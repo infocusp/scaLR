@@ -1,40 +1,54 @@
 # CONFIG
 
-# EXPERIMENT
-device: 'cuda'
-filepath: '.'
-exp_name: 'scp_testing'
-exp_run: 0
+# EXPERIMENT 
+device: 'cuda' # [Optional][cuda/cpu] device to run the deep learning models on
+filepath: '.' # [Required] base file path for all experiments
+exp_name: 'scp_testing' # [Required] experiment name
+exp_run: 0 # [Required] experiment run to compare
+# Final experiment directory would be: filepath/{exp_name}_{exp_run}/
+
 
 # DATA
 data:
     use_top_features: True
-    train_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/train.h5ad'
-    val_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/val.h5ad'
-    test_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/test.h5ad'
-    target: Cell_Type
+    # [Optional][path_to_features_list/True/null] determine whether to use subset of features
+    # path_to_features: txt file with name of genes/features to be selected as subset
+    # True: use the top features extracted using 1st part of pipeline stored in experiment directory
+    # [default] null: use complete dataset 
+
+    train_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/train.h5ad' # [Required] training data path
+    val_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/val.h5ad' # [Required] validation data path
+    test_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/test.h5ad' # [Required] testing data path
+    target: Cell_Type # [Required] target to perform classification on. Must be present as a column_name in adata.obs
 
 # Filtering techniques. Not implemented yet...
 filtering: {}
 
-
 # Preprocessing techniques. Not implemented yet...
 preprocessing: {}
 
-
+# First part of the pipeline
 # Feature selection technique parameters
 feature_selection:
     chunksize: 1000
-    method_type: feature_chunk
+    # [Required] chunks of features to train the model on iteratively
+    method_type: feature_chunk # Only method availble now
+
+    # [Required] [logistic_classifier/sgd_classifier]sklearn model with params
     model:
       name: logistic_classifier
       params:
           random_state: 0
           max_iter: 1
+
+    # [Required]
+    # k: number of top features to extract
+    # aggregation_strategy: stratergies to obtain top features. only mean implemented now
     top_features_stats:
         k: 3500
-        aggregation_strategy: mean # mean/class weighted density/top (k/n_classes) per class/
+        aggregation_strategy: mean # [Required][mean/class weighted density/top (k/n_classes) per class]
 
+# Transformer related implementation still underway
 #PREPROCESS & TOKENIZATION
 # transformer_preprocessing:
 #     value_bin: True
@@ -44,6 +58,12 @@ feature_selection:
 #     max_len: 3001
 
 # MODEL
+# DL model to train [Required]
+# type: [Linear]
+# hyperparameters:
+#    layers: [number of genes...number of classes]. eg. [22858, 2048, 64, 6]
+# start_checkpoint: if resume_from_checkpoint is true, path to checkpoint, note that this will overwrite above hyperparameters and type
+# resume_from_checkpoint: to resume training past checkpoint. [BOOLEAN], default: false
 model: 
     type: 'linear'
     hyperparameters:
@@ -52,6 +72,7 @@ model:
     start_checkpoint: null
     resume_from_checkpoint: False
 
+# Transformer related implementation still underway
 # model:
 #     type: 'transformer'
 #     hyperparameters:
@@ -64,8 +85,17 @@ model:
 #     resume_from_checkpoint: False
 
 # TRAINING
-opt:
-loss_fn:
+# opt: default Adam
+# loss_fn: default CrossEntropy
+
+# batch_size: samples per batch during training
+# lr: learning rate
+# l2: L2 penalty
+# epochs: max number of epochs to train
+# callbacks: EARLYSTOPPING, MODELCHECKPOINTING, TENSORBOARDLOGGING
+#     early_stop_patience: max number of epochs for which validation loss does not improve before stopping
+#     early_stop_min_delta: minimum increment in validation loss to count as improvement
+#     model_checkpoint_interval: intervals of epoch for which model weights are stored
 training:
     batch_size: 5000
     lr: 1.0e-3
@@ -76,6 +106,13 @@ training:
         early_stop_min_delta: 1.0e-4
         model_checkpoint_interval: 5
     
+
+
+# model_checkpoint: [OPTIONAL IF USING WITH PIPELINE AFTER TRAINING]
+#     path_to_model_checkpoint: use model checkpoint to load model
+#     [default] null: to use model trained previously by the pipeline
+# batch_size: evaluation batch_size
+# evaluation_metrics: metrics to perform evaluation available:['accuracy', 'report']
 # EVALUATION
 evaluation:
     model_checkpoint: null
