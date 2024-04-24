@@ -1,0 +1,89 @@
+# CONFIG
+
+# EXPERIMENT
+device: 'cuda'
+filepath: '.'
+exp_name: 'scp_testing'
+exp_run: 0
+
+# DATA
+data:
+    use_top_features: True
+    train_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/train.h5ad'
+    val_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/val.h5ad'
+    test_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/test.h5ad'
+    target: Cell_Type
+
+# Filtering techniques. Not implemented yet...
+filtering: {}
+
+
+# Preprocessing techniques. Not implemented yet...
+preprocessing: {}
+
+
+# Feature selection technique parameters
+feature_selection:
+    chunksize: 1000
+    method_type: feature_chunk
+    model:
+      name: logistic_classifier
+      params:
+          random_state: 0
+          max_iter: 1
+    top_features_stats:
+        k: 3500
+        aggregation_strategy: mean # mean/class weighted density/top (k/n_classes) per class/
+
+#PREPROCESS & TOKENIZATION
+# transformer_preprocessing:
+#     value_bin: True
+#     n_bins: 51
+#     append_cls: True
+#     include_zero_gene: False
+#     max_len: 3001
+
+# MODEL
+model: 
+    type: 'linear'
+    hyperparameters:
+        layers: [3500, 6]
+        dropout: 0
+    start_checkpoint: null
+    resume_from_checkpoint: False
+
+# model:
+#     type: 'transformer'
+#     hyperparameters:
+#         dim: 128
+#         nlayers: 2
+#         nheads: 8
+#         dropout: 0.2
+#         n_cls: 6
+#     start_checkpoint: False
+#     resume_from_checkpoint: False
+
+# TRAINING
+opt:
+loss_fn:
+training:
+    batch_size: 5000
+    lr: 1.0e-3
+    l2: 0
+    epochs: 100
+    callbacks:
+        early_stop_patience: 3
+        early_stop_min_delta: 1.0e-4
+        model_checkpoint_interval: 5
+    
+# EVALUATION
+evaluation:
+    model_checkpoint: null
+    batch_size: 20000
+    evaluation_metrics: ['accuracy', 'report']
+
+
+
+
+
+    
