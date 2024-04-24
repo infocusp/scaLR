@@ -10,7 +10,7 @@ exp_run: 0 # [Required] experiment run to compare
 
 # DATA
 data:
-    use_top_features: True
+    use_top_features: null
     # [Optional][path_to_features_list/True/null] determine whether to use subset of features
     # path_to_features: txt file with name of genes/features to be selected as subset
     # True: use the top features extracted using 1st part of pipeline stored in experiment directory
