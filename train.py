@@ -74,10 +74,9 @@ def main():
     elif data_config['use_top_features'] is not None:
         with open(data_config['use_top_features'], 'r') as fh:
             top_features = list(map(lambda x:x[:-1], fh.readlines()))
-
-    top_features_indices = sorted([train_data.var_names.tolist().index(feature) for feature in top_features])
     
     if data_config['use_top_features'] is not None:
+        top_features_indices = sorted([train_data.var_names.tolist().index(feature) for feature in top_features])
         train_data = train_data[:,top_features_indices]
         val_data = val_data[:,top_features_indices]
     
