@@ -39,7 +39,6 @@ feature_selection:
       name: logistic_classifier
       params:
           random_state: 0
-          max_iter: 1
 
     # [Required]
     # k: number of top features to extract
@@ -67,7 +66,7 @@ feature_selection:
 model: 
     type: 'linear'
     hyperparameters:
-        layers: [3500, 6]
+        layers: [22858, 6]
         dropout: 0
     start_checkpoint: null
     resume_from_checkpoint: False
@@ -116,7 +115,7 @@ training:
 # EVALUATION
 evaluation:
     model_checkpoint: null
-    batch_size: 20000
+    batch_size: 5000
     evaluation_metrics: ['accuracy', 'report']
 
 
