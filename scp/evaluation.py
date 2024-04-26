@@ -19,6 +19,7 @@ def predictions(model, test_dl, device='cpu'):
     Return:
         true_labels from test set, predicted labels via inference on test data
     """
+    model.eval()
     test_labels, pred_labels = [], []
 
     for batch in test_dl:
