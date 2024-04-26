@@ -92,9 +92,9 @@ def main():
 
     # Linear model creation and dataloaders
     if model_type == 'linear':
-        features = model_hp['layers']
-        dropout = model_hp['dropout']
-        model = LinearModel(features, dropout)
+        # features = model_hp['layers']
+        # dropout = model_hp['dropout']
+        model = LinearModel(**model_hp)
         dump_yaml(config['model'], f'{filepath}/best_model/config.yml')
         
         train_dl = simpleDataLoader(train_data, target, batch_size, label_mappings)

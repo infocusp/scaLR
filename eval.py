@@ -69,9 +69,9 @@ def main():
 
     # Linear model creation (and loading checkpoint model weights) and dataloaders
     if model_type == 'linear':
-        features = model_hp['layers']
-        dropout = model_hp['dropout']
-        model = LinearModel(features, dropout).to(device)
+        # features = model_hp['layers']
+        # dropout = model_hp['dropout']
+        model = LinearModel(**model_hp).to(device)
         model.load_state_dict(torch.load(f'{model_checkpoint}/model.pt')['model_state_dict'])
         
         test_dl = simpleDataLoader(test_data, target, batch_size, label_mappings)

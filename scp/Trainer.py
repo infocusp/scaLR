@@ -96,7 +96,7 @@ class Trainer:
             val_dl: validation dataloader
         """
     
-        callback = CallBack(filepath=self.filepath, callbacks=self.callbacks)
+        callback = CallBack(filepath=self.filepath, callbacks=self.callbacks, model=self.model)
         
         for epoch in range(epochs):
             ep_start = time()

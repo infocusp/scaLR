@@ -5,7 +5,7 @@ class ModelCheckpoint:
     """
     Model checkpointing callback at regular intervals and best model
     """
-    def __init__(self, filepath, interval):
+    def __init__(self, filepath, interval, model):
         """
         Args:
             filepath: to store the respective model checkpoints
@@ -16,6 +16,8 @@ class ModelCheckpoint:
         self.max_validation_acc = float(0)
         self.interval = int(interval)
         self.filepath = filepath
+
+        self.save_check(model.state_dict(), {}, f'{self.filepath}/checkpoints/model_0.pt')
 
     def save_check(self, model_state_dict, opt_state_dict, path):
         torch.save({'epoch': self.counter,

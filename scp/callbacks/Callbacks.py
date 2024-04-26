@@ -10,7 +10,7 @@ class CallBack:
         - Early Stopping
         - Checkpointing
     """
-    def __init__(self, filepath, callbacks):
+    def __init__(self, filepath, callbacks, model):
         """
         Args:
             filepath: to store logs and checkpoints
@@ -23,7 +23,7 @@ class CallBack:
         os.makedirs(f'{filepath}/checkpoints', exist_ok=True)
         self.logger = Logs(filepath)
         self.early_stopper = EarlyStopping(stop_patience, stop_min_delta)
-        self.checkpoint = ModelCheckpoint(filepath, checkpoint_interval)
+        self.checkpoint = ModelCheckpoint(filepath, checkpoint_interval, model)
 
     def __call__(self, model_state_dict, opt_state_dict, train_loss, train_acc, val_loss, val_acc):
         self.logger(train_loss, train_acc, val_loss, val_acc)
