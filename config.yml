@@ -4,17 +4,24 @@
 device: 'cuda' # [Optional][cuda/cpu] device to run the deep learning models on
 filepath: '.' # [Required] base file path for all experiments
 exp_name: 'scp_testing' # [Required] experiment name
-exp_run: 0 # [Required] experiment run to compare
+exp_run: 3 # [Required] experiment run to compare
 # Final experiment directory would be: filepath/{exp_name}_{exp_run}/
-
 
 # DATA
 data:
-    use_top_features: null
+    use_top_features: '/home/saiyam/projects/biocusp/scripts/scp_testing_0/feature_selection/top_features.txt'
     # [Optional][path_to_features_list/True/null] determine whether to use subset of features
     # path_to_features: txt file with name of genes/features to be selected as subset
     # True: use the top features extracted using 1st part of pipeline stored in experiment directory
     # [default] null: use complete dataset 
+
+    store_on_disk: True
+    # Valid only when using top_features. option to store subset data on disk, and then read from there
+    # Recommended for faster data-loading
+    
+    load_in_memory: False
+    # Valid only when using use_top_features. option to load the subset data on memory
+    # Recommended for faster data-loading
 
     train_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/train.h5ad' # [Required] training data path
     val_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/val.h5ad' # [Required] validation data path
@@ -47,6 +54,8 @@ feature_selection:
         k: 3500
         aggregation_strategy: mean # [Required][mean/class weighted density/top (k/n_classes) per class]
 
+    # Select for faster training ahead
+
 # Transformer related implementation still underway
 #PREPROCESS & TOKENIZATION
 # transformer_preprocessing:
@@ -66,7 +75,7 @@ feature_selection:
 model: 
     type: 'linear'
     hyperparameters:
-        layers: [22858, 6]
+        layers: [3500, 6]
         dropout: 0
     start_checkpoint: null
     resume_from_checkpoint: False
@@ -99,7 +108,7 @@ training:
     batch_size: 5000
     lr: 1.0e-3
     l2: 0
-    epochs: 100
+    epochs: 1
     callbacks:
         early_stop_patience: 3
         early_stop_min_delta: 1.0e-4

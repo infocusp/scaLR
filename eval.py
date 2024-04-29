@@ -63,7 +63,15 @@ def main():
     
     if data_config['use_top_features'] is not None:
         top_features_indices = sorted([test_data.var_names.tolist().index(feature) for feature in top_features])
-        test_data = test_data[:,top_features_indices]
+        if data_config['store_on_disk']:
+            os.makedirs(f'{filepath}/feature_selection/', exist_ok=True)
+            test_data[:,top_features_indices].write(f'{filepath}/feature_selection/test.h5ad', compression='gzip')
+            test_data = read_data(f'{filepath}/feature_selection/test.h5ad')
+        else:
+            test_data = test_data[:,top_features_indices]
+
+        if data_config['load_in_memory']:
+            test_data = test_data.to_memory()
     
     label_mappings = read_json(f'{filepath}/label_mappings.json')
 

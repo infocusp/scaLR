@@ -52,7 +52,7 @@ def main():
     k = config_fs['top_features_stats']['k']
     aggregation_strategy = config_fs['top_features_stats']['aggregation_strategy']
 
-    feature_chunking(train_data, target, model, chunksize, k, aggregation_strategy, filepath=f'{filepath}/feature_selection')
+    top_features_list = eature_chunking(train_data, target, model, chunksize, k, aggregation_strategy, filepath=f'{filepath}/feature_selection')
 
 if __name__ == '__main__':
     main()

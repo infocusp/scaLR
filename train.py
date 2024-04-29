@@ -77,8 +77,19 @@ def main():
     
     if data_config['use_top_features'] is not None:
         top_features_indices = sorted([train_data.var_names.tolist().index(feature) for feature in top_features])
-        train_data = train_data[:,top_features_indices]
-        val_data = val_data[:,top_features_indices]
+        if data_config['store_on_disk']:
+            os.makedirs(f'{filepath}/feature_selection/', exist_ok=True)
+            train_data[:,top_features_indices].write(f'{filepath}/feature_selection/train.h5ad', compression='gzip')
+            val_data[:,top_features_indices].write(f'{filepath}/feature_selection/val.h5ad', compression='gzip')
+            train_data = read_data(f'{filepath}/feature_selection/train.h5ad')
+            val_data = read_data(f'{filepath}/feature_selection/val.h5ad')
+        else:
+            train_data = train_data[:,top_features_indices]
+            val_data = val_data[:,top_features_indices]
+
+        if data_config['load_in_memory']:
+            train_data = train_data.to_memory()
+            val_data = val_data.to_memory()
     
     # Create mappings for targets to be used by testing
     label_mappings = {}
