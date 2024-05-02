@@ -38,6 +38,7 @@ def main():
 
     # Training
     train_config = config['training']
+    optimizer = train_config['opt']
     batch_size = train_config['batch_size']
     lr = train_config['lr']
     l2 = float(train_config['l2'])
@@ -189,7 +190,16 @@ def main():
         )
 
     # Training
-    opt = torch.optim.Adam
+
+    if optimizer == 'adam':
+        opt = torch.optim.Adam
+    elif optimizer == 'sgd':
+        opt = torch.optim.SGD
+    else:
+        raise NotImplementedError(
+            'Only adam and sgd available as options!'
+        )
+        
     loss_fn = nn.CrossEntropyLoss()
     
     trainer = Trainer(model, opt, lr, l2, loss_fn, callbacks, device, filepath, model_checkpoint)

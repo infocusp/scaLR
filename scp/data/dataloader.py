@@ -22,8 +22,8 @@ def simpleDataLoader(adata, target, batch_size, label_mappings):
     label_mappings = label_mappings[target]['label2id']
 
     def collate_fn(batch, target, label_mappings):
-        x = batch.X
-        y = torch.as_tensor(batch.obs[target].replace(label_mappings).astype('int64').values)
+        x = batch.X.float()
+        y = torch.as_tensor(batch.obs[target].cat.rename_categories(label_mappings).astype('int64').values)
         return x,y
     
     return AnnLoader(adata, batch_size=batch_size, collate_fn=lambda batch: collate_fn(batch, target, label_mappings))
@@ -83,11 +83,11 @@ def transformerDataLoader(adata,
                     append_cls,
                     include_zero_gene):
         
-        y = torch.as_tensor(batch.obs[target].replace(label_mappings).astype('int64').values)
+        y = torch.as_tensor(batch.obs[target].cat.rename_categories(label_mappings).astype('int64').values)
         
         if value_bin:
             batch = binning(batch, n_bins)
-        data = batch.X
+        data = batch.X.float()
             
         tokenized_data = tokenize_and_pad_batch(
                 data,
