@@ -39,6 +39,7 @@ def main():
     # Training
     train_config = config['training']
     optimizer = train_config['opt']
+    lossfunc = train_config['loss']
     batch_size = train_config['batch_size']
     lr = train_config['lr']
     l2 = float(train_config['l2'])
@@ -199,8 +200,18 @@ def main():
         raise NotImplementedError(
             'Only adam and sgd available as options!'
         )
-        
-    loss_fn = nn.CrossEntropyLoss()
+
+    if lossfunc == 'log':
+        loss_fn = nn.CrossEntropyLoss()
+    elif lossfunc == 'weighted_log':
+        weights = 1/torch.as_tensor(train_data.obs[target].value_counts()[id2label], dtype=torch.float32)
+        total_sum = weights.sum()
+        weights/=total_sum
+        loss_fn = nn.CrossEntropyLoss(weight=weights.to(device))
+    else:
+        raise NotImplementedError(
+            'Only log and weighted_log available as options!'
+        )
     
     trainer = Trainer(model, opt, lr, l2, loss_fn, callbacks, device, filepath, model_checkpoint)
     trainer.train(epochs, train_dl, val_dl)

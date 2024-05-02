@@ -4,12 +4,12 @@
 device: 'cuda' # [Optional][cuda/cpu] device to run the deep learning models on
 filepath: '.' # [Required] base file path for all experiments
 exp_name: 'scp_testing' # [Required] experiment name
-exp_run: 3 # [Required] experiment run to compare
+exp_run: 5 # [Required] experiment run to compare
 # Final experiment directory would be: filepath/{exp_name}_{exp_run}/
 
 # DATA
 data:
-    use_top_features: '/home/saiyam/projects/biocusp/scripts/scp_testing_0/feature_selection/top_features.txt'
+    use_top_features: null
     # [Optional][path_to_features_list/True/null] determine whether to use subset of features
     # path_to_features: txt file with name of genes/features to be selected as subset
     # True: use the top features extracted using 1st part of pipeline stored in experiment directory
@@ -75,9 +75,9 @@ feature_selection:
 model: 
     type: 'linear'
     hyperparameters:
-        layers: [3500, 6]
+        layers: [22858, 6]
         dropout: 0
-        weights_init_zero: True
+        weights_init_zero: False
     start_checkpoint: null
     resume_from_checkpoint: False
 
@@ -106,7 +106,8 @@ model:
 #     early_stop_min_delta: minimum increment in validation loss to count as improvement
 #     model_checkpoint_interval: intervals of epoch for which model weights are stored
 training:
-    opt: 'sgd'
+    opt: 'adam'
+    loss: 'weighted_log'
     batch_size: 5000
     lr: 1.0e-3
     l2: 0

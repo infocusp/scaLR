@@ -25,7 +25,9 @@ default_config = {
     'exp_name': 'run',
     'exp_run': 0,
     'data':{
-        'use_top_features':None,
+        'use_top_features': None,
+        'store_on_disk': False,
+        'load_in_memory': False
     },
     'model': {
         'type': None,
@@ -34,6 +36,8 @@ default_config = {
         'resume_from_checkpoint': False
     },
     'training':{
+        'opt': 'adam',
+        'loss': 'log',
         'batch_size': 8,
         'lr': 0.001,
         'l2': 0,
