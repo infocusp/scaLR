@@ -3,6 +3,9 @@
 **/.ipynb_checkpoints
 
 scp_testing_*
+scp_test_*
+scp_test_st_*
 
 testing.ipynb
 
+nohup.out

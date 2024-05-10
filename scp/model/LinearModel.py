@@ -2,21 +2,27 @@ import torch
 from torch import nn
 
 class LinearModel(nn.Module):
-    def __init__(self, layers, dropout=0, weights_init_zero=False):
+    def __init__(self, layers, dropout=0, activation = 'relu', weights_init_zero=False):
         """
-        Deep Nueral Network model with linear layers.
+        Deep Neural Network model with linear layers.
 
         Args:
-            layers: List of layers' feauture size going from input_ft -> out_ft. eg. [22858, 2048, 6] (req)
-            dropout: dropout after each layer. Floating point value [0,1) (req)
+            layers: List of layers' feature size going from input_ft -> out_ft. eg. [22858, 2048, 6] (req)
+            dropout: dropout after each layer. Floating point value [0,1)
+            activation_class: activation function class after each layer
+            weights_init_zero: [Bool] to initialize weights of model to zero
         """
         super().__init__()
-        activation = nn.ReLU(inplace=True)
+        if activation == 'relu':
+            activation = nn.ReLU(inplace=True)
+        else:
+            raise NotImplementedError(
+            "Activations to be chosen from ['relu']"
+        )
         dropout = nn.Dropout(dropout, inplace=False)
         self.layers = nn.ModuleList()
         n = len(layers)
-        for i in range(n):
-            if i==n-2:break
+        for i in range(n-2):
             self.layers.append(nn.Linear(layers[i], layers[i+1]))
             self.layers.append(activation)
             self.layers.append(dropout)

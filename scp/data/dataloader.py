@@ -5,7 +5,7 @@ from anndata.experimental import AnnLoader
 from .preprocess import binning
 from ..tokenizer import tokenize_and_pad_batch
 
-def simpleDataLoader(adata, target, batch_size, label_mappings):
+def simpleDataLoader(adata, target, batch_size=1, label_mappings=None):
     """
     A simple data loader to prepare inputs to be fed into linear model and corresponding labels
 
@@ -20,10 +20,10 @@ def simpleDataLoader(adata, target, batch_size, label_mappings):
         PyTorch DataLoader object with (X: Tensor [batch_size, features], y: Tensor [batch_size, ])
     """
     label_mappings = label_mappings[target]['label2id']
-
+    
     def collate_fn(batch, target, label_mappings):
         x = batch.X.float()
-        y = torch.as_tensor(batch.obs[target].cat.rename_categories(label_mappings).astype('int64').values)
+        y = torch.as_tensor(batch.obs[target].astype('category').cat.rename_categories(label_mappings).astype('int64').values)
         return x,y
     
     return AnnLoader(adata, batch_size=batch_size, collate_fn=lambda batch: collate_fn(batch, target, label_mappings))
@@ -87,7 +87,7 @@ def transformerDataLoader(adata,
         
         if value_bin:
             batch = binning(batch, n_bins)
-        data = batch.X.float()
+        data = batch.X
             
         tokenized_data = tokenize_and_pad_batch(
                 data,

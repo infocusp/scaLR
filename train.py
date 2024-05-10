@@ -2,7 +2,6 @@ import os
 import sys
 import argparse
 import torch
-print('GPU: ' ,torch.cuda.is_available())
 from torch import nn
 import numpy as np
 from scp.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
@@ -11,16 +10,10 @@ from scp.data import simpleDataLoader, transformerDataLoader
 from scp.model import LinearModel, TransformerModel
 from scp import Trainer
 
-def main():
-    # Parser to take in config file path and logging [enabled, disabled]
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-c','--config', type=str, help='config.yml file')
-    parser.add_argument('-l','--log', action='store_true', help='Store train-logs')
+def train(config, log=True):
 
-    args = parser.parse_args()
+    print('GPU: ' ,torch.cuda.is_available())
     
-    # load config file
-    config = load_config(args.config)
     device = config['device']
     filepath = config['filepath']
     exp_name = config['exp_name']
@@ -28,7 +21,7 @@ def main():
 
     # create experiment directory
     filepath = f'{filepath}/{exp_name}_{exp_run}'
-    os.makedirs(f'{filepath}/best_model', exist_ok=True)
+    os.makedirs(f'{filepath}/', exist_ok=True)
 
     # Data
     data_config = config['data']
@@ -59,40 +52,19 @@ def main():
     model_type = config['model']['type']
     model_hp = config['model']['hyperparameters']
 
-    config['evaluation']['model_checkpoint'] = f'{filepath}/best_model'
-    dump_yaml(config, f'{filepath}/config.yml')
+    if 'evaluation' in config:
+        config['evaluation']['model_checkpoint'] = f'{filepath}/best_model'
+    else:
+        config['evaluation'] = {'model_checkpoint': f'{filepath}/best_model'}
 
     # logging
-    if args.log:
+    if log:
         sys.stdout = open(f'{filepath}/train.log','w')
     
     # loading data
     train_data = read_data(train_datapath)
     val_data = read_data(val_datapath)
 
-    if data_config['use_top_features'] is True:
-        with open(f'{filepath}/feature_selection/top_features.txt', 'r') as fh:
-            top_features = list(map(lambda x:x[:-1], fh.readlines()))
-    elif data_config['use_top_features'] is not None:
-        with open(data_config['use_top_features'], 'r') as fh:
-            top_features = list(map(lambda x:x[:-1], fh.readlines()))
-    
-    if data_config['use_top_features'] is not None:
-        top_features_indices = sorted([train_data.var_names.tolist().index(feature) for feature in top_features])
-        if data_config['store_on_disk']:
-            os.makedirs(f'{filepath}/feature_selection/', exist_ok=True)
-            train_data[:,top_features_indices].write(f'{filepath}/feature_selection/train.h5ad', compression='gzip')
-            val_data[:,top_features_indices].write(f'{filepath}/feature_selection/val.h5ad', compression='gzip')
-            train_data = read_data(f'{filepath}/feature_selection/train.h5ad')
-            val_data = read_data(f'{filepath}/feature_selection/val.h5ad')
-        else:
-            train_data = train_data[:,top_features_indices]
-            val_data = val_data[:,top_features_indices]
-
-        if data_config['load_in_memory']:
-            train_data = train_data.to_memory()
-            val_data = val_data.to_memory()
-    
     # Create mappings for targets to be used by testing
     label_mappings = {}
     label_mappings[target] = {}
@@ -101,14 +73,11 @@ def main():
     label_mappings[target]['id2label'] = id2label
     label_mappings[target]['label2id'] = label2id
 
-    dump_json(label_mappings, f'{filepath}/label_mappings.json')
-
     # Linear model creation and dataloaders
     if model_type == 'linear':
         # features = model_hp['layers']
         # dropout = model_hp['dropout']
         model = LinearModel(**model_hp)
-        dump_yaml(config['model'], f'{filepath}/best_model/config.yml')
         
         train_dl = simpleDataLoader(train_data, target, batch_size, label_mappings)
         val_dl = simpleDataLoader(val_data, target, batch_size, label_mappings) 
@@ -128,7 +97,6 @@ def main():
             vocab = GeneVocab(genes + special_tokens)
             
         vocab.save_json(f'{filepath}/best_model/vocab.json')
-        dump_yaml(config['model'], f'{filepath}/best_model/config.yml')
         gene_ids = np.array(vocab(genes), dtype=int)
         ntokens=len(vocab)
 
@@ -215,9 +183,24 @@ def main():
     
     trainer = Trainer(model, opt, lr, l2, loss_fn, callbacks, device, filepath, model_checkpoint)
     trainer.train(epochs, train_dl, val_dl)
-    
+
+    dump_yaml(config['model'], f'{filepath}/best_model/config.yml')
+    dump_json(label_mappings, f'{filepath}/best_model/label_mappings.json')
+    dump_yaml(config, f'{filepath}/config.yml')
+    return config
+
+
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c','--config', type=str, help='config.yml file')
+    parser.add_argument('-l','--log', action='store_true', help='Store train-logs')
+
+    args = parser.parse_args()
+    
+    # load config file
+    config = load_config(args.config)
+
+    train(config, args.log)
 
 
 

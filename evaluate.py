@@ -2,34 +2,23 @@ import os
 import sys
 import argparse
 import torch
-print('GPU: ' ,torch.cuda.is_available())
 from torch import nn
 import numpy as np
-from scp.utils import load_config, read_data, read_yaml, read_json
+from scp.utils import load_config, read_data, read_yaml, read_json, dump_yaml
 from scp.tokenizer import GeneVocab
 from scp.data import simpleDataLoader, transformerDataLoader
 from scp.model import LinearModel, TransformerModel
 from scp.evaluation import predictions, accuracy, report
 from scp import Trainer
 
-def main():
-    # Parser to take in config file path and logging [enabled, disabled]
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-c','--config', type=str, help='config.yml file')
-    parser.add_argument('-l','--log', action='store_true', help='Store train-logs')
+def evaluate(config, log=True):
 
-    args = parser.parse_args()
+    print('GPU: ' ,torch.cuda.is_available())
     
-    # load config
-    config = load_config(args.config)
     device = config['device']
     filepath = config['filepath']
     exp_name = config['exp_name']
     exp_run = config['exp_run']
-
-    # create results directory
-    filepath = f'{filepath}/{exp_name}_{exp_run}'
-    os.makedirs(f'{filepath}/results', exist_ok=True)
 
     # Data
     data_config = config['data']
@@ -38,47 +27,31 @@ def main():
 
     evaluation_configs = config['evaluation']
     batch_size = evaluation_configs['batch_size']
+    if 'metrics' not in evaluation_configs:
+        return config
+
+        # create results directory
+    filepath = f'{filepath}/{exp_name}_{exp_run}'
+    os.makedirs(f'{filepath}/results', exist_ok=True)
 
     # Model params
     model_checkpoint = evaluation_configs['model_checkpoint']
-    if model_checkpoint is None:
-        model_checkpoint = f'{filepath}/best_model' 
     model_ = read_yaml(f'{model_checkpoint}/config.yml')
+    config['model'] = model_
     model_type = model_['type']
     model_hp = model_['hyperparameters']
 
     # logging
-    if args.log:
+    if log:
         sys.stdout = open(f'{filepath}/results/test.log','w')
     
     # loading data
     test_data = read_data(test_datapath)
-
-    if data_config['use_top_features'] is True:
-        with open(f'{filepath}/feature_selection/top_features.txt', 'r') as fh:
-            top_features = list(map(lambda x:x[:-1], fh.readlines()))
-    elif data_config['use_top_features'] is not None:
-        with open(data_config['use_top_features'], 'r') as fh:
-            top_features = list(map(lambda x:x[:-1], fh.readlines()))
     
-    if data_config['use_top_features'] is not None:
-        top_features_indices = sorted([test_data.var_names.tolist().index(feature) for feature in top_features])
-        if data_config['store_on_disk']:
-            os.makedirs(f'{filepath}/feature_selection/', exist_ok=True)
-            test_data[:,top_features_indices].write(f'{filepath}/feature_selection/test.h5ad', compression='gzip')
-            test_data = read_data(f'{filepath}/feature_selection/test.h5ad')
-        else:
-            test_data = test_data[:,top_features_indices]
-
-        if data_config['load_in_memory']:
-            test_data = test_data.to_memory()
-    
-    label_mappings = read_json(f'{filepath}/label_mappings.json')
+    label_mappings = read_json(f'{model_checkpoint}/label_mappings.json')
 
     # Linear model creation (and loading checkpoint model weights) and dataloaders
     if model_type == 'linear':
-        # features = model_hp['layers']
-        # dropout = model_hp['dropout']
         model = LinearModel(**model_hp).to(device)
         model.load_state_dict(torch.load(f'{model_checkpoint}/model.pt')['model_state_dict'])
         
@@ -157,15 +130,24 @@ def main():
     if 'report' in metrics:
         print('\nClassification Report:')
         report(test_labels, pred_labels, f'{filepath}/results', mapping=id2label)
-
+        
     #Heatmap
     # top_50_weights, top_50_genes = top_50_heatmap(model, f'{filepath}/results', classes=id2label ,genes=genes)
 
+    dump_yaml(config, f'{filepath}/config.yml')
+    return config
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c','--config', type=str, help='config.yml file')
+    parser.add_argument('-l','--log', action='store_true', help='Store evaluation-logs')
 
+    args = parser.parse_args()
+    
+    # load config file
+    config = load_config(args.config)
 
+    evaluate(config, args.log)
 
 
 

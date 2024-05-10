@@ -1,16 +1,16 @@
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
-class Logs:
+class TensorboardLogger:
     """
     Tensorboard logging of training process
     """
-    def __init__(self, filepath):
+    def __init__(self, dirpath):
         """
         Args:
-            filepath: to store the experiment logs
+            dirpath: to store the experiment logs
         """
-        self.writer = SummaryWriter(filepath+'/logs')
+        self.writer = SummaryWriter(dirpath+'/logs')
         self.epoch = 0
     
     def __call__(self,train_loss, train_acc, val_loss, val_acc):

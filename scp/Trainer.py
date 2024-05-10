@@ -2,7 +2,7 @@ import os
 import torch
 from torch import nn
 from torch.utils.data import Dataset, IterableDataset, DataLoader
-from .callbacks import CallBack
+from .callbacks import CallbackExecuter
 from time import time
 from .tokenizer import tokenize_and_pad_batch
 
@@ -11,33 +11,33 @@ class Trainer:
     """
     Trainer class to train and validate a model from scratch or resume from checkpoint
     """
-    def __init__(self, model, opt, lr, l2, loss_fn, callbacks : dict, device='cuda', filepath='.', model_checkpoint=None):
+    def __init__(self, model, opt_class=torch.optim.Adam, lr=1e-3, l2=0, loss_fn=nn.CrossEntropyLoss(), callback_params={}, device='cuda', dirpath='.', model_checkpoint_path=None):
         """
         Args:
             model: model to train
-            opt: optimizer to train model parameters
+            opt_class: optimizer class to train model parameters
             lr: learning rate for optimizer
             l2: L2 penalty for weights
             loss_fn: loss function for training
-            callbacks: callback params : dict {'model_checkpoint_interval', 'early_stop_patience', 'early_stop_min_delta'}
+            callback_params: callback params : dict {'model_checkpoint_interval', 'early_stop_patience', 'early_stop_min_delta'}
             device: device for compuations ('cpu'/'cuda')
-            filepath: filepath for storing logs, checkpoints, best_model
-            model_checkpoint: path to resume training from given checkpoint
+            dirpath: dirpath for storing logs, checkpoints, best_model
+            model_checkpoint_path: path to resume training from given checkpoint
         """
         self.device = device
         if not torch.cuda.is_available(): self.device='cpu'
 
         self.model = model.to(self.device)
-        self.opt = opt(self.model.parameters(), lr=lr, weight_decay=l2)
+        self.opt = opt_class(self.model.parameters(), lr=lr, weight_decay=l2)
 
-        if model_checkpoint is not None:
-            state_dict = torch.load(f'{model_checkpoint}/model.pt')
+        if model_checkpoint_path is not None:
+            state_dict = torch.load(f'{model_checkpoint_path}/model.pt')
             self.model.load_state_dict(state_dict['model_state_dict'])
             self.opt.load_state_dict(state_dict['optimizer_state_dict'])
         
         self.loss_fn = loss_fn
-        self.filepath = filepath
-        self.callbacks = callbacks
+        self.dirpath = dirpath
+        self.callback_params = callback_params
 
     def train_one_epoch(self, dl):
         """ training one epoch """
@@ -96,7 +96,7 @@ class Trainer:
             val_dl: validation dataloader
         """
     
-        callback = CallBack(filepath=self.filepath, callbacks=self.callbacks, model=self.model)
+        callback = CallbackExecuter(dirpath=self.dirpath, callback_paramaters=self.callback_params)
         
         for epoch in range(epochs):
             ep_start = time()
@@ -106,12 +106,12 @@ class Trainer:
             val_loss, val_acc = self.validation(val_dl)
             print(f'Validation Loss: {val_loss} || Validation Accuracy: {val_acc}')
             ep_end = time()
-            print(f'Time: {ep_end-ep_start}\n')
+            print(f'Time: {ep_end-ep_start}\n', flush=True)
             
-            if callback(self.model.state_dict(), self.opt.state_dict(), train_loss, train_acc, val_loss, val_acc): break
+            if callback.execute(self.model.state_dict(), self.opt.state_dict(), train_loss, train_acc, val_loss, val_acc): break
 
-        self.model.load_state_dict(torch.load(f'{self.filepath}/best_model/model.pt')['model_state_dict'])
-        torch.save(self.model, f'{self.filepath}/best_model/model.bin')
+        self.model.load_state_dict(torch.load(f'{self.dirpath}/best_model/model.pt')['model_state_dict'])
+        torch.save(self.model, f'{self.dirpath}/best_model/model.bin')
     
         return
 

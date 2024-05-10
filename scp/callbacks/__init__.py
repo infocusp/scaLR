@@ -1,4 +1,4 @@
 from .EarlyStopping import EarlyStopping
-from .Logs import Logs
+from .Logs import TensorboardLogger
 from .ModelCheckpoint import ModelCheckpoint
-from .Callbacks import CallBack
+from .Callbacks import CallbackExecuter

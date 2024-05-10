@@ -6,8 +6,17 @@ import pandas as pd
 import shutil
 
 
-def feature_chunking(train_adata, target, model, chunksize, k, aggregation_strategy, filepath):
-    """Feature selection using feature chunking approach."""
+def skl_feature_chunking(train_adata, target, model_config, chunksize, k, aggregation_strategy, dirpath):
+    """ Feature selection using feature chunking approach.
+        Args:
+            train_data: train_dataset (anndata oject)
+            target: target class which is present in dataset.obs for classifcation training
+            model_config: dict containing type of model, and it related config
+            chunksize: number of features to take in one training instance
+            k: number of features to select from all_features
+            aggregation_strategy: stratergy to aggregate features from each class, default: 'mean' 
+            dirpath: directory to store all model_weights and top_features   
+    """
 
     classes = np.unique(train_adata.obs[target])
 
@@ -15,8 +24,15 @@ def feature_chunking(train_adata, target, model, chunksize, k, aggregation_strat
 
     # Load features chunkwise, train the logistic classifier model, store the model per iteration.
     os.makedirs(
-        f'{filepath}/model_weights', exist_ok = True)
+        f'{dirpath}/model_weights', exist_ok = True)
 
+
+    if model_config['name'] == 'logistic_classifier':
+        model = LogisticRegression(**(model_config['params']))
+    raise ValueError(
+            '`model` must be one of [`logistic_classifier`]'
+    )
+    
     for start in tqdm.tqdm(range(0, len(train_adata.var_names), chunksize)):
         train_features = pd.DataFrame(
             train_adata[:, start:start + chunksize].X,
@@ -27,14 +43,14 @@ def feature_chunking(train_adata, target, model, chunksize, k, aggregation_strat
         model.fit(train_features, np.ravel(train_targets))
 
         # Saving model per iteration.
-        filename = f'{filepath}/model_weights/Feature_chunk_{target}_model_{start}.bin'
+        filename = f'{dirpath}/model_weights/Feature_chunk_{target}_model_{start}.bin'
         joblib.dump(model, filename)
 
     # Selecting top_k features
     print(f'Analysing features and selecting {k} features...')
 
     feature_class_weights = pd.DataFrame()
-    model_parent_path = f'{filepath}/model_weights'
+    model_parent_path = f'{dirpath}/model_weights'
 
     # Loading models from each chunk and generating feature class weights matrix.
     for file in tqdm.tqdm(os.listdir(model_parent_path)):
@@ -57,7 +73,7 @@ def feature_chunking(train_adata, target, model, chunksize, k, aggregation_strat
 
     # Stooring feature class weights matrix.
     feature_class_weights.to_csv(
-        f'{filepath}/feature_class_weights.csv'
+        f'{dirpath}/feature_class_weights.csv'
     )
 
     # Aggregation strategy to be used for selecting top_k features.
@@ -68,11 +84,8 @@ def feature_chunking(train_adata, target, model, chunksize, k, aggregation_strat
         raise NotImplementedError(
             'Other aggregation strategies are not implemented yet...')
 
-    fh = open(
-        f'{filepath}/top_features.txt',
-        'w')
-    fh.write('\n'.join(top_features_list) + '\n')
-    fh.close()
+    with open(f'{dirpath}/top_features.txt','w') as fh:
+        fh.write('\n'.join(top_features_list) + '\n')
 
     return top_features_list
     

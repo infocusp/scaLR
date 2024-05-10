@@ -9,7 +9,7 @@ import seaborn as sns
 
 def predictions(model, test_dl, device='cpu'):
     """
-    Function to get classifcaiton predictions from a model and test_dataloader
+    Function to get classificaton predictions from a model and test_dataloader
 
     Args:
         model: model to get predictions from

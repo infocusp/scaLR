@@ -3,58 +3,58 @@
 # EXPERIMENT 
 device: 'cuda' # [Optional][cuda/cpu] device to run the deep learning models on
 filepath: '.' # [Required] base file path for all experiments
-exp_name: 'scp_testing' # [Required] experiment name
-exp_run: 5 # [Required] experiment run to compare
+exp_name: 'scp_test_st' # [Required] experiment name
+exp_run: 2 # [Required] experiment run to compare
 # Final experiment directory would be: filepath/{exp_name}_{exp_run}/
 
 # DATA
 data:
-    use_top_features: null
-    # [Optional][path_to_features_list/True/null] determine whether to use subset of features
-    # path_to_features: txt file with name of genes/features to be selected as subset
-    # True: use the top features extracted using 1st part of pipeline stored in experiment directory
-    # [default] null: use complete dataset 
-
-    store_on_disk: True
-    # Valid only when using top_features. option to store subset data on disk, and then read from there
-    # Recommended for faster data-loading
+    chunksize: 20000
+    # [Optional] Useful for low resources utilization. Will ensure all data is stored with chunks of atmost 'chunksize' samples 
+    # [null] for storing data in one file.
     
-    load_in_memory: False
-    # Valid only when using use_top_features. option to load the subset data on memory
-    # Recommended for faster data-loading
+    # [Optional] To split full anndata dataset file into train/val/test sets
+    split_data:
+        full_datapath: '/home/biocusp/data/scp_ad/full.h5ad' # full data path, will be split into train, test, and val sets
+        split_ratio: [7, 1, 2.5] # [Required] ratio to split full data => train : val : test
+        stratify: 'donor_id' # [Optional][column in metadata / null] split stratified on parameter in metadata
+        
 
-    train_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/train.h5ad' # [Required] training data path
-    val_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/val.h5ad' # [Required] validation data path
-    test_datapath: '/home/saiyam/projects/biocusp/data/scp_ad/raw/test.h5ad' # [Required] testing data path
-    target: Cell_Type # [Required] target to perform classification on. Must be present as a column_name in adata.obs
+    # Note if split_data is given, following paths will be overwritten
+    # if spilt_data not given, paths are [Required]
+    train_datapath: './pipeline_3/feature_selection/train' # training data path
+    val_datapath: './pipeline_3/feature_selection/val' # validation data path
+    test_datapath: './pipeline_3/feature_selection/test' # testing data path
+    
+    target: Cell_State # [Required] target to perform classification on. Must be present as a column_name in adata.obs
 
-# Filtering techniques. Not implemented yet...
-filtering: {}
-
-# Preprocessing techniques. Not implemented yet...
-preprocessing: {}
-
-# First part of the pipeline
-# Feature selection technique parameters
+# Feature selection technique
 feature_selection:
-    chunksize: 1000
+    chunksize: 3000
     # [Required] chunks of features to train the model on iteratively
+    
     method_type: feature_chunk # Only method availble now
 
-    # [Required] [logistic_classifier/sgd_classifier]sklearn model with params
+    # [Required] [name: logistic_classifier/nn]
+    # logistic regression: keyword args of logistic regression classifier of sklearn
+    #                      can be passes in params
+    # nn: params are optional, can include epochs, batch_size, lr- learning rate, l2- L2 weight penalty
     model:
-      name: logistic_classifier
+      name: nn
       params:
-          random_state: 0
+          epochs: 100
 
     # [Required]
     # k: number of top features to extract
     # aggregation_strategy: stratergies to obtain top features. only mean implemented now
     top_features_stats:
-        k: 3500
+        k: 4000
         aggregation_strategy: mean # [Required][mean/class weighted density/top (k/n_classes) per class]
 
-    # Select for faster training ahead
+    # Will store extracted features subset on disk
+    # the storage will be according to data=>chunksize parameter
+    store_on_disk: True
+
 
 # Transformer related implementation still underway
 #PREPROCESS & TOKENIZATION
@@ -69,13 +69,13 @@ feature_selection:
 # DL model to train [Required]
 # type: [Linear]
 # hyperparameters:
-#    layers: [number of genes...number of classes]. eg. [22858, 2048, 64, 6], dropout, weights_init_zero
+#    layers: [number of genes...number of classes]. eg. [22858, 2048, 64, 6], dropout, activation, weights_init_zero
 # start_checkpoint: if resume_from_checkpoint is true, path to checkpoint, note that this will overwrite above hyperparameters and type
 # resume_from_checkpoint: to resume training past checkpoint. [BOOLEAN], default: false
 model: 
     type: 'linear'
     hyperparameters:
-        layers: [22858, 6]
+        layers: [4000, 16]
         dropout: 0
         weights_init_zero: False
     start_checkpoint: null
@@ -96,39 +96,38 @@ model:
 # TRAINING
 # opt: default Adam
 # loss_fn: default CrossEntropy
-
 # batch_size: samples per batch during training
 # lr: learning rate
 # l2: L2 penalty
 # epochs: max number of epochs to train
-# callbacks: EARLYSTOPPING, MODELCHECKPOINTING, TENSORBOARDLOGGING
+# callbacks: EARLYSTOPPING, MODELCHECKPOINT, TENSORBOARDLOGGING
 #     early_stop_patience: max number of epochs for which validation loss does not improve before stopping
 #     early_stop_min_delta: minimum increment in validation loss to count as improvement
 #     model_checkpoint_interval: intervals of epoch for which model weights are stored
 training:
     opt: 'adam'
-    loss: 'weighted_log'
+    loss: 'log'
     batch_size: 5000
     lr: 1.0e-3
     l2: 0
-    epochs: 1
+    epochs: 100
     callbacks:
-        early_stop_patience: 3
-        early_stop_min_delta: 1.0e-4
-        model_checkpoint_interval: 5
-    
-
+        tensorboard_logging: True
+        early_stop:
+            stop_patience: 3
+            stop_min_delta: 1.0e-4
+        model_checkpoint:
+            checkpoint_interval: 5
 
 # model_checkpoint: [OPTIONAL IF USING WITH PIPELINE AFTER TRAINING]
 #     path_to_model_checkpoint: use model checkpoint to load model
-#     [default] null: to use model trained previously by the pipeline
 # batch_size: evaluation batch_size
 # evaluation_metrics: metrics to perform evaluation available:['accuracy', 'report']
 # EVALUATION
 evaluation:
-    model_checkpoint: null
+    model_checkpoint: './pipeline_train_0/best_model'
     batch_size: 5000
-    evaluation_metrics: ['accuracy', 'report']
+    metrics: ['accuracy', 'report']
 
 
 
