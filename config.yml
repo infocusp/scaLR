@@ -3,8 +3,8 @@
 # EXPERIMENT 
 device: 'cuda' # [Optional][cuda/cpu] device to run the deep learning models on
 filepath: '.' # [Required] base file path for all experiments
-exp_name: 'scp_test_st' # [Required] experiment name
-exp_run: 2 # [Required] experiment run to compare
+exp_name: 'scp_test_final' # [Required] experiment name
+exp_run: 0 # [Required] experiment run to compare
 # Final experiment directory would be: filepath/{exp_name}_{exp_run}/
 
 # DATA
@@ -26,7 +26,7 @@ data:
     val_datapath: './pipeline_3/feature_selection/val' # validation data path
     test_datapath: './pipeline_3/feature_selection/test' # testing data path
     
-    target: Cell_State # [Required] target to perform classification on. Must be present as a column_name in adata.obs
+    target: Cell_Type # [Required] target to perform classification on. Must be present as a column_name in adata.obs
 
 # Feature selection technique
 feature_selection:
@@ -42,7 +42,7 @@ feature_selection:
     model:
       name: nn
       params:
-          epochs: 100
+          epochs: 25
 
     # [Required]
     # k: number of top features to extract
@@ -75,7 +75,7 @@ feature_selection:
 model: 
     type: 'linear'
     hyperparameters:
-        layers: [4000, 16]
+        layers: [4000, 6]
         dropout: 0
         weights_init_zero: False
     start_checkpoint: null
@@ -105,7 +105,7 @@ model:
 #     early_stop_min_delta: minimum increment in validation loss to count as improvement
 #     model_checkpoint_interval: intervals of epoch for which model weights are stored
 training:
-    opt: 'adam'
+    opt: 'sgd'
     loss: 'log'
     batch_size: 5000
     lr: 1.0e-3

@@ -5,8 +5,21 @@ import json
 from .file import write_data, dump_json, read_data
 import os
 
-def generate_split(datapath, split_ratio, target, stratify=None, path=None):
+def generate_split(datapath:str, split_ratio:list[float], target:str, stratify:str=None, path:str=None) -> dict:
+    """Generate a list of indices for train/val/test split of whole dataset
 
+    Args:
+        datapath: path to full data
+        split_ratio: ratio to split number of samples in
+        target: target for classification present in `obs`.
+        stratify: optional parameter to stratify the split upon parameter.
+        path: path to store generated split in json format/
+    
+    Returns:
+        dict with 'train', 'test' and 'val' indices list.
+    
+    """
+    
     adata = read_data(datapath)
     metadata = adata.obs
     metadata['inds'] = range(len(metadata))
@@ -57,8 +70,17 @@ def generate_split(datapath, split_ratio, target, stratify=None, path=None):
 
     return data_split
 
-def split_data(datapath, data_split, dirpath, chunksize=None):
+def split_data(datapath:str, data_split:dict, dirpath:str, chunksize:int=None):
+    """Split the full data based upon generated indices lists and write it to disk.
+    
+    Args:
+        datapath: path to full dataset
+        data_split: dict containing list of indices for train/val/test splits
+        dirpath: path to store new split data.
+        chunksize: number of samples to store in one chunk, after splitting the data.
 
+    """
+    
     dstype = ['train','val','test']
     for typ in dstype:
         if chunksize is None:

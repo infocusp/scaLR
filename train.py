@@ -6,7 +6,7 @@ from torch import nn
 import numpy as np
 from scp.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
 from scp.tokenizer import GeneVocab
-from scp.data import simpleDataLoader, transformerDataLoader
+from scp.data import simple_dataloader, transformer_dataloader
 from scp.model import LinearModel, TransformerModel
 from scp import Trainer
 
@@ -79,8 +79,8 @@ def train(config, log=True):
         # dropout = model_hp['dropout']
         model = LinearModel(**model_hp)
         
-        train_dl = simpleDataLoader(train_data, target, batch_size, label_mappings)
-        val_dl = simpleDataLoader(val_data, target, batch_size, label_mappings) 
+        train_dl = simple_dataloader(train_data, target, batch_size, label_mappings)
+        val_dl = simple_dataloader(val_data, target, batch_size, label_mappings) 
 
     # Transformer model creation and dataloaders
     elif model_type == 'transformer':    
@@ -126,7 +126,7 @@ def train(config, log=True):
         include_zero_gene = prep['include_zero_gene']
         max_len = prep['max_len']
 
-        train_dl = transformerDataLoader(
+        train_dl = transformer_dataloader(
             train_data,
             target,
             batch_size,
@@ -142,7 +142,7 @@ def train(config, log=True):
             include_zero_gene
         )
         
-        val_dl = transformerDataLoader(
+        val_dl = transformer_dataloader(
             val_data,
             target,
             batch_size,

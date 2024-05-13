@@ -10,7 +10,7 @@ from data_ingestion import data_ingestion
 def main():
     # Parser to take in config file path and logging [enabled, disabled]
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c','--config', type=str, help='config.yml file path')
+    parser.add_argument('-c','--config', type=str, help='config.yml file path',required=True)
     parser.add_argument('-l','--log', action='store_true', help='flag to store logs for the experiment')
 
     args = parser.parse_args()

@@ -6,7 +6,7 @@ from torch import nn
 import numpy as np
 from scp.utils import load_config, read_data, read_yaml, read_json, dump_yaml
 from scp.tokenizer import GeneVocab
-from scp.data import simpleDataLoader, transformerDataLoader
+from scp.data import simple_dataloader, transformer_dataloader
 from scp.model import LinearModel, TransformerModel
 from scp.evaluation import predictions, accuracy, report
 from scp import Trainer
@@ -55,7 +55,7 @@ def evaluate(config, log=True):
         model = LinearModel(**model_hp).to(device)
         model.load_state_dict(torch.load(f'{model_checkpoint}/model.pt')['model_state_dict'])
         
-        test_dl = simpleDataLoader(test_data, target, batch_size, label_mappings)
+        test_dl = simple_dataloader(test_data, target, batch_size, label_mappings)
 
     # Transformer model creation (and loading checkpoint model weights) and dataloaders
     elif model_type == 'transformer':    
@@ -99,7 +99,7 @@ def evaluate(config, log=True):
         include_zero_gene = prep['include_zero_gene']
         max_len = prep['max_len']
 
-        test_dl = transformerDataLoader(
+        test_dl = transformer_dataloader(
             test_data,
             target,
             batch_size,

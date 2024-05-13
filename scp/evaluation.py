@@ -1,13 +1,16 @@
 import os
 import pandas as pd
 import torch
+from torch.utils.data import DataLoader
 from torch import nn
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
+from .model import LinearModel
 
 
-def predictions(model, test_dl, device='cpu'):
+
+def predictions(model:LinearModel, test_dl: DataLoader, device:str='cpu') -> (list[int], list[int]):
     """
     Function to get classificaton predictions from a model and test_dataloader
 
@@ -17,7 +20,7 @@ def predictions(model, test_dl, device='cpu'):
         device: device to run model on ('cpu'/'cuda')
 
     Return:
-        true_labels from test set, predicted labels via inference on test data
+        List of true labels from test set and predicted labels via inference on test data
     """
     model.eval()
     test_labels, pred_labels = [], []
@@ -32,13 +35,13 @@ def predictions(model, test_dl, device='cpu'):
 
     return test_labels, pred_labels
 
-def accuracy(test_labels, pred_labels):
+def accuracy(test_labels:list[int], pred_labels:list[int])->float:
     """
     Function to return accuracy score of predicted labels as compared to true labels
     """
     return accuracy_score(test_labels, pred_labels)
 
-def report(test_labels, pred_labels, filepath, mapping=None):
+def report(test_labels:list[int], pred_labels:list[int], filepath:str, mapping:dict=None):
     """
     Function to generate a classifcaiton report from a from the predicted data
     at filepath as classification_report.csv
@@ -57,16 +60,16 @@ def report(test_labels, pred_labels, filepath, mapping=None):
     report = pd.DataFrame(classification_report(test_labels, pred_labels, output_dict=True)).transpose()
     print(report)
     report.to_csv(f'{filepath}/classification_report.csv')
-    return
 
-def conf_matrix(test_labels, pred_labels):
+# Incomplete
+def conf_matrix(test_labels:list[int], pred_labels:list[int]):
     """
     Function to return confusion matrix of predicted labels as compared to true labels
     """    
     return confusion_matrix(test_labels, pred_labels)
 
 # TODO: change extraction method from weights maybe?
-def get_top_n_genes(model, n=50, genes=None):
+def get_top_n_genes(model:LinearModel, n:int=50, genes:list[str]=None) -> (list[int], list[str]):
     """
     Function to get top_n genes and their indices using model weights.
 
@@ -85,9 +88,19 @@ def get_top_n_genes(model, n=50, genes=None):
     if genes is not None: top_n_genes = [genes[i] for i in top_n_indices]
     return top_n_indices, top_n_genes
 
-def top_n_heatmap(model, filepath, classes, n=50, genes=None):
+def top_n_heatmap(model:LinearModel, filepath:str, classes:list[str], n:int=50, genes:list[str]=None) -> (list[int], list[str]):
     """
     Generate a heatmap for top_n genes across all classes.
+
+    Args:
+        model: trained model to extract weights from
+        filepath: path to store the heatmap image
+        classes: list of name of classes
+        n: number of top_genes to extract
+        genes: gene_name list
+
+    Return:
+        top_n gene indices, top_n gene names
     """
     weights = model.state_dict()['lin.weight'].cpu()
     top_n_indices, top_n_genes = get_top_n_genes(model, n, genes)
@@ -97,7 +110,7 @@ def top_n_heatmap(model, filepath, classes, n=50, genes=None):
     sns.heatmap(top_n_weights, yticklabels=top_n_genes, xticklabels=classes, vmin=-1e-2, vmax=1e-2)
     
     plt.savefig(f"{filepath}/heatmap.png")
-    return top_n_weights, top_n_genes
+    return top_n_indices, top_n_genes
 
 
 

@@ -5,7 +5,7 @@ from anndata.experimental import AnnLoader
 from .preprocess import binning
 from ..tokenizer import tokenize_and_pad_batch
 
-def simpleDataLoader(adata, target, batch_size=1, label_mappings=None):
+def simple_dataloader(adata, target:str, batch_size:int=1, label_mappings:dict=None):
     """
     A simple data loader to prepare inputs to be fed into linear model and corresponding labels
 
@@ -28,7 +28,7 @@ def simpleDataLoader(adata, target, batch_size=1, label_mappings=None):
     
     return AnnLoader(adata, batch_size=batch_size, collate_fn=lambda batch: collate_fn(batch, target, label_mappings))
         
-def transformerDataLoader(adata,
+def transformer_dataloader(adata,
                           target,
                           batch_size=16,
                           label_mappings={},

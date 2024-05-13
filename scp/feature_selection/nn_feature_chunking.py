@@ -5,11 +5,14 @@ import torch
 from torch import nn
 from ..model import LinearModel
 from ..Trainer import Trainer
-from ..data import simpleDataLoader
+from ..data import simple_dataloader
 
 
-def nn_feature_chunking(train_data, val_data, target, model_config, chunksize, k, aggregation_strategy, dirpath, device='cpu'):
+def nn_feature_chunking(train_data, val_data, target:str, model_config:dict, chunksize:int, k:int, aggregation_strategy:str, dirpath:str, device:str='cpu') -> list[str]:
     """ Feature selection using feature chunking approach.
+
+        #TODO: add brief about approach
+    
         Args:
             train_data: train_dataset (anndata oject)
             val_data: validation_dataset (anndata object)
@@ -20,6 +23,9 @@ def nn_feature_chunking(train_data, val_data, target, model_config, chunksize, k
             aggregation_strategy: stratergy to aggregate features from each class, default: 'mean' 
             dirpath: directory to store all model_weights and top_features
             device: [cpu/cuda] device to perform training on.
+
+        Return:
+            List of top k features
     """
 
     label_mappings = {}
@@ -49,8 +55,8 @@ def nn_feature_chunking(train_data, val_data, target, model_config, chunksize, k
         train_features_subset = train_data[:, start:start+chunksize]
         val_features_subset = val_data[:, start:start+chunksize]
         
-        train_dl = simpleDataLoader(train_features_subset, target, batch_size, label_mappings)
-        val_dl = simpleDataLoader(val_features_subset, target, batch_size, label_mappings) 
+        train_dl = simple_dataloader(train_features_subset, target, batch_size, label_mappings)
+        val_dl = simple_dataloader(val_features_subset, target, batch_size, label_mappings) 
 
         model = LinearModel([len(train_features_subset.var_names), n_cls], weights_init_zero=True)
         opt = torch.optim.SGD

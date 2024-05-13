@@ -1,17 +1,17 @@
 import os
 import torch
 from torch import nn
-from torch.utils.data import Dataset, IterableDataset, DataLoader
+from torch.utils.data import DataLoader
 from .callbacks import CallbackExecuter
 from time import time
 from .tokenizer import tokenize_and_pad_batch
-
+from .model import LinearModel
 
 class Trainer:
     """
     Trainer class to train and validate a model from scratch or resume from checkpoint
     """
-    def __init__(self, model, opt_class=torch.optim.Adam, lr=1e-3, l2=0, loss_fn=nn.CrossEntropyLoss(), callback_params={}, device='cuda', dirpath='.', model_checkpoint_path=None):
+    def __init__(self, model:LinearModel, opt_class=torch.optim.Adam, lr:float=1e-3, l2:float=0, loss_fn=nn.CrossEntropyLoss(), callback_params:dict={}, device:str='cuda', dirpath:str='.', model_checkpoint_path:str=None):
         """
         Args:
             model: model to train
@@ -39,8 +39,15 @@ class Trainer:
         self.dirpath = dirpath
         self.callback_params = callback_params
 
-    def train_one_epoch(self, dl):
-        """ training one epoch """
+    def train_one_epoch(self, dl:DataLoader) -> (float, float):
+        """ training one epoch 
+        
+        Args:
+            dl: training dataloader
+
+        Return:
+            Train Loss, Train Accuracy
+        """
         self.model.train()
         total_loss = 0
         hits = 0
@@ -65,8 +72,15 @@ class Trainer:
         accuracy = hits/total_samples
         return total_loss, accuracy
 
-    def validation(self, dl):
-        """ validation after training one epoch """
+    def validation(self, dl:DataLoader) -> (float, float):
+        """ validation after training one epoch 
+        
+        Args:
+            dl: validation dataloader
+
+        Return:
+            Validation Loss, Validation Accuracy
+        """
         self.model.eval()
         total_loss = 0
         hits = 0
@@ -87,8 +101,8 @@ class Trainer:
     
         return total_loss, accuracy
 
-    def train(self, epochs, train_dl, val_dl):
-        """train function
+    def train(self, epochs:int, train_dl:DataLoader, val_dl:DataLoader):
+        """training function
 
         Args:
             epochs: max number of epochs to train model on
@@ -112,8 +126,7 @@ class Trainer:
 
         self.model.load_state_dict(torch.load(f'{self.dirpath}/best_model/model.pt')['model_state_dict'])
         torch.save(self.model, f'{self.dirpath}/best_model/model.bin')
-    
-        return
+
 
 
 

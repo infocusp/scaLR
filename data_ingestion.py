@@ -19,6 +19,8 @@ def data_ingestion(config, log=True):
     data_config = config['data']
     target = data_config['target']
 
+    os.makedirs(f'{filepath}/', exist_ok=True)
+    
     if log:
         sys.stdout = open(f'{filepath}/data_ingestion.log','w')
 

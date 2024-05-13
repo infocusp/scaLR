@@ -1,2 +1,2 @@
-from .LinearModel import LinearModel
-from .TransformerModel import TransformerModel
+from .linear_model import LinearModel
+from .transformer_model import TransformerModel

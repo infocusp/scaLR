@@ -72,7 +72,7 @@ default_config_ = {
     }
 }
 
-def overwrite_default(user_config, default_config): 
+def overwrite_default(user_config:dict, default_config:dict) -> dict: 
     """The funnction recursively overwrites information from user_config onto the default_config"""
     for key in user_config.keys():
         if key not in default_config.keys() or not isinstance(user_config[key], dict):
@@ -82,8 +82,15 @@ def overwrite_default(user_config, default_config):
             
     return default_config            
 
-def load_config(path):
-    """This function initializes a default_config file and overwrites information provided by the user."""
+def load_config(path:str) -> dict:
+    """This function initializes a default_config file and overwrites information provided by the user.
+        
+        Args:
+            path: path to config file
+
+        Returns:
+            config dict with default parameters loaded and overwritten by user.
+    """
     default_config = deepcopy(default_config_)
     user_config = read_yaml(path)
 

@@ -1,11 +1,12 @@
 import torch
 from torch import nn
+from torch import Tensor
 
 class LinearModel(nn.Module):
-    def __init__(self, layers, dropout=0, activation = 'relu', weights_init_zero=False):
+    """Deep Neural Network model with linear layers."""
+    
+    def __init__(self, layers:list[int], dropout:float=0, activation:str = 'relu', weights_init_zero:bool=False):
         """
-        Deep Neural Network model with linear layers.
-
         Args:
             layers: List of layers' feature size going from input_ft -> out_ft. eg. [22858, 2048, 6] (req)
             dropout: dropout after each layer. Floating point value [0,1)
@@ -35,7 +36,7 @@ class LinearModel(nn.Module):
                 
             torch.nn.init.constant_(self.out_layer.weight, 0.0)
     
-    def forward(self, x):
+    def forward(self, x:Tensor) -> Tensor:
         """pass input through the network.
 
             Args:

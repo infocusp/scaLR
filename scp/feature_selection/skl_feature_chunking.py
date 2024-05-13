@@ -6,8 +6,11 @@ import pandas as pd
 import shutil
 
 
-def skl_feature_chunking(train_adata, target, model_config, chunksize, k, aggregation_strategy, dirpath):
+def skl_feature_chunking(train_adata, target:str, model_config:dict, chunksize:int, k:int, aggregation_strategy:str, dirpath:str):
     """ Feature selection using feature chunking approach.
+
+        #TODO: briefly explain approach
+    
         Args:
             train_data: train_dataset (anndata oject)
             target: target class which is present in dataset.obs for classifcation training
@@ -15,7 +18,10 @@ def skl_feature_chunking(train_adata, target, model_config, chunksize, k, aggreg
             chunksize: number of features to take in one training instance
             k: number of features to select from all_features
             aggregation_strategy: stratergy to aggregate features from each class, default: 'mean' 
-            dirpath: directory to store all model_weights and top_features   
+            dirpath: directory to store all model_weights and top_features  
+
+        Return:
+            list of top k features
     """
 
     classes = np.unique(train_adata.obs[target])
