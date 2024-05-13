@@ -5,11 +5,11 @@ A complete end2end pipeline and tool for scRNA-seq tabular data (cell X genes) t
 ## Library Structure
 
 - scp
-    - callbacks: EarlyStopping, ModelCheckpoints, Logging
-    - model: Linear, Transformer
-    - utils: file_utils, config
+    - callbacks: EarlyStopping, ModelCheckpoints, TensorbaordLogging
+    - model: Linear
+    - utils: file_utils, config, split_data
     - data: preprocessing, dataloaders
-    - feature selection: feature_chunking
+    - feature selection: nn_feature_chunking, skl_feature_chunking
     - tokenizer: GeneVocab, tokenizer, padding
     - Trainer.py: training
     - evaluation.py: prediction, accuracy, report
