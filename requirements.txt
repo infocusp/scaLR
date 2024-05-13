@@ -1,30 +1,46 @@
 absl-py==2.1.0
 anndata==0.10.7
 array_api_compat==1.6
+asttokens==2.4.1
 certifi==2022.12.7
 charset-normalizer==2.1.1
-contourpy @ file:///home/conda/feedstock_root/build_artifacts/contourpy_1712429891065/work
-cycler @ file:///home/conda/feedstock_root/build_artifacts/cycler_1696677705766/work
+cloudpickle==3.0.0
+comm==0.2.2
+contourpy==1.2.1
+cycler==0.12.1
+debugpy==1.8.1
+decorator==5.1.1
 exceptiongroup==1.2.1
+executing==2.0.1
 filelock==3.13.1
-fonttools @ file:///home/conda/feedstock_root/build_artifacts/fonttools_1712344590944/work
+fonttools==4.51.0
 fsspec==2024.2.0
 grpcio==1.62.2
 h5py==3.11.0
 idna==3.4
 importlib_metadata==7.1.0
-importlib_resources @ file:///home/conda/feedstock_root/build_artifacts/importlib_resources_1711040877059/work
+importlib_resources==6.4.0
+ipykernel==6.29.4
+ipython==8.18.1
+jedi==0.19.1
 Jinja2==3.1.3
-joblib @ file:///home/conda/feedstock_root/build_artifacts/joblib_1712597192451/work
-kiwisolver @ file:///home/conda/feedstock_root/build_artifacts/kiwisolver_1695379916629/work
+joblib==1.4.0
+jupyter_client==8.6.1
+jupyter_core==5.7.2
+kiwisolver==1.4.5
+llvmlite==0.42.0
 Markdown==3.6
 MarkupSafe==2.1.5
-matplotlib @ file:///croot/matplotlib-suite_1713336378214/work
+matplotlib==3.8.4
+matplotlib-inline==0.1.7
+memory-profiler==0.61.0
 mpmath==1.3.0
 munkres==1.1.4
 natsort==8.4.0
+nest-asyncio==1.6.0
 networkx==3.2.1
-numpy @ file:///home/conda/feedstock_root/build_artifacts/numpy_1707225342954/work/dist/numpy-1.26.4-cp39-cp39-linux_x86_64.whl#sha256=c799942b5898f6e6c60264d1663a6469a475290e758c654aeeb78e2596463abd
+numba==0.59.1
+numpy==1.26.4
 nvidia-cublas-cu11==11.11.3.6
 nvidia-cuda-cupti-cu11==11.8.87
 nvidia-cuda-nvrtc-cu11==11.8.89
@@ -36,38 +52,55 @@ nvidia-cusolver-cu11==11.4.1.48
 nvidia-cusparse-cu11==11.7.5.86
 nvidia-nccl-cu11==2.19.3
 nvidia-nvtx-cu11==11.8.86
-olefile @ file:///home/conda/feedstock_root/build_artifacts/olefile_1701735466804/work
-packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1710075952259/work
-pandas @ file:///home/conda/feedstock_root/build_artifacts/pandas_1712782032048/work
+olefile==0.47
+packaging==24.0
+pandas==2.2.2
+parso==0.8.4
+pexpect==4.9.0
 pillow==10.2.0
+pip==23.3.1
+platformdirs==4.2.1
+prompt-toolkit==3.0.43
 protobuf==5.26.1
-pyparsing @ file:///home/conda/feedstock_root/build_artifacts/pyparsing_1652235407899/work
+psutil==5.9.8
+ptyprocess==0.7.0
+pure-eval==0.2.2
+Pygments==2.17.2
+pyparsing==3.0.9
 PyQt5==5.15.4
 PyQt5-sip==12.9.0
-python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/python-dateutil_1709299778482/work
-pytz @ file:///home/conda/feedstock_root/build_artifacts/pytz_1706886791323/work
+python-dateutil==2.9.0
+pytz==2024.1
 PyYAML==6.0.1
+pyzmq==26.0.2
 requests==2.28.1
-scikit-learn @ file:///home/conda/feedstock_root/build_artifacts/scikit-learn_1712824594464/work
-scipy @ file:///home/conda/feedstock_root/build_artifacts/scipy-split_1712255240811/work/dist/scipy-1.13.0-cp39-cp39-linux_x86_64.whl#sha256=3cd01611d085a04db4a9f3e928d9d10c1ede3ccccea3118f00499800913c9cb4
+scikit-learn==1.4.2
+scipy==1.13.0
 seaborn==0.13.2
-sip @ file:///home/conda/feedstock_root/build_artifacts/sip_1646101340685/work
-six @ file:///home/conda/feedstock_root/build_artifacts/six_1620240208055/work
+setuptools==68.2.2
+shap==0.45.0
+sip==6.5.1
+six==1.16.0
+slicer==0.0.7
+stack-data==0.6.3
 sympy==1.12
 tensorboard==2.16.2
 tensorboard-data-server==0.7.2
-threadpoolctl @ file:///home/conda/feedstock_root/build_artifacts/threadpoolctl_1710943558485/work
-toml @ file:///home/conda/feedstock_root/build_artifacts/toml_1604308577558/work
+threadpoolctl==3.4.0
+toml==0.10.2
 torch==2.2.0+cu118
 torchdata==0.7.1
 torchtext==0.17.0+cpu
 torchvision==0.17.0+cu118
-tornado @ file:///home/conda/feedstock_root/build_artifacts/tornado_1708363103305/work
+tornado==6.4
 tqdm==4.64.1
+traitlets==5.14.3
 triton==2.2.0
 typing_extensions==4.9.0
-tzdata @ file:///home/conda/feedstock_root/build_artifacts/python-tzdata_1707747584337/work
-unicodedata2 @ file:///home/conda/feedstock_root/build_artifacts/unicodedata2_1695847984941/work
+tzdata==2024.1
+unicodedata2==15.1.0
 urllib3==1.26.13
+wcwidth==0.2.13
 Werkzeug==3.0.2
-zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1695255097490/work
+wheel==0.41.2
+zipp==3.17.0
