@@ -14,22 +14,20 @@ default_transformer = {
 }
 
 # LINEAR MODEL CONFIGS ADDITIONS
-default_linear = {
-    'model': {}
-}
+default_linear = {'model': {}}
 
 default_feature_selection_config = {
     'chunksize': 2000,
     'method_type': 'feature_chunk',
-    'model':{
+    'model': {
         'name': 'nn',
-        'params':{
+        'params': {
             'epochs': 25
         }
     },
-    'top_features_stats':{
+    'top_features_stats': {
         'k': 5000,
-        'aggregation_strategy': 'mean' 
+        'aggregation_strategy': 'mean'
     },
     'store_on_disk': True
 }
@@ -67,22 +65,26 @@ default_config_ = {
     'filepath': '.',
     'exp_name': 'run',
     'exp_run': 0,
-    'data':{
-        'chunksize':None,
+    'data': {
+        'chunksize': None,
     }
 }
 
-def overwrite_default(user_config:dict, default_config:dict) -> dict: 
+
+def overwrite_default(user_config: dict, default_config: dict) -> dict:
     """The funnction recursively overwrites information from user_config onto the default_config"""
     for key in user_config.keys():
-        if key not in default_config.keys() or not isinstance(user_config[key], dict):
+        if key not in default_config.keys() or not isinstance(
+                user_config[key], dict):
             default_config[key] = user_config[key]
         else:
-            default_config[key] = overwrite_default(user_config[key], default_config[key])
-            
-    return default_config            
+            default_config[key] = overwrite_default(user_config[key],
+                                                    default_config[key])
 
-def load_config(path:str) -> dict:
+    return default_config
+
+
+def load_config(path: str) -> dict:
     """This function initializes a default_config file and overwrites information provided by the user.
         
         Args:
@@ -104,11 +106,9 @@ def load_config(path:str) -> dict:
     if 'evaluation' in user_config:
         default_config['evaluation'] = default_evaluation_config
         default_config['model'] = default_model
-    
-    if 'model' in user_config and user_config['model']['type'] == 'transformer':
-        default_config['transformer_preprocessing'] = default_transformer['transformer_preprocessing']
-    
-    return overwrite_default(user_config, default_config)
-            
 
-        
+    if 'model' in user_config and user_config['model']['type'] == 'transformer':
+        default_config['transformer_preprocessing'] = default_transformer[
+            'transformer_preprocessing']
+
+    return overwrite_default(user_config, default_config)

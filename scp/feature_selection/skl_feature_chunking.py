@@ -6,7 +6,9 @@ import pandas as pd
 import shutil
 
 
-def skl_feature_chunking(train_adata, target:str, model_config:dict, chunksize:int, k:int, aggregation_strategy:str, dirpath:str):
+def skl_feature_chunking(train_adata, target: str, model_config: dict,
+                         chunksize: int, k: int, aggregation_strategy: str,
+                         dirpath: str):
     """ Feature selection using feature chunking approach.
 
         #TODO: briefly explain approach
@@ -29,23 +31,19 @@ def skl_feature_chunking(train_adata, target:str, model_config:dict, chunksize:i
     print('\nThe unique classes are : ', classes)
 
     # Load features chunkwise, train the logistic classifier model, store the model per iteration.
-    os.makedirs(
-        f'{dirpath}/model_weights', exist_ok = True)
-
+    os.makedirs(f'{dirpath}/model_weights', exist_ok=True)
 
     if model_config['name'] == 'logistic_classifier':
         model = LogisticRegression(**(model_config['params']))
-    raise ValueError(
-            '`model` must be one of [`logistic_classifier`]'
-    )
-    
+    raise ValueError('`model` must be one of [`logistic_classifier`]')
+
     for start in tqdm.tqdm(range(0, len(train_adata.var_names), chunksize)):
         train_features = pd.DataFrame(
             train_adata[:, start:start + chunksize].X,
             columns=train_adata[:, start:start + chunksize].var_names)
 
         train_targets = train_adata[:, start:start + chunksize].obs[target]
-        
+
         model.fit(train_features, np.ravel(train_targets))
 
         # Saving model per iteration.
@@ -78,9 +76,7 @@ def skl_feature_chunking(train_adata, target:str, model_config:dict, chunksize:i
                 [feature_class_weights, model_stats], axis=1)
 
     # Stooring feature class weights matrix.
-    feature_class_weights.to_csv(
-        f'{dirpath}/feature_class_weights.csv'
-    )
+    feature_class_weights.to_csv(f'{dirpath}/feature_class_weights.csv')
 
     # Aggregation strategy to be used for selecting top_k features.
     if aggregation_strategy == 'mean':
@@ -90,8 +86,7 @@ def skl_feature_chunking(train_adata, target:str, model_config:dict, chunksize:i
         raise NotImplementedError(
             'Other aggregation strategies are not implemented yet...')
 
-    with open(f'{dirpath}/top_features.txt','w') as fh:
+    with open(f'{dirpath}/top_features.txt', 'w') as fh:
         fh.write('\n'.join(top_features_list) + '\n')
 
     return top_features_list
-    

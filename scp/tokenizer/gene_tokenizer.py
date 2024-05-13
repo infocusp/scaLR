@@ -10,6 +10,7 @@ from collections import Counter, OrderedDict
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 from typing_extensions import Self
 
+
 class GeneVocab(Vocab):
     """
     Vocabulary for genes.
@@ -72,10 +73,8 @@ class GeneVocab(Vocab):
                 token2idx = json.load(f)
                 return cls.from_dict(token2idx)
         else:
-            raise ValueError(
-                f"{file_path} is not a valid file type. "
-                "Only .pkl and .json are supported."
-            )
+            raise ValueError(f"{file_path} is not a valid file type. "
+                             "Only .pkl and .json are supported.")
 
     @classmethod
     def from_dict(
@@ -215,13 +214,11 @@ def tokenize_batch(
     if data.shape[1] != len(gene_ids):
         raise ValueError(
             f"Number of features in data ({data.shape[1]}) does not match "
-            f"number of gene_ids ({len(gene_ids)})."
-        )
+            f"number of gene_ids ({len(gene_ids)}).")
     if mod_type is not None and data.shape[1] != len(mod_type):
         raise ValueError(
             f"Number of features in data ({data.shape[1]}) does not match "
-            f"number of mod_type ({len(mod_type)})."
-        )
+            f"number of mod_type ({len(mod_type)}).")
 
     tokenized_data = []
     for i in range(len(data)):
@@ -293,7 +290,9 @@ def pad_batch(
             if not cls_appended:
                 idx = np.random.choice(len(gene_ids), max_len, replace=False)
             else:
-                idx = np.random.choice(len(gene_ids) - 1, max_len - 1, replace=False)
+                idx = np.random.choice(len(gene_ids) - 1,
+                                       max_len - 1,
+                                       replace=False)
                 idx = idx + 1
                 idx = np.insert(idx, 0, 0)
             gene_ids = gene_ids[idx]
@@ -301,31 +300,27 @@ def pad_batch(
             if mod_types is not None:
                 mod_types = mod_types[idx]
         if len(gene_ids) < max_len:
-            gene_ids = torch.cat(
-                [
-                    gene_ids,
-                    torch.full(
-                        (max_len - len(gene_ids),), pad_id, dtype=gene_ids.dtype
-                    ),
-                ]
-            )
-            values = torch.cat(
-                [
-                    values,
-                    torch.full((max_len - len(values),), pad_value, dtype=values.dtype),
-                ]
-            )
+            gene_ids = torch.cat([
+                gene_ids,
+                torch.full((max_len - len(gene_ids), ),
+                           pad_id,
+                           dtype=gene_ids.dtype),
+            ])
+            values = torch.cat([
+                values,
+                torch.full((max_len - len(values), ),
+                           pad_value,
+                           dtype=values.dtype),
+            ])
             if mod_types is not None:
-                mod_types = torch.cat(
-                    [
-                        mod_types,
-                        torch.full(
-                            (max_len - len(mod_types),),
-                            mod_pad_id,
-                            dtype=mod_types.dtype,
-                        ),
-                    ]
-                )
+                mod_types = torch.cat([
+                    mod_types,
+                    torch.full(
+                        (max_len - len(mod_types), ),
+                        mod_pad_id,
+                        dtype=mod_types.dtype,
+                    ),
+                ])
 
         gene_ids_list.append(gene_ids)
         values_list.append(values)
@@ -382,16 +377,3 @@ def tokenize_and_pad_batch(
         vocab_mod=vocab_mod,
     )
     return batch_padded
-
-
-
-
-
-
-
-
-
-
-
-
-

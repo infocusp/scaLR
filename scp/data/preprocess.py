@@ -2,6 +2,7 @@ import anndata as ad
 import numpy as np
 import torch
 
+
 def binning(adata, n_bins):
     """
     Value binning for pre-processing of data in transformer model
@@ -13,7 +14,7 @@ def binning(adata, n_bins):
     Return:
         anndata object containing layer 'X_binned' with binned data values
     """
-    
+
     data = adata.X
     binned_rows = []
 
@@ -24,8 +25,8 @@ def binning(adata, n_bins):
         non_zero_ids = row.nonzero()
         non_zero_row = row[non_zero_ids]
         if isinstance(non_zero_row, torch.Tensor):
-            non_zero_ids=non_zero_ids.flatten()
-            non_zero_row=non_zero_row.flatten()
+            non_zero_ids = non_zero_ids.flatten()
+            non_zero_row = non_zero_row.flatten()
         bins = np.quantile(non_zero_row, np.linspace(0, 1, n_bins - 1))
         # bins = np.sort(np.unique(bins))
         # NOTE: comment this line for now, since this will make the each category
@@ -38,8 +39,9 @@ def binning(adata, n_bins):
         # print(binned_row.shape)
         binned_rows.append(binned_row)
     adata = adata.to_adata()
-    adata.X=torch.stack(binned_rows)
+    adata.X = torch.stack(binned_rows)
     return adata
+
 
 def _digitize(x, bins, side="both") -> np.ndarray:
     """
@@ -71,6 +73,7 @@ def _digitize(x, bins, side="both") -> np.ndarray:
 
     rands = np.random.rand(len(x))  # uniform random numbers
 
-    digits = torch.as_tensor(rands * (right_difits - left_digits) + left_digits)
+    digits = torch.as_tensor(rands * (right_difits - left_digits) +
+                             left_digits)
     digits = torch.ceil(digits).flatten().type(torch.int64)
     return digits
