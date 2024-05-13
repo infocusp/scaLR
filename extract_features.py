@@ -28,7 +28,7 @@ def extract_features(config, log=True):
 
     # logging
     if log:
-        sys.stdout = open(f'{filepath}/feature_extraction.log','w')
+        sys.stdout = open(f'{filepath}/feature_selection/feature_extraction.log','w')
     
     # loading data
     train_data = read_data(train_datapath)

@@ -15,7 +15,6 @@ def data_ingestion(config, log=True):
 
     # create experiment directory
     filepath = f'{filepath}/{exp_name}_{exp_run}'
-    os.makedirs(f'{filepath}/data/', exist_ok=True)
     
     data_config = config['data']
     target = data_config['target']
@@ -27,6 +26,8 @@ def data_ingestion(config, log=True):
     
     # Splitting the data
     if 'split_data' in data_config:
+        os.makedirs(f'{filepath}/data/', exist_ok=True)
+        
         split_config = data_config['split_data']
         full_datapath = split_config['full_datapath']
         split_ratio = split_config['split_ratio']
