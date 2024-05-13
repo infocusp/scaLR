@@ -4,7 +4,6 @@ from torch import nn
 from torch.utils.data import DataLoader
 from .callbacks import CallbackExecuter
 from time import time
-from .tokenizer import tokenize_and_pad_batch
 from .model import LinearModel
 
 

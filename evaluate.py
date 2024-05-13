@@ -5,9 +5,8 @@ import torch
 from torch import nn
 import numpy as np
 from scp.utils import load_config, read_data, read_yaml, read_json, dump_yaml
-from scp.tokenizer import GeneVocab
-from scp.data import simple_dataloader, transformer_dataloader
-from scp.model import LinearModel, TransformerModel
+from scp.data import simple_dataloader
+from scp.model import LinearModel
 from scp.evaluation import predictions, accuracy, report
 from scp import Trainer
 
@@ -59,47 +58,6 @@ def evaluate(config, log=True):
 
         test_dl = simple_dataloader(test_data, target, batch_size,
                                     label_mappings)
-
-    # Transformer model creation (and loading checkpoint model weights) and dataloaders
-    elif model_type == 'transformer':
-        # create vocab
-        pad_token = "<pad>"
-        cls_token = "<cls>"
-        special_tokens = [pad_token, cls_token]
-        pad_value = -2
-
-        genes = test_data.var.index.tolist()
-        vocab = GeneVocab.from_file(f'{model_checkpoint}/vocab.json')
-        gene_ids = np.array(vocab(genes), dtype=int)
-        ntokens = len(vocab)
-
-        # model hyperparamters
-        dim = model_hp['dim']
-        nlayers = model_hp['nlayers']
-        nheads = model_hp['nheads']
-        dropout = model_hp['dropout']
-        n_cls = model_hp['n_cls']
-        decoder_layers = [dim, dim, n_cls]
-
-        model = TransformerModel(ntokens, vocab, dim, nheads, nlayers, dropout,
-                                 decoder_layers, pad_token).to(device)
-
-        model.load_state_dict(
-            torch.load(f'{model_checkpoint}/model.pt')['model_state_dict'])
-
-        #Tokenization
-        prep = config['transformer_preprocessing']
-        value_bin = prep['value_bin']
-        n_bins = prep['n_bins']
-        append_cls = prep['append_cls']
-        include_zero_gene = prep['include_zero_gene']
-        max_len = prep['max_len']
-
-        test_dl = transformer_dataloader(test_data, target, batch_size,
-                                         label_mappings, value_bin, n_bins,
-                                         gene_ids, max_len, vocab, pad_token,
-                                         pad_value, append_cls,
-                                         include_zero_gene)
 
     # Evaluation
     id2label = label_mappings[target]['id2label']

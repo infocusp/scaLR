@@ -5,9 +5,8 @@ import torch
 from torch import nn
 import numpy as np
 from scp.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
-from scp.tokenizer import GeneVocab
-from scp.data import simple_dataloader, transformer_dataloader
-from scp.model import LinearModel, TransformerModel
+from scp.data import simple_dataloader
+from scp.model import LinearModel
 from scp import Trainer
 
 
@@ -84,54 +83,6 @@ def train(config, log=True):
                                      label_mappings)
         val_dl = simple_dataloader(val_data, target, batch_size,
                                    label_mappings)
-
-    # Transformer model creation and dataloaders
-    elif model_type == 'transformer':
-        # create vocab
-        pad_token = "<pad>"
-        cls_token = "<cls>"
-        special_tokens = [pad_token, cls_token]
-        pad_value = -2
-
-        genes = train_data.var.index.tolist()
-        if resume_from_checkpoint:
-            vocab = GeneVocab.from_file(f'{model_checkpoint}/vocab.json')
-        else:
-            vocab = GeneVocab(genes + special_tokens)
-
-        vocab.save_json(f'{filepath}/best_model/vocab.json')
-        gene_ids = np.array(vocab(genes), dtype=int)
-        ntokens = len(vocab)
-
-        dim = model_hp['dim']
-        nlayers = model_hp['nlayers']
-        nheads = model_hp['nheads']
-        dropout = model_hp['dropout']
-        n_cls = model_hp['n_cls']
-        decoder_layers = [dim, dim, n_cls]
-
-        model = TransformerModel(ntokens, vocab, dim, nheads, nlayers, dropout,
-                                 decoder_layers, pad_token)
-
-        #Tokenization
-        prep = config['transformer_preprocessing']
-        value_bin = prep['value_bin']
-        n_bins = prep['n_bins']
-        append_cls = prep['append_cls']
-        include_zero_gene = prep['include_zero_gene']
-        max_len = prep['max_len']
-
-        train_dl = transformer_dataloader(train_data, target, batch_size,
-                                          label_mappings, value_bin, n_bins,
-                                          gene_ids, max_len, vocab, pad_token,
-                                          pad_value, append_cls,
-                                          include_zero_gene)
-
-        val_dl = transformer_dataloader(val_data, target, batch_size,
-                                        label_mappings, value_bin, n_bins,
-                                        gene_ids, max_len, vocab, pad_token,
-                                        pad_value, append_cls,
-                                        include_zero_gene)
 
     # Training
 

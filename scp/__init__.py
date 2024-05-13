@@ -1,7 +1,6 @@
 from . import data
 from . import evaluation
 from . import model
-from . import tokenizer
 from . import utils
 from . import feature_selection
 

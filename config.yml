@@ -55,16 +55,6 @@ feature_selection:
     # the storage will be according to data=>chunksize parameter
     store_on_disk: True
 
-
-# Transformer related implementation still underway
-#PREPROCESS & TOKENIZATION
-# transformer_preprocessing:
-#     value_bin: True
-#     n_bins: 51
-#     append_cls: True
-#     include_zero_gene: False
-#     max_len: 3001
-
 # MODEL
 # DL model to train [Required]
 # type: [Linear]
@@ -80,18 +70,6 @@ model:
         weights_init_zero: False
     start_checkpoint: null
     resume_from_checkpoint: False
-
-# Transformer related implementation still underway
-# model:
-#     type: 'transformer'
-#     hyperparameters:
-#         dim: 128
-#         nlayers: 2
-#         nheads: 8
-#         dropout: 0.2
-#         n_cls: 6
-#     start_checkpoint: False
-#     resume_from_checkpoint: False
 
 # TRAINING
 # opt: default Adam
