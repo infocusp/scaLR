@@ -1,2 +1,1 @@
-from .skl_feature_chunking import skl_feature_chunking
-from .nn_feature_chunking import nn_feature_chunking
+from .feature_chunking import feature_chunking, extract_top_k_features

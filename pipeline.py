@@ -9,7 +9,6 @@ from data_ingestion import data_ingestion
 
 
 def main():
-    # Parser to take in config file path and logging [enabled, disabled]
     parser = argparse.ArgumentParser()
     parser.add_argument('-c',
                         '--config',
@@ -23,7 +22,6 @@ def main():
 
     args = parser.parse_args()
 
-    # load config file
     config = load_config(args.config)
     log = args.log
 

@@ -2,10 +2,9 @@
 
 **/.ipynb_checkpoints
 
-scp_testing_*
-scp_test_*
-scp_test_st_*
+scp_test*
 
 testing.ipynb
 
 nohup.out
+.gitignore.save

@@ -1,4 +1,5 @@
 import os
+
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
@@ -34,7 +35,7 @@ class TensorboardLogger:
 
 class EarlyStopping:
     """
-    Implementing Early stopping for model in case of learning stalled based upon validation loss
+    Implements early stopping based upon validation loss
 
     Attributes:
         patience: number of epochs with no improvement after which training will be stopped
@@ -42,17 +43,17 @@ class EarlyStopping:
                             i.e. an absolute change of less than min_delta, will count as no improvement.
     """
 
-    def __init__(self, stop_patience: int = 3, stop_min_delta: float = 1e-4):
+    def __init__(self, patience: int = 3, min_delta: float = 1e-4):
         """
         Args:
-            stop_patience: number of epochs with no improvement after which training will be stopped
-            stop_min_delta: Minimum change in the monitored quantity to qualify as an improvement,
+            patience: number of epochs with no improvement after which training will be stopped
+            min_delta: Minimum change in the monitored quantity to qualify as an improvement,
                             i.e. an absolute change of less than min_delta, will count as no improvement.
             epoch: An interger count of epochs trained.
             min_validation_loss: keeps the track of the minimum validation loss across all epochs.
         """
-        self.patience = int(stop_patience)
-        self.min_delta = float(stop_min_delta)
+        self.patience = int(patience)
+        self.min_delta = float(min_delta)
         self.epoch = 0
         self.min_validation_loss = float('inf')
 
@@ -81,7 +82,7 @@ class ModelCheckpoint:
         interval: regular interval of model checkpointing.
     """
 
-    def __init__(self, dirpath: str, checkpoint_interval: int = 5):
+    def __init__(self, dirpath: str, interval: int = 5):
         """
         Args:
             dirpath: to store the respective model checkpoints
@@ -90,7 +91,7 @@ class ModelCheckpoint:
 
         self.epoch = 0
         self.max_validation_acc = float(0)
-        self.interval = int(checkpoint_interval)
+        self.interval = int(interval)
         self.dirpath = dirpath
 
         os.makedirs(f'{dirpath}/best_model', exist_ok=True)
@@ -119,7 +120,7 @@ class ModelCheckpoint:
                 f'{self.dirpath}/checkpoints/model_{self.epoch}.pt')
 
 
-class CallbackExecuter:
+class CallbackExecutor:
     """
     Wrapper class to incorporate all callbacks implemented
         - TensorboardLogging
@@ -139,10 +140,10 @@ class CallbackExecuter:
             callback_paramaters: params dict
                 - tensorboard_logging: boolean flag
                 - model_checkpoint:
-                    - checkpoint_interval
+                    - interval
                 - early_stop:
-                    - stop_patience
-                    - stop_min_delta
+                    - patience
+                    - min_delta
         """
 
         self.log = False

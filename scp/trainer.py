@@ -1,9 +1,13 @@
 import os
+from time import time
+
 import torch
 from torch import nn
+from torch.nn import Module
 from torch.utils.data import DataLoader
-from .callbacks import CallbackExecuter
-from time import time
+from torch.optim import Optimizer
+
+from .callbacks import CallbackExecutor
 from .model import LinearModel
 
 
@@ -14,10 +18,10 @@ class Trainer:
 
     def __init__(self,
                  model: LinearModel,
-                 opt_class=torch.optim.Adam,
+                 opt_class:Optimizer=torch.optim.Adam,
                  lr: float = 1e-3,
                  l2: float = 0,
-                 loss_fn=nn.CrossEntropyLoss(),
+                 loss_fn:Module=nn.CrossEntropyLoss(),
                  callback_params: dict = {},
                  device: str = 'cuda',
                  dirpath: str = '.',
@@ -50,12 +54,12 @@ class Trainer:
         self.callback_params = callback_params
 
     def train_one_epoch(self, dl: DataLoader) -> (float, float):
-        """ training one epoch 
+        """ Trains one epoch 
         
         Args:
             dl: training dataloader
 
-        Return:
+        Returns:
             Train Loss, Train Accuracy
         """
         self.model.train()
@@ -63,8 +67,8 @@ class Trainer:
         hits = 0
         total_samples = 0
         for batch in dl:
-            x, y = [x_.to(self.device)
-                    for x_ in batch[:-1]], batch[-1].to(self.device)
+            x, y = [example.to(self.device)
+                    for example in batch[:-1]], batch[-1].to(self.device)
 
             out = self.model(*x)['cls_output']
             loss = self.loss_fn(out, y)
@@ -84,12 +88,12 @@ class Trainer:
         return total_loss, accuracy
 
     def validation(self, dl: DataLoader) -> (float, float):
-        """ validation after training one epoch 
+        """ Validates after training one epoch 
         
         Args:
             dl: validation dataloader
 
-        Return:
+        Returns:
             Validation Loss, Validation Accuracy
         """
         self.model.eval()
@@ -98,8 +102,8 @@ class Trainer:
         total_samples = 0
         for batch in dl:
             with torch.no_grad():
-                x, y = [x_.to(self.device)
-                        for x_ in batch[:-1]], batch[-1].to(self.device)
+                x, y = [example.to(self.device)
+                        for example in batch[:-1]], batch[-1].to(self.device)
                 out = self.model(*x)['cls_output']
                 loss = self.loss_fn(out, y)
 
@@ -114,7 +118,7 @@ class Trainer:
         return total_loss, accuracy
 
     def train(self, epochs: int, train_dl: DataLoader, val_dl: DataLoader):
-        """training function
+        """Trains the model.
 
         Args:
             epochs: max number of epochs to train model on
@@ -122,7 +126,7 @@ class Trainer:
             val_dl: validation dataloader
         """
 
-        callback = CallbackExecuter(dirpath=self.dirpath,
+        callback_executor = CallbackExecutor(dirpath=self.dirpath,
                                     callback_paramaters=self.callback_params)
 
         for epoch in range(epochs):
@@ -139,7 +143,7 @@ class Trainer:
             ep_end = time()
             print(f'Time: {ep_end-ep_start}\n', flush=True)
 
-            if callback.execute(self.model.state_dict(), self.opt.state_dict(),
+            if callback_executor.execute(self.model.state_dict(), self.opt.state_dict(),
                                 train_loss, train_acc, val_loss, val_acc):
                 break
 

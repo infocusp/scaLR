@@ -1,4 +1,6 @@
 import os
+from typing import Optional
+
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
@@ -6,6 +8,7 @@ from torch import nn
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
+
 from .model import LinearModel
 
 
@@ -28,7 +31,7 @@ def predictions(model: LinearModel,
 
     for batch in test_dl:
         with torch.no_grad():
-            x, y = [x_.to(device) for x_ in batch[:-1]], batch[-1].to(device)
+            x, y = [example.to(device) for example in batch[:-1]], batch[-1].to(device)
             out = model(*x)['cls_output']
 
         test_labels += y.tolist()
@@ -44,12 +47,12 @@ def accuracy(test_labels: list[int], pred_labels: list[int]) -> float:
     return accuracy_score(test_labels, pred_labels)
 
 
-def report(test_labels: list[int],
+def generate_and_save_classification_report(test_labels: list[int],
            pred_labels: list[int],
            filepath: str,
-           mapping: dict = None):
+           mapping: Optional[dict] = None):
     """
-    Function to generate a classifcaiton report from a from the predicted data
+    Function to generate a classificaton report from the predicted data
     at filepath as classification_report.csv
 
     Args:
@@ -57,11 +60,14 @@ def report(test_labels: list[int],
         pred_labels: predicted labels from trained model
         filepath: path to store classification_report.csv
         mapping[optional]: mapping of label_id to true label_names (id2label)
+
+    Returns:
+        a Pandas DataFrame with the classification report
     """
 
     if mapping is not None:
-        test_labels = list(map(lambda x: mapping[x], test_labels))
-        pred_labels = list(map(lambda x: mapping[x], pred_labels))
+        test_labels = [mapping[x] for x in test_labels]
+        pred_labels = [mapping[x] for x in pred_labels]
 
     report = pd.DataFrame(
         classification_report(test_labels, pred_labels,
@@ -69,6 +75,7 @@ def report(test_labels: list[int],
     print(report)
     report.to_csv(f'{filepath}/classification_report.csv')
 
+    return report
 
 # Incomplete
 def conf_matrix(test_labels: list[int], pred_labels: list[int]):
@@ -81,7 +88,7 @@ def conf_matrix(test_labels: list[int], pred_labels: list[int]):
 # TODO: change extraction method from weights maybe?
 def get_top_n_genes(model: LinearModel,
                     n: int = 50,
-                    genes: list[str] = None) -> (list[int], list[str]):
+                    genes: Optional[list[str]] = None) -> (list[int], list[str]):
     """
     Function to get top_n genes and their indices using model weights.
 
@@ -102,16 +109,16 @@ def get_top_n_genes(model: LinearModel,
 
 
 def top_n_heatmap(model: LinearModel,
-                  filepath: str,
+                  dirpath: str,
                   classes: list[str],
                   n: int = 50,
-                  genes: list[str] = None) -> (list[int], list[str]):
+                  genes: Optional[list[str]] = None) -> (list[int], list[str]):
     """
     Generate a heatmap for top_n genes across all classes.
 
     Args:
         model: trained model to extract weights from
-        filepath: path to store the heatmap image
+        dirpath: path to store the heatmap image
         classes: list of name of classes
         n: number of top_genes to extract
         genes: gene_name list
@@ -130,5 +137,5 @@ def top_n_heatmap(model: LinearModel,
                 vmin=-1e-2,
                 vmax=1e-2)
 
-    plt.savefig(f"{filepath}/heatmap.png")
+    plt.savefig(f"{dirpath}/heatmap.png")
     return top_n_indices, top_n_genes

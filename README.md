@@ -5,14 +5,23 @@ A complete end2end pipeline and tool for scRNA-seq tabular data (cell X genes) t
 ## Library Structure
 
 - scp
-    - callbacks: EarlyStopping, ModelCheckpoints, TensorbaordLogging
-    - model: Linear
-    - utils: file_utils, config, split_data
-    - data: preprocessing, dataloaders
-    - feature selection: nn_feature_chunking, skl_feature_chunking
-    - tokenizer: GeneVocab, tokenizer, padding
-    - Trainer.py: training
-    - evaluation.py: prediction, accuracy, report
+    - callbacks: CallbackExecutor, EarlyStopping, ModelCheckpoints, TensorbaordLogging
+    - model:
+        - LinearModel: torch deep neural network model class
+    - data:
+        - split_data: function to obtain and store train/test/val splits 
+    - utils:
+        - file_utils: functions to read and write - anndata, json and yaml files
+        - config: function to load config
+    - dataloader:
+        - simple_dataloader: simple dataloader and generator to prepare batched data to pass through model
+    - feature selection:
+        - nn_feature_chunking: feature chunking algorithm to generate top features list
+    - trainer: Trainer class handles training and validation of model
+    - evaluation:
+        - predictions: generate predictions of trained model on data
+        - accuracy: generate accuracy of predictions
+        - generate_and_save_classification_report: to generate a classwise report containing precision, recall, f1-score metrics and storing the table
 
 ## Data
 - Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only)
@@ -28,6 +37,7 @@ There are 3 independent parts in the pipeline:
 3. Evaluation: The trained model is evaluated using precision, recall, f1-score, and accuracy scores. Then various visualizations like feature rank plots (genes) and heatmaps are prepared.
 
 ## How to use
-1. Modify the configuration and each stage of the pipeline in [config.yml](config.yml) as per your requirements. Simply omit / comment out stages of the pipeline you do not wish to run.
-2. use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), and an optional flag to log all parts of the pipelines (`-l | --log`).
-3. `python pipeline.py --config /path/to/config --log` to run the pipeline
+1. run `pip install -r requirements.txt`
+2. Modify the configuration and each stage of the pipeline in [config.yml](config.yml) as per your requirements. Simply omit / comment out stages of the pipeline you do not wish to run.
+3. use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), and an optional flag to log all parts of the pipelines (`-l | --log`).
+4. `python pipeline.py --config /path/to/config --log` to run the pipeline

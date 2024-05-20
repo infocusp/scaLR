@@ -1,16 +1,19 @@
+import os
+import json
+from typing import Callable
+
 import anndata as ad
 from anndata import AnnData
 from sklearn.model_selection import GroupShuffleSplit
-import json
-from .file import write_data, dump_json, read_data
-import os
+
+from ..utils import write_data, dump_json, read_data
 
 
-def generate_split(datapath: str,
+def _generate_train_val_test_split_indices(datapath: str,
                    split_ratio: list[float],
                    target: str,
                    stratify: str = None,
-                   path: str = None) -> dict:
+                   dirpath: str = None) -> dict:
     """Generate a list of indices for train/val/test split of whole dataset
 
     Args:
@@ -18,7 +21,7 @@ def generate_split(datapath: str,
         split_ratio: ratio to split number of samples in
         target: target for classification present in `obs`.
         stratify: optional parameter to stratify the split upon parameter.
-        path: path to store generated split in json format/
+        dirpath: dirpath to store generated split in json format
     
     Returns:
         dict with 'train', 'test' and 'val' indices list.
@@ -81,30 +84,37 @@ def generate_split(datapath: str,
         'test': true_test_inds
     }
 
-    if path is not None:
-        dump_json(data_split, path)
+    if dirpath is not None:
+        dump_json(data_split, dirpath+'/data_split.json')
 
     return data_split
 
+def _generate_metadata_indinces(adata:AnnData, target: str) -> dict:
+    """generate splits for DEG"""
+    return
 
 def split_data(datapath: str,
                data_split: dict,
                dirpath: str,
-               chunksize: int = None):
+               chunksize: int = None,
+               process_fn: Callable = None,
+               **kwargs):
     """Split the full data based upon generated indices lists and write it to disk.
     
     Args:
         datapath: path to full dataset
-        data_split: dict containing list of indices for train/val/test splits
+        data_split: dict containing list of indices for each splits
         dirpath: path to store new split data.
-        chunksize: number of samples to store in one chunk, after splitting the data.
-
+        chunksize: numberadata of samples to store in one chunk, after splitting the data.
+        process_fn: a function which takes in data chunk to perform operations on it like Normalization
+        **kwargs: keyword arguments to pass to `process` function besides adata
     """
 
-    dstype = ['train', 'val', 'test']
-    for typ in dstype:
+    for typ in data_split.keys():
         if chunksize is None:
-            adata = read_data(datapath)
+            adata = read_data(datapath).to_memory()
+            if process_fn is not None:
+                adata = process_fn(adata, **kwargs)
             write_data(adata[data_split[typ]], f'{dirpath}/{typ}.h5ad')
         else:
             os.makedirs(f'{dirpath}/{typ}/', exist_ok=True)
@@ -116,4 +126,42 @@ def split_data(datapath: str,
                 adata = adata[data_split[typ][start:start + chunksize_]]
                 if not isinstance(adata, AnnData):
                     adata = adata.to_adata()
+                adata = process_fn(adata.to_memory(), **kwargs)
                 write_data(adata, f'{dirpath}/{typ}/{i}.h5ad')
+
+
+def generate_train_val_test_split(datapath: str,
+                   split_ratio: list[float],
+                   target: str,
+                   stratify: str = None,
+                   dirpath: str = None,
+                   chunksize: int = None,
+                   process_fn: Callable = None,
+                   **kwargs):
+    """Generate a list of indices for train/val/test split of whole dataset and writes new data splits
+    to disk.
+
+    Args:
+        datapath: path to full data
+        split_ratio: ratio to split number of samples in
+        target: target for classification present in `obs`.
+        stratify: optional parameter to stratify the split upon parameter.
+        dirpath: dirpath to store generated split in json format
+        chunksize: number of samples to store in one chunk, after splitting the data.
+    
+    Returns:
+        dict with 'train', 'test' and 'val' indices list.
+    
+    """
+
+    data_split = _generate_train_val_test_split_indices(datapath, split_ratio, target, stratify, dirpath)
+
+    split_data(datapath, data_split, dirpath, chunksize, process_fn, **kwargs)
+    
+
+
+
+
+
+
+

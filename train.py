@@ -1,11 +1,13 @@
 import os
 import sys
 import argparse
+
 import torch
 from torch import nn
 import numpy as np
+
 from scp.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
-from scp.data import simple_dataloader
+from scp.dataloader import simple_dataloader
 from scp.model import LinearModel
 from scp import Trainer
 
@@ -19,17 +21,14 @@ def train(config, log=True):
     exp_name = config['exp_name']
     exp_run = config['exp_run']
 
-    # create experiment directory
     filepath = f'{filepath}/{exp_name}_{exp_run}'
     os.makedirs(f'{filepath}/', exist_ok=True)
 
-    # Data
     data_config = config['data']
     target = data_config['target']
     train_datapath = data_config['train_datapath']
     val_datapath = data_config['val_datapath']
 
-    # Training
     train_config = config['training']
     optimizer = train_config['opt']
     lossfunc = train_config['loss']
@@ -39,7 +38,6 @@ def train(config, log=True):
     epochs = train_config['epochs']
     callbacks = train_config['callbacks']
 
-    # Model params
     resume_from_checkpoint = config['model']['resume_from_checkpoint']
     if resume_from_checkpoint:
         model_checkpoint = config['model']['start_checkpoint']
@@ -57,23 +55,21 @@ def train(config, log=True):
     else:
         config['evaluation'] = {'model_checkpoint': f'{filepath}/best_model'}
 
-    # logging
     if log:
         sys.stdout = open(f'{filepath}/train.log', 'w')
 
-    # loading data
     train_data = read_data(train_datapath)
     val_data = read_data(val_datapath)
 
     # Create mappings for targets to be used by testing
     label_mappings = {}
     label_mappings[target] = {}
-    id2label = train_data.obs[target].cat.categories.tolist()
+    id2label = train_data.obs[target].astype('category').cat.categories.tolist()
     label2id = {id2label[i]: i for i in range(len(id2label))}
     label_mappings[target]['id2label'] = id2label
     label_mappings[target]['label2id'] = label2id
 
-    # Linear model creation and dataloaders
+    # model creation and dataloaders
     if model_type == 'linear':
         # features = model_hp['layers']
         # dropout = model_hp['dropout']

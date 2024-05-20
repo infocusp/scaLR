@@ -1,12 +1,15 @@
 import os
 import sys
 import argparse
+
 import numpy as np
+import pandas as pd
 from anndata import AnnData
-from scp.utils import load_config, read_data, read_yaml, dump_yaml, dump_json, write_data
-from scp.feature_selection import skl_feature_chunking, nn_feature_chunking
-from scp.model import LinearModel
 from sklearn.linear_model import LogisticRegression, SGDClassifier
+
+from scp.utils import load_config, read_data, read_yaml, dump_yaml, dump_json, write_data
+from scp.feature_selection import feature_chunking, extract_top_k_features
+from scp.model import LinearModel
 
 
 def extract_features(config, log=True):
@@ -16,63 +19,54 @@ def extract_features(config, log=True):
     exp_run = config['exp_run']
     device = config['device']
 
-    # create experiment directory
     filepath = f'{filepath}/{exp_name}_{exp_run}'
     os.makedirs(f'{filepath}/feature_selection', exist_ok=True)
 
-    # Data
     data_config = config['data']
     target = data_config['target']
     train_datapath = data_config['train_datapath']
     val_datapath = data_config['val_datapath']
     test_datapath = data_config['test_datapath']
 
-    # logging
     if log:
         sys.stdout = open(
             f'{filepath}/feature_selection/feature_extraction.log', 'w')
 
-    # loading data
     train_data = read_data(train_datapath)
     val_data = read_data(val_datapath)
     test_data = read_data(test_datapath)
 
-    # Feature selection configs
     config_fs = config['feature_selection']
-    chunksize = config_fs['chunksize']
+    weight_matrix=config_fs.get('weight_matrix', None)
     k = config_fs['top_features_stats']['k']
     aggregation_strategy = config_fs['top_features_stats'][
         'aggregation_strategy']
-    model_config = config_fs['model']
 
-    if model_config['name'] == 'nn':
-        top_features = nn_feature_chunking(
+    if weight_matrix is None:
+        chunksize = config_fs['chunksize']
+        model_config = config_fs['model']
+    
+        feature_class_weights = feature_chunking(
             train_data,
             val_data,
             target,
             model_config,
             chunksize,
-            k,
-            aggregation_strategy,
             dirpath=f'{filepath}/feature_selection',
             device=device)
     else:
-        top_features = skl_feature_chunking(
-            train_data,
-            target,
-            model_config,
-            chunksize,
-            k,
-            aggregation_strategy,
-            dirpath=f'{filepath}/feature_selection')
+        feature_class_weights = pd.read_csv(weight_matrix, index_col=0)
 
-    # Extract features to make a subset
-
+    top_features = extract_top_k_features(feature_class_weights, 
+                                          k, aggregation_strategy,
+                                          dirpath=f'{filepath}/feature_selection')
+    
     top_features_indices = sorted([
         train_data.var_names.tolist().index(feature)
         for feature in top_features
     ])
 
+    # Storing the Data
     if config_fs['store_on_disk']:
         if data_config['chunksize'] is None:
             train_data[:, top_features_indices].write(
@@ -118,7 +112,7 @@ def extract_features(config, log=True):
         config['data']['val_datapath'] = f'{filepath}/feature_selection/val'
         config['data']['test_datapath'] = f'{filepath}/feature_selection/test'
 
-        if chunksize is None:
+        if data_config['chunksize'] is None:
             config['data']['train_datapath'] += '.h5ad'
             config['data']['val_datapath'] += '.h5ad'
             config['data']['test_datapath'] += '.h5ad'
@@ -137,7 +131,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # load config file
     config = load_config(args.config)
 
     extract_features(config, args.log)

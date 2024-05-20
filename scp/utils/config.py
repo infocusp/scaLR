@@ -1,5 +1,6 @@
-from .file import read_yaml
 from copy import deepcopy
+
+from .file import read_yaml
 
 # TRANSFORMER MODEL CONFIGS ADDITIONS
 default_transformer = {
@@ -48,7 +49,7 @@ default_train_config = {
     'epochs': 1,
     'callbacks': {
         'model_checkpoint': {
-            'checkpoint_interval': 0
+            'interval': 0
         }
     }
 }
@@ -67,6 +68,7 @@ default_config_ = {
     'exp_run': 0,
     'data': {
         'chunksize': None,
+        'normalize_data': False
     }
 }
 
