@@ -103,14 +103,17 @@ def split_data(datapath: str,
     
     Args:
         datapath: path to full dataset
-        data_split: dict containing list of indices for each splits
+        data_split: dict containing list of indices for each split, `-1` as value indicates all indices
         dirpath: path to store new split data.
         chunksize: numberadata of samples to store in one chunk, after splitting the data.
         process_fn: a function which takes in data chunk to perform operations on it like Normalization
         **kwargs: keyword arguments to pass to `process` function besides adata
     """
-
+    total_samples = len(read_data(datapath))
+    
     for typ in data_split.keys():
+        if data_split[typ] == -1:
+            data_split[typ] = list(range(total_samples))
         if chunksize is None:
             adata = read_data(datapath).to_memory()
             if process_fn is not None:
@@ -118,15 +121,17 @@ def split_data(datapath: str,
             write_data(adata[data_split[typ]], f'{dirpath}/{typ}.h5ad')
         else:
             os.makedirs(f'{dirpath}/{typ}/', exist_ok=True)
-            chunksize_ = len(data_split[typ]) - 1 if chunksize >= len(
+            curr_chunksize = len(data_split[typ]) - 1 if chunksize >= len(
                 data_split[typ]) else chunksize
             for i, (start) in enumerate(
-                    range(0, len(data_split[typ]), chunksize_)):
+                    range(0, len(data_split[typ]), curr_chunksize)):
                 adata = read_data(datapath)
-                adata = adata[data_split[typ][start:start + chunksize_]]
+                adata = adata[data_split[typ][start:start + curr_chunksize]]
                 if not isinstance(adata, AnnData):
                     adata = adata.to_adata()
-                adata = process_fn(adata.to_memory(), **kwargs)
+                adata = adata.to_memory()
+                if process_fn is not None:
+                    adata = process_fn(adata, **kwargs)
                 write_data(adata, f'{dirpath}/{typ}/{i}.h5ad')
 
 

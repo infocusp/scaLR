@@ -5,6 +5,7 @@
 scp_test*
 
 testing.ipynb
+testing.py
 
 nohup.out
 .gitignore.save

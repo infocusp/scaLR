@@ -22,7 +22,7 @@ class Trainer:
                  lr: float = 1e-3,
                  l2: float = 0,
                  loss_fn:Module=nn.CrossEntropyLoss(),
-                 callback_params: dict = {},
+                 callback_params: dict = None,
                  device: str = 'cuda',
                  dirpath: str = '.',
                  model_checkpoint_path: str = None):
@@ -51,7 +51,7 @@ class Trainer:
 
         self.loss_fn = loss_fn
         self.dirpath = dirpath
-        self.callback_params = callback_params
+        self.callback_params = callback_params if callback_params is not None else {}
 
     def train_one_epoch(self, dl: DataLoader) -> (float, float):
         """ Trains one epoch 

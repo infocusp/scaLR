@@ -17,12 +17,12 @@ def train(config, log=True):
     print('GPU: ', torch.cuda.is_available())
 
     device = config['device']
-    filepath = config['filepath']
+    dirpath = config['dirpath']
     exp_name = config['exp_name']
     exp_run = config['exp_run']
 
-    filepath = f'{filepath}/{exp_name}_{exp_run}'
-    os.makedirs(f'{filepath}/', exist_ok=True)
+    dirpath = f'{dirpath}/{exp_name}_{exp_run}'
+    os.makedirs(f'{dirpath}/', exist_ok=True)
 
     data_config = config['data']
     target = data_config['target']
@@ -51,12 +51,13 @@ def train(config, log=True):
     model_hp = config['model']['hyperparameters']
 
     if 'evaluation' in config:
-        config['evaluation']['model_checkpoint'] = f'{filepath}/best_model'
+        config['evaluation']['model_checkpoint'] = f'{dirpath}/best_model'
     else:
-        config['evaluation'] = {'model_checkpoint': f'{filepath}/best_model'}
+        config['evaluation'] = {'model_checkpoint': f'{dirpath}/best_model'}
 
+    # TODO: add absl.logging functionality
     if log:
-        sys.stdout = open(f'{filepath}/train.log', 'w')
+        sys.stdout = open(f'{dirpath}/train.log', 'w')
 
     train_data = read_data(train_datapath)
     val_data = read_data(val_datapath)
@@ -79,6 +80,8 @@ def train(config, log=True):
                                      label_mappings)
         val_dl = simple_dataloader(val_data, target, batch_size,
                                    label_mappings)
+    else:
+        raise NotImplementedError('Only `linear` available as options!')
 
     # Training
 
@@ -87,7 +90,7 @@ def train(config, log=True):
     elif optimizer == 'sgd':
         opt = torch.optim.SGD
     else:
-        raise NotImplementedError('Only adam and sgd available as options!')
+        raise NotImplementedError('Only `adam` and `sgd` available as options!')
 
     if lossfunc == 'log':
         loss_fn = nn.CrossEntropyLoss()
@@ -100,15 +103,15 @@ def train(config, log=True):
         loss_fn = nn.CrossEntropyLoss(weight=weights.to(device))
     else:
         raise NotImplementedError(
-            'Only log and weighted_log available as options!')
+            'Only `log` and `weighted_log` available as options!')
 
-    trainer = Trainer(model, opt, lr, l2, loss_fn, callbacks, device, filepath,
+    trainer = Trainer(model, opt, lr, l2, loss_fn, callbacks, device, dirpath,
                       model_checkpoint)
     trainer.train(epochs, train_dl, val_dl)
 
-    dump_yaml(config['model'], f'{filepath}/best_model/config.yml')
-    dump_json(label_mappings, f'{filepath}/best_model/label_mappings.json')
-    dump_yaml(config, f'{filepath}/config.yml')
+    dump_yaml(config['model'], f'{dirpath}/best_model/config.yml')
+    dump_json(label_mappings, f'{dirpath}/best_model/label_mappings.json')
+    dump_yaml(config, f'{dirpath}/config.yml')
     return config
 
 

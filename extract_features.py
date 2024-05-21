@@ -14,13 +14,13 @@ from scp.model import LinearModel
 
 def extract_features(config, log=True):
 
-    filepath = config['filepath']
+    dirpath = config['dirpath']
     exp_name = config['exp_name']
     exp_run = config['exp_run']
     device = config['device']
 
-    filepath = f'{filepath}/{exp_name}_{exp_run}'
-    os.makedirs(f'{filepath}/feature_selection', exist_ok=True)
+    dirpath = f'{dirpath}/{exp_name}_{exp_run}'
+    os.makedirs(f'{dirpath}/feature_selection', exist_ok=True)
 
     data_config = config['data']
     target = data_config['target']
@@ -28,9 +28,10 @@ def extract_features(config, log=True):
     val_datapath = data_config['val_datapath']
     test_datapath = data_config['test_datapath']
 
+    # TODO: add absl.logging functionality
     if log:
         sys.stdout = open(
-            f'{filepath}/feature_selection/feature_extraction.log', 'w')
+            f'{dirpath}/feature_selection/feature_extraction.log', 'w')
 
     train_data = read_data(train_datapath)
     val_data = read_data(val_datapath)
@@ -52,14 +53,14 @@ def extract_features(config, log=True):
             target,
             model_config,
             chunksize,
-            dirpath=f'{filepath}/feature_selection',
+            dirpath=f'{dirpath}/feature_selection',
             device=device)
     else:
         feature_class_weights = pd.read_csv(weight_matrix, index_col=0)
 
     top_features = extract_top_k_features(feature_class_weights, 
                                           k, aggregation_strategy,
-                                          dirpath=f'{filepath}/feature_selection')
+                                          dirpath=f'{dirpath}/feature_selection')
     
     top_features_indices = sorted([
         train_data.var_names.tolist().index(feature)
@@ -70,14 +71,14 @@ def extract_features(config, log=True):
     if config_fs['store_on_disk']:
         if data_config['chunksize'] is None:
             train_data[:, top_features_indices].write(
-                f'{filepath}/feature_selection/train.h5ad', compression='gzip')
+                f'{dirpath}/feature_selection/train.h5ad', compression='gzip')
             val_data[:, top_features_indices].write(
-                f'{filepath}/feature_selection/val.h5ad', compression='gzip')
+                f'{dirpath}/feature_selection/val.h5ad', compression='gzip')
             test_data[:, top_features_indices].write(
-                f'{filepath}/feature_selection/test.h5ad', compression='gzip')
+                f'{dirpath}/feature_selection/test.h5ad', compression='gzip')
         else:
             chunksize = data_config['chunksize']
-            os.makedirs(f'{filepath}/feature_selection/train/', exist_ok=True)
+            os.makedirs(f'{dirpath}/feature_selection/train/', exist_ok=True)
             for i, (start) in enumerate(range(0, len(train_data), chunksize)):
                 train_data = read_data(train_datapath)
                 train_data = train_data[start:start + chunksize,
@@ -85,9 +86,9 @@ def extract_features(config, log=True):
                 if not isinstance(train_data, AnnData):
                     train_data = train_data.to_adata()
                 write_data(train_data,
-                           f'{filepath}/feature_selection/train/{i}.h5ad')
+                           f'{dirpath}/feature_selection/train/{i}.h5ad')
 
-            os.makedirs(f'{filepath}/feature_selection/val/', exist_ok=True)
+            os.makedirs(f'{dirpath}/feature_selection/val/', exist_ok=True)
             for i, (start) in enumerate(range(0, len(val_data), chunksize)):
                 val_data = read_data(val_datapath)
                 val_data = val_data[start:start + chunksize,
@@ -95,9 +96,9 @@ def extract_features(config, log=True):
                 if not isinstance(val_data, AnnData):
                     val_data = val_data.to_adata()
                 write_data(val_data,
-                           f'{filepath}/feature_selection/val/{i}.h5ad')
+                           f'{dirpath}/feature_selection/val/{i}.h5ad')
 
-            os.makedirs(f'{filepath}/feature_selection/test/', exist_ok=True)
+            os.makedirs(f'{dirpath}/feature_selection/test/', exist_ok=True)
             for i, (start) in enumerate(range(0, len(test_data), chunksize)):
                 test_data = read_data(test_datapath)
                 test_data = test_data[start:start + chunksize,
@@ -105,19 +106,19 @@ def extract_features(config, log=True):
                 if not isinstance(test_data, AnnData):
                     test_data = test_data.to_adata()
                 write_data(test_data,
-                           f'{filepath}/feature_selection/test/{i}.h5ad')
+                           f'{dirpath}/feature_selection/test/{i}.h5ad')
 
         config['data'][
-            'train_datapath'] = f'{filepath}/feature_selection/train'
-        config['data']['val_datapath'] = f'{filepath}/feature_selection/val'
-        config['data']['test_datapath'] = f'{filepath}/feature_selection/test'
+            'train_datapath'] = f'{dirpath}/feature_selection/train'
+        config['data']['val_datapath'] = f'{dirpath}/feature_selection/val'
+        config['data']['test_datapath'] = f'{dirpath}/feature_selection/test'
 
         if data_config['chunksize'] is None:
             config['data']['train_datapath'] += '.h5ad'
             config['data']['val_datapath'] += '.h5ad'
             config['data']['test_datapath'] += '.h5ad'
 
-    dump_yaml(config, f'{filepath}/config.yml')
+    dump_yaml(config, f'{dirpath}/config.yml')
     return config
 
 

@@ -5,8 +5,8 @@ import anndata as ad
 from anndata import AnnData
 from anndata.experimental import AnnCollection
 
-def _normalize_subdata(adata: AnnData, scaling_factor: float = 1.0):
-    """Normalize each sample in subset of data
+def normalize_data(adata: AnnData, scaling_factor: float = 1.0):
+    """Normalize each sample in data
 
     Args:
         adata: AnnData object to normalize
@@ -15,13 +15,6 @@ def _normalize_subdata(adata: AnnData, scaling_factor: float = 1.0):
     Returns:
         Normalized AnnData
     """
-    adata.X = (adata.X / (adata.X.sum(axis=1).reshape(len(adata), 1))) * scaling_factor
+    adata.X /= (adata.X.sum(axis=1).reshape(len(adata), 1))
+    adata.X *= scaling_factor   
     return adata
-
-def normalize_data(adata: Union[AnnData, AnnCollection], chunksize:int = None, scaling_factor: float = 1.0):
-    
-    # for start in range(0, len(adata), chunksize):
-    if chunksize is None:
-        return _normalize_subdata(adata=adata, scaling_factor=scaling_factor)
-        
-    

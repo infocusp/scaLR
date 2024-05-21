@@ -53,7 +53,11 @@ def read_data(filepath:str, backed:str='r') -> Union[AnnData, AnnCollection]:
     return data
 
 
-def write_data(adata, filepath:str, chunksize=None):
+def write_data(adata: AnnData, filepath:str, chunksize:int = None):
     """This function writes the anndata."""
     if chunksize is None:
         adata.write(filepath, compression="gzip")
+    else:
+        raise NotImplementedError('Only `chunksize=None` available as options!')
+    # TODO:
+    # implement chunkwise writing of anndata to handle chunksize not None

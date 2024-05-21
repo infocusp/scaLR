@@ -12,7 +12,7 @@ import seaborn as sns
 from .model import LinearModel
 
 
-def predictions(model: LinearModel,
+def get_predictions(model: LinearModel,
                 test_dl: DataLoader,
                 device: str = 'cpu') -> (list[int], list[int]):
     """
@@ -40,12 +40,9 @@ def predictions(model: LinearModel,
     return test_labels, pred_labels
 
 
-def accuracy(test_labels: list[int], pred_labels: list[int]) -> float:
-    """
-    Function to return accuracy score of predicted labels as compared to true labels
-    """
-    return accuracy_score(test_labels, pred_labels)
-
+# Function to return accuracy score of predicted labels as compared to true labels
+# Wrapper for sklearn accuracy_score function
+accuracy = accuracy_score
 
 def generate_and_save_classification_report(test_labels: list[int],
            pred_labels: list[int],
@@ -77,11 +74,23 @@ def generate_and_save_classification_report(test_labels: list[int],
 
     return report
 
-# Incomplete
-def conf_matrix(test_labels: list[int], pred_labels: list[int]):
+def conf_matrix(test_labels: list[int], pred_labels: list[int], mapping: Optional[dict] = None):
     """
     Function to return confusion matrix of predicted labels as compared to true labels
+
+    Args:
+        test_labels: true labels from test set
+        pred_labels: predicted labels from trained model
+        mapping[optional]: mapping of label_id to true label_names (id2label)
+
+    Returns:
+        numpy array of shape (n_classes, n_classes)
     """
+
+    if mapping is not None:
+        test_labels = [mapping[x] for x in test_labels]
+        pred_labels = [mapping[x] for x in pred_labels]
+        
     return confusion_matrix(test_labels, pred_labels)
 
 

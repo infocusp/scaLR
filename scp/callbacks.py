@@ -13,7 +13,7 @@ class TensorboardLogger:
         writer: object that writes to tensorboard.
     """
 
-    def __init__(self, dirpath: str):
+    def __init__(self, dirpath: str = '.'):
         """
         Args:
             dirpath: path of directory to store the experiment logs
@@ -124,8 +124,11 @@ class CallbackExecutor:
     """
     Wrapper class to incorporate all callbacks implemented
         - TensorboardLogging
-        - Early Stopping
         - Checkpointing
+        - Early Stopping
+
+    Enabled callbacks are executed with the early stopping callback
+    executed last to return a flag for continuation or stopping of model training
 
     Arguments:
         log: Boolean flag to enable tensorboard logging.

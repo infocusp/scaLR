@@ -2,6 +2,17 @@
 
 A complete end2end pipeline and tool for scRNA-seq tabular data (cell X genes) to perform Classification tasks
 
+## TODO:
+- Logging
+    - module instead of sys.stdout
+    - log the run of pipeline to show in real time what pipeline has done and finished
+- Paths
+    - use `os.path.join` in all paths to make paths platform independent
+    - relative file paths getter and setters from config
+- README
+    - library structure and hierarcy with each module input and outputs
+    - pipeline input and output paths
+
 ## Library Structure
 
 - scp

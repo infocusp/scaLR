@@ -2,10 +2,10 @@
 
 # EXPERIMENT 
 device: 'cuda' # [Optional][cuda/cpu] device to run the deep learning models on
-filepath: '.' # [Required] base file path for all experiments
-exp_name: 'full_ct' # [Required] experiment name
-exp_run: 2 # [Required] experiment run to compare
-# Final experiment directory would be: filepath/{exp_name}_{exp_run}/
+dirpath: '.' # [Required] base directory path for all experiments
+exp_name: 'scp_test_fp' # [Required] experiment name
+exp_run: 0 # [Required] experiment run to compare
+# Final experiment directory would be: dirpath/{exp_name}_{exp_run}/
 
 # DATA
 data:
@@ -14,59 +14,54 @@ data:
     # [null] for storing data in one file.
     
     # [Optional] To split full anndata dataset file into train/val/test sets
-    # split_data:
-    #     split_ratio: [7, 1, 2.5] # [Required] ratio to split full data => train : val : test
-    #     stratify: 'donor_id' # [Optional][column in metadata / null] split stratified on parameter in metadata
+    split_data:
+        split_ratio: [7, 1, 2.5] # [Required] ratio to split full data => train : val : test
+        stratify: 'donor_id' # [Optional][column in metadata / null] split stratified on parameter in metadata
 
     # [Optional] To perform sample-wise normalization of expression values
-    normalize_data: False
+    normalize_data: True
 
     full_datapath: '/home/biocusp/data/scp_ad/full.h5ad' # full data path, will be split into train, test, and val sets. [Required] for splitting of data
 
     # Note if split_data is given, following split paths will be overwritten
     # if spilt_data not given, paths are [Required]
-    
     train_datapath: '/home/biocusp/data/scp_ad/train.h5ad' # training data path
     val_datapath: '/home/biocusp/data/scp_ad/val.h5ad' # validation data path
     test_datapath: '/home/biocusp/data/scp_ad/test.h5ad' # testing data path
 
-    # test_datapath: ./scp_test_st_ft_0/feature_selection/test.h5ad
-    # train_datapath: ./scp_test_st_ft_0/feature_selection/train.h5ad
-    # val_datapath: ./scp_test_st_ft_0/feature_selection/val.h5ad
-    
-    target: Cell_State # [Required] target to perform classification on. Must be present as a column_name in adata.obs
+    target: Cell_Type # [Required] target to perform classification on. Must be present as a column_name in adata.obs
 
 # Feature selection technique
-# feature_selection:
+feature_selection:
 
-#     # [Optional] path to weight matrix containing weights for all features across all classes
-#     # If path specified, feature importance algorithm will not work, and directly use weights to perform selection
-#     # weight_matrix: 'full_test_0/feature_selection/feature_class_weights.csv'
+    # [Optional] path to weight matrix containing weights for all features across all classes
+    # If path specified, feature importance algorithm will not work, and directly use weights to perform selection
+    # weight_matrix: 'full_test_0/feature_selection/feature_class_weights.csv'
     
-#     chunksize: 2000
-#     # [Required] chunks of features to train the model on iteratively
+    chunksize: 5000
+    # [Required] chunks of features to train the model on iteratively
     
-#     method_type: feature_chunk # Only method availble now
+    method_type: feature_chunk # Only method availble now
 
-#     # [Required] [name: logistic_classifier/nn]
-#     # logistic regression: keyword args of logistic regression classifier of sklearn
-#     #                      can be passes in params
-#     # nn: params are optional, can include epochs, batch_size, lr- learning rate, l2- L2 weight penalty
-#     model:
-#       name: nn
-#       params:
-#           epochs: 1
+    # [Required] [name: logistic_classifier/nn]
+    # logistic regression: keyword args of logistic regression classifier of sklearn
+    #                      can be passes in params
+    # nn: params are optional, can include epochs, batch_size, lr- learning rate, l2- L2 weight penalty
+    model:
+      name: nn
+      params:
+          epochs: 1
 
-#     # [Required]
-#     # k: number of top features to extract
-#     # aggregation_strategy: stratergies to obtain top features. only mean implemented now
-#     top_features_stats:
-#         k: 3000
-#         aggregation_strategy: mean # [Required][mean/class weighted density/top (k/n_classes) per class]
+    # [Required]
+    # k: number of top features to extract
+    # aggregation_strategy: stratergies to obtain top features. only mean implemented now
+    top_features_stats:
+        k: 3000
+        aggregation_strategy: mean # [Required][mean/class weighted density/top (k/n_classes) per class]
 
-#     # Will store extracted features subset on disk
-#     # the storage will be according to data=>chunksize parameter
-#     store_on_disk: True
+    # Will store extracted features subset on disk
+    # the storage will be according to data=>chunksize parameter
+    store_on_disk: True
 
 # MODEL
 # DL model to train [Required]
@@ -78,7 +73,7 @@ data:
 model: 
     type: 'linear'
     hyperparameters:
-        layers: [3500, 16]
+        layers: [3000, 6]
         dropout: 0
         weights_init_zero: False
     start_checkpoint: null
@@ -101,11 +96,11 @@ training:
     batch_size: 5000
     lr: 1.0e-3
     l2: 0
-    epochs: 100
+    epochs: 1
     callbacks:
         tensorboard_logging: True
         early_stop:
-            patience: 3
+            patience: 4
             min_delta: 1.0e-4
         model_checkpoint:
             interval: 5

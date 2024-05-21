@@ -9,7 +9,7 @@ import numpy as np
 from scp.utils import load_config, read_data, read_yaml, read_json, dump_yaml
 from scp.dataloader import simple_dataloader
 from scp.model import LinearModel
-from scp.evaluation import predictions, accuracy, generate_and_save_classification_report
+from scp.evaluation import get_predictions, accuracy, generate_and_save_classification_report
 from scp import Trainer
 
 
@@ -18,7 +18,7 @@ def evaluate(config, log=True):
     print('GPU: ', torch.cuda.is_available())
 
     device = config['device']
-    filepath = config['filepath']
+    dirpath = config['dirpath']
     exp_name = config['exp_name']
     exp_run = config['exp_run']
 
@@ -31,8 +31,8 @@ def evaluate(config, log=True):
     if 'metrics' not in evaluation_configs:
         return config
 
-    filepath = f'{filepath}/{exp_name}_{exp_run}'
-    os.makedirs(f'{filepath}/results', exist_ok=True)
+    dirpath = f'{dirpath}/{exp_name}_{exp_run}'
+    os.makedirs(f'{dirpath}/results', exist_ok=True)
 
     model_checkpoint = evaluation_configs['model_checkpoint']
     model_ = read_yaml(f'{model_checkpoint}/config.yml')
@@ -40,8 +40,9 @@ def evaluate(config, log=True):
     model_type = model_['type']
     model_hp = model_['hyperparameters']
 
+    # TODO: add absl.logging functionality
     if log:
-        sys.stdout = open(f'{filepath}/results/test.log', 'w')
+        sys.stdout = open(f'{dirpath}/results/test.log', 'w')
 
     test_data = read_data(test_datapath)
 
@@ -59,7 +60,7 @@ def evaluate(config, log=True):
     id2label = label_mappings[target]['id2label']
     metrics = evaluation_configs['metrics']
 
-    test_labels, pred_labels = predictions(model, test_dl, device)
+    test_labels, pred_labels = get_predictions(model, test_dl, device)
 
     if 'accuracy' in metrics:
         print('Accuracy: ', accuracy(test_labels, pred_labels))
@@ -68,10 +69,10 @@ def evaluate(config, log=True):
         print('\nClassification Report:')
         generate_and_save_classification_report(test_labels,
                pred_labels,
-               f'{filepath}/results',
+               f'{dirpath}/results',
                mapping=id2label)
 
-    dump_yaml(config, f'{filepath}/config.yml')
+    dump_yaml(config, f'{dirpath}/config.yml')
     return config
 
 
