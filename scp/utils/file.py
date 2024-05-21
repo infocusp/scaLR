@@ -23,7 +23,7 @@ def read_json(filepath: str) -> dict:
     return config
 
 
-def dump_yaml(config: dict, filepath:str):
+def dump_yaml(config: dict, filepath: str):
     """This function stores config file to filepath"""
     with open(filepath, 'w') as fh:
         config = yaml.dump(config, fh)
@@ -37,7 +37,8 @@ def dump_json(config: dict, filepath: str):
     return
 
 
-def read_data(filepath:str, backed:str='r') -> Union[AnnData, AnnCollection]:
+def read_data(filepath: str,
+              backed: str = 'r') -> Union[AnnData, AnnCollection]:
     """This function reads the anndata in backed `r mode."""
     if filepath.endswith('.h5ad'):
         data = ad.read_h5ad(filepath, backed=backed)
@@ -53,11 +54,12 @@ def read_data(filepath:str, backed:str='r') -> Union[AnnData, AnnCollection]:
     return data
 
 
-def write_data(adata: AnnData, filepath:str, chunksize:int = None):
+def write_data(adata: AnnData, filepath: str, chunksize: int = None):
     """This function writes the anndata."""
     if chunksize is None:
         adata.write(filepath, compression="gzip")
     else:
-        raise NotImplementedError('Only `chunksize=None` available as options!')
+        raise NotImplementedError(
+            'Only `chunksize=None` available as options!')
     # TODO:
     # implement chunkwise writing of anndata to handle chunksize not None

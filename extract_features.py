@@ -38,7 +38,7 @@ def extract_features(config, log=True):
     test_data = read_data(test_datapath)
 
     config_fs = config['feature_selection']
-    weight_matrix=config_fs.get('weight_matrix', None)
+    weight_matrix = config_fs.get('weight_matrix', None)
     k = config_fs['top_features_stats']['k']
     aggregation_strategy = config_fs['top_features_stats'][
         'aggregation_strategy']
@@ -46,7 +46,7 @@ def extract_features(config, log=True):
     if weight_matrix is None:
         chunksize = config_fs['chunksize']
         model_config = config_fs['model']
-    
+
         feature_class_weights = feature_chunking(
             train_data,
             val_data,
@@ -58,10 +58,12 @@ def extract_features(config, log=True):
     else:
         feature_class_weights = pd.read_csv(weight_matrix, index_col=0)
 
-    top_features = extract_top_k_features(feature_class_weights, 
-                                          k, aggregation_strategy,
-                                          dirpath=f'{dirpath}/feature_selection')
-    
+    top_features = extract_top_k_features(
+        feature_class_weights,
+        k,
+        aggregation_strategy,
+        dirpath=f'{dirpath}/feature_selection')
+
     top_features_indices = sorted([
         train_data.var_names.tolist().index(feature)
         for feature in top_features
@@ -108,8 +110,7 @@ def extract_features(config, log=True):
                 write_data(test_data,
                            f'{dirpath}/feature_selection/test/{i}.h5ad')
 
-        config['data'][
-            'train_datapath'] = f'{dirpath}/feature_selection/train'
+        config['data']['train_datapath'] = f'{dirpath}/feature_selection/train'
         config['data']['val_datapath'] = f'{dirpath}/feature_selection/val'
         config['data']['test_datapath'] = f'{dirpath}/feature_selection/test'
 

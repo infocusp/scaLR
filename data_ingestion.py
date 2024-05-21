@@ -6,9 +6,9 @@ import torch
 from torch import nn
 import numpy as np
 
-
 from scp.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
 from scp.data import generate_train_val_test_split, normalize_data, split_data
+
 
 def data_ingestion(config, log=True):
 
@@ -41,23 +41,18 @@ def data_ingestion(config, log=True):
         stratify = split_config.get('stratify', None)
 
         generate_train_val_test_split(full_datapath, split_ratio, target,
-                                    stratify,
-                                    f'{dirpath}/data',
-                                    chunksize,
-                                    process_fn)
+                                      stratify, f'{dirpath}/data', chunksize,
+                                      process_fn)
 
     # Normalize existing splits
     if normalize and 'split_data' not in data_config:
         os.makedirs(f'{dirpath}/data/', exist_ok=True)
-        
+
         chunksize = data_config['chunksize']
-        
-        for typ in ['train','val','test']:
-            split_data(data_config[f'{typ}_datapath'],
-                       {typ:-1},
-                       f'{dirpath}/data/',
-                       chunksize,
-                       process_fn)
+
+        for typ in ['train', 'val', 'test']:
+            split_data(data_config[f'{typ}_datapath'], {typ: -1},
+                       f'{dirpath}/data/', chunksize, process_fn)
 
     # changing dirpath in config
     if normalize or 'split_data' in data_config:
@@ -69,7 +64,7 @@ def data_ingestion(config, log=True):
             config['data']['train_datapath'] += '.h5ad'
             config['data']['val_datapath'] += '.h5ad'
             config['data']['test_datapath'] += '.h5ad'
-    
+
     dump_yaml(config, f'{dirpath}/config.yml')
     return config
 

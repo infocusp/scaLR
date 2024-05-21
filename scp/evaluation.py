@@ -13,8 +13,8 @@ from .model import LinearModel
 
 
 def get_predictions(model: LinearModel,
-                test_dl: DataLoader,
-                device: str = 'cpu') -> (list[int], list[int]):
+                    test_dl: DataLoader,
+                    device: str = 'cpu') -> (list[int], list[int]):
     """
     Function to get classificaton predictions from a model and test_dataloader
 
@@ -31,7 +31,8 @@ def get_predictions(model: LinearModel,
 
     for batch in test_dl:
         with torch.no_grad():
-            x, y = [example.to(device) for example in batch[:-1]], batch[-1].to(device)
+            x, y = [example.to(device)
+                    for example in batch[:-1]], batch[-1].to(device)
             out = model(*x)['cls_output']
 
         test_labels += y.tolist()
@@ -44,10 +45,11 @@ def get_predictions(model: LinearModel,
 # Wrapper for sklearn accuracy_score function
 accuracy = accuracy_score
 
+
 def generate_and_save_classification_report(test_labels: list[int],
-           pred_labels: list[int],
-           filepath: str,
-           mapping: Optional[dict] = None):
+                                            pred_labels: list[int],
+                                            filepath: str,
+                                            mapping: Optional[dict] = None):
     """
     Function to generate a classificaton report from the predicted data
     at filepath as classification_report.csv
@@ -74,7 +76,10 @@ def generate_and_save_classification_report(test_labels: list[int],
 
     return report
 
-def conf_matrix(test_labels: list[int], pred_labels: list[int], mapping: Optional[dict] = None):
+
+def conf_matrix(test_labels: list[int],
+                pred_labels: list[int],
+                mapping: Optional[dict] = None):
     """
     Function to return confusion matrix of predicted labels as compared to true labels
 
@@ -90,14 +95,15 @@ def conf_matrix(test_labels: list[int], pred_labels: list[int], mapping: Optiona
     if mapping is not None:
         test_labels = [mapping[x] for x in test_labels]
         pred_labels = [mapping[x] for x in pred_labels]
-        
+
     return confusion_matrix(test_labels, pred_labels)
 
 
 # TODO: change extraction method from weights maybe?
-def get_top_n_genes(model: LinearModel,
-                    n: int = 50,
-                    genes: Optional[list[str]] = None) -> (list[int], list[str]):
+def get_top_n_genes(
+        model: LinearModel,
+        n: int = 50,
+        genes: Optional[list[str]] = None) -> (list[int], list[str]):
     """
     Function to get top_n genes and their indices using model weights.
 

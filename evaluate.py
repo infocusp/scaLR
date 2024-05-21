@@ -68,9 +68,9 @@ def evaluate(config, log=True):
     if 'report' in metrics:
         print('\nClassification Report:')
         generate_and_save_classification_report(test_labels,
-               pred_labels,
-               f'{dirpath}/results',
-               mapping=id2label)
+                                                pred_labels,
+                                                f'{dirpath}/results',
+                                                mapping=id2label)
 
     dump_yaml(config, f'{dirpath}/config.yml')
     return config

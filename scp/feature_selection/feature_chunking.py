@@ -12,12 +12,12 @@ from ..dataloader import simple_dataloader
 
 
 def feature_chunking(train_data,
-                        val_data,
-                        target: str,
-                        model_config: dict,
-                        chunksize: int,
-                        dirpath: str,
-                        device: str = 'cpu') -> list[str]:
+                     val_data,
+                     target: str,
+                     model_config: dict,
+                     chunksize: int,
+                     dirpath: str,
+                     device: str = 'cpu') -> list[str]:
     """ Feature selection using feature chunking approach.
 
         #TODO: add brief about approach
@@ -37,7 +37,8 @@ def feature_chunking(train_data,
 
     label_mappings = {}
     label_mappings[target] = {}
-    id2label = train_data.obs[target].astype('category').cat.categories.tolist()
+    id2label = train_data.obs[target].astype(
+        'category').cat.categories.tolist()
     label2id = {id2label[i]: i for i in range(len(id2label))}
     label_mappings[target]['id2label'] = id2label
     label_mappings[target]['label2id'] = label2id
@@ -110,8 +111,11 @@ def feature_chunking(train_data,
 
     return feature_class_weights
 
-def extract_top_k_features(feature_class_weights: DataFrame,k: int,
-                           aggregation_strategy:str='mean', dirpath:str='.'):
+
+def extract_top_k_features(feature_class_weights: DataFrame,
+                           k: int,
+                           aggregation_strategy: str = 'mean',
+                           dirpath: str = '.'):
     """Extract top k features from weight matrix trained on chunked features
 
     Args:
@@ -123,7 +127,7 @@ def extract_top_k_features(feature_class_weights: DataFrame,k: int,
     Returns:
         List of top k features
     """
-    
+
     if aggregation_strategy == 'mean':
         top_features_list = feature_class_weights.abs().mean().sort_values(
             ascending=False).reset_index()['index'][:k]

@@ -18,10 +18,10 @@ class Trainer:
 
     def __init__(self,
                  model: LinearModel,
-                 opt_class:Optimizer=torch.optim.Adam,
+                 opt_class: Optimizer = torch.optim.Adam,
                  lr: float = 1e-3,
                  l2: float = 0,
-                 loss_fn:Module=nn.CrossEntropyLoss(),
+                 loss_fn: Module = nn.CrossEntropyLoss(),
                  callback_params: dict = None,
                  device: str = 'cuda',
                  dirpath: str = '.',
@@ -126,8 +126,8 @@ class Trainer:
             val_dl: validation dataloader
         """
 
-        callback_executor = CallbackExecutor(dirpath=self.dirpath,
-                                    callback_paramaters=self.callback_params)
+        callback_executor = CallbackExecutor(
+            dirpath=self.dirpath, callback_paramaters=self.callback_params)
 
         for epoch in range(epochs):
             ep_start = time()
@@ -143,8 +143,9 @@ class Trainer:
             ep_end = time()
             print(f'Time: {ep_end-ep_start}\n', flush=True)
 
-            if callback_executor.execute(self.model.state_dict(), self.opt.state_dict(),
-                                train_loss, train_acc, val_loss, val_acc):
+            if callback_executor.execute(self.model.state_dict(),
+                                         self.opt.state_dict(), train_loss,
+                                         train_acc, val_loss, val_acc):
                 break
 
         self.model.load_state_dict(

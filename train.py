@@ -65,7 +65,8 @@ def train(config, log=True):
     # Create mappings for targets to be used by testing
     label_mappings = {}
     label_mappings[target] = {}
-    id2label = train_data.obs[target].astype('category').cat.categories.tolist()
+    id2label = train_data.obs[target].astype(
+        'category').cat.categories.tolist()
     label2id = {id2label[i]: i for i in range(len(id2label))}
     label_mappings[target]['id2label'] = id2label
     label_mappings[target]['label2id'] = label2id
@@ -90,7 +91,8 @@ def train(config, log=True):
     elif optimizer == 'sgd':
         opt = torch.optim.SGD
     else:
-        raise NotImplementedError('Only `adam` and `sgd` available as options!')
+        raise NotImplementedError(
+            'Only `adam` and `sgd` available as options!')
 
     if lossfunc == 'log':
         loss_fn = nn.CrossEntropyLoss()

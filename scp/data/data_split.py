@@ -10,10 +10,10 @@ from ..utils import write_data, dump_json, read_data
 
 
 def _generate_train_val_test_split_indices(datapath: str,
-                   split_ratio: list[float],
-                   target: str,
-                   stratify: str = None,
-                   dirpath: str = None) -> dict:
+                                           split_ratio: list[float],
+                                           target: str,
+                                           stratify: str = None,
+                                           dirpath: str = None) -> dict:
     """Generate a list of indices for train/val/test split of whole dataset
 
     Args:
@@ -85,13 +85,15 @@ def _generate_train_val_test_split_indices(datapath: str,
     }
 
     if dirpath is not None:
-        dump_json(data_split, dirpath+'/data_split.json')
+        dump_json(data_split, dirpath + '/data_split.json')
 
     return data_split
 
-def _generate_metadata_indinces(adata:AnnData, target: str) -> dict:
+
+def _generate_metadata_indinces(adata: AnnData, target: str) -> dict:
     """generate splits for DEG"""
     return
+
 
 def split_data(datapath: str,
                data_split: dict,
@@ -110,7 +112,7 @@ def split_data(datapath: str,
         **kwargs: keyword arguments to pass to `process` function besides adata
     """
     total_samples = len(read_data(datapath))
-    
+
     for typ in data_split.keys():
         if data_split[typ] == -1:
             data_split[typ] = list(range(total_samples))
@@ -136,13 +138,13 @@ def split_data(datapath: str,
 
 
 def generate_train_val_test_split(datapath: str,
-                   split_ratio: list[float],
-                   target: str,
-                   stratify: str = None,
-                   dirpath: str = None,
-                   chunksize: int = None,
-                   process_fn: Callable = None,
-                   **kwargs):
+                                  split_ratio: list[float],
+                                  target: str,
+                                  stratify: str = None,
+                                  dirpath: str = None,
+                                  chunksize: int = None,
+                                  process_fn: Callable = None,
+                                  **kwargs):
     """Generate a list of indices for train/val/test split of whole dataset and writes new data splits
     to disk.
 
@@ -159,14 +161,7 @@ def generate_train_val_test_split(datapath: str,
     
     """
 
-    data_split = _generate_train_val_test_split_indices(datapath, split_ratio, target, stratify, dirpath)
+    data_split = _generate_train_val_test_split_indices(
+        datapath, split_ratio, target, stratify, dirpath)
 
     split_data(datapath, data_split, dirpath, chunksize, process_fn, **kwargs)
-    
-
-
-
-
-
-
-
