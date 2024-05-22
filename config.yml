@@ -1,0 +1,122 @@
+# CONFIG
+
+# EXPERIMENT 
+device: 'cuda' # [Optional][cuda/cpu] device to run the deep learning models on
+dirpath: '.' # [Required] base directory path for all experiments
+exp_name: 'scp_test_final' # [Required] experiment name
+exp_run: 7 # [Required] experiment run to compare
+# Final experiment directory would be: dirpath/{exp_name}_{exp_run}/
+
+# DATA
+data:
+    chunksize: 10000
+    # [Optional] Useful for low resources utilization. Will ensure all data is stored with chunks of atmost 'chunksize' samples 
+    # [null] for storing data in one file.
+    
+    # [Optional] To split full anndata dataset file into train/val/test sets
+    split_data:
+        split_ratio: [7, 1, 2.5] # [Required] ratio to split full data => train : val : test
+        stratify: 'donor_id' # [Optional][column in metadata / null] split stratified on parameter in metadata
+
+    # [Optional] To perform sample-wise normalization of expression values
+    normalize_data: True
+
+    full_datapath: '/home/biocusp/data/scp_ad/full.h5ad' # full data path, will be split into train, test, and val sets. [Required] for splitting of data
+
+    # Note if split_data is given, following split paths will be overwritten
+    # if spilt_data not given, paths are [Required]
+    train_datapath: '/home/biocusp/data/scp_ad/train.h5ad' # training data path
+    val_datapath: '/home/biocusp/data/scp_ad/val.h5ad' # validation data path
+    test_datapath: '/home/biocusp/data/scp_ad/test.h5ad' # testing data path
+
+    target: Cell_Type # [Required] target to perform classification on. Must be present as a column_name in adata.obs
+
+# Feature selection technique
+feature_selection:
+
+    # [Optional] path to weight matrix containing weights for all features across all classes
+    # If path specified, feature importance algorithm will not work, and directly use weights to perform selection
+    # weight_matrix: 'full_test_0/feature_selection/feature_class_weights.csv'
+    
+    chunksize: 5000
+    # [Required] chunks of features to train the model on iteratively
+    
+    method_type: feature_chunk # Only method availble now
+
+    # [Required] [name: logistic_classifier/nn]
+    # logistic regression: keyword args of logistic regression classifier of sklearn
+    #                      can be passes in params
+    # nn: params are optional, can include epochs, batch_size, lr- learning rate, l2- L2 weight penalty
+    model:
+      name: nn
+      params:
+          epochs: 1
+
+    # [Required]
+    # k: number of top features to extract
+    # aggregation_strategy: stratergies to obtain top features. only mean implemented now
+    top_features_stats:
+        k: 3000
+        aggregation_strategy: mean # [Required][mean/class weighted density/top (k/n_classes) per class]
+
+    # Will store extracted features subset on disk
+    # the storage will be according to data=>chunksize parameter
+    store_on_disk: True
+
+# MODEL
+# DL model to train [Required]
+# type: [Linear]
+# hyperparameters:
+#    layers: [number of genes...number of classes]. eg. [22858, 2048, 64, 6], dropout, activation, weights_init_zero
+# start_checkpoint: if resume_from_checkpoint is true, path to checkpoint, note that this will overwrite above hyperparameters and type
+# resume_from_checkpoint: to resume training past checkpoint. [BOOLEAN], default: false
+model: 
+    type: 'linear'
+    hyperparameters:
+        layers: [3000, 6]
+        dropout: 0
+        weights_init_zero: False
+    start_checkpoint: null
+    resume_from_checkpoint: False
+
+# TRAINING
+# opt: default Adam
+# loss_fn: default CrossEntropy
+# batch_size: samples per batch during training
+# lr: learning rate
+# l2: L2 penalty
+# epochs: max number of epochs to train
+# callbacks: EARLYSTOPPING, MODELCHECKPOINT, TENSORBOARDLOGGING
+#     early_stop_patience: max number of epochs for which validation loss does not improve before stopping
+#     early_stop_min_delta: minimum increment in validation loss to count as improvement
+#     model_checkpoint_interval: intervals of epoch for which model weights are stored
+training:
+    opt: 'adam'
+    loss: 'log'
+    batch_size: 5000
+    lr: 1.0e-3
+    l2: 0
+    epochs: 1
+    callbacks:
+        tensorboard_logging: True
+        early_stop:
+            patience: 4
+            min_delta: 1.0e-4
+        model_checkpoint:
+            interval: 5
+
+# model_checkpoint: [OPTIONAL IF USING WITH PIPELINE AFTER TRAINING]
+#     path_to_model_checkpoint: use model checkpoint to load model
+# batch_size: evaluation batch_size
+# evaluation_metrics: metrics to perform evaluation available:['accuracy', 'report']
+# EVALUATION
+evaluation:
+    model_checkpoint: './pipeline_train_0/best_model'
+    batch_size: 5000
+    metrics: ['accuracy', 'report']
+
+
+
+
+
+    
