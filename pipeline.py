@@ -1,7 +1,7 @@
 import os
 import sys
 import argparse
-from scp.utils import load_config
+from scalr.utils import load_config
 from train import train
 from evaluate import evaluate
 from feature_extraction import extract_features

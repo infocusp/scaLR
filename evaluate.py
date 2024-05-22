@@ -6,11 +6,11 @@ import torch
 from torch import nn
 import numpy as np
 
-from scp.utils import load_config, read_data, read_yaml, read_json, dump_yaml
-from scp.dataloader import simple_dataloader
-from scp.model import LinearModel
-from scp.evaluation import get_predictions, accuracy, generate_and_save_classification_report
-from scp import Trainer
+from scalr.utils import load_config, read_data, read_yaml, read_json, dump_yaml
+from scalr.dataloader import simple_dataloader
+from scalr.model import LinearModel
+from scalr.evaluation import get_predictions, accuracy, generate_and_save_classification_report
+from scalr import Trainer
 
 
 def evaluate(config, log=True):

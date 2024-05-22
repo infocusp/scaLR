@@ -7,9 +7,9 @@ import pandas as pd
 from anndata import AnnData
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 
-from scp.utils import load_config, read_data, read_yaml, dump_yaml, dump_json, write_data
-from scp.feature_selection import feature_chunking, extract_top_k_features
-from scp.model import LinearModel
+from scalr.utils import load_config, read_data, read_yaml, dump_yaml, dump_json, write_data
+from scalr.feature_selection import feature_chunking, extract_top_k_features
+from scalr.model import LinearModel
 
 
 def extract_features(config, log=True):

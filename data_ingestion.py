@@ -6,8 +6,8 @@ import torch
 from torch import nn
 import numpy as np
 
-from scp.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
-from scp.data import generate_train_val_test_split, normalize_data, split_data
+from scalr.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
+from scalr.data import generate_train_val_test_split, normalize_data, split_data
 
 
 def ingest_data(config, log=True):

@@ -6,10 +6,10 @@ import torch
 from torch import nn
 import numpy as np
 
-from scp.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
-from scp.dataloader import simple_dataloader
-from scp.model import LinearModel
-from scp import Trainer
+from scalr.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
+from scalr.dataloader import simple_dataloader
+from scalr.model import LinearModel
+from scalr import Trainer
 
 
 def train(config, log=True):
