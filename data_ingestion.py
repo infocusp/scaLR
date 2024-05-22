@@ -10,7 +10,7 @@ from scp.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
 from scp.data import generate_train_val_test_split, normalize_data, split_data
 
 
-def data_ingestion(config, log=True):
+def ingest_data(config, log=True):
 
     dirpath = config['dirpath']
     exp_name = config['exp_name']
@@ -50,8 +50,8 @@ def data_ingestion(config, log=True):
 
         chunksize = data_config['chunksize']
 
-        for typ in ['train', 'val', 'test']:
-            split_data(data_config[f'{typ}_datapath'], {typ: -1},
+        for split_name in ['train', 'val', 'test']:
+            split_data(data_config[f'{split_name}_datapath'], {split_name: -1},
                        f'{dirpath}/data/', chunksize, process_fn)
 
     # changing dirpath in config
@@ -81,4 +81,4 @@ if __name__ == '__main__':
 
     config = load_config(args.config)
 
-    data_ingestion(config, args.log)
+    ingest_data(config, args.log)

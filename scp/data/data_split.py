@@ -31,12 +31,12 @@ def _generate_train_val_test_split_indices(datapath: str,
     adata = read_data(datapath)
     metadata = adata.obs
     metadata['inds'] = range(len(metadata))
-    n_cls = len(metadata[target].unique())
+    n_cls = metadata[target].nunique()
 
-    total_ = sum(split_ratio)
-    train_ratio = split_ratio[0] / total_
-    val_ratio = split_ratio[1] / total_
-    test_ratio = split_ratio[2] / total_
+    total_ratio = sum(split_ratio)
+    train_ratio = split_ratio[0] / total_ratio
+    val_ratio = split_ratio[1] / total_ratio
+    test_ratio = split_ratio[2] / total_ratio
 
     test_splitter = GroupShuffleSplit(test_size=test_ratio,
                                       n_splits=10,
@@ -70,9 +70,12 @@ def _generate_train_val_test_split_indices(datapath: str,
     if len(metadata[target].iloc[true_train_inds].unique()) != n_cls:
         print('WARNING: All classes are not present in Train set')
 
-    assert len(set(true_test_inds).intersection(true_train_inds)) == 0
-    assert len(set(true_val_inds).intersection(true_train_inds)) == 0
-    assert len(set(true_val_inds).intersection(true_test_inds)) == 0
+    assert len(set(true_test_inds).intersection(true_train_inds)
+               ) == 0, "Test and Train sets contain overlapping samples"
+    assert len(set(true_val_inds).intersection(true_train_inds)
+               ) == 0, "Validation and Train sets contain overlapping samples"
+    assert len(set(true_val_inds).intersection(true_test_inds)
+               ) == 0, "Test and Validation sets contain overlapping samples"
 
     print('Length of train set: ', len(true_train_inds))
     print('Length of val set: ', len(true_val_inds))
@@ -88,11 +91,6 @@ def _generate_train_val_test_split_indices(datapath: str,
         dump_json(data_split, dirpath + '/data_split.json')
 
     return data_split
-
-
-def _generate_metadata_indinces(adata: AnnData, target: str) -> dict:
-    """generate splits for DEG"""
-    return
 
 
 def split_data(datapath: str,
@@ -113,28 +111,31 @@ def split_data(datapath: str,
     """
     total_samples = len(read_data(datapath))
 
-    for typ in data_split.keys():
-        if data_split[typ] == -1:
-            data_split[typ] = list(range(total_samples))
+    for split_name in data_split.keys():
+        if data_split[split_name] == -1:
+            data_split[split_name] = list(range(total_samples))
         if chunksize is None:
             adata = read_data(datapath).to_memory()
             if process_fn is not None:
                 adata = process_fn(adata, **kwargs)
-            write_data(adata[data_split[typ]], f'{dirpath}/{typ}.h5ad')
+            write_data(adata[data_split[split_name]],
+                       f'{dirpath}/{split_name}.h5ad')
         else:
-            os.makedirs(f'{dirpath}/{typ}/', exist_ok=True)
-            curr_chunksize = len(data_split[typ]) - 1 if chunksize >= len(
-                data_split[typ]) else chunksize
+            os.makedirs(f'{dirpath}/{split_name}/', exist_ok=True)
+            curr_chunksize = len(
+                data_split[split_name]) - 1 if chunksize >= len(
+                    data_split[split_name]) else chunksize
             for i, (start) in enumerate(
-                    range(0, len(data_split[typ]), curr_chunksize)):
+                    range(0, len(data_split[split_name]), curr_chunksize)):
                 adata = read_data(datapath)
-                adata = adata[data_split[typ][start:start + curr_chunksize]]
+                adata = adata[data_split[split_name][start:start +
+                                                     curr_chunksize]]
                 if not isinstance(adata, AnnData):
                     adata = adata.to_adata()
                 adata = adata.to_memory()
                 if process_fn is not None:
                     adata = process_fn(adata, **kwargs)
-                write_data(adata, f'{dirpath}/{typ}/{i}.h5ad')
+                write_data(adata, f'{dirpath}/{split_name}/{i}.h5ad')
 
 
 def generate_train_val_test_split(datapath: str,

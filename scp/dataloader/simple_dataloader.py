@@ -1,9 +1,12 @@
+from typing import Union
+
 import torch
 import anndata as ad
-from anndata.experimental import AnnLoader
+from anndata.experimental import AnnLoader, AnnCollection
+from anndata import AnnData
 
 
-def simple_dataloader(adata,
+def simple_dataloader(adata: Union[AnnData, AnnCollection],
                       target: str,
                       batch_size: int = 1,
                       label_mappings: dict = None):

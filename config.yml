@@ -3,13 +3,13 @@
 # EXPERIMENT 
 device: 'cuda' # [Optional][cuda/cpu] device to run the deep learning models on
 dirpath: '.' # [Required] base directory path for all experiments
-exp_name: 'scp_test_fp' # [Required] experiment name
-exp_run: 0 # [Required] experiment run to compare
+exp_name: 'scp_test_final' # [Required] experiment name
+exp_run: 7 # [Required] experiment run to compare
 # Final experiment directory would be: dirpath/{exp_name}_{exp_run}/
 
 # DATA
 data:
-    chunksize: 20000
+    chunksize: 10000
     # [Optional] Useful for low resources utilization. Will ensure all data is stored with chunks of atmost 'chunksize' samples 
     # [null] for storing data in one file.
     

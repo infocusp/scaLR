@@ -51,10 +51,10 @@ class Trainer:
 
         self.loss_fn = loss_fn
         self.dirpath = dirpath
-        self.callback_params = callback_params if callback_params is not None else {}
+        self.callback_params = callback_params or {}
 
     def train_one_epoch(self, dl: DataLoader) -> (float, float):
-        """ Trains one epoch 
+        """Trains one epoch 
         
         Args:
             dl: training dataloader

@@ -1,26 +1,29 @@
 import os
+from typing import Union, Literal
 
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
 import torch
 from torch import nn
+from anndata import AnnData
+from anndata.experimental import AnnCollection
 
 from ..model import LinearModel
 from ..trainer import Trainer
 from ..dataloader import simple_dataloader
 
 
-def feature_chunking(train_data,
-                     val_data,
+def feature_chunking(train_data: Union[AnnData, AnnCollection],
+                     val_data: Union[AnnData, AnnCollection],
                      target: str,
                      model_config: dict,
                      chunksize: int,
                      dirpath: str,
-                     device: str = 'cpu') -> list[str]:
-    """ Feature selection using feature chunking approach.
+                     device: Literal['cpu', 'cuda'] = 'cpu') -> list[str]:
+    """Select features using feature chunking approach.
 
-        #TODO: add brief about approach
+        # TODO: add brief about approach
     
         Args:
             train_data: train_dataset (anndata oject)
@@ -78,14 +81,14 @@ def feature_chunking(train_data,
             }
         }
 
-        dirpath_ = f'{dirpath}/model_weights/{i}'
-        os.makedirs(f'{dirpath_}/best_model', exist_ok=True)
+        chunk_dirpath = f'{dirpath}/model_weights/{i}'
+        os.makedirs(f'{chunk_dirpath}/best_model', exist_ok=True)
 
-        trainer_ = Trainer(model, opt, lr, l2, loss_fn, callbacks, device,
-                           dirpath_)
-        trainer_.train(epochs, train_dl, val_dl)
+        chunk_trainer = Trainer(model, opt, lr, l2, loss_fn, callbacks, device,
+                                chunk_dirpath)
+        chunk_trainer.train(epochs, train_dl, val_dl)
 
-        best_model_weights.append(f'{dirpath_}/best_model/model.pt')
+        best_model_weights.append(f'{chunk_dirpath}/best_model/model.pt')
 
         i += 1
 
@@ -95,10 +98,10 @@ def feature_chunking(train_data,
 
     all_weights = []
     # Loading models from each chunk and generating feature class weights matrix.
-    for file in best_model_weights:
+    for filename in best_model_weights:
 
         weights = torch.load(
-            file)['model_state_dict']['out_layer.weight'].cpu()
+            filename)['model_state_dict']['out_layer.weight'].cpu()
         all_weights.append(weights)
 
     full_weights_matrix = torch.cat(all_weights, dim=1)

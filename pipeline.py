@@ -4,8 +4,8 @@ import argparse
 from scp.utils import load_config
 from train import train
 from evaluate import evaluate
-from extract_features import extract_features
-from data_ingestion import data_ingestion
+from feature_extraction import extract_features
+from data_ingestion import ingest_data
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
     config = load_config(args.config)
     log = args.log
 
-    config = data_ingestion(config, log)
+    config = ingest_data(config, log)
 
     if 'feature_selection' in config:
         config = extract_features(config, log)
