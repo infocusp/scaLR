@@ -15,7 +15,7 @@ A complete end2end pipeline and tool for scRNA-seq tabular data (cell X genes) t
 
 ## Library Structure
 
-- scp
+- scalr
     - callbacks: CallbackExecutor, EarlyStopping, ModelCheckpoints, TensorbaordLogging
     - model:
         - LinearModel: torch deep neural network model class
