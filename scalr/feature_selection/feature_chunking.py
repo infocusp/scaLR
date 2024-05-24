@@ -24,7 +24,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
     """Select features using feature chunking approach.
 
         # TODO: add brief about approach
-    
+
         Args:
             train_data: train_dataset (anndata oject)
             val_data: validation_dataset (anndata object)

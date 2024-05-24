@@ -22,10 +22,10 @@ def _generate_train_val_test_split_indices(datapath: str,
         target: target for classification present in `obs`.
         stratify: optional parameter to stratify the split upon parameter.
         dirpath: dirpath to store generated split in json format
-    
+
     Returns:
         dict with 'train', 'test' and 'val' indices list.
-    
+
     """
 
     adata = read_data(datapath)
@@ -100,7 +100,7 @@ def split_data(datapath: str,
                process_fn: Callable = None,
                **kwargs):
     """Split the full data based upon generated indices lists and write it to disk.
-    
+
     Args:
         datapath: path to full dataset
         data_split: dict containing list of indices for each split, `-1` as value indicates all indices
@@ -156,10 +156,10 @@ def generate_train_val_test_split(datapath: str,
         stratify: optional parameter to stratify the split upon parameter.
         dirpath: dirpath to store generated split in json format
         chunksize: number of samples to store in one chunk, after splitting the data.
-    
+
     Returns:
         dict with 'train', 'test' and 'val' indices list.
-    
+
     """
 
     data_split = _generate_train_val_test_split_indices(

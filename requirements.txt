@@ -88,10 +88,6 @@ tensorboard==2.16.2
 tensorboard-data-server==0.7.2
 threadpoolctl==3.4.0
 toml==0.10.2
-torch==2.2.0+cu118
-torchdata==0.7.1
-torchtext==0.17.0+cpu
-torchvision==0.17.0+cu118
 tornado==6.4
 tqdm==4.64.1
 traitlets==5.14.3

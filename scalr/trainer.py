@@ -54,8 +54,8 @@ class Trainer:
         self.callback_params = callback_params or {}
 
     def train_one_epoch(self, dl: DataLoader) -> (float, float):
-        """Trains one epoch 
-        
+        """Trains one epoch
+
         Args:
             dl: training dataloader
 
@@ -88,8 +88,8 @@ class Trainer:
         return total_loss, accuracy
 
     def validation(self, dl: DataLoader) -> (float, float):
-        """ Validates after training one epoch 
-        
+        """ Validates after training one epoch
+
         Args:
             dl: validation dataloader
 
