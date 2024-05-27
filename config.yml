@@ -108,9 +108,9 @@ training:
 # model_checkpoint: [OPTIONAL IF USING WITH PIPELINE AFTER TRAINING]
 #     path_to_model_checkpoint: use model checkpoint to load model
 # batch_size: evaluation batch_size
-# evaluation_metrics: metrics to perform evaluation available:['accuracy', 'report']
+# evaluation_metrics: metrics to perform evaluation available:['accuracy', 'report', 'roc_auc']
 # EVALUATION
 evaluation:
     model_checkpoint: './pipeline_train_0/best_model'
     batch_size: 5000
-    metrics: ['accuracy', 'report']
+    metrics: ['accuracy', 'report', 'roc_auc']
