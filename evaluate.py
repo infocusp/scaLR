@@ -74,7 +74,7 @@ def evaluate(config, log=True):
                                                 mapping=id2label)
 
     if 'roc_auc' in metrics:
-        print("\n ROC & AUC:")
+        print("\nROC & AUC:")
         roc_auc(test_labels,
                 pred_probabilities,
                 f'{dirpath}/results',
