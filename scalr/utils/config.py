@@ -63,7 +63,7 @@ default_evaluation_config = {
 # THE DEFAULT CONFIGS TEMPLATE
 default_config_ = {
     'device': 'cpu',
-    'filepath': '.',
+    'dirpath': '.',
     'exp_name': 'run',
     'exp_run': 0,
     'data': {
@@ -88,7 +88,7 @@ def overwrite_default(user_config: dict, default_config: dict) -> dict:
 
 def load_config(path: str) -> dict:
     """This function initializes a default_config file and overwrites information provided by the user.
-        
+
         Args:
             path: path to config file
 

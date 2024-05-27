@@ -1,4 +1,5 @@
 import os
+from os import path
 
 import torch
 from torch.utils.tensorboard import SummaryWriter
@@ -18,7 +19,7 @@ class TensorboardLogger:
         Args:
             dirpath: path of directory to store the experiment logs
         """
-        self.writer = SummaryWriter(dirpath + '/logs')
+        self.writer = SummaryWriter(path.join(dirpath,'logs'))
         self.epoch = 0
 
     def __call__(self, train_loss: float, train_acc: float, val_loss: float,
@@ -94,9 +95,9 @@ class ModelCheckpoint:
         self.interval = int(interval)
         self.dirpath = dirpath
 
-        os.makedirs(f'{dirpath}/best_model', exist_ok=True)
+        os.makedirs(path.join(dirpath,'best_model'), exist_ok=True)
         if self.interval:
-            os.makedirs(f'{dirpath}/checkpoints', exist_ok=True)
+            os.makedirs(path.join(dirpath,'checkpoints'), exist_ok=True)
 
     def save_checkpoint(self, model_state_dict: dict, opt_state_dict: dict,
                         path: str):
@@ -113,11 +114,11 @@ class ModelCheckpoint:
         if validation_acc > self.max_validation_acc:
             self.max_validation_acc = validation_acc
             self.save_checkpoint(model_state_dict, opt_state_dict,
-                                 f'{self.dirpath}/best_model/model.pt')
+                                 path.join(self.dirpath,'best_model','model.pt'))
         if self.interval and self.epoch % self.interval == 0:
             self.save_checkpoint(
                 model_state_dict, opt_state_dict,
-                f'{self.dirpath}/checkpoints/model_{self.epoch}.pt')
+                path.join(dirpath,'checkpoints',f'model_{self.epoch}.pt'))
 
 
 class CallbackExecutor:

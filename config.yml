@@ -3,8 +3,8 @@
 # EXPERIMENT 
 device: 'cuda' # [Optional][cuda/cpu] device to run the deep learning models on
 dirpath: '.' # [Required] base directory path for all experiments
-exp_name: 'scp_test_final' # [Required] experiment name
-exp_run: 7 # [Required] experiment run to compare
+exp_name: 'scp_test_fp' # [Required] experiment name
+exp_run: 3 # [Required] experiment run to compare
 # Final experiment directory would be: dirpath/{exp_name}_{exp_run}/
 
 # DATA
@@ -19,7 +19,7 @@ data:
         stratify: 'donor_id' # [Optional][column in metadata / null] split stratified on parameter in metadata
 
     # [Optional] To perform sample-wise normalization of expression values
-    normalize_data: True
+    # normalize_data: True
 
     full_datapath: '/home/biocusp/data/scp_ad/full.h5ad' # full data path, will be split into train, test, and val sets. [Required] for splitting of data
 
@@ -119,4 +119,3 @@ evaluation:
 
 
 
-    
