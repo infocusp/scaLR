@@ -2,15 +2,17 @@ import os
 from os import path
 from typing import Optional
 
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import torch
+import seaborn as sns
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, RocCurveDisplay, roc_curve, auc
 from torch.utils.data import DataLoader
 from torch import nn
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 from .model import LinearModel
+from .utils import data_utils
 
 
 def get_predictions(model: LinearModel,
@@ -24,11 +26,12 @@ def get_predictions(model: LinearModel,
         test_dl: test dataloader containing data as well as true labels
         device: device to run model on ('cpu'/'cuda')
 
-    Return:
-        List of true labels from test set and predicted labels via inference on test data
+    Returns:
+        List of true labels from test set, predicted labels via inference on test
+        data and prediction probabilities of each class
     """
     model.eval()
-    test_labels, pred_labels = [], []
+    test_labels, pred_labels, pred_probabilities = [], [], []
 
     for batch in test_dl:
         with torch.no_grad():
@@ -38,8 +41,9 @@ def get_predictions(model: LinearModel,
 
         test_labels += y.tolist()
         pred_labels += torch.argmax(out, dim=1).tolist()
+        pred_probabilities += out.tolist()
 
-    return test_labels, pred_labels
+    return test_labels, pred_labels, pred_probabilities
 
 
 # Function to return accuracy score of predicted labels as compared to true labels
@@ -155,3 +159,32 @@ def top_n_heatmap(model: LinearModel,
 
     plt.savefig(path.join(dirpath,'heatmap.png'))
     return top_n_indices, top_n_genes
+
+
+def roc_auc(test_labels: list[int],
+            pred_score: list[list[float]],
+            dirpath: str,
+            mapping: Optional[dict] = None) -> None:
+    """ Calculate ROC-AUC and save plot.
+
+    Args:
+        test_labels: true labels from the test dataset.
+        pred_score: predictions probabities of each sample for all the classes.
+    """
+    # convert label predictions list to one-hot matrix.
+    test_labels_onehot = data_utils.get_one_hot_matrix(np.array(test_labels))
+
+    for class_label in range(max(test_labels)):
+
+        # fpr: False Positive Rate | tpr: True Positive Rate
+        fpr, tpr, _ = roc_curve(test_labels_onehot[:, class_label],
+                                np.array(pred_score)[:, class_label])
+
+        roc_auc = auc(fpr, tpr)
+
+        display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc)
+        display.plot()
+        os.makedirs(os.path.join(dirpath,"roc_auc"), exist_ok=True)
+        plt.savefig(
+            os.path.join(dirpath,'roc_auc',f'{mapping[class_label].replace(" ", "_")}.png')
+        )
