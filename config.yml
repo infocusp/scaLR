@@ -1,6 +1,6 @@
 # CONFIG
 
-# EXPERIMENT 
+# EXPERIMENT
 device: 'cuda' # [Optional][cuda/cpu] device to run the deep learning models on
 dirpath: '.' # [Required] base directory path for all experiments
 exp_name: 'scp_test_final' # [Required] experiment name
@@ -10,9 +10,9 @@ exp_run: 7 # [Required] experiment run to compare
 # DATA
 data:
     chunksize: 10000
-    # [Optional] Useful for low resources utilization. Will ensure all data is stored with chunks of atmost 'chunksize' samples 
+    # [Optional] Useful for low resources utilization. Will ensure all data is stored with chunks of atmost 'chunksize' samples
     # [null] for storing data in one file.
-    
+
     # [Optional] To split full anndata dataset file into train/val/test sets
     split_data:
         split_ratio: [7, 1, 2.5] # [Required] ratio to split full data => train : val : test
@@ -37,10 +37,10 @@ feature_selection:
     # [Optional] path to weight matrix containing weights for all features across all classes
     # If path specified, feature importance algorithm will not work, and directly use weights to perform selection
     # weight_matrix: 'full_test_0/feature_selection/feature_class_weights.csv'
-    
+
     chunksize: 5000
     # [Required] chunks of features to train the model on iteratively
-    
+
     method_type: feature_chunk # Only method availble now
 
     # [Required] [name: logistic_classifier/nn]
@@ -70,7 +70,7 @@ feature_selection:
 #    layers: [number of genes...number of classes]. eg. [22858, 2048, 64, 6], dropout, activation, weights_init_zero
 # start_checkpoint: if resume_from_checkpoint is true, path to checkpoint, note that this will overwrite above hyperparameters and type
 # resume_from_checkpoint: to resume training past checkpoint. [BOOLEAN], default: false
-model: 
+model:
     type: 'linear'
     hyperparameters:
         layers: [3000, 6]
@@ -108,15 +108,9 @@ training:
 # model_checkpoint: [OPTIONAL IF USING WITH PIPELINE AFTER TRAINING]
 #     path_to_model_checkpoint: use model checkpoint to load model
 # batch_size: evaluation batch_size
-# evaluation_metrics: metrics to perform evaluation available:['accuracy', 'report']
+# evaluation_metrics: metrics to perform evaluation available:['accuracy', 'report', 'roc_auc']
 # EVALUATION
 evaluation:
     model_checkpoint: './pipeline_train_0/best_model'
     batch_size: 5000
-    metrics: ['accuracy', 'report']
-
-
-
-
-
-    
+    metrics: ['accuracy', 'report', 'roc_auc']

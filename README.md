@@ -20,7 +20,7 @@ A complete end2end pipeline and tool for scRNA-seq tabular data (cell X genes) t
     - model:
         - LinearModel: torch deep neural network model class
     - data:
-        - split_data: function to obtain and store train/test/val splits 
+        - split_data: function to obtain and store train/test/val splits
     - utils:
         - file_utils: functions to read and write - anndata, json and yaml files
         - config: function to load config
@@ -34,6 +34,20 @@ A complete end2end pipeline and tool for scRNA-seq tabular data (cell X genes) t
         - accuracy: generate accuracy of predictions
         - generate_and_save_classification_report: to generate a classwise report containing precision, recall, f1-score metrics and storing the table
 
+## Requirements
+
+- Python=3.9
+
+- pytorch = 2.2.0
+
+```
+conda install pytorch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 pytorch-cuda=11.8 -c pytorch -c nvidia
+
+OR
+
+pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
+```
+
 ## Data
 - Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only)
 - The anndata object should contain cell samples as `obs` and genes as `var`.
@@ -42,7 +56,7 @@ A complete end2end pipeline and tool for scRNA-seq tabular data (cell X genes) t
 - `adata.var` contains all gene_names as Index.
 
 ## Pipeline
-There are 3 independent parts in the pipeline:  
+There are 3 independent parts in the pipeline:
 1. Top_features selection: A model undergoes iterative training where all samples are utilized in each cycle, with a distinct subset of features employed in every iteration. Then the top_k features are selected, to train the final model, using a feature score based on the model's coefficients/weights.
 2. Training: A Deep Neural Network (DNN) is trained on the train_data with val_data being used as the validation set.
 3. Evaluation: The trained model is evaluated using precision, recall, f1-score, and accuracy scores. Then various visualizations like feature rank plots (genes) and heatmaps are prepared.
