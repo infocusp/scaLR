@@ -25,7 +25,7 @@ def get_predictions(model: LinearModel,
         test_dl: test dataloader containing data as well as true labels
         device: device to run model on ('cpu'/'cuda')
 
-    Return:
+    Returns:
         List of true labels from test set, predicted labels via inference on test
         data and prediction probabilities of each class
     """
@@ -160,10 +160,10 @@ def top_n_heatmap(model: LinearModel,
     return top_n_indices, top_n_genes
 
 
-def roc_auc(test_labels: list,
-            pred_score: list,
+def roc_auc(test_labels: list[int],
+            pred_score: list[list[float]],
             dirpath: str,
-            mapping: Optional[dict] = None):
+            mapping: Optional[dict] = None) -> None:
     """ Calculate ROC-AUC and save plot.
 
     Args:
@@ -175,6 +175,7 @@ def roc_auc(test_labels: list,
 
     for class_label in range(max(test_labels)):
 
+        # fpr: False Positive Rate | tpr: True Positive Rate
         fpr, tpr, _ = roc_curve(test_labels_onehot[:, class_label],
                                 np.array(pred_score)[:, class_label])
 
@@ -182,7 +183,7 @@ def roc_auc(test_labels: list,
 
         display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc)
         display.plot()
-        os.makedirs(f"{dirpath}/roc_auc", exist_ok=True)
+        os.makedirs(os.path.join(dirpath,"roc_auc"), exist_ok=True)
         plt.savefig(
-            f'{dirpath}/roc_auc/{mapping[class_label].replace(" ", "_")}.png'
+            os.path.join(dirpath,'roc_auc',f'{mapping[class_label].replace(" ", "_")}.png')
         )
