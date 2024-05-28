@@ -6,7 +6,8 @@ import torch
 from torch import nn
 import numpy as np
 
-from scalr.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
+from config.utils import load_config
+from scalr.utils import read_data, read_yaml, dump_yaml, dump_json
 from scalr.data import generate_train_val_test_split, normalize_data, split_data
 
 

@@ -6,7 +6,8 @@ import torch
 from torch import nn
 import numpy as np
 
-from scalr.utils import load_config, read_data, read_yaml, read_json, dump_yaml
+from config.utils import load_config
+from scalr.utils import read_data, read_yaml, read_json, dump_yaml
 from scalr.dataloader import simple_dataloader
 from scalr.model import LinearModel
 from scalr.evaluation import get_predictions, accuracy, generate_and_save_classification_report

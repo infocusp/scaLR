@@ -1,0 +1,81 @@
+# EXPERIMENT
+device: 'cuda'
+dirpath: '.'
+exp_name: 'scalr_test'
+exp_run: 0
+
+# DATA
+data:
+    chunksize: 10000
+    full_datapath: '/path/to/data'
+
+    split_data:
+        split_ratio: [7, 1, 2.5]
+        stratify: 'donor_id'
+
+    normalize_data: False
+
+    # train_datapath: '/path/to/train_data'
+    # val_datapath: '/path/to/val_data'
+    # test_datapath: '/path/to/test_data'
+
+    target: Cell_Type
+
+# FEATURE SELECTION
+feature_selection:
+
+    # weight_matrix: '/path/to/matrix'
+
+    chunksize: 2000
+    method_type: feature_chunk
+
+    model:
+      name: nn
+      params:
+          epochs: 25
+          batch_size: 15000
+          lr: 1.0e-3
+          l2: 0.1
+
+    top_features_stats:
+        k: 3000
+        aggregation_strategy: mean
+
+    store_on_disk: True
+
+# MODEL
+model:
+    type: 'linear'
+    hyperparameters:
+        layers: [3000, 6]
+        dropout: 0
+        weights_init_zero: False
+    start_checkpoint: null
+    resume_from_checkpoint: False
+
+# TRAINING
+training:
+    opt: 'adam'
+    loss: 'log'
+    batch_size: 5000
+    lr: 1.0e-3
+    l2: 0
+    epochs: 100
+    callbacks:
+        tensorboard_logging: True
+        early_stop:
+            patience: 3
+            min_delta: 1.0e-4
+        model_checkpoint:
+            interval: 5
+
+# ANALYSIS
+evaluation:
+    model_checkpoint: '/path/to/model'
+    batch_size: 5000
+    metrics: ['accuracy', 'report']
+
+
+
+
+
