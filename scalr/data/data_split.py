@@ -4,6 +4,7 @@ from typing import Callable
 
 import anndata as ad
 from anndata import AnnData
+import numpy as np
 from sklearn.model_selection import GroupShuffleSplit, StratifiedShuffleSplit
 
 from ..utils import write_data, dump_json, read_data
@@ -120,8 +121,10 @@ def split_data(datapath: str,
             data_split[split_name] = list(range(total_samples))
         if chunksize is None:
             adata = read_data(datapath).to_memory()
+            if not isinstance(adata.X, np.ndarray):
+                adata.X = adata.X.A
             if process_fn is not None:
-                adata = process_fn(adata, **kwargs)
+                adata.X = process_fn(adata.X, **kwargs)
             write_data(adata[data_split[split_name]],
                        f'{dirpath}/{split_name}.h5ad')
         else:
@@ -137,8 +140,10 @@ def split_data(datapath: str,
                 if not isinstance(adata, AnnData):
                     adata = adata.to_adata()
                 adata = adata.to_memory()
+                if not isinstance(adata.X, np.ndarray):
+                    adata.X = adata.X.A
                 if process_fn is not None:
-                    adata = process_fn(adata, **kwargs)
+                    adata.X = process_fn(adata.X, **kwargs)
                 write_data(adata, f'{dirpath}/{split_name}/{i}.h5ad')
 
 
