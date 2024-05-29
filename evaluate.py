@@ -10,7 +10,7 @@ import numpy as np
 from scalr.utils import load_config, read_data, read_yaml, read_json, dump_yaml
 from scalr.dataloader import simple_dataloader
 from scalr.model import LinearModel
-from scalr.evaluation import get_predictions, accuracy, generate_and_save_classification_report, roc_auc
+from scalr.evaluation import get_predictions, accuracy, generate_and_save_classification_report, roc_auc, perform_differential_expression_analysis
 from scalr import Trainer
 
 
@@ -62,8 +62,8 @@ def evaluate(config, log=True):
     id2label = label_mappings[target]['id2label']
     metrics = evaluation_configs['metrics']
 
-    test_labels, pred_labels, pred_probabilities = get_predictions(
-        model, test_dl, device)
+    if metrics != ['deg']:
+        test_labels, pred_labels, pred_probabilities = get_predictions(model, test_dl, device)
 
     if 'accuracy' in metrics:
         print('Accuracy: ', accuracy(test_labels, pred_labels))
@@ -81,6 +81,10 @@ def evaluate(config, log=True):
                 pred_probabilities,
                 resultpath,
                 mapping=id2label)
+
+    if 'deg' in metrics:
+        perform_differential_expression_analysis(test_data, **evaluation_configs['deg_config'],
+                                                 dirpath=resultpath)
 
     dump_yaml(config, path.join(dirpath,'config.yml'))
     return config
