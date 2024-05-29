@@ -112,7 +112,7 @@ def split_data(datapath: str,
         dirpath: path to store new split data.
         chunksize: numberadata of samples to store in one chunk, after splitting the data.
         process_fn: a function which takes in data chunk to perform operations on it like Normalization
-        **kwargs: keyword arguments to pass to `process` function besides adata
+        **kwargs: keyword arguments to pass to `process_fn` apart from adata's numpy array.
     """
     total_samples = len(read_data(datapath))
 
