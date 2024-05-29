@@ -198,8 +198,9 @@ def roc_auc(test_labels: list[int],
 
 
 def _make_design_matrix(adata: Union[AnnData, AnnCollection],
-                        fixed_column: str, fixed_condition: str, design_factor: str,
-                        factor_categories: list[str], sum_column: str) -> AnnData:
+                        fixed_column: str, fixed_condition: str,
+                        design_factor: str, factor_categories: list[str],
+                        sum_column: str) -> AnnData:
     """Function to make design matrix based upon fixed and control conditions.
 
     Args:
@@ -219,26 +220,31 @@ def _make_design_matrix(adata: Union[AnnData, AnnCollection],
     design_matrix_list = []
 
     # Hacky fix since deseq2 does not like `_` in column_names
-    new_control_column_name = design_factor.replace('_','')
+    new_control_column_name = design_factor.replace('_', '')
 
-    fix_data = adata[adata.obs[fixed_column]==fixed_condition]
+    fix_data = adata[adata.obs[fixed_column] == fixed_condition]
     for condition in factor_categories:
-        condition_subset = fix_data[fix_data.obs[design_factor]==condition]
+        condition_subset = fix_data[fix_data.obs[design_factor] == condition]
         for sum_sample in condition_subset.obs[sum_column].unique():
-            sum_subset = condition_subset[condition_subset.obs[sum_column]==sum_sample]
-            subdata = ad.AnnData(X = sum_subset[:].X.sum(axis = 0).reshape(1,len(sum_subset.var_names)),
-                                 var = pd.DataFrame(index=sum_subset.var_names),
-                                 obs = pd.DataFrame(index=[f'{sum_sample}_{condition}']))
+            sum_subset = condition_subset[condition_subset.obs[sum_column] ==
+                                          sum_sample]
+            subdata = ad.AnnData(
+                X=sum_subset[:].X.sum(axis=0).reshape(
+                    1, len(sum_subset.var_names)),
+                var=pd.DataFrame(index=sum_subset.var_names),
+                obs=pd.DataFrame(index=[f'{sum_sample}_{condition}']))
             subdata.obs[new_control_column_name] = [condition]
             design_matrix_list.append(subdata)
 
     design_matrix = ad.concat(design_matrix_list)
     return design_matrix
 
-def get_differential_expression_results(adata: AnnData, fixed_condition: str,
+
+def get_differential_expression_results(adata: AnnData,
+                                        fixed_condition: str,
                                         design_factor: str,
                                         factor_categories: list[str],
-                                        dirpath:str = None) -> DataFrame:
+                                        dirpath: str = None) -> DataFrame:
     """Function to get differential expression analysis values
 
     Args:
@@ -257,34 +263,36 @@ def get_differential_expression_results(adata: AnnData, fixed_condition: str,
     metadata_ad = adata.obs
 
     # Hacky fix since deseq2 does not like `_` in column_names
-    design_factor = design_factor.replace('_','')
+    design_factor = design_factor.replace('_', '')
 
-    deseq_dataset = DeseqDataSet(counts = count_matrix_int,
-                                 metadata = metadata_ad,
-                                 design_factors = design_factor)
-
+    deseq_dataset = DeseqDataSet(counts=count_matrix_int,
+                                 metadata=metadata_ad,
+                                 design_factors=design_factor)
 
     # removing genes with zero expression across all the sample
-    sc.pp.filter_genes(deseq_dataset, min_cells = 1)
+    sc.pp.filter_genes(deseq_dataset, min_cells=1)
     deseq_dataset.deseq2()
 
-    result_stats = DeseqStats(deseq_dataset, contrast=(design_factor, *factor_categories))
+    result_stats = DeseqStats(deseq_dataset,
+                              contrast=(design_factor, *factor_categories))
     result_stats.summary()
     results_df = result_stats.results_df
 
     if dirpath:
-        results_df.to_csv(f'{dirpath}/DEG_results_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.csv')
+        results_df.to_csv(
+            f'{dirpath}/DEG_results_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.csv'
+        )
 
     return results_df
 
-def plot_volcano(deg_results_df: DataFrame,
-                  fixed_condition: str,
-                  factor_categories: list[str],
-                  fold_change : Union[float,int] = 1.5,
-                  p_val : Union[float,int] = 0.05,
-                  y_lim_tuple : Optional[Tuple[float, ...]] = None,
-                  dirpath:str = None):
 
+def plot_volcano(deg_results_df: DataFrame,
+                 fixed_condition: str,
+                 factor_categories: list[str],
+                 fold_change: Union[float, int] = 1.5,
+                 p_val: Union[float, int] = 0.05,
+                 y_lim_tuple: Optional[Tuple[float, ...]] = None,
+                 dirpath: str = None):
     """Function to generate volcano plot differential expression results and store it to disk
 
     Args:
@@ -300,48 +308,89 @@ def plot_volcano(deg_results_df: DataFrame,
     neg_log10_pval = -np.log10(p_val)
     deg_results_df['-log10(pvalue)'] = -np.log10(deg_results_df['pvalue'])
 
-    upregulated_gene = (deg_results_df['log2FoldChange']>=log2_fold_chnage)&(deg_results_df['-log10(pvalue)']>=(neg_log10_pval))
-    downregulated_gene = (deg_results_df['log2FoldChange']<=(-log2_fold_chnage))&(deg_results_df['-log10(pvalue)']>=(neg_log10_pval))
+    upregulated_gene = (deg_results_df['log2FoldChange'] >= log2_fold_chnage
+                        ) & (deg_results_df['-log10(pvalue)']
+                             >= (neg_log10_pval))
+    downregulated_gene = (deg_results_df['log2FoldChange'] <= (
+        -log2_fold_chnage)) & (deg_results_df['-log10(pvalue)']
+                               >= (neg_log10_pval))
 
-    unsignificant_gene = deg_results_df['-log10(pvalue)']<=(neg_log10_pval)
-    signi_genes_between_up_n_down = ~(upregulated_gene|downregulated_gene|unsignificant_gene)
+    unsignificant_gene = deg_results_df['-log10(pvalue)'] <= (neg_log10_pval)
+    signi_genes_between_up_n_down = ~(upregulated_gene | downregulated_gene
+                                      | unsignificant_gene)
 
     plt.figure(figsize=(10, 6))
-    plt.scatter(deg_results_df.loc[upregulated_gene,'log2FoldChange'], deg_results_df.loc[upregulated_gene,'-log10(pvalue)'],
-                color='red',alpha=0.2,s=20,label= f"FC>={fold_change} & p_val<={p_val}")
+    plt.scatter(deg_results_df.loc[upregulated_gene, 'log2FoldChange'],
+                deg_results_df.loc[upregulated_gene, '-log10(pvalue)'],
+                color='red',
+                alpha=0.2,
+                s=20,
+                label=f"FC>={fold_change} & p_val<={p_val}")
 
-    plt.scatter(deg_results_df.loc[downregulated_gene,'log2FoldChange'], deg_results_df.loc[downregulated_gene,'-log10(pvalue)'],
-                color='blue',alpha=0.2,s=20,label=f'FC<=-{fold_change} & p_val<={p_val}')
+    plt.scatter(deg_results_df.loc[downregulated_gene, 'log2FoldChange'],
+                deg_results_df.loc[downregulated_gene, '-log10(pvalue)'],
+                color='blue',
+                alpha=0.2,
+                s=20,
+                label=f'FC<=-{fold_change} & p_val<={p_val}')
 
-    plt.scatter(deg_results_df.loc[unsignificant_gene,'log2FoldChange'], deg_results_df.loc[unsignificant_gene,'-log10(pvalue)'],
-                color='mediumorchid',alpha=0.2,s=20,label=f'p_val>{p_val}')
+    plt.scatter(deg_results_df.loc[unsignificant_gene, 'log2FoldChange'],
+                deg_results_df.loc[unsignificant_gene, '-log10(pvalue)'],
+                color='mediumorchid',
+                alpha=0.2,
+                s=20,
+                label=f'p_val>{p_val}')
 
-    plt.scatter(deg_results_df.loc[signi_genes_between_up_n_down,'log2FoldChange'], deg_results_df.loc[signi_genes_between_up_n_down,'-log10(pvalue)'],
-                color='green',alpha=0.2,s=20,label=f'-{fold_change}<FC<{fold_change} & p_val<={p_val}')
+    plt.scatter(deg_results_df.loc[signi_genes_between_up_n_down,
+                                   'log2FoldChange'],
+                deg_results_df.loc[signi_genes_between_up_n_down,
+                                   '-log10(pvalue)'],
+                color='green',
+                alpha=0.2,
+                s=20,
+                label=f'-{fold_change}<FC<{fold_change} & p_val<={p_val}')
 
-    plt.xlabel('Log2 Fold Change',fontweight='bold')
-    plt.ylabel('-Log10(p-value)',fontweight='bold')
-    plt.title(f'DEG of "{fixed_condition}" in {factor_categories[0]} v/s {factor_categories[1]}',fontweight='bold')
+    plt.xlabel('Log2 Fold Change', fontweight='bold')
+    plt.ylabel('-Log10(p-value)', fontweight='bold')
+    plt.title(
+        f'DEG of "{fixed_condition}" in {factor_categories[0]} v/s {factor_categories[1]}',
+        fontweight='bold')
     plt.grid(False)
-    plt.axhline(neg_log10_pval,color='black', linestyle='--',label=f'p_val ({p_val})')
-    plt.axvline(log2_fold_chnage, color='red', linestyle='--', alpha=0.4,label=f'Log2 Fold Change (+{fold_change})')
-    plt.axvline(-log2_fold_chnage, color='blue', linestyle='--', alpha=0.4,label=f'Log2 Fold Change (-{fold_change})')
+    plt.axhline(neg_log10_pval,
+                color='black',
+                linestyle='--',
+                label=f'p_val ({p_val})')
+    plt.axvline(log2_fold_chnage,
+                color='red',
+                linestyle='--',
+                alpha=0.4,
+                label=f'Log2 Fold Change (+{fold_change})')
+    plt.axvline(-log2_fold_chnage,
+                color='blue',
+                linestyle='--',
+                alpha=0.4,
+                label=f'Log2 Fold Change (-{fold_change})')
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     if y_lim_tuple:
-        plt.ylim(bottom=y_lim_tuple[0],top=y_lim_tuple[1])
-    if dirpath:
-        plt.savefig(f'{dirpath}/DEG_plot_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.png',
-                    bbox_inches='tight')
-    else:
-        plt.show()
+        plt.ylim(bottom=y_lim_tuple[0], top=y_lim_tuple[1])
+    plt.savefig(
+        f'{dirpath}/DEG_plot_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.png',
+        bbox_inches='tight')
 
-def perform_differential_expression_analysis(adata: Union[AnnData, AnnCollection],
-                                      fixed_column: str, fixed_condition: str,
-                                      design_factor: str,factor_categories: list[str],
-                                      sum_column: str,fold_change: Union[float,int] = 1.5,
-                                      p_val: Union[float,int] = 0.05,
-                                      y_lim_tuple: Optional[Tuple[float, ...]] = None,
-                                      dirpath: str = None) -> DataFrame:
+
+def perform_differential_expression_analysis(adata: Union[AnnData,
+                                                          AnnCollection],
+                                             fixed_column: str,
+                                             fixed_condition: str,
+                                             design_factor: str,
+                                             factor_categories: list[str],
+                                             sum_column: str,
+                                             fold_change: Union[float,
+                                                                int] = 1.5,
+                                             p_val: Union[float, int] = 0.05,
+                                             y_lim_tuple: Optional[Tuple[
+                                                 float, ...]] = None,
+                                             dirpath: str = None) -> DataFrame:
     """Function to perform differential expression analysis on data
 
     Args:
@@ -363,18 +412,22 @@ def perform_differential_expression_analysis(adata: Union[AnnData, AnnCollection
     assert fixed_column in adata.obs.columns, f"{fixed_column} must be a column name in `adata.obs`"
     assert design_factor in adata.obs.columns, f"{design_factor} must be a column name in `adata.obs`"
     assert sum_column in adata.obs.columns, f"{sum_column} must be a column name in `adata.obs`"
-    assert fixed_condition in adata.obs[fixed_column].unique(),f"{fixed_condition} must belong to {fixed_column}"
-    assert factor_categories[0] in adata.obs[design_factor].unique(), f"{factor_categories[0]} must belong to {design_factor}"
-    assert factor_categories[1] in adata.obs[design_factor].unique(), f"{factor_categories[1]} must belong to {design_factor}"
+    assert fixed_condition in adata.obs[fixed_column].unique(
+    ), f"{fixed_condition} must belong to {fixed_column}"
+    assert factor_categories[0] in adata.obs[design_factor].unique(
+    ), f"{factor_categories[0]} must belong to {design_factor}"
+    assert factor_categories[1] in adata.obs[design_factor].unique(
+    ), f"{factor_categories[1]} must belong to {design_factor}"
 
-    design_matrix = _make_design_matrix(adata,fixed_column, fixed_condition,
-                  design_factor,factor_categories,sum_column)
+    design_matrix = _make_design_matrix(adata, fixed_column, fixed_condition,
+                                        design_factor, factor_categories,
+                                        sum_column)
 
-    deg_results_df = get_differential_expression_results(design_matrix, fixed_condition,
-                                                         design_factor, factor_categories,
-                                                         dirpath)
+    deg_results_df = get_differential_expression_results(
+        design_matrix, fixed_condition, design_factor, factor_categories,
+        dirpath)
 
-    plot_volcano(deg_results_df, fixed_condition, factor_categories, fold_change,
-                  p_val, y_lim_tuple, dirpath)
+    plot_volcano(deg_results_df, fixed_condition, factor_categories,
+                 fold_change, p_val, y_lim_tuple, dirpath)
 
     return deg_results_df
