@@ -19,7 +19,7 @@ data:
     #     stratify: 'donor_id' # [Optional][column in metadata / null] split stratified on parameter in metadata
 
     # [Optional] To perform sample-wise normalization of expression values
-    # normalize_data: True
+    normalize_data: True
 
     # full_datapath: '/home/biocusp/data/scp_ad/full.h5ad' # full data path, will be split into train, test, and val sets. [Required] for splitting of data
 
@@ -32,36 +32,36 @@ data:
     target: Cell_Type # [Required] target to perform classification on. Must be present as a column_name in adata.obs
 
 # Feature selection technique
-# feature_selection:
-#     chunksize: 5000
-#     # [Required] chunks of features to train the model on iteratively
+feature_selection:
+    chunksize: 5000
+    # [Required] chunks of features to train the model on iteratively
 
-#     # weight_matrix: 'full_test_0/feature_selection/feature_class_weights.csv'
-#     # [Optional] path to weight matrix containing weights for all features across all classes
-#     # If path specified, feature importance algorithm will not work, and directly use weights to perform selection
+    # weight_matrix: 'full_test_0/feature_selection/feature_class_weights.csv'
+    # [Optional] path to weight matrix containing weights for all features across all classes
+    # If path specified, feature importance algorithm will not work, and directly use weights to perform selection
 
-#     method_type: feature_chunk # Only method availble now
+    method_type: feature_chunk # Only method availble now
 
-#     # [Required] [name: logistic_classifier/nn]
-#     # logistic regression: keyword args of logistic regression classifier of sklearn
-#     #                      can be passes in params
-#     # nn: params are optional, can include epochs, batch_size, lr- learning rate, l2- L2 weight penalty
-#     model:
-#       name: nn
-#       params:
-#           epochs: 1
-#           batch_size: 50000
+    # [Required] [name: logistic_classifier/nn]
+    # logistic regression: keyword args of logistic regression classifier of sklearn
+    #                      can be passes in params
+    # nn: params are optional, can include epochs, batch_size, lr- learning rate, l2- L2 weight penalty
+    model:
+      name: nn
+      params:
+          epochs: 1
+          batch_size: 50000
 
-#     # [Required]
-#     # k: number of top features to extract
-#     # aggregation_strategy: stratergies to obtain top features. only mean implemented now
-#     top_features_stats:
-#         k: 3000
-#         aggregation_strategy: mean # [Required][mean/class weighted density/top (k/n_classes) per class]
+    # [Required]
+    # k: number of top features to extract
+    # aggregation_strategy: stratergies to obtain top features. only mean implemented now
+    top_features_stats:
+        k: 3000
+        aggregation_strategy: mean # [Required][mean/class weighted density/top (k/n_classes) per class]
 
-#     # Will store extracted features subset on disk
-#     # the storage will be according to data=>chunksize parameter
-#     store_on_disk: True
+    # Will store extracted features subset on disk
+    # the storage will be according to data=>chunksize parameter
+    store_on_disk: True
 
 # MODEL
 # DL model to train [Required]
@@ -90,20 +90,20 @@ model:
 #     early_stop_patience: max number of epochs for which validation loss does not improve before stopping
 #     early_stop_min_delta: minimum increment in validation loss to count as improvement
 #     model_checkpoint_interval: intervals of epoch for which model weights are stored
-# training:
-#     opt: 'adam'
-#     loss: 'log'
-#     batch_size: 5000
-#     lr: 1.0e-3
-#     l2: 0
-#     epochs: 1
-#     callbacks:
-#         tensorboard_logging: True
-#         early_stop:
-#             patience: 4
-#             min_delta: 1.0e-4
-#         model_checkpoint:
-#             interval: 5
+training:
+    opt: 'adam'
+    loss: 'log'
+    batch_size: 5000
+    lr: 1.0e-3
+    l2: 0
+    epochs: 1
+    callbacks:
+        tensorboard_logging: True
+        early_stop:
+            patience: 4
+            min_delta: 1.0e-4
+        model_checkpoint:
+            interval: 5
 
 # model_checkpoint: [OPTIONAL IF USING WITH PIPELINE AFTER TRAINING]
 #     path_to_model_checkpoint: use model checkpoint to load model
