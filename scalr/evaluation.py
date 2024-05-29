@@ -58,10 +58,11 @@ def get_predictions(model: LinearModel,
 accuracy = accuracy_score
 
 
-def generate_and_save_classification_report(test_labels: list[int],
-                                            pred_labels: list[int],
-                                            dirpath: str,
-                                            mapping: Optional[dict] = None) -> DataFrame:
+def generate_and_save_classification_report(
+        test_labels: list[int],
+        pred_labels: list[int],
+        dirpath: str,
+        mapping: Optional[dict] = None) -> DataFrame:
     """
     Function to generate a classificaton report from the predicted data
     at dirpath as classification_report.csv
@@ -84,7 +85,7 @@ def generate_and_save_classification_report(test_labels: list[int],
         classification_report(test_labels, pred_labels,
                               output_dict=True)).transpose()
     print(report)
-    report.to_csv(path.join(dirpath,'classification_report.csv'))
+    report.to_csv(path.join(dirpath, 'classification_report.csv'))
 
     return report
 
@@ -164,7 +165,7 @@ def top_n_heatmap(model: LinearModel,
                 vmin=-1e-2,
                 vmax=1e-2)
 
-    plt.savefig(path.join(dirpath,'heatmap.png'))
+    plt.savefig(path.join(dirpath, 'heatmap.png'))
     return top_n_indices, top_n_genes
 
 
@@ -191,10 +192,10 @@ def roc_auc(test_labels: list[int],
 
         display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc)
         display.plot()
-        os.makedirs(os.path.join(dirpath,"roc_auc"), exist_ok=True)
+        os.makedirs(os.path.join(dirpath, "roc_auc"), exist_ok=True)
         plt.savefig(
-            os.path.join(dirpath,'roc_auc',f'{mapping[class_label].replace(" ", "_")}.png')
-        )
+            os.path.join(dirpath, 'roc_auc',
+                         f'{mapping[class_label].replace(" ", "_")}.png'))
 
 
 def _make_design_matrix(adata: Union[AnnData, AnnCollection],
