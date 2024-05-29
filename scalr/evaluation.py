@@ -208,7 +208,7 @@ def _make_design_matrix(adata: Union[AnnData, AnnCollection],
         adata: data to make design matrix from
         fixed_column: column name in `adata.obs` containing a fixed condition to subset
         fixed_condition: condition to subset data on, belonging to `fixed_column`
-        design_factor: column name in `adata.obs` containing the control condition
+        design_factor: column name in `adata.obs` containing different factor levels or categories
         factor_categories: list of conditions in `design_factor` to make design matrix for
         sum_column: column name to sum values across samples
 
@@ -251,7 +251,7 @@ def get_differential_expression_results(adata: AnnData,
     Args:
         adata: design matrix
         fixed_condition: condition to subset data on, belonging to `fixed_column`
-        design_factor: column name in `adata.obs` containing the control condition
+        design_factor: column name in `adata.obs` containing different factor levels or categories
         factor_categories: list of conditions in `design_factor` of design matrix
         dirpath: directory path to store DEG
 
