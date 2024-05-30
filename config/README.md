@@ -1,8 +1,9 @@
 
+
 # Config Parameters
 
 ## Experiment
-**device** {str}: `cuda` | `cpu`
+**device** {str}: `cuda | cpu`
 default: `cuda`
 Device to run the deep learning models on
 
@@ -24,10 +25,10 @@ Final experiment directory would be: `dirpath/{exp_name}_{exp_run}/`
 This will be considered as the root directory for this run, and all subsequent file operations, logging, storing would be done here. Any subsequent occurrence of `dirpath` should be assumed as the root directory and not parameter passed.
 
 ## Data
-**chunksize** {int}: `number` | `null`
+**chunksize** {int}: `int | null`
 default: `10000`
 Useful for low resources utilization. This will ensure all data is stored in multiple chunks of atmost `chunksize` samples. This does not hamper any logic in algorithms, but simply ensures that entire dataset is never loaded all at once on the RAM.
-`null` value will disregard this optimization. 
+`null` value will disregard this optimization.
 
 **split_data** {dict}:
 - **split_ratio** {list [int | float]}: `[x, y, z]`
@@ -44,7 +45,7 @@ To perform sample-wise normalization of expression values
 
 **full_datapath** {str}: `/path/to/data`
 Full data path, will be split into train, test, and val sets.
-The data will be split into Train/Validation/Test sets and used further. 
+The data will be split into Train/Validation/Test sets and used further.
 *Optional* if  `train_datapath`, `val_datapath`, `test_datapath` parameters are given.
 
 If `full_datapath` parameter is given, the following 3 paths will be overwritten. Otherwise they are *Required*
@@ -58,53 +59,149 @@ Test data path
 **target** {str}: `target`
 Target to perform classification on. Must be present as a column_name in `adata.obs`
 
-Notes:
-TODO
+## Feature_Selection
+**method_type** {str}: `feature_chunk`
+default: `feature_chunk`
+Algorithm to select top-k features. `feature_chunk` is the only available method right now.
 
-## Feature Selection
-**device** {str}: `cuda` | `cpu`
-default: `cuda`
-Device to run the deep learning models on
+**chunksize** {int}: `int | null`
+default: `3000`
+Chunks of features to subset data for training the model on iteratively.
 
-**dirpath** {str}: `/path/to/dir`
-default: `.`
-Base directory path for all experiments
+**model** {dict}:
+Model to train the feature chunks
+- **name** {str}: `nn`
+default: `nn`
+Type of model to train each feature-chunked-subset data. Only `nn` is available right now.
+- **params** {dict}:
+--- **epochs** {int}:
+default: `25`
+Max number of epochs for to train the model.
+--- **batch_size** {int}:
+default: `15000`
+Batch_size for data loading during training. The range of this depends upon how much data can fit on GPU RAM.
+--- **lr** {float}:
+default: `1e-2`
+Learning rate during training.
+--- **l2** {float}:
+default: `0.1`
+L2 Penalty during training.
 
-**exp_name** {str}: `experiment name`
-default: `scalr_test`
-Name of the experiment, usually based upon configurations.
-eg. scalr_ct_fs_5000_6
+**top_features_stats** {dict}:
+Configs for extracting top-k features
+- **k** {int}:
+default: `5000`
+Number of top features to extract.
+- **aggregation_strategy** {str}: `mean`
+default: `mean`
+Strategy to use model weights to give a score for each feature.
+`mean`: take the mean of absolute values of across all classes for each feature.
 
-**exp_run** {int}: `0`
+
+## Model
+**type** {str}: `linear`
+default: `linear`
+Type of model to train. Currently only `linear` model is available.
+
+**hyperparameters** {dict}:
+- **layers** {list [int]}: `[x, y, z]`
+*Required*
+List containing dimensions of each layer in the DNN model. The first value MUST correspond to the input features dimension, and last layer to the number of output classes.
+eg.  [10000, 1000, 10] will create a model taking input of 10000-d vectors, and create a 2-layered network having output as 10-d vector.
+- **dropout** {float}:
 default: `0`
-Experiment runs for comparison
-feature_selection:
+Dropout regularization after each layer.
+- **weights_init_zero** {bool}: `True | False`
+default: `False`
+Initialize the weights of model to zero.
 
-    # [Optional] path to weight matrix containing weights for all features across all classes
-    # If path specified, feature importance algorithm will not work, and directly use weights to perform selection
-    # weight_matrix: 'full_test_0/feature_selection/feature_class_weights.csv'
+**resume_from_checkpoint** {bool}: `True | False`
+default: `False`
+To resume training from a past checkpoint
 
-    chunksize: 5000
-    # [Required] chunks of features to train the model on iteratively
+**start_checkpoint** {str}: `/path/to/model`
+default: `null`
+*Required* if `resume_from_checkpoint` is True. Specifies the model checkpoint path to initiate weights and optimizer and start training
 
-    method_type: feature_chunk # Only method availble now
+## Training
+**opt** {str}: `adam | sgd`
+default: `adam`
+Optimizer used for training of DNN
 
-    # [Required] [name: logistic_classifier/nn]
-    # logistic regression: keyword args of logistic regression classifier of sklearn
-    #                      can be passes in params
-    # nn: params are optional, can include epochs, batch_size, lr- learning rate, l2- L2 weight penalty
-    model:
-      name: nn
-      params:
-          epochs: 1
+**loss_fn** {str}: `log | weighted_log`
+default: `log`
+Loss function used for training of DNN.
+Weighted log is used for uneven class distribution, where weights are inverse proportions of each class size.
 
-    # [Required]
-    # k: number of top features to extract
-    # aggregation_strategy: stratergies to obtain top features. only mean implemented now
-    top_features_stats:
-        k: 3000
-        aggregation_strategy: mean # [Required][mean/class weighted density/top (k/n_classes) per class]
+**batch_size** {int}:
+default: `5000`
+Batch_size for data loading during training. The range of this size depends upon how much data can fit on GPU RAM.
 
-    # Will store extracted features subset on disk
-    # the storage will be according to data=>chunksize parameter
-    store_on_disk: True
+**lr** {float}:
+default: `1e-3`
+Learning rate during training.
+
+**l2** {float}:
+default: `0`
+L2 Penalty during training.
+
+**epochs** {int}:
+default: `100`
+Maximum number of epochs to train the model for.
+
+**callbacks** {dict}:
+- **tensorboard_logging** {bool}: `True | False`
+default: `True`
+Flag to enable tensorboard logging to see training curves.
+- **early_stop** {dict}:
+--- **patience** {int}:
+default: `3`
+Max number of epochs for which validation loss does not improve before stopping
+--- **min_delta** {float}:
+default: `1e-4`
+Minimum increment in validation loss to count as improvement
+- **model_checkpoint** {dict}:
+--- **interval** {int}:
+default: `5`
+Intervals of epoch for which model weights are stored
+
+## Evaluation
+**model_checkpoint** {str}: `/path/to/model`
+Uses the model checkpoint to load model for evaluation.
+*Required* if running only analysis part in pipeline.
+If training is run before evaluation, the best model path overwrites `model_checkpoint` parameter.
+
+**batch_size** {int}:
+default: `5000`
+Batch size for data loading onto GPU during inference. Since inference does not store additional overheads for gradient, bigger numbers can be used.
+
+**metrics** {list[str]}: `['accuracy', 'report', 'roc_auc', 'deg']`
+default: `['accuracy', 'report']`
+A list of metrics to perform evaluation of trained model on.
+`accuracy`: Accuracy score for predictions on test set
+`report`: Detailed classification report showing how the model performed on each class, with recall, precision, f1-score metrics.
+`roc_auc`: store ROC-AUC plot of each class
+`deg`: perform differential gene expression analysis on data.
+
+**deg_config** {dict}:
+*Required* only if deg specified in `metrics`
+specific configurations to perform DEG
+- **fixed_column** {str}: *Required*
+column name in `data.obs` containing a fixed condition to subset
+- **fixed_condition** {str}: *Required*
+condition to subset data on, belonging to `fixed_column`
+- **design_factor** {str}: *Required*
+column name in `adata.obs` containing the control condition
+- **factor_categories** {str}: *Required*
+list of conditions in `design_factor` to make design matrix for
+- **sum_column** {str}: *Required*
+column name to sum values across samples
+- **fold_change** {float}:
+default: `1.5`
+fold change to filter the differentially expressed genes for volcano plot
+- **p_val** {float}:
+default: `0.05`
+p_val to filter the differentially expressed genes for volcano plot
+- **y_lim_tuple** {(float, ...)}:
+default: `null`
+values to adjust the Y-axis limits of the plot

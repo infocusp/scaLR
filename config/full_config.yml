@@ -73,9 +73,4 @@ training:
 evaluation:
     model_checkpoint: '/path/to/model'
     batch_size: 5000
-    metrics: ['accuracy', 'report']
-
-
-
-
-
+    metrics: ['accuracy', 'report', 'roc_auc']
