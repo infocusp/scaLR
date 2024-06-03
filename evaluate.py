@@ -1,4 +1,5 @@
 import os
+from os import path
 import sys
 import argparse
 
@@ -31,11 +32,12 @@ def evaluate(config, log=True):
     if 'metrics' not in evaluation_configs:
         return config
 
-    dirpath = f'{dirpath}/{exp_name}_{exp_run}'
-    os.makedirs(f'{dirpath}/results', exist_ok=True)
+    dirpath = path.join(dirpath, f'{exp_name}_{exp_run}')
+    resultpath = path.join(dirpath, 'results')
+    os.makedirs(resultpath, exist_ok=True)
 
     model_checkpoint = evaluation_configs['model_checkpoint']
-    model_ = read_yaml(f'{model_checkpoint}/config.yml')
+    model_ = read_yaml(path.join(model_checkpoint,'config.yml'))
     config['model'] = model_
     model_type = model_['type']
     model_hp = model_['hyperparameters']
@@ -46,12 +48,12 @@ def evaluate(config, log=True):
 
     test_data = read_data(test_datapath)
 
-    label_mappings = read_json(f'{model_checkpoint}/label_mappings.json')
+    label_mappings = read_json(path.join(model_checkpoint,'label_mappings.json'))
 
     if model_type == 'linear':
         model = LinearModel(**model_hp).to(device)
         model.load_state_dict(
-            torch.load(f'{model_checkpoint}/model.pt')['model_state_dict'])
+            torch.load(path.join(model_checkpoint,'model.pt'))['model_state_dict'])
 
         test_dl = simple_dataloader(test_data, target, batch_size,
                                     label_mappings)
@@ -70,17 +72,17 @@ def evaluate(config, log=True):
         print('\nClassification Report:')
         generate_and_save_classification_report(test_labels,
                                                 pred_labels,
-                                                f'{dirpath}/results',
+                                                resultpath,
                                                 mapping=id2label)
 
     if 'roc_auc' in metrics:
         print("\nROC & AUC:")
         roc_auc(test_labels,
                 pred_probabilities,
-                f'{dirpath}/results',
+                resultpath,
                 mapping=id2label)
 
-    dump_yaml(config, f'{dirpath}/config.yml')
+    dump_yaml(config, path.join(dirpath,'config.yml'))
     return config
 
 

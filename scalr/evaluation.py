@@ -1,4 +1,5 @@
 import os
+from os import path
 from typing import Optional
 
 import matplotlib.pyplot as plt
@@ -52,16 +53,16 @@ accuracy = accuracy_score
 
 def generate_and_save_classification_report(test_labels: list[int],
                                             pred_labels: list[int],
-                                            filepath: str,
+                                            dirpath: str,
                                             mapping: Optional[dict] = None):
     """
     Function to generate a classificaton report from the predicted data
-    at filepath as classification_report.csv
+    at dirpath as classification_report.csv
 
     Args:
         test_labels: true labels from test set
         pred_labels: predicted labels from trained model
-        filepath: path to store classification_report.csv
+        dirpath: path to store classification_report.csv
         mapping[optional]: mapping of label_id to true label_names (id2label)
 
     Returns:
@@ -76,7 +77,7 @@ def generate_and_save_classification_report(test_labels: list[int],
         classification_report(test_labels, pred_labels,
                               output_dict=True)).transpose()
     print(report)
-    report.to_csv(f'{filepath}/classification_report.csv')
+    report.to_csv(path.join(dirpath,'classification_report.csv'))
 
     return report
 
@@ -156,7 +157,7 @@ def top_n_heatmap(model: LinearModel,
                 vmin=-1e-2,
                 vmax=1e-2)
 
-    plt.savefig(f"{dirpath}/heatmap.png")
+    plt.savefig(path.join(dirpath,'heatmap.png'))
     return top_n_indices, top_n_genes
 
 
