@@ -1,4 +1,5 @@
 import os
+from os import path
 import json
 from typing import Callable
 
@@ -93,7 +94,7 @@ def _generate_train_val_test_split_indices(datapath: str,
     }
 
     if dirpath is not None:
-        dump_json(data_split, dirpath + '/data_split.json')
+        dump_json(data_split, path.join(dirpath,'data_split.json'))
 
     return data_split
 
@@ -126,9 +127,9 @@ def split_data(datapath: str,
             if process_fn is not None:
                 adata.X = process_fn(adata.X, **kwargs)
             write_data(adata[data_split[split_name]],
-                       f'{dirpath}/{split_name}.h5ad')
+                       path.join(dirpath,f'{split_name}.h5ad'))
         else:
-            os.makedirs(f'{dirpath}/{split_name}/', exist_ok=True)
+            os.makedirs(path.join(dirpath, split_name), exist_ok=True)
             curr_chunksize = len(
                 data_split[split_name]) - 1 if chunksize >= len(
                     data_split[split_name]) else chunksize
@@ -144,7 +145,7 @@ def split_data(datapath: str,
                     adata.X = adata.X.A
                 if process_fn is not None:
                     adata.X = process_fn(adata.X, **kwargs)
-                write_data(adata, f'{dirpath}/{split_name}/{i}.h5ad')
+                write_data(adata, path.join(dirpath, split_name,f'{i}.h5ad'))
 
 
 def generate_train_val_test_split(datapath: str,

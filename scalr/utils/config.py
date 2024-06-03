@@ -63,7 +63,7 @@ default_evaluation_config = {
 # THE DEFAULT CONFIGS TEMPLATE
 default_config_ = {
     'device': 'cpu',
-    'filepath': '.',
+    'dirpath': '.',
     'exp_name': 'run',
     'exp_run': 0,
     'data': {

@@ -1,4 +1,5 @@
 import os
+from os import path
 from time import time
 
 import torch
@@ -45,7 +46,7 @@ class Trainer:
         self.opt = opt_class(self.model.parameters(), lr=lr, weight_decay=l2)
 
         if model_checkpoint_path is not None:
-            state_dict = torch.load(f'{model_checkpoint_path}/model.pt')
+            state_dict = torch.load(path.join(model_checkpoint_path,'model.pt'))
             self.model.load_state_dict(state_dict['model_state_dict'])
             self.opt.load_state_dict(state_dict['optimizer_state_dict'])
 
@@ -149,6 +150,6 @@ class Trainer:
                 break
 
         self.model.load_state_dict(
-            torch.load(f'{self.dirpath}/best_model/model.pt')
+            torch.load(path.join(self.dirpath,'best_model','model.pt'))
             ['model_state_dict'])
-        torch.save(self.model, f'{self.dirpath}/best_model/model.bin')
+        torch.save(self.model, path.join(self.dirpath,'best_model','model.bin'))

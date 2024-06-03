@@ -1,4 +1,5 @@
 import os
+from os import path
 from typing import Union, Literal
 
 import numpy as np
@@ -52,7 +53,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
     lr = model_config['params'].get('lr', 1e-2)
     l2 = model_config['params'].get('l2', 0.1)
 
-    os.makedirs(f'{dirpath}/model_weights', exist_ok=True)
+    os.makedirs(path.join(dirpath,'model_weights'), exist_ok=True)
 
     best_model_weights = []
     i = 0
@@ -81,20 +82,20 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
             }
         }
 
-        chunk_dirpath = f'{dirpath}/model_weights/{i}'
-        os.makedirs(f'{chunk_dirpath}/best_model', exist_ok=True)
+        chunk_dirpath = path.join(dirpath,'model_weights',str(i))
+        os.makedirs(path.join(chunk_dirpath,'best_model'), exist_ok=True)
 
         chunk_trainer = Trainer(model, opt, lr, l2, loss_fn, callbacks, device,
                                 chunk_dirpath)
         chunk_trainer.train(epochs, train_dl, val_dl)
 
-        best_model_weights.append(f'{chunk_dirpath}/best_model/model.pt')
+        best_model_weights.append(path.join(chunk_dirpath,'best_model','model.pt'))
 
         i += 1
 
     # Selecting top_k features
     feature_class_weights = pd.DataFrame()
-    model_parent_path = f'{dirpath}/model_weights'
+    model_parent_path = path.join(dirpath,'model_weights')
 
     all_weights = []
     # Loading models from each chunk and generating feature class weights matrix.
@@ -110,7 +111,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
                                          index=id2label)
 
     # Storing feature class weights matrix.
-    feature_class_weights.to_csv(f'{dirpath}/feature_class_weights.csv')
+    feature_class_weights.to_csv(path.join(dirpath,'feature_class_weights.csv'))
 
     return feature_class_weights
 
@@ -138,7 +139,7 @@ def extract_top_k_features(feature_class_weights: DataFrame,
         raise NotImplementedError(
             'Other aggregation strategies are not implemented yet...')
 
-    with open(f'{dirpath}/top_features.txt', 'w') as fh:
+    with open(path.join(dirpath,'top_features.txt'), 'w') as fh:
         fh.write('\n'.join(top_features_list) + '\n')
 
     return top_features_list

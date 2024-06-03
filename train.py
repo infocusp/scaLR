@@ -1,4 +1,5 @@
 import os
+from os import path
 import sys
 import argparse
 
@@ -21,8 +22,8 @@ def train(config, log=True):
     exp_name = config['exp_name']
     exp_run = config['exp_run']
 
-    dirpath = f'{dirpath}/{exp_name}_{exp_run}'
-    os.makedirs(f'{dirpath}/', exist_ok=True)
+    dirpath = path.join(dirpath, f'{exp_name}_{exp_run}')
+    os.makedirs(dirpath, exist_ok=True)
 
     data_config = config['data']
     target = data_config['target']
@@ -41,7 +42,7 @@ def train(config, log=True):
     resume_from_checkpoint = config['model']['resume_from_checkpoint']
     if resume_from_checkpoint:
         model_checkpoint = config['model']['start_checkpoint']
-        model_ = read_yaml(f'{model_checkpoint}/config.yml')
+        model_ = read_yaml(path.join(model_checkpoint,'config.yml'))
         config['model']['type'] = model_['type']
         config['model']['hyperparameters'] = model_['hyperparameters']
     else:
@@ -51,9 +52,9 @@ def train(config, log=True):
     model_hp = config['model']['hyperparameters']
 
     if 'evaluation' in config:
-        config['evaluation']['model_checkpoint'] = f'{dirpath}/best_model'
+        config['evaluation']['model_checkpoint'] = path.join(dirpath,'best_model')
     else:
-        config['evaluation'] = {'model_checkpoint': f'{dirpath}/best_model'}
+        config['evaluation'] = {'model_checkpoint': path.join(dirpath,'best_model')}
 
     # TODO: add absl.logging functionality
     if log:
@@ -73,8 +74,6 @@ def train(config, log=True):
 
     # model creation and dataloaders
     if model_type == 'linear':
-        # features = model_hp['layers']
-        # dropout = model_hp['dropout']
         model = LinearModel(**model_hp)
 
         train_dl = simple_dataloader(train_data, target, batch_size,
@@ -111,9 +110,9 @@ def train(config, log=True):
                       model_checkpoint)
     trainer.train(epochs, train_dl, val_dl)
 
-    dump_yaml(config['model'], f'{dirpath}/best_model/config.yml')
-    dump_json(label_mappings, f'{dirpath}/best_model/label_mappings.json')
-    dump_yaml(config, f'{dirpath}/config.yml')
+    dump_yaml(config['model'], path.join(dirpath,'best_model','config.yml'))
+    dump_json(label_mappings, path.join(dirpath,'best_model','label_mappings.json'))
+    dump_yaml(config, path.join(dirpath,'config.yml'))
     return config
 
 

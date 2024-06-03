@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+
 from scalr.utils import load_config
 from train import train
 from evaluate import evaluate
