@@ -1,16 +1,18 @@
 import os
 from typing import Optional
 
+import anndata as ad
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torch
 import seaborn as sns
+import shap
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, RocCurveDisplay, roc_curve, auc
 from torch.utils.data import DataLoader
 from torch import nn
 
-from .model import LinearModel
+from .model import LinearModel, CustomShapModel
 from .utils import data_utils
 
 
@@ -103,67 +105,72 @@ def conf_matrix(test_labels: list[int],
     return confusion_matrix(test_labels, pred_labels)
 
 
-# TODO: change extraction method from weights maybe?
-def get_top_n_genes(
-        model: LinearModel,
-        n: int = 50,
-        genes: Optional[list[str]] = None) -> (list[int], list[str]):
+def save_top_genes_and_heatmap(
+    model: LinearModel,
+    test_dl: DataLoader,
+    classes: list,
+    dirpath: str,
+    device: str = 'cpu',
+    top_n: int = 50,
+) -> None:
     """
-    Function to get top_n genes and their indices using model weights.
+    Function to save top n genes of each class and save heatmap of gene to class weight.
 
     Args:
         model: trained model to extract weights from
-        n: number of top_genes to extract
-        genes: gene_name list
-
-    Return:
-        top_n gene indices, top_n gene names
-
+        test_dl: test dataloader.
+        classes: list of class names.
+        dirpath: dir where shap analysis csv & heatmap stored.
+        device: device for pytorch.
+        top_n: save top n genes based on shap values.
     """
-    weights = abs(model.state_dict()['lin.weight'].cpu())
-    top_n_indices = torch.mean(weights, dim=0).sort().indices[-n:].tolist()
-    top_n_genes = []
-    if genes is not None: top_n_genes = [genes[i] for i in top_n_indices]
-    return top_n_indices, top_n_genes
+    model.to(device)
+    shap_model = CustomShapModel(model)
+    explainer = shap.DeepExplainer(shap_model,
+                                   next(iter(test_dl))[0].to(device))
+
+    shap_values = []
+    for batch in test_dl:
+        batch_shap_values = explainer.shap_values(batch[0].to(device))
+        shap_values.append(batch_shap_values)
+
+    concate_shap_values = np.concatenate(shap_values).mean(axis=0)
+    genes_class_shap_df = pd.DataFrame(concate_shap_values,
+                                       index=test_dl.dataset.var_names,
+                                       columns=classes)
+
+    class_top_genes = {}
+    for class_name in classes:
+        sorted_genes = genes_class_shap_df[class_name].sort_values(
+            ascending=False)
+        class_top_genes[class_name] = sorted_genes.index[:top_n]
+
+    pd.DataFrame(class_top_genes).to_csv(
+        os.path.join(dirpath, "shap_analysis.csv"), index=False)
+
+    top_n_genes_heatmap(genes_class_shap_df, dirpath)
 
 
-def top_n_heatmap(model: LinearModel,
-                  dirpath: str,
-                  classes: list[str],
-                  n: int = 50,
-                  genes: Optional[list[str]] = None) -> (list[int], list[str]):
+def top_n_genes_heatmap(class_genes_weights: pd.DataFrame, dirpath: str):
     """
-    Generate a heatmap for top_n genes across all classes.
+    Generate a heatmap for top n genes across all classes.
 
     Args:
-        model: trained model to extract weights from
-        dirpath: path to store the heatmap image
-        classes: list of name of classes
-        n: number of top_genes to extract
-        genes: gene_name list
-
-    Return:
-        top_n gene indices, top_n gene names
+        class_genes_weights: genes * classes matrix which contains
+                             shap_value/weights of each gene to class.
+        dirpath: path to store the heatmap image.
     """
-    weights = model.state_dict()['lin.weight'].cpu()
-    top_n_indices, top_n_genes = get_top_n_genes(model, n, genes)
-    top_n_weights = weights[:, top_n_indices].transpose(0, 1)
 
     sns.set(rc={'figure.figsize': (9, 12)})
-    sns.heatmap(top_n_weights,
-                yticklabels=top_n_genes,
-                xticklabels=classes,
-                vmin=-1e-2,
-                vmax=1e-2)
+    sns.heatmap(class_genes_weights, vmin=-1e-2, vmax=1e-2)
 
-    plt.savefig(f"{dirpath}/heatmap.png")
-    return top_n_indices, top_n_genes
+    plt.savefig(os.path.join(dirpath, "heatmap.png"))
 
 
 def roc_auc(test_labels: list[int],
             pred_score: list[list[float]],
             dirpath: str,
-            mapping: Optional[dict] = None) -> None:
+            mapping: Optional[list] = None) -> None:
     """ Calculate ROC-AUC and save plot.
 
     Args:
@@ -173,7 +180,8 @@ def roc_auc(test_labels: list[int],
     # convert label predictions list to one-hot matrix.
     test_labels_onehot = data_utils.get_one_hot_matrix(np.array(test_labels))
 
-    for class_label in range(max(test_labels)):
+    # test labels starts with 0 so we need to add 1 in max.
+    for class_label in range(max(test_labels) + 1):
 
         # fpr: False Positive Rate | tpr: True Positive Rate
         fpr, tpr, _ = roc_curve(test_labels_onehot[:, class_label],
@@ -183,7 +191,7 @@ def roc_auc(test_labels: list[int],
 
         display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc)
         display.plot()
-        os.makedirs(os.path.join(dirpath,"roc_auc"), exist_ok=True)
+        os.makedirs(os.path.join(dirpath, "roc_auc"), exist_ok=True)
         plt.savefig(
-            os.path.join(dirpath,'roc_auc',f'{mapping[class_label].replace(" ", "_")}.png')
-        )
+            os.path.join(dirpath, 'roc_auc',
+                         f'{mapping[class_label].replace(" ", "_")}.png'))

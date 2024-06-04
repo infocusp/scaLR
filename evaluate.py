@@ -9,7 +9,7 @@ import numpy as np
 from scalr.utils import load_config, read_data, read_yaml, read_json, dump_yaml
 from scalr.dataloader import simple_dataloader
 from scalr.model import LinearModel
-from scalr.evaluation import get_predictions, accuracy, generate_and_save_classification_report, roc_auc
+from scalr.evaluation import get_predictions, accuracy, generate_and_save_classification_report, roc_auc, save_top_genes_and_heatmap
 from scalr import Trainer
 
 
@@ -77,10 +77,14 @@ def evaluate(config, log=True):
         print("\nROC & AUC:")
         roc_auc(test_labels,
                 pred_probabilities,
-                f'{dirpath}/results',
+                os.path.join(dirpath, 'results'),
                 mapping=id2label)
+    if 'shap' in metrics:
+        print("\n SHAP analysis:")
+        save_top_genes_and_heatmap(model, test_dl, id2label,
+                                   os.path.join(dirpath, 'results'), device)
 
-    dump_yaml(config, f'{dirpath}/config.yml')
+    dump_yaml(config, os.path.join(dirpath, 'config.yml'))
     return config
 
 
