@@ -28,7 +28,9 @@ def evaluate(config, log=True):
 
     evaluation_configs = config['evaluation']
     batch_size = evaluation_configs['batch_size']
-    if 'metrics' not in evaluation_configs:
+    shap_config = evaluation_configs.get('shap')
+    if ('metrics' not in evaluation_configs) and ('shap'
+                                                  not in evaluation_configs):
         return config
 
     dirpath = f'{dirpath}/{exp_name}_{exp_run}'
@@ -79,10 +81,16 @@ def evaluate(config, log=True):
                 pred_probabilities,
                 os.path.join(dirpath, 'results'),
                 mapping=id2label)
-    if 'shap' in metrics:
+    if shap_config:
         print("\n SHAP analysis:")
-        save_top_genes_and_heatmap(model, test_dl, id2label,
-                                   os.path.join(dirpath, 'results'), device)
+        save_top_genes_and_heatmap(model,
+                                   test_dl,
+                                   id2label,
+                                   os.path.join(dirpath, 'results'),
+                                   device,
+                                   top_n=shap_config.get('top_n', 20),
+                                   n_background_tensor=shap_config.get(
+                                       'background_tensor', 1000))
 
     dump_yaml(config, os.path.join(dirpath, 'config.yml'))
     return config

@@ -114,3 +114,6 @@ evaluation:
     model_checkpoint: './pipeline_train_0/best_model'
     batch_size: 5000
     metrics: ['accuracy', 'report', 'roc_auc']
+    shap:
+        top_n: 20
+        background_tensor: 1000

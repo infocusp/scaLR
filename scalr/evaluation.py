@@ -111,7 +111,8 @@ def save_top_genes_and_heatmap(
     classes: list,
     dirpath: str,
     device: str = 'cpu',
-    top_n: int = 50,
+    top_n: int = 20,
+    n_background_tensor: int = 1000,
 ) -> None:
     """
     Function to save top n genes of each class and save heatmap of gene to class weight.
@@ -126,8 +127,9 @@ def save_top_genes_and_heatmap(
     """
     model.to(device)
     shap_model = CustomShapModel(model)
-    explainer = shap.DeepExplainer(shap_model,
-                                   next(iter(test_dl))[0].to(device))
+    explainer = shap.DeepExplainer(
+        shap_model,
+        next(iter(test_dl))[0][:n_background_tensor].to(device))
 
     shap_values = []
     for batch in test_dl:
@@ -140,15 +142,17 @@ def save_top_genes_and_heatmap(
                                        columns=classes)
 
     class_top_genes = {}
+    common_genes = set()
     for class_name in classes:
         sorted_genes = genes_class_shap_df[class_name].sort_values(
             ascending=False)
         class_top_genes[class_name] = sorted_genes.index[:top_n]
+        common_genes.update(set(sorted_genes.index[:top_n]))
 
     pd.DataFrame(class_top_genes).to_csv(
         os.path.join(dirpath, "shap_analysis.csv"), index=False)
 
-    top_n_genes_heatmap(genes_class_shap_df, dirpath)
+    top_n_genes_heatmap(genes_class_shap_df.loc[list(common_genes)], dirpath)
 
 
 def top_n_genes_heatmap(class_genes_weights: pd.DataFrame, dirpath: str):
