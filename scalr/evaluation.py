@@ -107,6 +107,7 @@ def conf_matrix(test_labels: list[int],
 
 def save_top_genes_and_heatmap(
     model: LinearModel,
+    train_dl: DataLoader,
     test_dl: DataLoader,
     classes: list,
     dirpath: str,
@@ -119,6 +120,7 @@ def save_top_genes_and_heatmap(
 
     Args:
         model: trained model to extract weights from
+        train_dl: train dataloader.
         test_dl: test dataloader.
         classes: list of class names.
         dirpath: dir where shap analysis csv & heatmap stored.
@@ -129,7 +131,7 @@ def save_top_genes_and_heatmap(
     shap_model = CustomShapModel(model)
     explainer = shap.DeepExplainer(
         shap_model,
-        next(iter(test_dl))[0][:n_background_tensor].to(device))
+        next(iter(train_dl))[0][:n_background_tensor].to(device))
 
     shap_values = []
     for batch in test_dl:

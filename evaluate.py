@@ -25,6 +25,7 @@ def evaluate(config, log=True):
     data_config = config['data']
     target = data_config['target']
     test_datapath = data_config['test_datapath']
+    train_datapath = data_config.get('train_datapath')
 
     evaluation_configs = config['evaluation']
     batch_size = evaluation_configs['batch_size']
@@ -82,8 +83,15 @@ def evaluate(config, log=True):
                 os.path.join(dirpath, 'results'),
                 mapping=id2label)
     if shap_config:
-        print("\n SHAP analysis:")
+        print("\nSHAP analysis:")
+        if train_datapath:
+            train_data = read_data(train_datapath)
+            train_dl = simple_dataloader(train_data, target, batch_size,
+                                        label_mappings)
+        else:
+            raise ValueError("Train data/path required for SHAP analysis.")
         save_top_genes_and_heatmap(model,
+                                   train_dl,
                                    test_dl,
                                    id2label,
                                    os.path.join(dirpath, 'results'),
