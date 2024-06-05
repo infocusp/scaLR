@@ -3,8 +3,8 @@
 # EXPERIMENT
 device: 'cuda' # [Optional][cuda/cpu] device to run the deep learning models on
 dirpath: '.' # [Required] base directory path for all experiments
-exp_name: 'scp_test_final' # [Required] experiment name
-exp_run: 7 # [Required] experiment run to compare
+exp_name: 'scp_test_eval' # [Required] experiment name
+exp_run: 1 # [Required] experiment run to compare
 # Final experiment directory would be: dirpath/{exp_name}_{exp_run}/
 
 # DATA
@@ -14,32 +14,31 @@ data:
     # [null] for storing data in one file.
 
     # [Optional] To split full anndata dataset file into train/val/test sets
-    split_data:
-        split_ratio: [7, 1, 2.5] # [Required] ratio to split full data => train : val : test
-        stratify: 'donor_id' # [Optional][column in metadata / null] split stratified on parameter in metadata
+    # split_data:
+    #     split_ratio: [7, 1, 2.5] # [Required] ratio to split full data => train : val : test
+    #     stratify: 'donor_id' # [Optional][column in metadata / null] split stratified on parameter in metadata
 
     # [Optional] To perform sample-wise normalization of expression values
     normalize_data: True
 
-    full_datapath: '/home/biocusp/data/scp_ad/full.h5ad' # full data path, will be split into train, test, and val sets. [Required] for splitting of data
+    # full_datapath: '/home/biocusp/data/scp_ad/full.h5ad' # full data path, will be split into train, test, and val sets. [Required] for splitting of data
 
     # Note if split_data is given, following split paths will be overwritten
     # if spilt_data not given, paths are [Required]
-    train_datapath: '/home/biocusp/data/scp_ad/train.h5ad' # training data path
-    val_datapath: '/home/biocusp/data/scp_ad/val.h5ad' # validation data path
-    test_datapath: '/home/biocusp/data/scp_ad/test.h5ad' # testing data path
+    train_datapath: '/home/saiyam/projects/biocusp/scripts/scp_test_final_7/feature_selection/train' # training data path
+    val_datapath: '/home/saiyam/projects/biocusp/scripts/scp_test_final_7/feature_selection/val' # validation data path
+    test_datapath: '/home/saiyam/projects/biocusp/scripts/scp_test_final_7/feature_selection/test' # testing data path
 
     target: Cell_Type # [Required] target to perform classification on. Must be present as a column_name in adata.obs
 
 # Feature selection technique
 feature_selection:
-
-    # [Optional] path to weight matrix containing weights for all features across all classes
-    # If path specified, feature importance algorithm will not work, and directly use weights to perform selection
-    # weight_matrix: 'full_test_0/feature_selection/feature_class_weights.csv'
-
     chunksize: 5000
     # [Required] chunks of features to train the model on iteratively
+
+    # weight_matrix: 'full_test_0/feature_selection/feature_class_weights.csv'
+    # [Optional] path to weight matrix containing weights for all features across all classes
+    # If path specified, feature importance algorithm will not work, and directly use weights to perform selection
 
     method_type: feature_chunk # Only method availble now
 
@@ -51,6 +50,7 @@ feature_selection:
       name: nn
       params:
           epochs: 1
+          batch_size: 50000
 
     # [Required]
     # k: number of top features to extract
@@ -108,12 +108,29 @@ training:
 # model_checkpoint: [OPTIONAL IF USING WITH PIPELINE AFTER TRAINING]
 #     path_to_model_checkpoint: use model checkpoint to load model
 # batch_size: evaluation batch_size
-# evaluation_metrics: metrics to perform evaluation available:['accuracy', 'report', 'roc_auc']
+# evaluation_metrics: metrics to perform evaluation available:['accuracy', 'report', 'roc_auc', 'deg']
+
+# deg_config: [Optional] [required if 'deg' in evaluation_metrics]
+#     fixed_column: [Required] column name in `adata.obs` containing a fixed condition to subset
+#     fixed_condition: [Required] condition to subset data on, belonging to `fixed_column`
+#     control_column: Required] column name in `adata.obs` containing the control condition
+#     control_conditions: Required] list of conditions in `control_column` to make design matrix for
+#     sum_column: Required] column name to sum values across samples
+#     fold_change: fold change to filter the differentially expressed genes for volcano plot
+#     p_val: p_val to filter the differentially expressed genes for volcano plot
+#     y_lim_tuple: values to adjust the Y-axis limits of the plot
+
 # EVALUATION
 evaluation:
-    model_checkpoint: './pipeline_train_0/best_model'
+    model_checkpoint: './scp_test_final_7/best_model'
     batch_size: 5000
-    metrics: ['accuracy', 'report', 'roc_auc']
+    metrics: ['accuracy', 'report', 'roc_auc', 'deg']
+    deg_config:
+        fixed_column: 'Cell_Type'
+        fixed_condition: 'B'
+        design_factor: 'Cell_State'
+        factor_categories: ['BS1', 'BS2']
+        sum_column: 'donor_id'
     shap:
         top_n: 20
         background_tensor: 1000

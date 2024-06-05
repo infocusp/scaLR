@@ -1,4 +1,5 @@
 import os
+from os import path
 import sys
 import argparse
 
@@ -16,7 +17,8 @@ def ingest_data(config, log=True):
     exp_name = config['exp_name']
     exp_run = config['exp_run']
 
-    dirpath = f'{dirpath}/{exp_name}_{exp_run}'
+    dirpath = path.join(dirpath, f'{exp_name}_{exp_run}')
+    datapath = path.join(dirpath,'data')
 
     data_config = config['data']
     target = data_config['target']
@@ -24,7 +26,7 @@ def ingest_data(config, log=True):
 
     process_fn = normalize_data if normalize else None
 
-    os.makedirs(f'{dirpath}/', exist_ok=True)
+    os.makedirs(dirpath, exist_ok=True)
 
     # TODO: add absl.logging functionality
     if log:
@@ -32,7 +34,7 @@ def ingest_data(config, log=True):
 
     # Train Val Test Split
     if 'split_data' in data_config:
-        os.makedirs(f'{dirpath}/data/', exist_ok=True)
+        os.makedirs(datapath, exist_ok=True)
 
         full_datapath = data_config['full_datapath']
         chunksize = data_config['chunksize']
@@ -41,31 +43,31 @@ def ingest_data(config, log=True):
         stratify = split_config.get('stratify', None)
 
         generate_train_val_test_split(full_datapath, split_ratio, target,
-                                      stratify, f'{dirpath}/data', chunksize,
+                                      stratify, datapath, chunksize,
                                       process_fn)
 
     # Normalize existing splits
     if normalize and 'split_data' not in data_config:
-        os.makedirs(f'{dirpath}/data/', exist_ok=True)
+        os.makedirs(datapath, exist_ok=True)
 
         chunksize = data_config['chunksize']
 
         for split_name in ['train', 'val', 'test']:
             split_data(data_config[f'{split_name}_datapath'], {split_name: -1},
-                       f'{dirpath}/data/', chunksize, process_fn)
+                       datapath, chunksize, process_fn)
 
     # changing dirpath in config
     if normalize or 'split_data' in data_config:
-        config['data']['train_datapath'] = f'{dirpath}/data/train'
-        config['data']['val_datapath'] = f'{dirpath}/data/val'
-        config['data']['test_datapath'] = f'{dirpath}/data/test'
+        config['data']['train_datapath'] = path.join(datapath,'train')
+        config['data']['val_datapath'] = path.join(datapath,'val')
+        config['data']['test_datapath'] = path.join(datapath,'test')
 
         if chunksize is None:
             config['data']['train_datapath'] += '.h5ad'
             config['data']['val_datapath'] += '.h5ad'
             config['data']['test_datapath'] += '.h5ad'
 
-    dump_yaml(config, f'{dirpath}/config.yml')
+    dump_yaml(config, path.join(dirpath,'config.yml'))
     return config
 
 
