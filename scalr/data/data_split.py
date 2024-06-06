@@ -5,6 +5,7 @@ from typing import Callable
 
 import anndata as ad
 from anndata import AnnData
+import numpy as np
 from sklearn.model_selection import GroupShuffleSplit, StratifiedShuffleSplit
 
 from ..utils import write_data, dump_json, read_data
@@ -112,7 +113,7 @@ def split_data(datapath: str,
         dirpath: path to store new split data.
         sample_chunksize: numberadata of samples to store in one chunk, after splitting the data.
         process_fn: a function which takes in data chunk to perform operations on it like Normalization
-        **kwargs: keyword arguments to pass to `process` function besides adata
+        **kwargs: keyword arguments to pass to `process_fn` apart from adata's numpy array.
     """
     total_samples = len(read_data(datapath))
 
@@ -121,8 +122,10 @@ def split_data(datapath: str,
             data_split[split_name] = list(range(total_samples))
         if sample_chunksize is None:
             adata = read_data(datapath).to_memory()
+            if not isinstance(adata.X, np.ndarray):
+                adata.X = adata.X.A
             if process_fn is not None:
-                adata = process_fn(adata, **kwargs)
+                adata.X = process_fn(adata.X, **kwargs)
             write_data(adata[data_split[split_name]],
                        path.join(dirpath,f'{split_name}.h5ad'))
         else:
@@ -138,8 +141,10 @@ def split_data(datapath: str,
                 if not isinstance(adata, AnnData):
                     adata = adata.to_adata()
                 adata = adata.to_memory()
+                if not isinstance(adata.X, np.ndarray):
+                    adata.X = adata.X.A
                 if process_fn is not None:
-                    adata = process_fn(adata, **kwargs)
+                    adata.X = process_fn(adata.X, **kwargs)
                 write_data(adata, path.join(dirpath, split_name,f'{i}.h5ad'))
 
 

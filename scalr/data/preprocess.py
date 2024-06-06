@@ -1,20 +1,17 @@
 from typing import Union
 
-import anndata as ad
-from anndata import AnnData
-from anndata.experimental import AnnCollection
 import numpy as np
 
 
-def normalize_samples(adata: AnnData, scaling_factor: float = 1.0):
+def normalize_samples(data: np.ndarray, scaling_factor: float = 1.0):
     """Normalize each sample in data
 
     Args:
-        adata: AnnData object to normalize
+        data: numpy array object to normalize
         scaling_factor: factor by which to scale normalized data
 
     Returns:
-        Normalized AnnData
+        Normalized numpy array
     """
-    adata.X *= (scaling_factor / (adata.X.sum(axis=1).reshape(len(adata), 1)))
-    return adata
+    data *= (scaling_factor / (data.sum(axis=1).reshape(len(data), 1)))
+    return data
