@@ -35,7 +35,7 @@ def train(config, log=True):
     lossfunc = train_config['loss']
     batch_size = train_config['batch_size']
     lr = train_config['lr']
-    l2 = float(train_config['l2'])
+    weight_decay = float(train_config['weight_decay'])
     epochs = train_config['epochs']
     callbacks = train_config['callbacks']
 
@@ -108,7 +108,7 @@ def train(config, log=True):
         raise NotImplementedError(
             'Only `log` and `weighted_log` available as options!')
 
-    trainer = Trainer(model, opt, lr, l2, loss_fn, callbacks, device, dirpath,
+    trainer = Trainer(model, opt, lr, weight_decay, loss_fn, callbacks, device, dirpath,
                       model_checkpoint)
     trainer.train(epochs, train_dl, val_dl)
 

@@ -1,5 +1,5 @@
 data_config = {
-    'chunksize': 10000,
+    'sample_chunksize': 10000,
     'normalize_data': False
 }
 
@@ -8,7 +8,7 @@ data_split_config = {
 }
 
 feature_selection_config = {
-    'chunksize': 2000,
+    'sample_chunksize': 2000,
     'method_type': 'feature_chunk',
     'model': {
         'name': 'nn',
@@ -16,7 +16,7 @@ feature_selection_config = {
             'epochs': 25,
             'batch_size': 15000,
             'lr': 1.0e-3,
-            'l2': 0.1
+            'weight_decay': 0.1
         }
     },
     'top_features_stats': {
@@ -41,7 +41,7 @@ train_config = {
     'loss': 'log',
     'batch_size': 5000,
     'lr': 0.001,
-    'l2': 0,
+    'weight_decay': 0,
     'epochs': 100,
     'callbacks': {
         'tensorboard_logging': True,

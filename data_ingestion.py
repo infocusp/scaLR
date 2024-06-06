@@ -36,24 +36,24 @@ def ingest_data(config, log=True):
         os.makedirs(f'{dirpath}/data/', exist_ok=True)
 
         full_datapath = data_config['full_datapath']
-        chunksize = data_config['chunksize']
+        sample_chunksize = data_config['sample_chunksize']
         split_config = data_config['split_data']
         split_ratio = split_config['split_ratio']
         stratify = split_config.get('stratify', None)
 
         generate_train_val_test_split(full_datapath, split_ratio, target,
-                                      stratify, f'{dirpath}/data', chunksize,
+                                      stratify, f'{dirpath}/data', sample_chunksize,
                                       process_fn)
 
     # Normalize existing splits
     if normalize and 'split_data' not in data_config:
         os.makedirs(f'{dirpath}/data/', exist_ok=True)
 
-        chunksize = data_config['chunksize']
+        sample_chunksize = data_config['sample_chunksize']
 
         for split_name in ['train', 'val', 'test']:
             split_data(data_config[f'{split_name}_datapath'], {split_name: -1},
-                       f'{dirpath}/data/', chunksize, process_fn)
+                       f'{dirpath}/data/', sample_chunksize, process_fn)
 
     # changing dirpath in config
     if normalize or 'split_data' in data_config:
@@ -61,7 +61,7 @@ def ingest_data(config, log=True):
         config['data']['val_datapath'] = f'{dirpath}/data/val'
         config['data']['test_datapath'] = f'{dirpath}/data/test'
 
-        if chunksize is None:
+        if sample_chunksize is None:
             config['data']['train_datapath'] += '.h5ad'
             config['data']['val_datapath'] += '.h5ad'
             config['data']['test_datapath'] += '.h5ad'

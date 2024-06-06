@@ -1,5 +1,3 @@
-
-
 # Config Parameters
 
 ## Experiment
@@ -18,16 +16,16 @@ eg. scalr_ct_fs_5000_6
 
 **exp_run** {int}: `0`  
 default: `0`  
-Experiment runs for comparison
+The n-th run for `exp_name`
 
 Notes:  
 Final experiment directory would be: `dirpath/{exp_name}_{exp_run}/`  
-This will be considered as the root directory for this run, and all subsequent file operations, logging, storing would be done here. Any subsequent occurrence of `dirpath` should be assumed as the root directory and not parameter passed.  
+This will be considered as the root directory for this experiment run, and all subsequent I/O operations like logging, storing of files, configs, results would be done here.  
 
 ## Data
-**chunksize** {int}: `int | null`  
+**sample_chunksize** {int}: `int | null`  
 default: `10000`  
-Useful for low resources utilization. This will ensure all data is stored in multiple chunks of atmost `chunksize` samples. This does not hamper any logic in algorithms, but simply ensures that entire dataset is never loaded all at once on the RAM.  
+Useful for low resources utilization. This will ensure all data is stored in multiple chunks of atmost `sample_chunksize` samples. This does not hamper any logic in algorithms, but simply ensures that entire dataset is never loaded all at once on the RAM.  
 `null` value will disregard this optimization.
 
 **split_data** {dict}:  
@@ -64,7 +62,7 @@ Target to perform classification on. Must be present as a column_name in `adata.
 default: `feature_chunk`  
 Algorithm to select top-k features. `feature_chunk` is the only available method right now.  
 
-**chunksize** {int}: `int | null`  
+**feature_chunksize** {int}: `int | null`  
 default: `3000`  
 Chunks of features to subset data for training the model on iteratively.
 
@@ -83,7 +81,7 @@ Batch_size for data loading during training. The range of this depends upon how 
 --- **lr** {float}:  
 default: `1e-2`  
 Learning rate during training.  
---- **l2** {float}:  
+--- **weight_decay** {float}:  
 default: `0.1`  
 L2 Penalty during training.  
 
@@ -91,7 +89,7 @@ L2 Penalty during training.
 Configs for extracting top-k features  
 - **k** {int}:  
 default: `5000`  
-Number of top features to extract.  
+Number of top features to select.  
 - **aggregation_strategy** {str}: `mean`  
 default: `mean`  
 Strategy to use model weights to give a score for each feature.  
@@ -141,7 +139,7 @@ Batch_size for data loading during training. The range of this size depends upon
 default: `1e-3`  
 Learning rate during training.  
 
-**l2** {float}:  
+**weight_decay** {float}:  
 default: `0`  
 L2 Penalty during training.  
 

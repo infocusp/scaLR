@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from scalr.utils.file import read_yaml
-from .default_config import *
+from .default_config import data_config, data_split_config, feature_selection_config, train_config, model_config, evaluation_config
 
 # THE DEFAULT CONFIGS TEMPLATE
 default_config_template = {
@@ -13,7 +13,7 @@ default_config_template = {
 
 
 def overwrite_default(user_config: dict, default_config: dict) -> dict:
-    """The funnction recursively overwrites information from user_config onto the default_config"""
+    """The function recursively overwrites information from user_config onto the default_config"""
     for key in user_config.keys():
         if key not in default_config.keys() or not isinstance(
                 user_config[key], dict):

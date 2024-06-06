@@ -18,7 +18,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
                      val_data: Union[AnnData, AnnCollection],
                      target: str,
                      model_config: dict,
-                     chunksize: int,
+                     feature_chunksize: int,
                      dirpath: str,
                      device: Literal['cpu', 'cuda'] = 'cpu') -> list[str]:
     """Select features using feature chunking approach.
@@ -30,7 +30,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
             val_data: validation_dataset (anndata object)
             target: target class which is present in dataset.obs for classifcation training
             model_config: dict containing type of model, and it related config
-            chunksize: number of features to take in one training instance
+            feature_chunksize: number of features to take in one training instance
             dirpath: directory to store all model_weights and top_features
             device: [cpu/cuda] device to perform training on.
 
@@ -50,16 +50,16 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
     epochs = model_config['params'].get('epochs', 25)
     batch_size = model_config['params'].get('batch_size', 15000)
     lr = model_config['params'].get('lr', 1e-2)
-    l2 = model_config['params'].get('l2', 0.1)
+    weight_decay = model_config['params'].get('weight_decay', 0.1)
 
     os.makedirs(f'{dirpath}/model_weights', exist_ok=True)
 
     best_model_weights = []
     i = 0
-    for start in range(0, len(train_data.var_names), chunksize):
+    for start in range(0, len(train_data.var_names), feature_chunksize):
 
-        train_features_subset = train_data[:, start:start + chunksize]
-        val_features_subset = val_data[:, start:start + chunksize]
+        train_features_subset = train_data[:, start:start + feature_chunksize]
+        val_features_subset = val_data[:, start:start + feature_chunksize]
 
         train_dl = simple_dataloader(train_features_subset, target, batch_size,
                                      label_mappings)
@@ -84,7 +84,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
         chunk_dirpath = f'{dirpath}/model_weights/{i}'
         os.makedirs(f'{chunk_dirpath}/best_model', exist_ok=True)
 
-        chunk_trainer = Trainer(model, opt, lr, l2, loss_fn, callbacks, device,
+        chunk_trainer = Trainer(model, opt, lr, weight_decay, loss_fn, callbacks, device,
                                 chunk_dirpath)
         chunk_trainer.train(epochs, train_dl, val_dl)
 

@@ -2,11 +2,11 @@
 device: 'cuda'
 dirpath: '.'
 exp_name: 'scp_test_config'
-exp_run: 0
+exp_run: 1
 
 # DATA
 data:
-    chunksize: 10000
+    sample_chunksize: 10000
     full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
 
     split_data:
@@ -26,7 +26,7 @@ feature_selection:
 
     # weight_matrix: '/path/to/matrix'
 
-    chunksize: 3000
+    feature_chunksize: 3000
     method_type: feature_chunk
 
     model:
@@ -35,7 +35,7 @@ feature_selection:
           epochs: 1
           batch_size: 15000
           lr: 1.0e-3
-          l2: 0.1
+          weight_decay: 0.1
 
     top_features_stats:
         k: 3000
@@ -57,7 +57,7 @@ training:
     loss: 'log'
     batch_size: 15000
     lr: 1.0e-3
-    l2: 0
+    weight_decay: 0
     epochs: 1
     callbacks:
         tensorboard_logging: True
