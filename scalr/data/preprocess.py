@@ -1,9 +1,9 @@
 from typing import Union
 
-import numpy as np
 import anndata as ad
 from anndata import AnnData
 from anndata.experimental import AnnCollection
+import numpy as np
 
 
 def normalize_samples(adata: AnnData, scaling_factor: float = 1.0):
