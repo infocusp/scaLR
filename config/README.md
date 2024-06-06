@@ -32,6 +32,8 @@ Useful for low resources utilization. This will ensure all data is stored in mul
 - **split_ratio** {list [int | float]}: `[x, y, z]`  
 default: `[7, 1, 2]`  
 Ratio to split full data => train : val : test  
+eg. There is a full dataset with 130k samples, and we want the train set with 100k, validation with 10k, and test with 20k samples. We will put up `split_ratio` as `[10, 1, 2]`. This indicates the ratios of 3 splits.  
+eg. In terms of precentages if we want train set with 80%, validation with 5% and test with 15%, we can use `split_ratio` as `[80, 5, 15]`.  
 - **stratify** {str}: `group | null`  
 default: `null`  
 Column in metadata which has multiple groups, based upon which split is stratified. This ensures that one group can belong only to one split

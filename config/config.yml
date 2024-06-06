@@ -8,7 +8,6 @@ data:
 
 feature_selection:
     feature_chunksize: 2000
-    method_type: feature_chunk
     model:
       params:
           epochs: 25
