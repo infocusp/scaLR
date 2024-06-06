@@ -8,7 +8,7 @@ import numpy as np
 
 from config.utils import load_config
 from scalr.utils import read_data, read_yaml, dump_yaml, dump_json
-from scalr.data import generate_train_val_test_split, normalize_data, split_data
+from scalr.data import generate_train_val_test_split, normalize_samples, split_data
 
 
 def ingest_data(config, log=True):
@@ -21,9 +21,9 @@ def ingest_data(config, log=True):
 
     data_config = config['data']
     target = data_config['target']
-    normalize = data_config['normalize_data']
+    normalize = data_config['normalize_samples']
 
-    process_fn = normalize_data if normalize else None
+    process_fn = normalize_samples if normalize else None
 
     os.makedirs(f'{dirpath}/', exist_ok=True)
 

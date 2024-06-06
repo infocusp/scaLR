@@ -13,7 +13,7 @@ data:
         split_ratio: [7, 1, 2.5]
         stratify: 'donor_id'
 
-    normalize_data: False
+    normalize_samples: False
 
     # train_datapath: '/path/to/train_data'
     # val_datapath: '/path/to/val_data'

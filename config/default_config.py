@@ -1,6 +1,6 @@
 data_config = {
     'sample_chunksize': 10000,
-    'normalize_data': False
+    'normalize_samples': False
 }
 
 data_split_config = {

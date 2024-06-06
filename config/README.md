@@ -37,7 +37,7 @@ default: `null`
 Column in metadata which has multiple groups, based upon which split is stratified. This ensures that one group can belong only to one split
 
 
-**normalize_data** {bool}: `True | False`  
+**normalize_samples** {bool}: `True | False`  
 default: `False`  
 To perform sample-wise normalization of expression values
 
@@ -175,7 +175,7 @@ Batch size for data loading onto GPU during inference. Since inference does not 
 
 **metrics** {list[str]}: `['accuracy', 'report', 'roc_auc', 'deg']`  
 default: `['accuracy', 'report']`  
-A list of metrics to perform evaluation of trained model on.  
+A list of evaluation metrics on the trained model.  
 `accuracy`: Accuracy score for predictions on test set  
 `report`: Detailed classification report showing how the model performed on each class, with recall, precision, f1-score metrics.  
 `roc_auc`: store ROC-AUC plot of each class  

@@ -6,7 +6,7 @@ from anndata import AnnData
 from anndata.experimental import AnnCollection
 
 
-def normalize_data(adata: AnnData, scaling_factor: float = 1.0):
+def normalize_samples(adata: AnnData, scaling_factor: float = 1.0):
     """Normalize each sample in data
 
     Args:
