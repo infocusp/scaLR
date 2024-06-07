@@ -181,6 +181,7 @@ def roc_auc(test_labels: list[int],
     """
     # convert label predictions list to one-hot matrix.
     test_labels_onehot = data_utils.get_one_hot_matrix(np.array(test_labels))
+    fig, ax = plt.subplots(1, 1, figsize=(16, 8))
 
     for class_label in range(max(test_labels)):
 
@@ -191,11 +192,10 @@ def roc_auc(test_labels: list[int],
         roc_auc = auc(fpr, tpr)
 
         display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc)
-        display.plot()
-        os.makedirs(os.path.join(dirpath, "roc_auc"), exist_ok=True)
-        plt.savefig(
-            os.path.join(dirpath, 'roc_auc',
-                         f'{mapping[class_label].replace(" ", "_")}.png'))
+        display.plot(ax=ax, name=mapping[class_label])
+
+    plt.axline((0, 0), (1, 1), linestyle='--', color='black')
+    fig.savefig(path.join(dirpath, f'roc_auc.png'))
 
 
 def _make_design_matrix(adata: Union[AnnData, AnnCollection],
@@ -281,7 +281,8 @@ def get_differential_expression_results(adata: AnnData,
 
     if dirpath:
         results_df.to_csv(
-            f'{dirpath}/DEG_results_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.csv'
+            path.join(dirpath,
+                      f'DEG_results_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.csv')
         )
 
     return results_df
@@ -375,8 +376,12 @@ def plot_volcano(deg_results_df: DataFrame,
     if y_lim_tuple:
         plt.ylim(bottom=y_lim_tuple[0], top=y_lim_tuple[1])
     plt.savefig(
-        f'{dirpath}/DEG_plot_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.png',
-        bbox_inches='tight')
+        path.join(
+            dirpath,
+            f'DEG_plot_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.png'
+        ),
+        bbox_inches='tight'
+    )
 
 
 def perform_differential_expression_analysis(adata: Union[AnnData,
