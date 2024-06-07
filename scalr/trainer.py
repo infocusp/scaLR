@@ -21,7 +21,7 @@ class Trainer:
                  model: LinearModel,
                  opt_class: Optimizer = torch.optim.Adam,
                  lr: float = 1e-3,
-                 l2: float = 0,
+                 weight_decay: float = 0,
                  loss_fn: Module = nn.CrossEntropyLoss(),
                  callback_params: dict = None,
                  device: str = 'cuda',
@@ -32,7 +32,7 @@ class Trainer:
             model: model to train
             opt_class: optimizer class to train model parameters
             lr: learning rate for optimizer
-            l2: L2 penalty for weights
+            weight_decay: L2 penalty for weights
             loss_fn: loss function for training
             callback_params: callback params : dict {'model_checkpoint_interval', 'early_stop_patience', 'early_stop_min_delta'}
             device: device for compuations ('cpu'/'cuda')
@@ -43,7 +43,7 @@ class Trainer:
         if not torch.cuda.is_available(): self.device = 'cpu'
 
         self.model = model.to(self.device)
-        self.opt = opt_class(self.model.parameters(), lr=lr, weight_decay=l2)
+        self.opt = opt_class(self.model.parameters(), lr=lr, weight_decay=weight_decay)
 
         if model_checkpoint_path is not None:
             state_dict = torch.load(path.join(model_checkpoint_path,'model.pt'))

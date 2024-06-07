@@ -57,12 +57,12 @@ def read_data(filepath: str,
     return data
 
 
-def write_data(adata: AnnData, filepath: str, chunksize: int = None):
+def write_data(adata: AnnData, filepath: str, sample_chunksize: int = None):
     """Writes the AnnData to filepath."""
-    if chunksize is None:
+    if sample_chunksize is None:
         adata.write(filepath, compression="gzip")
     else:
         raise NotImplementedError(
-            'Only `chunksize=None` available as options!')
+            'Only `sample_chunksize=None` available as options!')
     # TODO:
-    # implement chunkwise writing of anndata to handle chunksize not None
+    # implement chunkwise writing of anndata to handle sample_chunksize not None

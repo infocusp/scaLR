@@ -3,7 +3,7 @@ from typing import Union
 import numpy as np
 
 
-def normalize_data(data: np.ndarray, scaling_factor: float = 1.0):
+def normalize_samples(data: np.ndarray, scaling_factor: float = 1.0):
     """Normalize each sample in data
 
     Args:

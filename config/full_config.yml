@@ -1,19 +1,19 @@
 # EXPERIMENT
 device: 'cuda'
 dirpath: '.'
-exp_name: 'scp_test_config'
-exp_run: 2
+exp_name: 'scalr_test'
+exp_run: 0
 
 # DATA
 data:
     sample_chunksize: 10000
-    full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
+    full_datapath: '/path/to/data'
 
     split_data:
         split_ratio: [7, 1, 2.5]
         stratify: 'donor_id'
 
-    normalize_samples: True
+    normalize_samples: False
 
     # train_datapath: '/path/to/train_data'
     # val_datapath: '/path/to/val_data'
@@ -26,13 +26,13 @@ feature_selection:
 
     # weight_matrix: '/path/to/matrix'
 
-    feature_chunksize: 3000
+    feature_chunksize: 2000
     method_type: feature_chunk
 
     model:
       name: nn
       params:
-          epochs: 1
+          epochs: 25
           batch_size: 15000
           lr: 1.0e-3
           weight_decay: 0.1
@@ -40,6 +40,8 @@ feature_selection:
     top_features_stats:
         k: 3000
         aggregation_strategy: mean
+
+    store_on_disk: True
 
 # MODEL
 model:
@@ -55,10 +57,10 @@ model:
 training:
     opt: 'adam'
     loss: 'log'
-    batch_size: 15000
+    batch_size: 5000
     lr: 1.0e-3
     weight_decay: 0
-    epochs: 1
+    epochs: 100
     callbacks:
         tensorboard_logging: True
         early_stop:
@@ -70,5 +72,5 @@ training:
 # ANALYSIS
 evaluation:
     model_checkpoint: '/path/to/model'
-    batch_size: 15000
-    metrics: ['accuracy', 'report']
+    batch_size: 5000
+    metrics: ['accuracy', 'report', 'roc_auc']

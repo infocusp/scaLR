@@ -8,7 +8,8 @@ import pandas as pd
 from anndata import AnnData
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 
-from scalr.utils import load_config, read_data, read_yaml, dump_yaml, dump_json, write_data
+from config.utils import load_config
+from scalr.utils import read_data, read_yaml, dump_yaml, dump_json, write_data
 from scalr.feature_selection import feature_chunking, extract_top_k_features
 from scalr.model import LinearModel
 
@@ -46,7 +47,7 @@ def extract_features(config, log=True):
         'aggregation_strategy']
 
     if weight_matrix is None:
-        chunksize = config_fs['chunksize']
+        feature_chunksize = config_fs['feature_chunksize']
         model_config = config_fs['model']
 
         feature_class_weights = feature_chunking(
@@ -54,7 +55,7 @@ def extract_features(config, log=True):
             val_data,
             target,
             model_config,
-            chunksize,
+            feature_chunksize,
             dirpath=featurespath,
             device=device)
     else:
@@ -73,7 +74,7 @@ def extract_features(config, log=True):
 
     # Storing the Data
     if config_fs['store_on_disk']:
-        if data_config['chunksize'] is None:
+        if data_config['sample_chunksize'] is None:
             train_data[:, top_features_indices].write(
                 path.join(featurespath,'train.h5ad'), compression='gzip')
             val_data[:, top_features_indices].write(
@@ -81,12 +82,12 @@ def extract_features(config, log=True):
             test_data[:, top_features_indices].write(
                 path.join(featurespath,'test.h5ad'), compression='gzip')
         else:
-            chunksize = data_config['chunksize']
+            sample_chunksize = data_config['sample_chunksize']
             trainpath = path.join(featurespath,'train')
             os.makedirs(trainpath, exist_ok=True)
-            for i, (start) in enumerate(range(0, len(train_data), chunksize)):
+            for i, (start) in enumerate(range(0, len(train_data), sample_chunksize)):
                 train_data = read_data(train_datapath)
-                train_data = train_data[start:start + chunksize,
+                train_data = train_data[start:start + sample_chunksize,
                                         top_features_indices]
                 if not isinstance(train_data, AnnData):
                     train_data = train_data.to_adata()
@@ -95,9 +96,9 @@ def extract_features(config, log=True):
 
             valpath = path.join(featurespath,'val')
             os.makedirs(valpath, exist_ok=True)
-            for i, (start) in enumerate(range(0, len(val_data), chunksize)):
+            for i, (start) in enumerate(range(0, len(val_data), sample_chunksize)):
                 val_data = read_data(val_datapath)
-                val_data = val_data[start:start + chunksize,
+                val_data = val_data[start:start + sample_chunksize,
                                     top_features_indices]
                 if not isinstance(val_data, AnnData):
                     val_data = val_data.to_adata()
@@ -106,9 +107,9 @@ def extract_features(config, log=True):
 
             testpath = path.join(featurespath,'test')
             os.makedirs(testpath, exist_ok=True)
-            for i, (start) in enumerate(range(0, len(test_data), chunksize)):
+            for i, (start) in enumerate(range(0, len(test_data), sample_chunksize)):
                 test_data = read_data(test_datapath)
-                test_data = test_data[start:start + chunksize,
+                test_data = test_data[start:start + sample_chunksize,
                                       top_features_indices]
                 if not isinstance(test_data, AnnData):
                     test_data = test_data.to_adata()
@@ -119,7 +120,7 @@ def extract_features(config, log=True):
         config['data']['val_datapath'] = valpath
         config['data']['test_datapath'] = testpath
 
-        if data_config['chunksize'] is None:
+        if data_config['sample_chunksize'] is None:
             config['data']['train_datapath'] += '.h5ad'
             config['data']['val_datapath'] += '.h5ad'
             config['data']['test_datapath'] += '.h5ad'
