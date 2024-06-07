@@ -118,7 +118,7 @@ class ModelCheckpoint:
         if self.interval and self.epoch % self.interval == 0:
             self.save_checkpoint(
                 model_state_dict, opt_state_dict,
-                path.join(dirpath,'checkpoints',f'model_{self.epoch}.pt'))
+                path.join(self.dirpath,'checkpoints',f'model_{self.epoch}.pt'))
 
 
 class CallbackExecutor:
