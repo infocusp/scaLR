@@ -7,8 +7,9 @@ import torch
 from torch import nn
 import numpy as np
 
-from scalr.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
-from scalr.data import generate_train_val_test_split, normalize_data, split_data
+from config.utils import load_config
+from scalr.utils import read_data, read_yaml, dump_yaml, dump_json
+from scalr.data import generate_train_val_test_split, normalize_samples, split_data
 
 
 def ingest_data(config, log=True):
@@ -22,9 +23,9 @@ def ingest_data(config, log=True):
 
     data_config = config['data']
     target = data_config['target']
-    normalize = data_config['normalize_data']
+    normalize = data_config['normalize_samples']
 
-    process_fn = normalize_data if normalize else None
+    process_fn = normalize_samples if normalize else None
 
     os.makedirs(dirpath, exist_ok=True)
 
@@ -37,24 +38,24 @@ def ingest_data(config, log=True):
         os.makedirs(datapath, exist_ok=True)
 
         full_datapath = data_config['full_datapath']
-        chunksize = data_config['chunksize']
+        sample_chunksize = data_config['sample_chunksize']
         split_config = data_config['split_data']
         split_ratio = split_config['split_ratio']
         stratify = split_config.get('stratify', None)
 
         generate_train_val_test_split(full_datapath, split_ratio, target,
-                                      stratify, datapath, chunksize,
+                                      stratify, datapath, sample_chunksize,
                                       process_fn)
 
     # Normalize existing splits
     if normalize and 'split_data' not in data_config:
         os.makedirs(datapath, exist_ok=True)
 
-        chunksize = data_config['chunksize']
+        sample_chunksize = data_config['sample_chunksize']
 
         for split_name in ['train', 'val', 'test']:
             split_data(data_config[f'{split_name}_datapath'], {split_name: -1},
-                       datapath, chunksize, process_fn)
+                       datapath, sample_chunksize, process_fn)
 
     # changing dirpath in config
     if normalize or 'split_data' in data_config:
@@ -62,7 +63,7 @@ def ingest_data(config, log=True):
         config['data']['val_datapath'] = path.join(datapath,'val')
         config['data']['test_datapath'] = path.join(datapath,'test')
 
-        if chunksize is None:
+        if sample_chunksize is None:
             config['data']['train_datapath'] += '.h5ad'
             config['data']['val_datapath'] += '.h5ad'
             config['data']['test_datapath'] += '.h5ad'

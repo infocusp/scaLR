@@ -5,6 +5,7 @@ from typing import Callable
 
 import anndata as ad
 from anndata import AnnData
+import numpy as np
 from sklearn.model_selection import GroupShuffleSplit, StratifiedShuffleSplit
 
 from ..utils import write_data, dump_json, read_data
@@ -101,7 +102,7 @@ def _generate_train_val_test_split_indices(datapath: str,
 def split_data(datapath: str,
                data_split: dict,
                dirpath: str,
-               chunksize: int = None,
+               sample_chunksize: int = None,
                process_fn: Callable = None,
                **kwargs):
     """Split the full data based upon generated indices lists and write it to disk.
@@ -110,26 +111,28 @@ def split_data(datapath: str,
         datapath: path to full dataset
         data_split: dict containing list of indices for each split, `-1` as value indicates all indices
         dirpath: path to store new split data.
-        chunksize: numberadata of samples to store in one chunk, after splitting the data.
+        sample_chunksize: numberadata of samples to store in one chunk, after splitting the data.
         process_fn: a function which takes in data chunk to perform operations on it like Normalization
-        **kwargs: keyword arguments to pass to `process` function besides adata
+        **kwargs: keyword arguments to pass to `process_fn` apart from adata's numpy array.
     """
     total_samples = len(read_data(datapath))
 
     for split_name in data_split.keys():
         if data_split[split_name] == -1:
             data_split[split_name] = list(range(total_samples))
-        if chunksize is None:
+        if sample_chunksize is None:
             adata = read_data(datapath).to_memory()
+            if not isinstance(adata.X, np.ndarray):
+                adata.X = adata.X.A
             if process_fn is not None:
-                adata = process_fn(adata, **kwargs)
+                adata.X = process_fn(adata.X, **kwargs)
             write_data(adata[data_split[split_name]],
                        path.join(dirpath,f'{split_name}.h5ad'))
         else:
             os.makedirs(path.join(dirpath, split_name), exist_ok=True)
             curr_chunksize = len(
-                data_split[split_name]) - 1 if chunksize >= len(
-                    data_split[split_name]) else chunksize
+                data_split[split_name]) - 1 if sample_chunksize >= len(
+                    data_split[split_name]) else sample_chunksize
             for i, (start) in enumerate(
                     range(0, len(data_split[split_name]), curr_chunksize)):
                 adata = read_data(datapath)
@@ -138,8 +141,10 @@ def split_data(datapath: str,
                 if not isinstance(adata, AnnData):
                     adata = adata.to_adata()
                 adata = adata.to_memory()
+                if not isinstance(adata.X, np.ndarray):
+                    adata.X = adata.X.A
                 if process_fn is not None:
-                    adata = process_fn(adata, **kwargs)
+                    adata.X = process_fn(adata.X, **kwargs)
                 write_data(adata, path.join(dirpath, split_name,f'{i}.h5ad'))
 
 
@@ -148,7 +153,7 @@ def generate_train_val_test_split(datapath: str,
                                   target: str,
                                   stratify: str = None,
                                   dirpath: str = None,
-                                  chunksize: int = None,
+                                  sample_chunksize: int = None,
                                   process_fn: Callable = None,
                                   **kwargs):
     """Generate a list of indices for train/val/test split of whole dataset and writes new data splits
@@ -160,8 +165,8 @@ def generate_train_val_test_split(datapath: str,
         target: target for classification present in `obs`.
         stratify: optional parameter to stratify the split upon parameter.
         dirpath: dirpath to store generated split in json format
-        chunksize: number of samples to store in one chunk, after splitting the data.
-
+        sample_chunksize: number of samples to store in one chunk, after splitting the data.
+    
     Returns:
         dict with 'train', 'test' and 'val' indices list.
 
@@ -170,4 +175,4 @@ def generate_train_val_test_split(datapath: str,
     data_split = _generate_train_val_test_split_indices(
         datapath, split_ratio, target, stratify, dirpath)
 
-    split_data(datapath, data_split, dirpath, chunksize, process_fn, **kwargs)
+    split_data(datapath, data_split, dirpath, sample_chunksize, process_fn, **kwargs)

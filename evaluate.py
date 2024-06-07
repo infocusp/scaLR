@@ -7,11 +7,12 @@ import torch
 from torch import nn
 import numpy as np
 
+from config.utils import load_config
 from scalr import Trainer
 from scalr.dataloader import simple_dataloader
-from scalr.evaluation import get_predictions, accuracy, generate_and_save_classification_report, roc_auc, perform_differential_expression_analysis, save_top_genes_and_heatmap
+from scalr.evaluation import get_predictions, accuracy, generate_and_save_classification_report, plot_roc_auc_curve, perform_differential_expression_analysis, save_top_genes_and_heatmap
 from scalr.model import LinearModel
-from scalr.utils import load_config, read_data, read_yaml, read_json, dump_yaml
+from scalr.utils import read_data, read_yaml, read_json, dump_yaml
 
 
 def evaluate(config, log=True):
@@ -30,9 +31,12 @@ def evaluate(config, log=True):
 
     evaluation_configs = config['evaluation']
     batch_size = evaluation_configs['batch_size']
-    shap_config = evaluation_configs.get('shap')
-    if ('metrics' not in evaluation_configs) and ('shap'
-                                                  not in evaluation_configs):
+
+    shap_config = evaluation_configs.get('shap_config')
+    top_n = shap_config.get('top_n', 20)
+    n_background_tensor=shap_config.get('background_tensor', 1000)
+
+    if ('metrics' not in evaluation_configs):
         return config
 
     dirpath = path.join(dirpath, f'{exp_name}_{exp_run}')
@@ -83,27 +87,26 @@ def evaluate(config, log=True):
 
     if 'roc_auc' in metrics:
         print("\nROC & AUC:")
-        roc_auc(test_labels,
+        plot_roc_auc_curve(test_labels,
                 pred_probabilities,
                 resultpath,
                 mapping=id2label)
-    if shap_config:
+    if 'shap' in metrics:
         print("\nSHAP analysis:")
         if train_datapath:
             train_data = read_data(train_datapath)
             train_dl = simple_dataloader(train_data, target, batch_size,
                                         label_mappings)
         else:
-            raise ValueError("Train data/path required for SHAP analysis.")
+            raise ValueError("Train data path required for SHAP analysis.")
         save_top_genes_and_heatmap(model,
                                    train_dl,
                                    test_dl,
                                    id2label,
                                    resultpath,
                                    device,
-                                   top_n=shap_config.get('top_n', 20),
-                                   n_background_tensor=shap_config.get(
-                                       'background_tensor', 1000))
+                                   top_n,
+                                   n_background_tensor)
 
     if 'deg' in metrics:
         perform_differential_expression_analysis(

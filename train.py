@@ -7,7 +7,8 @@ import torch
 from torch import nn
 import numpy as np
 
-from scalr.utils import load_config, read_data, read_yaml, dump_yaml, dump_json
+from config.utils import load_config
+from scalr.utils import read_data, read_yaml, dump_yaml, dump_json
 from scalr.dataloader import simple_dataloader
 from scalr.model import LinearModel
 from scalr import Trainer
@@ -35,7 +36,7 @@ def train(config, log=True):
     lossfunc = train_config['loss']
     batch_size = train_config['batch_size']
     lr = train_config['lr']
-    l2 = float(train_config['l2'])
+    weight_decay = float(train_config['weight_decay'])
     epochs = train_config['epochs']
     callbacks = train_config['callbacks']
 
@@ -106,7 +107,7 @@ def train(config, log=True):
         raise NotImplementedError(
             'Only `log` and `weighted_log` available as options!')
 
-    trainer = Trainer(model, opt, lr, l2, loss_fn, callbacks, device, dirpath,
+    trainer = Trainer(model, opt, lr, weight_decay, loss_fn, callbacks, device, dirpath,
                       model_checkpoint)
     trainer.train(epochs, train_dl, val_dl)
 

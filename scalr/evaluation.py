@@ -1,4 +1,3 @@
-import os
 from os import path
 from typing import Optional, Union, Tuple
 
@@ -112,6 +111,56 @@ def conf_matrix(test_labels: list[int],
     return confusion_matrix(test_labels, pred_labels)
 
 
+def get_top_n_genes(
+    model: LinearModel,
+    train_dl: DataLoader,
+    test_dl: DataLoader,
+    classes: list,
+    dirpath: str,
+    device: str = 'cpu',
+    top_n: int = 20,
+    n_background_tensor: int = 1000,
+) -> None:
+    """
+    Function to get top n genes of each class and its weights.
+
+    Args:
+        model: trained model to extract weights from
+        train_dl: train dataloader.
+        test_dl: test dataloader.
+        classes: list of class names.
+        dirpath: dir where shap analysis csv & heatmap stored.
+        device: device for pytorch.
+        top_n: save top n genes based on shap values.
+
+    Returns:
+        class wise top n genes, genes * class weights matrix
+    """
+
+    model.to(device)
+    shap_model = CustomShapModel(model)
+    explainer = shap.DeepExplainer(
+        shap_model,
+        next(iter(train_dl))[0][:n_background_tensor].to(device))
+
+    shap_values = []
+    for batch in test_dl:
+        batch_shap_values = explainer.shap_values(batch[0].to(device))
+        shap_values.append(batch_shap_values)
+
+    concat_shap_values = np.concatenate(shap_values).mean(axis=0)
+    genes_class_shap_df = DataFrame(concat_shap_values,
+                                       index=test_dl.dataset.var_names,
+                                       columns=classes)
+
+    class_top_genes = {}
+    for class_name in classes:
+        sorted_genes = genes_class_shap_df[class_name].sort_values(
+            ascending=False)
+        class_top_genes[class_name] = list(sorted_genes.index[:top_n])
+
+    return class_top_genes, genes_class_shap_df
+
 def save_top_genes_and_heatmap(
     model: LinearModel,
     train_dl: DataLoader,
@@ -134,37 +183,28 @@ def save_top_genes_and_heatmap(
         device: device for pytorch.
         top_n: save top n genes based on shap values.
     """
-    model.to(device)
-    shap_model = CustomShapModel(model)
-    explainer = shap.DeepExplainer(
-        shap_model,
-        next(iter(train_dl))[0][:n_background_tensor].to(device))
 
-    shap_values = []
-    for batch in test_dl:
-        batch_shap_values = explainer.shap_values(batch[0].to(device))
-        shap_values.append(batch_shap_values)
-
-    concate_shap_values = np.concatenate(shap_values).mean(axis=0)
-    genes_class_shap_df = DataFrame(concate_shap_values,
-                                       index=test_dl.dataset.var_names,
-                                       columns=classes)
-
-    class_top_genes = {}
-    common_genes = set()
-    for class_name in classes:
-        sorted_genes = genes_class_shap_df[class_name].sort_values(
-            ascending=False)
-        class_top_genes[class_name] = sorted_genes.index[:top_n]
-        common_genes.update(set(sorted_genes.index[:top_n]))
+    class_top_genes, genes_class_shap_df = get_top_n_genes(
+        model,
+        train_dl,
+        test_dl,
+        classes,
+        dirpath,
+        device,
+        top_n,
+        n_background_tensor,
+    )
 
     DataFrame(class_top_genes).to_csv(
-        os.path.join(dirpath, "shap_analysis.csv"), index=False)
+        path.join(dirpath, "shap_analysis.csv"), index=False)
 
-    top_n_genes_heatmap(genes_class_shap_df.loc[list(common_genes)], dirpath)
+    common_genes = set()
+    for class_name, genes in class_top_genes.items():
+        common_genes.update(genes)
+    plot_heatmap(genes_class_shap_df.loc[list(common_genes)], dirpath)
 
 
-def top_n_genes_heatmap(class_genes_weights: DataFrame, dirpath: str):
+def plot_heatmap(class_genes_weights: DataFrame, dirpath: str):
     """
     Generate a heatmap for top n genes across all classes.
 
@@ -177,10 +217,10 @@ def top_n_genes_heatmap(class_genes_weights: DataFrame, dirpath: str):
     sns.set(rc={'figure.figsize': (9, 12)})
     sns.heatmap(class_genes_weights, vmin=-1e-2, vmax=1e-2)
 
-    plt.savefig(os.path.join(dirpath, "heatmap.png"))
+    plt.savefig(path.join(dirpath, "heatmap.png"))
 
 
-def roc_auc(test_labels: list[int],
+def plot_roc_auc_curve(test_labels: list[int],
             pred_score: list[list[float]],
             dirpath: str,
             mapping: Optional[list] = None) -> None:
@@ -192,6 +232,7 @@ def roc_auc(test_labels: list[int],
     """
     # convert label predictions list to one-hot matrix.
     test_labels_onehot = data_utils.get_one_hot_matrix(np.array(test_labels))
+    fig, ax = plt.subplots(1, 1, figsize=(16, 8))
 
     # test labels starts with 0 so we need to add 1 in max.
     for class_label in range(max(test_labels) + 1):
@@ -203,11 +244,11 @@ def roc_auc(test_labels: list[int],
         roc_auc = auc(fpr, tpr)
 
         display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc)
-        display.plot()
-        os.makedirs(os.path.join(dirpath, "roc_auc"), exist_ok=True)
-        plt.savefig(
-            os.path.join(dirpath, 'roc_auc',
-                         f'{mapping[class_label].replace(" ", "_")}.png'))
+        display.plot(ax=ax, name=mapping[class_label])
+
+    plt.axline((0, 0), (1, 1), linestyle='--', color='black')
+    fig.savefig(path.join(dirpath, f'roc_auc.png'))
+    plt.clf() # clear axis & figure so it's not affect to next plot.
 
 
 def _make_design_matrix(adata: Union[AnnData, AnnCollection],
@@ -293,7 +334,8 @@ def get_differential_expression_results(adata: AnnData,
 
     if dirpath:
         results_df.to_csv(
-            f'{dirpath}/DEG_results_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.csv'
+            path.join(dirpath,
+                      f'DEG_results_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.csv')
         )
 
     return results_df
@@ -387,8 +429,12 @@ def plot_volcano(deg_results_df: DataFrame,
     if y_lim_tuple:
         plt.ylim(bottom=y_lim_tuple[0], top=y_lim_tuple[1])
     plt.savefig(
-        f'{dirpath}/DEG_plot_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.png',
-        bbox_inches='tight')
+        path.join(
+            dirpath,
+            f'DEG_plot_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.png'
+        ),
+        bbox_inches='tight'
+    )
 
 
 def perform_differential_expression_analysis(adata: Union[AnnData,
