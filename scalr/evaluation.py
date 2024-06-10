@@ -172,7 +172,7 @@ def save_top_genes_and_heatmap(
     n_background_tensor: int = 1000,
 ) -> None:
     """
-    Function to save top n genes of each class and save heatmap of gene to class weight.
+    Function to save top n genes of each class and save heatmap of genes & their class weight.
 
     Args:
         model: trained model to extract weights from
@@ -248,7 +248,7 @@ def plot_roc_auc_curve(test_labels: list[int],
 
     plt.axline((0, 0), (1, 1), linestyle='--', color='black')
     fig.savefig(path.join(dirpath, f'roc_auc.png'))
-    plt.clf() # clear axis & figure so it's not affect to next plot.
+    plt.clf() # clear axis & figure so it does not affect the next plot.
 
 
 def _make_design_matrix(adata: Union[AnnData, AnnCollection],
