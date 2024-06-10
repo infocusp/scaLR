@@ -28,10 +28,8 @@ class TensorboardLogger:
         Logs the train_loss, val_loss, train_accuracy, val_accuracy for each epoch.
         """
         self.epoch += 1
-        self.writer.add_scalar('Loss/train', train_loss, self.epoch)
-        self.writer.add_scalar('Loss/val', val_loss, self.epoch)
-        self.writer.add_scalar('Accuracy/train', train_acc, self.epoch)
-        self.writer.add_scalar('Accuracy/val', val_acc, self.epoch)
+        self.writer.add_scalars('Loss', {'train': train_loss, 'val': val_loss}, self.epoch)
+        self.writer.add_scalars('Accuracy', {'train': train_acc, 'val': val_acc}, self.epoch)
 
 
 class EarlyStopping:
