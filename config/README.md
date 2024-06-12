@@ -219,7 +219,9 @@ Required only if user wants to generate recall curve for the experiment.
 - **plots_per_row** {int}: Number of gene recall curve plots to plot per row in subplots.
 
 
-**Note** - Few points to be kept in mind for passing ranked/reference genes list. Also, if user intent to run only gene recall curve, consider commenting everything else. Just provide experiment name, run & dirpath & gene recall information in the config.
+**Note** - Few points to be kept in mind for passing ranked/reference genes list.
+- If user intent to run only gene recall curve, consider commenting everything else. Just provide experiment name, run & dirpath & gene recall information in the config.
+- Also, stores json file for reference genes vs its rank in pipeline generated ranked gene list per category.
 - **feature_class_weights_path** when passed, is used to extract ranked genes lists for `per_category` & `aggregated` across all categories internally. So `ranked_genes` section should be omitted in that case.
 - **ranked_genes** & **reference_genes** should be a csv which has columns as category names of trait and row contains ranked genes list per category.
 - If **feature_class_weights_path** & **ranked_genes** section is not mentioned, then pipeline will try to look for feature_class_weights matrix at `dirpath/feature_selection/feature_class_weights.csv` path and will raise an error if matrix is not found. So user need to pass dirpath in config.yml

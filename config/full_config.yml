@@ -74,15 +74,15 @@ evaluation:
     model_checkpoint: '/path/to/model'
     batch_size: 5000
     metrics: ['accuracy', 'report', 'roc_auc']
-    gene_recall:
-        ## `feature_class_weights_path` & `ranked_genes` are mutually exclusive. Or if you comment out both,
-        ## then pipeline generated feature_class_weights matrix is used.
-        # feature_class_weights_path: '/path/to/feature_class_weights matrix csv'
-        # ranked_genes:
-        #     per_category: '/path/to/ranked_genes_per_category'
-        #     aggregated: '/path/to/ranked_genes_aggr_all_categories csv'
-        reference_genes:
-            per_category: '/path/to/ref_genes_per_category csv'
-            aggregated: '/path/to/ref_genes_aggr_all_categories csv'
-        top_K: 5000
-        plots_per_row: 5
+    # gene_recall:
+    #     ## `feature_class_weights_path` & `ranked_genes` are mutually exclusive. Or if you comment out both,
+    #     ## then pipeline generated feature_class_weights matrix is used.
+    #     # feature_class_weights_path: '/path/to/feature_class_weights matrix csv'
+    #     # ranked_genes:
+    #     #     per_category: '/path/to/ranked_genes_per_category'
+    #     #     aggregated: '/path/to/ranked_genes_aggr_all_categories csv'
+    #     reference_genes:
+    #         per_category: '/path/to/ref_genes_per_category csv'
+    #         aggregated: '/path/to/ref_genes_aggr_all_categories csv'
+    #     top_K: 5000
+    #     plots_per_row: 5
