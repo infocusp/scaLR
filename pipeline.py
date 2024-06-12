@@ -25,7 +25,8 @@ def main():
     config = load_config(args.config)
     log = args.log
 
-    config = ingest_data(config, log)
+    if config.get('data'):
+        config = ingest_data(config, log)
 
     if 'feature_selection' in config:
         config = extract_features(config, log)

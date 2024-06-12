@@ -9,6 +9,7 @@ from anndata import AnnData
 from anndata.experimental import AnnCollection
 from pydeseq2.dds import DeseqDataSet
 from pydeseq2.ds import DeseqStats
+import json
 import pandas as pd
 from pandas import DataFrame
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, RocCurveDisplay, roc_curve, auc
@@ -20,6 +21,7 @@ import scanpy as sc
 
 from .model import LinearModel
 from .utils import data_utils
+from scalr.feature_selection import extract_top_k_features
 
 
 def get_predictions(model: LinearModel,
@@ -281,9 +283,10 @@ def get_differential_expression_results(adata: AnnData,
 
     if dirpath:
         results_df.to_csv(
-            path.join(dirpath,
-                      f'DEG_results_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.csv')
-        )
+            path.join(
+                dirpath,
+                f'DEG_results_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.csv'
+            ))
 
     return results_df
 
@@ -375,13 +378,11 @@ def plot_volcano(deg_results_df: DataFrame,
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     if y_lim_tuple:
         plt.ylim(bottom=y_lim_tuple[0], top=y_lim_tuple[1])
-    plt.savefig(
-        path.join(
-            dirpath,
-            f'DEG_plot_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.png'
-        ),
-        bbox_inches='tight'
-    )
+    plt.savefig(path.join(
+        dirpath,
+        f'DEG_plot_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.png'
+    ),
+                bbox_inches='tight')
 
 
 def perform_differential_expression_analysis(adata: Union[AnnData,
@@ -437,3 +438,222 @@ def perform_differential_expression_analysis(adata: Union[AnnData,
                  fold_change, p_val, y_lim_tuple, dirpath)
 
     return deg_results_df
+
+
+def plot_gene_recall(ranked_genes_df: pd.DataFrame,
+                     ref_genes_df: pd.DataFrame,
+                     top_K: int = 5000,
+                     dirpath: str = '.',
+                     plot_type: str = '',
+                     plots_per_row=5):
+    """This function stores the gene recall curve for provided ranked genes & reference genes.
+    It also stores the reference genes along with their ranks in a json file for further
+    analysis to user.
+
+    Args:
+        ranked_genes_df: Pipeline generated ranked genes dataframe.
+        ref_genes_df: Reference genes dataframe.
+        top_K: The top K ranked genes in which reference genes are to be looked for.
+        dirpath: Path to store gene recall plot and json.
+        plot_type: Type of gene recall - per category or aggregated across all categories.
+    """
+    gene_recall_dict = {}
+
+    n_plots = len(
+        set(ref_genes_df.columns).intersection(ranked_genes_df.columns))
+    print(
+        f'-- {n_plots} categories matches between ranked genes & reference genes dataframes, namely: {set(ref_genes_df.columns).intersection(ranked_genes_df.columns)}'
+    )
+    n_cols = min(plots_per_row, n_plots)
+    n_rows = int(np.ceil(n_plots / n_cols))
+    fig, axs = plt.subplots(n_rows,
+                            n_cols,
+                            figsize=(n_cols * plots_per_row,
+                                     n_rows * plots_per_row),
+                            squeeze=False)
+    axs = axs.flatten()
+    fig.suptitle('Recall of ref genes w.r.t pipeline ranked genes')
+
+    for i, category in enumerate(
+            set(ranked_genes_df.columns).intersection(ref_genes_df.columns)):
+        ranked_genes = ranked_genes_df[category].values
+        ref_genes = ref_genes_df[category].values
+        k = top_K
+
+        assert k >= len(
+            ref_genes
+        ), f'k={k} should be greater than #ref genes({len(ref_genes)})'
+
+        if len(ranked_genes) == 0 or len(ref_genes) == 0:
+            raise Exception('Ranked genes or ref genes list cannot be empty.')
+
+        # Adjusting k if expected k > number of ranked genes.
+        k = min(k, len(ranked_genes))
+
+        # Building baseline curve
+        step = k // len(ref_genes)
+        baseline = [i // step for i in range(1, 1 + k)]
+
+        order_in_lit = {}
+        points = []
+
+        count = 0
+        for rank, gene in enumerate(ranked_genes[:k]):
+            if gene in ref_genes:
+                count += 1
+                order_in_lit[rank] = gene
+            points.append(count)
+
+        axs[i].plot(list(range(1, 1 + k)), points, label=f'gene_recall')
+        axs[i].plot(list(range(1, 1 + k)), baseline, label='baseline')
+        axs[i].set_title(category)
+        axs[i].set_xlabel('# Top-ranked genes (k)')
+        axs[i].set_ylabel('# Reference genes')
+        axs[i].legend()
+
+        gene_recall_dict[category] = order_in_lit
+
+    for j in range(i + 1, len(axs)):
+        fig.delaxes(axs[j])
+
+    plt.tight_layout()
+    plt.savefig(f'{dirpath}/gene_recall_curves_{plot_type}.png')
+    with open(f'{dirpath}/gene_recall_curve_{plot_type}_info.json', 'w') as f:
+        json.dump(gene_recall_dict, f, indent=6)
+    print(
+        f'Gene recall curves stored at path : `{dirpath}/gene_recall_curves_{plot_type}.png`'
+    )
+
+    plt.close()
+
+
+def validate_gene_recall_config_and_extract_genes(gene_recall_config, dirpath):
+
+    ranked_genes = {}
+    reference_genes = {}
+    fcw_path = None
+    top_K = gene_recall_config.get('top_K', None)
+
+    if 'reference_genes' not in gene_recall_config:
+        raise KeyError(
+            'Reference genes information not provided by user in the gene recall config. Please provide or check the README for the same!'
+        )
+    elif not gene_recall_config['reference_genes']:
+        raise ValueError(
+            'Atleast one of `per_category` or `aggregated across all categories` reference genes list needs to be provided by user!'
+        )
+    else:
+        if gene_recall_config['reference_genes'].get('per_category', []):
+            reference_genes['per_category'] = pd.read_csv(
+                gene_recall_config['reference_genes']['per_category'],
+                index_col=0)
+        else:
+            reference_genes['per_category'] = None
+        if gene_recall_config['reference_genes'].get('aggregated', []):
+            reference_genes['aggr_all_categories'] = pd.read_csv(
+                gene_recall_config['reference_genes']['aggregated'],
+                index_col=0)
+        else:
+            reference_genes['aggr_all_categories'] = None
+
+    print('-- Reference genes are extracted.')
+
+    if 'feature_class_weights_path' in gene_recall_config and 'ranked_genes' in gene_recall_config:
+        raise ValueError(
+            'Either of `feature_class_weights` or `ranked_genes` is expected, not both!'
+        )
+
+    if 'feature_class_weights_path' in gene_recall_config:
+        fcw_path = gene_recall_config['feature_class_weights_path']
+    elif 'feature_class_weights_path' not in gene_recall_config and 'ranked_genes' not in gene_recall_config:
+        fcw_path = f'{dirpath}/feature_selection/feature_class_weights.csv'
+
+    if fcw_path:
+        try:
+            feature_class_weights = pd.read_csv(fcw_path, index_col=0)
+        except:
+            raise KeyError(
+                'Ranked genes information not provided by user in the gene recall config. '
+                'Nor does the feature class weights matrix is found at expected path '
+                f'after the pipeline run - {fcw_path}. Please check the README!'
+            )
+
+        if reference_genes['per_category'] is not None:
+            ranked_genes['per_category'] = extract_top_k_features(
+                feature_class_weights=feature_class_weights,
+                aggregation_strategy='no_reduction',
+                k=top_K,
+                save_features=False)
+        else:
+            ranked_genes['per_category'] = None
+        if reference_genes['aggr_all_categories'] is not None:
+            ranked_genes['aggr_all_categories'] = extract_top_k_features(
+                feature_class_weights=feature_class_weights,
+                aggregation_strategy='mean',
+                k=top_K,
+                save_features=False).to_frame(
+                    name=reference_genes['aggr_all_categories'].columns.
+                    to_list()[0])
+        else:
+            ranked_genes['aggr_all_categories'] = None
+
+    if not fcw_path and 'ranked_genes' in gene_recall_config:
+        if gene_recall_config['ranked_genes'].get('per_category', []):
+            ranked_genes['per_category'] = pd.read_csv(
+                gene_recall_config['ranked_genes']['per_category'],
+                index_col=0)
+        else:
+            if 'per_category' in gene_recall_config['reference_genes']:
+                raise KeyError(
+                    'Please provide ranked genes list for per_category...')
+            ranked_genes['per_category'] = None
+        if gene_recall_config['ranked_genes'].get('aggregated', []):
+            ranked_genes['aggr_all_categories'] = pd.read_csv(
+                gene_recall_config['ranked_genes']['aggregated'], index_col=0)
+        else:
+            if 'aggregated' in gene_recall_config['reference_genes']:
+                raise KeyError(
+                    'Please provide ranked genes list for `aggregated across all categories`...'
+                )
+            ranked_genes['aggr_all_categories'] = None
+    print('-- Ranked genes are extracted.')
+
+    return ranked_genes, reference_genes
+
+
+def generate_gene_recall_curve(gene_recall_config, dirpath):
+    """This function geneerates gene recall curves for each category of target provided &
+    also plots gene recall for aggregated ranked genes across all categories if user intents to.
+
+    Args:
+        gene_recall_config: Config for gene recall.
+        dirpath: Path to fetch experiment's stored feature class weight matrix.
+    """
+
+    # Validating the parameters provided in gene recal config and extract ranked & reference gene lists.
+    ranked_genes, reference_genes = validate_gene_recall_config_and_extract_genes(
+        gene_recall_config, dirpath)
+
+    # Plotting gene recall curves for each category in trait.
+    if 'per_category' in gene_recall_config['reference_genes']:
+        print('Plotting gene recall curve for each category in the target.')
+        plot_gene_recall(ranked_genes['per_category'],
+                         reference_genes['per_category'],
+                         len(ranked_genes['per_category']),
+                         dirpath,
+                         plot_type='per_category',
+                         plots_per_row=gene_recall_config.get(
+                             'plots_per_row', 5))
+
+    # Plotting gene recall curves aggregated across all categories in trait.
+    if 'aggregated' in gene_recall_config['reference_genes']:
+        print(
+            'Plotting gene recall curve for genes ranked by aggregation across all categories in the trait.'
+        )
+        plot_gene_recall(ranked_genes['aggr_all_categories'],
+                         reference_genes['aggr_all_categories'],
+                         len(ranked_genes['aggr_all_categories']),
+                         dirpath,
+                         plot_type='aggregated_across_all_categories',
+                         plots_per_row=gene_recall_config.get(
+                             'plots_per_row', 5))

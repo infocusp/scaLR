@@ -57,7 +57,6 @@ train_config = {
 
 evaluation_config = {
     'batch_size': 15000,
-    'model_checkpoint': None,
-    'metrics': ['accuracy', 'report']
+    'model_checkpoint': None
 }
 
