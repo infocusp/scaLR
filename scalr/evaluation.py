@@ -634,13 +634,16 @@ def generate_gene_recall_curve(gene_recall_config, dirpath):
     ranked_genes, reference_genes = validate_gene_recall_config_and_extract_genes(
         gene_recall_config, dirpath)
 
+    resultpath = path.join(dirpath, 'results')
+    os.makedirs(resultpath, exist_ok=True)
+
     # Plotting gene recall curves for each category in trait.
     if 'per_category' in gene_recall_config['reference_genes']:
         print('Plotting gene recall curve for each category in the target.')
         plot_gene_recall(ranked_genes['per_category'],
                          reference_genes['per_category'],
                          len(ranked_genes['per_category']),
-                         dirpath,
+                         resultpath,
                          plot_type='per_category',
                          plots_per_row=gene_recall_config.get(
                              'plots_per_row', 5))
@@ -653,7 +656,7 @@ def generate_gene_recall_curve(gene_recall_config, dirpath):
         plot_gene_recall(ranked_genes['aggr_all_categories'],
                          reference_genes['aggr_all_categories'],
                          len(ranked_genes['aggr_all_categories']),
-                         dirpath,
+                         resultpath,
                          plot_type='aggregated_across_all_categories',
                          plots_per_row=gene_recall_config.get(
                              'plots_per_row', 5))

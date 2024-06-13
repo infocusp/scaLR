@@ -34,7 +34,7 @@ def evaluate(config, log=True):
     os.makedirs(resultpath, exist_ok=True)
 
     if 'metrics' in evaluation_configs:
-        target = data_config.get['target']
+        target = data_config['target']
         test_datapath = data_config['test_datapath']
         model_checkpoint = evaluation_configs['model_checkpoint']
         model_ = read_yaml(path.join(model_checkpoint, 'config.yml'))
@@ -95,7 +95,7 @@ def evaluate(config, log=True):
             'gene_recall']:
         print('Starting gene recall curve analysis.')
         generate_gene_recall_curve(evaluation_configs['gene_recall'],
-                                   dirpath=resultpath)
+                                   dirpath=dirpath)
         print('Gene recall curves generated.')
 
     dump_yaml(config, path.join(dirpath, 'config.yml'))
