@@ -223,9 +223,10 @@ Required only if user wants to generate recall curve for the experiment.
 - If user intent to run only gene recall curve, consider commenting everything else. Just provide experiment name, run & dirpath & gene recall information in the config.
 - Also, stores json file for reference genes vs its rank in pipeline generated ranked gene list per category.
 - **feature_class_weights_path** when passed, is used to extract ranked genes lists for `per_category` & `aggregated` across all categories internally. So `ranked_genes` section should be omitted in that case.
-- **ranked_genes** & **reference_genes** should be a csv which has columns as category names of trait and row contains ranked genes list per category.
+- **ranked_genes** & **reference_genes** should be a csv which has columns as category names of trait and row contains ranked genes list per category. Please check `examples/gene_recall_curve/reference_genes_per_category.csv` for your reference.
 - If **feature_class_weights_path** & **ranked_genes** section is not mentioned, then pipeline will try to look for feature_class_weights matrix at `dirpath/feature_selection/feature_class_weights.csv` path and will raise an error if matrix is not found. So user need to pass dirpath in config.yml
 - **reference_genes** section is a must for generating gene recall curve.
 - The csv should be in below format.
     - The index should be present in csv, as while reading we use `index_col=0`. So categores should be present in columns.
     - The reference genes csv column names should match with the actual target categoris. Please check the csv files properly.
+- A example notebook has been made inside `examples/gene_recall` for better understanding and required files are also attached there.
