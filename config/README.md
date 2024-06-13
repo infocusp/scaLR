@@ -1,5 +1,7 @@
 # Config Parameters
 
+This README explains different parameters with explanation used in config files.
+
 ## Experiment
 **device** {str}: `cuda | cpu`  
 default: `cuda`  
@@ -27,7 +29,7 @@ This will be considered as the root directory for this experiment run, and all s
 default: `10000`  
 Useful for low resources utilization. This will ensure all data is stored in multiple chunks of atmost `sample_chunksize` samples. This does not hamper any logic in algorithms, but simply ensures that entire dataset is never loaded all at once on the RAM.  
 `null` value will disregard this optimization.
-
+deg
 **split_data** {dict}:  
 - **split_ratio** {list [int | float]}: `[x, y, z]`  
 default: `[7, 1, 2]`  
