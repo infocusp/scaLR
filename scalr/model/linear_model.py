@@ -20,7 +20,7 @@ class LinearModel(nn.Module):
         """
         super().__init__()
         if activation == 'relu':
-            activation = nn.ReLU(inplace=True)
+            activation = nn.ReLU()
         else:
             raise NotImplementedError("Activations to be chosen from ['relu']")
         dropout = nn.Dropout(dropout, inplace=False)

@@ -1,24 +1,23 @@
-import os
 from os import path
 from typing import Optional, Union, Tuple
 
-import matplotlib.pyplot as plt
-import numpy as np
 import anndata as ad
 from anndata import AnnData
 from anndata.experimental import AnnCollection
+import matplotlib.pyplot as plt
+import numpy as np
+from pandas import DataFrame
 from pydeseq2.dds import DeseqDataSet
 from pydeseq2.ds import DeseqStats
-import pandas as pd
-from pandas import DataFrame
+import scanpy as sc
+import seaborn as sns
+import shap
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, RocCurveDisplay, roc_curve, auc
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
-import seaborn as sns
-import scanpy as sc
 
-from .model import LinearModel
+from .model import LinearModel, CustomShapModel
 from .utils import data_utils
 
 
@@ -81,7 +80,7 @@ def generate_and_save_classification_report(
         test_labels = [mapping[x] for x in test_labels]
         pred_labels = [mapping[x] for x in pred_labels]
 
-    report = pd.DataFrame(
+    report = DataFrame(
         classification_report(test_labels, pred_labels,
                               output_dict=True)).transpose()
     print(report)
@@ -112,67 +111,119 @@ def conf_matrix(test_labels: list[int],
     return confusion_matrix(test_labels, pred_labels)
 
 
-# TODO: change extraction method from weights maybe?
 def get_top_n_genes(
-        model: LinearModel,
-        n: int = 50,
-        genes: Optional[list[str]] = None) -> (list[int], list[str]):
+    model: LinearModel,
+    train_dl: DataLoader,
+    test_dl: DataLoader,
+    classes: list,
+    dirpath: str,
+    device: str = 'cpu',
+    top_n: int = 20,
+    n_background_tensor: int = 1000,
+) -> None:
     """
-    Function to get top_n genes and their indices using model weights.
+    Function to get top n genes of each class and its weights.
 
     Args:
         model: trained model to extract weights from
-        n: number of top_genes to extract
-        genes: gene_name list
+        train_dl: train dataloader.
+        test_dl: test dataloader.
+        classes: list of class names.
+        dirpath: dir where shap analysis csv & heatmap stored.
+        device: device for pytorch.
+        top_n: save top n genes based on shap values.
 
-    Return:
-        top_n gene indices, top_n gene names
-
+    Returns:
+        class wise top n genes, genes * class weights matrix
     """
-    weights = abs(model.state_dict()['lin.weight'].cpu())
-    top_n_indices = torch.mean(weights, dim=0).sort().indices[-n:].tolist()
-    top_n_genes = []
-    if genes is not None: top_n_genes = [genes[i] for i in top_n_indices]
-    return top_n_indices, top_n_genes
 
+    model.to(device)
+    shap_model = CustomShapModel(model)
+    explainer = shap.DeepExplainer(
+        shap_model,
+        next(iter(train_dl))[0][:n_background_tensor].to(device))
 
-def top_n_heatmap(model: LinearModel,
-                  dirpath: str,
-                  classes: list[str],
-                  n: int = 50,
-                  genes: Optional[list[str]] = None) -> (list[int], list[str]):
+    shap_values = []
+    for batch in test_dl:
+        batch_shap_values = explainer.shap_values(batch[0].to(device))
+        shap_values.append(batch_shap_values)
+
+    concat_shap_values = np.concatenate(shap_values).mean(axis=0)
+    genes_class_shap_df = DataFrame(concat_shap_values,
+                                       index=test_dl.dataset.var_names,
+                                       columns=classes)
+
+    class_top_genes = {}
+    for class_name in classes:
+        sorted_genes = genes_class_shap_df[class_name].sort_values(
+            ascending=False)
+        class_top_genes[class_name] = list(sorted_genes.index[:top_n])
+
+    return class_top_genes, genes_class_shap_df
+
+def save_top_genes_and_heatmap(
+    model: LinearModel,
+    train_dl: DataLoader,
+    test_dl: DataLoader,
+    classes: list,
+    dirpath: str,
+    device: str = 'cpu',
+    top_n: int = 20,
+    n_background_tensor: int = 1000,
+) -> None:
     """
-    Generate a heatmap for top_n genes across all classes.
+    Function to save top n genes of each class and save heatmap of genes & their class weight.
 
     Args:
         model: trained model to extract weights from
-        dirpath: path to store the heatmap image
-        classes: list of name of classes
-        n: number of top_genes to extract
-        genes: gene_name list
-
-    Return:
-        top_n gene indices, top_n gene names
+        train_dl: train dataloader.
+        test_dl: test dataloader.
+        classes: list of class names.
+        dirpath: dir where shap analysis csv & heatmap stored.
+        device: device for pytorch.
+        top_n: save top n genes based on shap values.
     """
-    weights = model.state_dict()['lin.weight'].cpu()
-    top_n_indices, top_n_genes = get_top_n_genes(model, n, genes)
-    top_n_weights = weights[:, top_n_indices].transpose(0, 1)
+
+    class_top_genes, genes_class_shap_df = get_top_n_genes(
+        model,
+        train_dl,
+        test_dl,
+        classes,
+        dirpath,
+        device,
+        top_n,
+        n_background_tensor,
+    )
+
+    DataFrame(class_top_genes).to_csv(
+        path.join(dirpath, "shap_analysis.csv"), index=False)
+
+    common_genes = set()
+    for class_name, genes in class_top_genes.items():
+        common_genes.update(genes)
+    plot_heatmap(genes_class_shap_df.loc[list(common_genes)], dirpath)
+
+
+def plot_heatmap(class_genes_weights: DataFrame, dirpath: str):
+    """
+    Generate a heatmap for top n genes across all classes.
+
+    Args:
+        class_genes_weights: genes * classes matrix which contains
+                             shap_value/weights of each gene to class.
+        dirpath: path to store the heatmap image.
+    """
 
     sns.set(rc={'figure.figsize': (9, 12)})
-    sns.heatmap(top_n_weights,
-                yticklabels=top_n_genes,
-                xticklabels=classes,
-                vmin=-1e-2,
-                vmax=1e-2)
+    sns.heatmap(class_genes_weights, vmin=-1e-2, vmax=1e-2)
 
-    plt.savefig(path.join(dirpath, 'heatmap.png'))
-    return top_n_indices, top_n_genes
+    plt.savefig(path.join(dirpath, "heatmap.png"))
 
 
-def roc_auc(test_labels: list[int],
+def plot_roc_auc_curve(test_labels: list[int],
             pred_score: list[list[float]],
             dirpath: str,
-            mapping: Optional[dict] = None) -> None:
+            mapping: Optional[list] = None) -> None:
     """ Calculate ROC-AUC and save plot.
 
     Args:
@@ -183,7 +234,8 @@ def roc_auc(test_labels: list[int],
     test_labels_onehot = data_utils.get_one_hot_matrix(np.array(test_labels))
     fig, ax = plt.subplots(1, 1, figsize=(16, 8))
 
-    for class_label in range(max(test_labels)):
+    # test labels starts with 0 so we need to add 1 in max.
+    for class_label in range(max(test_labels) + 1):
 
         # fpr: False Positive Rate | tpr: True Positive Rate
         fpr, tpr, _ = roc_curve(test_labels_onehot[:, class_label],
@@ -196,6 +248,7 @@ def roc_auc(test_labels: list[int],
 
     plt.axline((0, 0), (1, 1), linestyle='--', color='black')
     fig.savefig(path.join(dirpath, f'roc_auc.png'))
+    plt.clf() # clear axis & figure so it does not affect the next plot.
 
 
 def _make_design_matrix(adata: Union[AnnData, AnnCollection],
@@ -232,8 +285,8 @@ def _make_design_matrix(adata: Union[AnnData, AnnCollection],
             subdata = ad.AnnData(
                 X=sum_subset[:].X.sum(axis=0).reshape(
                     1, len(sum_subset.var_names)),
-                var=pd.DataFrame(index=sum_subset.var_names),
-                obs=pd.DataFrame(index=[f'{sum_sample}_{condition}']))
+                var=DataFrame(index=sum_subset.var_names),
+                obs=DataFrame(index=[f'{sum_sample}_{condition}']))
             subdata.obs[new_control_column_name] = [condition]
             design_matrix_list.append(subdata)
 
@@ -401,7 +454,7 @@ def perform_differential_expression_analysis(adata: Union[AnnData,
 
     Args:
         adata: data to make design matrix from
-        fixed_column: column name in `adata.obs` containing a fixed condition to subset 
+        fixed_column: column name in `adata.obs` containing a fixed condition to subset
         fixed_condition: condition to subset data on, belonging to `fixed_column`
         design_factor: column name in `adata.obs` containing the control condition
         factor_categories: list of conditions in `design_factor` to make design matrix for
