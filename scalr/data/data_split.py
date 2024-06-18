@@ -122,9 +122,9 @@ def split_data(datapath: str,
             data_split[split_name] = list(range(total_samples))
         if sample_chunksize is None:
             adata = read_data(datapath).to_memory()
-            if not isinstance(adata.X, np.ndarray):
-                adata.X = adata.X.A
             if process_fn is not None:
+                if not isinstance(adata.X, np.ndarray):
+                    adata.X = adata.X.A
                 adata.X = process_fn(adata.X, **kwargs)
             write_data(adata[data_split[split_name]],
                        path.join(dirpath,f'{split_name}.h5ad'))
@@ -141,9 +141,9 @@ def split_data(datapath: str,
                 if not isinstance(adata, AnnData):
                     adata = adata.to_adata()
                 adata = adata.to_memory()
-                if not isinstance(adata.X, np.ndarray):
-                    adata.X = adata.X.A
                 if process_fn is not None:
+                    if not isinstance(adata.X, np.ndarray):
+                        adata.X = adata.X.A
                     adata.X = process_fn(adata.X, **kwargs)
                 write_data(adata, path.join(dirpath, split_name,f'{i}.h5ad'))
 
