@@ -68,8 +68,8 @@ pure-eval==0.2.2
 pydeseq2==0.4.9
 Pygments==2.17.2
 pyparsing==3.0.9
-PyQt5==5.15.4
-PyQt5-sip==12.9.0
+PyQt5==5.15.10
+PyQt5-sip==12.13.0
 python-dateutil==2.9.0
 pytz==2024.1
 PyYAML==6.0.1
