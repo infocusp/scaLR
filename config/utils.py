@@ -38,8 +38,8 @@ def load_config(path: str) -> dict:
     user_config = read_yaml(path)
 
     default_config['data'] = data_config
-    if 'data_split' in user_config['data'] or 'full_datapath' in user_config['data']:
-        default_config['data']['data_split'] = data_split_config
+    if 'split_data' in user_config['data'] or 'full_datapath' in user_config['data']:
+        default_config['data']['split_data'] = data_split_config
 
     if 'feature_selection' in user_config:
         default_config['feature_selection'] = feature_selection_config
