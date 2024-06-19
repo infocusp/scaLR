@@ -1,11 +1,6 @@
-data_config = {
-    'sample_chunksize': 10000,
-    'normalize_samples': False
-}
+data_config = {'sample_chunksize': 10000, 'normalize_samples': False}
 
-data_split_config = {
-    'split_ratio': [7, 1, 2]
-}
+data_split_config = {'split_ratio': [7, 1, 2]}
 
 feature_selection_config = {
     'sample_chunksize': 2000,
@@ -45,7 +40,7 @@ train_config = {
     'epochs': 100,
     'callbacks': {
         'tensorboard_logging': True,
-        'early_stop':{
+        'early_stop': {
             'patience': 3,
             'min_delta': 1.0e-4
         },
@@ -55,8 +50,4 @@ train_config = {
     }
 }
 
-evaluation_config = {
-    'batch_size': 15000,
-    'model_checkpoint': None
-}
-
+evaluation_config = {'batch_size': 15000, 'model_checkpoint': None}

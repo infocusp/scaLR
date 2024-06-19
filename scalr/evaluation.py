@@ -1,4 +1,5 @@
 import json
+import os
 from os import path
 from typing import Optional, Union, Tuple
 
@@ -153,8 +154,8 @@ def get_top_n_genes(
 
     concat_shap_values = np.concatenate(shap_values).mean(axis=0)
     genes_class_shap_df = DataFrame(concat_shap_values,
-                                       index=test_dl.dataset.var_names,
-                                       columns=classes)
+                                    index=test_dl.dataset.var_names,
+                                    columns=classes)
 
     class_top_genes = {}
     for class_name in classes:
@@ -163,6 +164,7 @@ def get_top_n_genes(
         class_top_genes[class_name] = list(sorted_genes.index[:top_n])
 
     return class_top_genes, genes_class_shap_df
+
 
 def save_top_genes_and_heatmap(
     model: LinearModel,
@@ -187,6 +189,9 @@ def save_top_genes_and_heatmap(
         top_n: save top n genes based on shap values.
     """
 
+    shap_heatmap_path = path.join(dirpath, "shap_heatmap")
+    os.makedirs(shap_heatmap_path, exist_ok=True)
+
     class_top_genes, genes_class_shap_df = get_top_n_genes(
         model,
         train_dl,
@@ -198,13 +203,18 @@ def save_top_genes_and_heatmap(
         n_background_tensor,
     )
 
-    DataFrame(class_top_genes).to_csv(
-        path.join(dirpath, "shap_analysis.csv"), index=False)
+    DataFrame(class_top_genes).to_csv(path.join(shap_heatmap_path,
+                                                "shap_analysis.csv"),
+                                      index=False)
+
+    genes_class_shap_df.T.to_csv(
+        path.join(shap_heatmap_path, "genes_class_weights.csv"))
 
     common_genes = set()
     for class_name, genes in class_top_genes.items():
         common_genes.update(genes)
-    plot_heatmap(genes_class_shap_df.loc[list(common_genes)], dirpath)
+    plot_heatmap(genes_class_shap_df.loc[list(common_genes)],
+                 shap_heatmap_path)
 
 
 def plot_heatmap(class_genes_weights: DataFrame, dirpath: str):
@@ -224,9 +234,9 @@ def plot_heatmap(class_genes_weights: DataFrame, dirpath: str):
 
 
 def plot_roc_auc_curve(test_labels: list[int],
-            pred_score: list[list[float]],
-            dirpath: str,
-            mapping: Optional[list] = None) -> None:
+                       pred_score: list[list[float]],
+                       dirpath: str,
+                       mapping: Optional[list] = None) -> None:
     """ Calculate ROC-AUC and save plot.
 
     Args:
@@ -251,7 +261,7 @@ def plot_roc_auc_curve(test_labels: list[int],
 
     plt.axline((0, 0), (1, 1), linestyle='--', color='black')
     fig.savefig(path.join(dirpath, f'roc_auc.png'))
-    plt.clf() # clear axis & figure so it does not affect the next plot.
+    plt.clf()  # clear axis & figure so it does not affect the next plot.
 
 
 def _make_design_matrix(adata: Union[AnnData, AnnCollection],
@@ -620,7 +630,7 @@ def validate_gene_recall_config_and_extract_genes(gene_recall_config, dirpath):
     if 'feature_class_weights_path' in gene_recall_config:
         fcw_path = gene_recall_config['feature_class_weights_path']
     elif 'feature_class_weights_path' not in gene_recall_config and 'ranked_genes' not in gene_recall_config:
-        fcw_path = f'{dirpath}/feature_selection/feature_class_weights.csv'
+        fcw_path = f'{dirpath}/shap_heatmap/genes_class_weights.csv'
 
     if fcw_path:
         try:
@@ -675,21 +685,18 @@ def validate_gene_recall_config_and_extract_genes(gene_recall_config, dirpath):
     return ranked_genes, reference_genes
 
 
-def generate_gene_recall_curve(gene_recall_config, dirpath):
+def generate_gene_recall_curve(gene_recall_config, resultpath):
     """This function geneerates gene recall curves for each category of target provided &
     also plots gene recall for aggregated ranked genes across all categories if user intents to.
 
     Args:
         gene_recall_config: Config for gene recall.
-        dirpath: Path to fetch experiment's stored feature class weight matrix.
+        resultpath: Path to fetch experiment's stored shap results.
     """
 
     # Validating the parameters provided in gene recal config and extract ranked & reference gene lists.
     ranked_genes, reference_genes = validate_gene_recall_config_and_extract_genes(
-        gene_recall_config, dirpath)
-
-    resultpath = path.join(dirpath, 'results')
-    os.makedirs(resultpath, exist_ok=True)
+        gene_recall_config, resultpath)
 
     # Plotting gene recall curves for each category in trait.
     if 'per_category' in gene_recall_config['reference_genes']:

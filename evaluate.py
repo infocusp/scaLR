@@ -24,30 +24,19 @@ def evaluate(config, log=True):
     exp_name = config['exp_name']
     exp_run = config['exp_run']
 
-    data_config = config['data']
-
-    target = data_config['target']
-    test_datapath = data_config['test_datapath']
-    train_datapath = data_config.get('train_datapath')
-
     evaluation_configs = config['evaluation']
-    batch_size = evaluation_configs['batch_size']
-
-    shap_config = evaluation_configs.get('shap_config')
-    if shap_config:
-        top_n = shap_config.get('top_n', 20)
-        n_background_tensor=shap_config.get('background_tensor', 1000)
-
-    if ('metrics' not in evaluation_configs):
-        return config
 
     dirpath = path.join(dirpath, f'{exp_name}_{exp_run}')
     resultpath = path.join(dirpath, 'results')
     os.makedirs(resultpath, exist_ok=True)
 
     if 'metrics' in evaluation_configs:
+        data_config = config['data']
         target = data_config['target']
         test_datapath = data_config['test_datapath']
+        train_datapath = data_config.get('train_datapath')
+        batch_size = evaluation_configs['batch_size']
+
         model_checkpoint = evaluation_configs['model_checkpoint']
         model_ = read_yaml(path.join(model_checkpoint, 'config.yml'))
         config['model'] = model_
@@ -93,24 +82,28 @@ def evaluate(config, log=True):
         if 'roc_auc' in metrics:
             print("\nROC & AUC:")
             plot_roc_auc_curve(test_labels,
-                    pred_probabilities,
-                    resultpath,
-                    mapping=id2label)
+                               pred_probabilities,
+                               resultpath,
+                               mapping=id2label)
         if 'shap' in metrics:
             print("\nSHAP analysis:")
+            shap_config = evaluation_configs.get('shap_config')
+            if shap_config:
+                top_n = shap_config.get('top_n', 20)
+                n_background_tensor = shap_config.get('background_tensor',
+                                                      1000)
+            else:
+                raise ValueError("Shap config required.")
+
             if train_datapath:
                 train_data = read_data(train_datapath)
                 train_dl = simple_dataloader(train_data, target, batch_size,
-                                            label_mappings)
+                                             label_mappings)
             else:
                 raise ValueError("Train data path required for SHAP analysis.")
-            save_top_genes_and_heatmap(model,
-                                       train_dl,
-                                       test_dl,
-                                       id2label,
-                                       resultpath,
-                                       device,
-                                       top_n,
+
+            save_top_genes_and_heatmap(model, train_dl, test_dl, id2label,
+                                       resultpath, device, top_n,
                                        n_background_tensor)
 
         if 'deg' in metrics:
@@ -123,7 +116,7 @@ def evaluate(config, log=True):
             'gene_recall']:
         print('Starting gene recall curve analysis.')
         generate_gene_recall_curve(evaluation_configs['gene_recall'],
-                                   dirpath=dirpath)
+                                   resultpath=resultpath)
         print('Gene recall curves generated.')
 
     dump_yaml(config, path.join(dirpath, 'config.yml'))

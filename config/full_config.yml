@@ -73,7 +73,10 @@ training:
 evaluation:
     model_checkpoint: '/path/to/model'
     batch_size: 5000
-    metrics: ['accuracy', 'report', 'roc_auc']
+    metrics: ['accuracy', 'report', 'roc_auc', 'shap']
+    shap_config:
+        top_n: 10
+        background_tensor: 200
     # gene_recall:
     #     ## `feature_class_weights_path` & `ranked_genes` are mutually exclusive. Or if you comment out both,
     #     ## then pipeline generated feature_class_weights matrix is used.

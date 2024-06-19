@@ -43,7 +43,7 @@ def train(config, log=True):
     resume_from_checkpoint = config['model']['resume_from_checkpoint']
     if resume_from_checkpoint:
         model_checkpoint = config['model']['start_checkpoint']
-        model_ = read_yaml(path.join(model_checkpoint,'config.yml'))
+        model_ = read_yaml(path.join(model_checkpoint, 'config.yml'))
         config['model']['type'] = model_['type']
         config['model']['hyperparameters'] = model_['hyperparameters']
     else:
@@ -53,9 +53,12 @@ def train(config, log=True):
     model_hp = config['model']['hyperparameters']
 
     if 'evaluation' in config:
-        config['evaluation']['model_checkpoint'] = path.join(dirpath,'best_model')
+        config['evaluation']['model_checkpoint'] = path.join(
+            dirpath, 'best_model')
     else:
-        config['evaluation'] = {'model_checkpoint': path.join(dirpath,'best_model')}
+        config['evaluation'] = {
+            'model_checkpoint': path.join(dirpath, 'best_model')
+        }
 
     # TODO: add absl.logging functionality
     if log:
@@ -107,13 +110,14 @@ def train(config, log=True):
         raise NotImplementedError(
             'Only `log` and `weighted_log` available as options!')
 
-    trainer = Trainer(model, opt, lr, weight_decay, loss_fn, callbacks, device, dirpath,
-                      model_checkpoint)
+    trainer = Trainer(model, opt, lr, weight_decay, loss_fn, callbacks, device,
+                      dirpath, model_checkpoint)
     trainer.train(epochs, train_dl, val_dl)
 
-    dump_yaml(config['model'], path.join(dirpath,'best_model','config.yml'))
-    dump_json(label_mappings, path.join(dirpath,'best_model','label_mappings.json'))
-    dump_yaml(config, path.join(dirpath,'config.yml'))
+    dump_yaml(config['model'], path.join(dirpath, 'best_model', 'config.yml'))
+    dump_json(label_mappings,
+              path.join(dirpath, 'best_model', 'label_mappings.json'))
+    dump_yaml(config, path.join(dirpath, 'config.yml'))
     return config
 
 
