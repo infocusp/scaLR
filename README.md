@@ -79,10 +79,11 @@ pip install -r requirements.txt
 
 3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), and an optional flag to log all parts of the pipelines (`-l | --log`).
 
-4. `python pipeline.py --config /path/to/config --log` to run the pipeline 
+4. `python pipeline.py --config /path/to/config --log` to run the scaLR. 
 
 ## Interactive tutorials
 
-Please follow this [notebook](gitlabclone/single_cell_classification/scaLR_tutorial.ipynb)
+Please follow this link will update soon. 
 
 ## Citation
+Will update soon.
