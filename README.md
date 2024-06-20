@@ -83,7 +83,7 @@ pip install -r requirements.txt
 
 ## Interactive tutorials
 
-Please follow this link will update soon. 
+Will update soon. 
 
 ## Citation
 Will update soon.
