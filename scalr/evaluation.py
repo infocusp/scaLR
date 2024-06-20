@@ -133,7 +133,7 @@ def get_top_n_genes(
         train_dl: train dataloader.
         test_dl: test dataloader.
         classes: list of class names.
-        dirpath: dir where shap analysis csv & heatmap stored.
+        dirpath: dir where genes to class weights stored.
         device: device for pytorch.
         top_n: save top n genes based on shap values.
 
@@ -152,14 +152,24 @@ def get_top_n_genes(
         batch_shap_values = explainer.shap_values(batch[0].to(device))
         shap_values.append(batch_shap_values)
 
-    concat_shap_values = np.concatenate(shap_values).mean(axis=0)
-    genes_class_shap_df = DataFrame(concat_shap_values,
+    concat_shap_values = np.concatenate(shap_values)
+
+    mean_shap_values = concat_shap_values.mean()
+    genes_class_shap_df = DataFrame(mean_shap_values,
                                     index=test_dl.dataset.var_names,
                                     columns=classes)
 
+    abs_mean_shap_values = np.abs(concat_shap_values).mean()
+    abs_genes_class_shap_df = DataFrame(abs_mean_shap_values,
+                                    index=test_dl.dataset.var_names,
+                                    columns=classes)
+
+    abs_genes_class_shap_df.T.to_csv(
+        path.join(dirpath, "genes_class_weights.csv"))
+
     class_top_genes = {}
     for class_name in classes:
-        sorted_genes = genes_class_shap_df[class_name].sort_values(
+        sorted_genes = abs_genes_class_shap_df[class_name].sort_values(
             ascending=False)
         class_top_genes[class_name] = list(sorted_genes.index[:top_n])
 
@@ -197,7 +207,7 @@ def save_top_genes_and_heatmap(
         train_dl,
         test_dl,
         classes,
-        dirpath,
+        shap_heatmap_path,
         device,
         top_n,
         n_background_tensor,
@@ -206,9 +216,6 @@ def save_top_genes_and_heatmap(
     DataFrame(class_top_genes).to_csv(path.join(shap_heatmap_path,
                                                 "shap_analysis.csv"),
                                       index=False)
-
-    genes_class_shap_df.T.to_csv(
-        path.join(shap_heatmap_path, "genes_class_weights.csv"))
 
     common_genes = set()
     for class_name, genes in class_top_genes.items():
