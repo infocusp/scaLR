@@ -1,25 +1,28 @@
+import json
 import os
 from os import path
 from typing import Optional, Union, Tuple
 
-import matplotlib.pyplot as plt
-import numpy as np
 import anndata as ad
 from anndata import AnnData
 from anndata.experimental import AnnCollection
-from pydeseq2.dds import DeseqDataSet
-from pydeseq2.ds import DeseqStats
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from pandas import DataFrame
+from pydeseq2.dds import DeseqDataSet
+from pydeseq2.ds import DeseqStats
+import scanpy as sc
+import seaborn as sns
+import shap
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, RocCurveDisplay, roc_curve, auc
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
-import seaborn as sns
-import scanpy as sc
 
-from .model import LinearModel
+from .model import LinearModel, CustomShapModel
 from .utils import data_utils
+from scalr.feature_selection import extract_top_k_features
 
 
 def get_predictions(model: LinearModel,
@@ -81,7 +84,7 @@ def generate_and_save_classification_report(
         test_labels = [mapping[x] for x in test_labels]
         pred_labels = [mapping[x] for x in pred_labels]
 
-    report = pd.DataFrame(
+    report = DataFrame(
         classification_report(test_labels, pred_labels,
                               output_dict=True)).transpose()
     print(report)
@@ -112,67 +115,135 @@ def conf_matrix(test_labels: list[int],
     return confusion_matrix(test_labels, pred_labels)
 
 
-# TODO: change extraction method from weights maybe?
 def get_top_n_genes(
-        model: LinearModel,
-        n: int = 50,
-        genes: Optional[list[str]] = None) -> (list[int], list[str]):
+    model: LinearModel,
+    train_dl: DataLoader,
+    test_dl: DataLoader,
+    classes: list,
+    dirpath: str,
+    device: str = 'cpu',
+    top_n: int = 20,
+    n_background_tensor: int = 1000,
+) -> None:
     """
-    Function to get top_n genes and their indices using model weights.
+    Function to get top n genes of each class and its weights.
 
     Args:
         model: trained model to extract weights from
-        n: number of top_genes to extract
-        genes: gene_name list
+        train_dl: train dataloader.
+        test_dl: test dataloader.
+        classes: list of class names.
+        dirpath: dir where genes to class weights stored.
+        device: device for pytorch.
+        top_n: save top n genes based on shap values.
 
-    Return:
-        top_n gene indices, top_n gene names
-
+    Returns:
+        class wise top n genes, genes * class weights matrix
     """
-    weights = abs(model.state_dict()['lin.weight'].cpu())
-    top_n_indices = torch.mean(weights, dim=0).sort().indices[-n:].tolist()
-    top_n_genes = []
-    if genes is not None: top_n_genes = [genes[i] for i in top_n_indices]
-    return top_n_indices, top_n_genes
+
+    model.to(device)
+    shap_model = CustomShapModel(model)
+    explainer = shap.DeepExplainer(
+        shap_model,
+        next(iter(train_dl))[0][:n_background_tensor].to(device))
+
+    shap_values = []
+    for batch in test_dl:
+        batch_shap_values = explainer.shap_values(batch[0].to(device))
+        shap_values.append(batch_shap_values)
+
+    concat_shap_values = np.concatenate(shap_values)
+
+    mean_shap_values = concat_shap_values.mean()
+    genes_class_shap_df = DataFrame(mean_shap_values,
+                                    index=test_dl.dataset.var_names,
+                                    columns=classes)
+
+    abs_mean_shap_values = np.abs(concat_shap_values).mean()
+    abs_genes_class_shap_df = DataFrame(abs_mean_shap_values,
+                                    index=test_dl.dataset.var_names,
+                                    columns=classes)
+
+    abs_genes_class_shap_df.T.to_csv(
+        path.join(dirpath, "genes_class_weights.csv"))
+
+    class_top_genes = {}
+    for class_name in classes:
+        sorted_genes = abs_genes_class_shap_df[class_name].sort_values(
+            ascending=False)
+        class_top_genes[class_name] = list(sorted_genes.index[:top_n])
+
+    return class_top_genes, genes_class_shap_df
 
 
-def top_n_heatmap(model: LinearModel,
-                  dirpath: str,
-                  classes: list[str],
-                  n: int = 50,
-                  genes: Optional[list[str]] = None) -> (list[int], list[str]):
+def save_top_genes_and_heatmap(
+    model: LinearModel,
+    train_dl: DataLoader,
+    test_dl: DataLoader,
+    classes: list,
+    dirpath: str,
+    device: str = 'cpu',
+    top_n: int = 20,
+    n_background_tensor: int = 1000,
+) -> None:
     """
-    Generate a heatmap for top_n genes across all classes.
+    Function to save top n genes of each class and save heatmap of genes & their class weight.
 
     Args:
         model: trained model to extract weights from
-        dirpath: path to store the heatmap image
-        classes: list of name of classes
-        n: number of top_genes to extract
-        genes: gene_name list
-
-    Return:
-        top_n gene indices, top_n gene names
+        train_dl: train dataloader.
+        test_dl: test dataloader.
+        classes: list of class names.
+        dirpath: dir where shap analysis csv & heatmap stored.
+        device: device for pytorch.
+        top_n: save top n genes based on shap values.
     """
-    weights = model.state_dict()['lin.weight'].cpu()
-    top_n_indices, top_n_genes = get_top_n_genes(model, n, genes)
-    top_n_weights = weights[:, top_n_indices].transpose(0, 1)
+
+    shap_heatmap_path = path.join(dirpath, "shap_heatmap")
+    os.makedirs(shap_heatmap_path, exist_ok=True)
+
+    class_top_genes, genes_class_shap_df = get_top_n_genes(
+        model,
+        train_dl,
+        test_dl,
+        classes,
+        shap_heatmap_path,
+        device,
+        top_n,
+        n_background_tensor,
+    )
+
+    DataFrame(class_top_genes).to_csv(path.join(shap_heatmap_path,
+                                                "shap_analysis.csv"),
+                                      index=False)
+
+    common_genes = set()
+    for class_name, genes in class_top_genes.items():
+        common_genes.update(genes)
+    plot_heatmap(genes_class_shap_df.loc[list(common_genes)],
+                 shap_heatmap_path)
+
+
+def plot_heatmap(class_genes_weights: DataFrame, dirpath: str):
+    """
+    Generate a heatmap for top n genes across all classes.
+
+    Args:
+        class_genes_weights: genes * classes matrix which contains
+                             shap_value/weights of each gene to class.
+        dirpath: path to store the heatmap image.
+    """
 
     sns.set(rc={'figure.figsize': (9, 12)})
-    sns.heatmap(top_n_weights,
-                yticklabels=top_n_genes,
-                xticklabels=classes,
-                vmin=-1e-2,
-                vmax=1e-2)
+    sns.heatmap(class_genes_weights, vmin=-1e-2, vmax=1e-2)
 
-    plt.savefig(path.join(dirpath, 'heatmap.png'))
-    return top_n_indices, top_n_genes
+    plt.savefig(path.join(dirpath, "heatmap.png"))
 
 
-def roc_auc(test_labels: list[int],
-            pred_score: list[list[float]],
-            dirpath: str,
-            mapping: Optional[dict] = None) -> None:
+def plot_roc_auc_curve(test_labels: list[int],
+                       pred_score: list[list[float]],
+                       dirpath: str,
+                       mapping: Optional[list] = None) -> None:
     """ Calculate ROC-AUC and save plot.
 
     Args:
@@ -183,7 +254,8 @@ def roc_auc(test_labels: list[int],
     test_labels_onehot = data_utils.get_one_hot_matrix(np.array(test_labels))
     fig, ax = plt.subplots(1, 1, figsize=(16, 8))
 
-    for class_label in range(max(test_labels)):
+    # test labels starts with 0 so we need to add 1 in max.
+    for class_label in range(max(test_labels) + 1):
 
         # fpr: False Positive Rate | tpr: True Positive Rate
         fpr, tpr, _ = roc_curve(test_labels_onehot[:, class_label],
@@ -196,6 +268,7 @@ def roc_auc(test_labels: list[int],
 
     plt.axline((0, 0), (1, 1), linestyle='--', color='black')
     fig.savefig(path.join(dirpath, f'roc_auc.png'))
+    plt.clf()  # clear axis & figure so it does not affect the next plot.
 
 
 def _make_design_matrix(adata: Union[AnnData, AnnCollection],
@@ -232,8 +305,8 @@ def _make_design_matrix(adata: Union[AnnData, AnnCollection],
             subdata = ad.AnnData(
                 X=sum_subset[:].X.sum(axis=0).reshape(
                     1, len(sum_subset.var_names)),
-                var=pd.DataFrame(index=sum_subset.var_names),
-                obs=pd.DataFrame(index=[f'{sum_sample}_{condition}']))
+                var=DataFrame(index=sum_subset.var_names),
+                obs=DataFrame(index=[f'{sum_sample}_{condition}']))
             subdata.obs[new_control_column_name] = [condition]
             design_matrix_list.append(subdata)
 
@@ -281,9 +354,10 @@ def get_differential_expression_results(adata: AnnData,
 
     if dirpath:
         results_df.to_csv(
-            path.join(dirpath,
-                      f'DEG_results_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.csv')
-        )
+            path.join(
+                dirpath,
+                f'DEG_results_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.csv'
+            ))
 
     return results_df
 
@@ -375,13 +449,11 @@ def plot_volcano(deg_results_df: DataFrame,
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     if y_lim_tuple:
         plt.ylim(bottom=y_lim_tuple[0], top=y_lim_tuple[1])
-    plt.savefig(
-        path.join(
-            dirpath,
-            f'DEG_plot_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.png'
-        ),
-        bbox_inches='tight'
-    )
+    plt.savefig(path.join(
+        dirpath,
+        f'DEG_plot_{fixed_condition}_{factor_categories[0]}_vs_{factor_categories[1]}.png'
+    ),
+                bbox_inches='tight')
 
 
 def perform_differential_expression_analysis(adata: Union[AnnData,
@@ -401,7 +473,7 @@ def perform_differential_expression_analysis(adata: Union[AnnData,
 
     Args:
         adata: data to make design matrix from
-        fixed_column: column name in `adata.obs` containing a fixed condition to subset 
+        fixed_column: column name in `adata.obs` containing a fixed condition to subset
         fixed_condition: condition to subset data on, belonging to `fixed_column`
         design_factor: column name in `adata.obs` containing the control condition
         factor_categories: list of conditions in `design_factor` to make design matrix for
@@ -437,3 +509,222 @@ def perform_differential_expression_analysis(adata: Union[AnnData,
                  fold_change, p_val, y_lim_tuple, dirpath)
 
     return deg_results_df
+
+
+def plot_gene_recall(ranked_genes_df: pd.DataFrame,
+                     ref_genes_df: pd.DataFrame,
+                     top_K: int = 5000,
+                     dirpath: str = '.',
+                     plot_type: str = '',
+                     plots_per_row=5):
+    """This function stores the gene recall curve for provided ranked genes & reference genes.
+    It also stores the reference genes along with their ranks in a json file for further
+    analysis to user.
+
+    Args:
+        ranked_genes_df: Pipeline generated ranked genes dataframe.
+        ref_genes_df: Reference genes dataframe.
+        top_K: The top K ranked genes in which reference genes are to be looked for.
+        dirpath: Path to store gene recall plot and json.
+        plot_type: Type of gene recall - per category or aggregated across all categories.
+    """
+    gene_recall_dict = {}
+
+    n_plots = len(
+        set(ref_genes_df.columns).intersection(ranked_genes_df.columns))
+    print(
+        f'-- {n_plots} categories matches between ranked genes & reference genes dataframes, namely: {set(ref_genes_df.columns).intersection(ranked_genes_df.columns)}'
+    )
+    n_cols = min(plots_per_row, n_plots)
+    n_rows = int(np.ceil(n_plots / n_cols))
+    fig, axs = plt.subplots(n_rows,
+                            n_cols,
+                            figsize=(n_cols * plots_per_row,
+                                     n_rows * plots_per_row),
+                            squeeze=False)
+    axs = axs.flatten()
+    fig.suptitle('Recall of ref genes w.r.t pipeline ranked genes')
+
+    for i, category in enumerate(
+            set(ranked_genes_df.columns).intersection(ref_genes_df.columns)):
+        ranked_genes = ranked_genes_df[category].values
+        ref_genes = ref_genes_df[category].values
+        k = top_K
+
+        assert k >= len(
+            ref_genes
+        ), f'k={k} should be greater than #ref genes({len(ref_genes)})'
+
+        if len(ranked_genes) == 0 or len(ref_genes) == 0:
+            raise Exception('Ranked genes or ref genes list cannot be empty.')
+
+        # Adjusting k if expected k > number of ranked genes.
+        k = min(k, len(ranked_genes))
+
+        # Building baseline curve
+        step = k // len(ref_genes)
+        baseline = [i // step for i in range(1, 1 + k)]
+
+        order_in_lit = {}
+        points = []
+
+        count = 0
+        for rank, gene in enumerate(ranked_genes[:k]):
+            if gene in ref_genes:
+                count += 1
+                order_in_lit[rank] = gene
+            points.append(count)
+
+        axs[i].plot(list(range(1, 1 + k)), points, label=f'gene_recall')
+        axs[i].plot(list(range(1, 1 + k)), baseline, label='baseline')
+        axs[i].set_title(category)
+        axs[i].set_xlabel('# Top-ranked genes (k)')
+        axs[i].set_ylabel('# Reference genes')
+        axs[i].legend()
+
+        gene_recall_dict[category] = order_in_lit
+
+    for j in range(i + 1, len(axs)):
+        fig.delaxes(axs[j])
+
+    plt.tight_layout()
+    plt.savefig(f'{dirpath}/gene_recall_curves_{plot_type}.png')
+    with open(f'{dirpath}/gene_recall_curve_{plot_type}_info.json', 'w') as f:
+        json.dump(gene_recall_dict, f, indent=6)
+    print(
+        f'Gene recall curves stored at path : `{dirpath}/gene_recall_curves_{plot_type}.png`'
+    )
+
+    plt.close()
+
+
+def validate_gene_recall_config_and_extract_genes(gene_recall_config, dirpath):
+
+    ranked_genes = {}
+    reference_genes = {}
+    fcw_path = None
+    top_K = gene_recall_config.get('top_K', None)
+
+    if 'reference_genes' not in gene_recall_config:
+        raise KeyError(
+            'Reference genes information not provided by user in the gene recall config. Please provide or check the README for the same!'
+        )
+    elif not gene_recall_config['reference_genes']:
+        raise ValueError(
+            'Atleast one of `per_category` or `aggregated across all categories` reference genes list needs to be provided by user!'
+        )
+    else:
+        if gene_recall_config['reference_genes'].get('per_category', []):
+            reference_genes['per_category'] = pd.read_csv(
+                gene_recall_config['reference_genes']['per_category'],
+                index_col=0)
+        else:
+            reference_genes['per_category'] = None
+        if gene_recall_config['reference_genes'].get('aggregated', []):
+            reference_genes['aggr_all_categories'] = pd.read_csv(
+                gene_recall_config['reference_genes']['aggregated'],
+                index_col=0)
+        else:
+            reference_genes['aggr_all_categories'] = None
+
+    print('-- Reference genes are extracted.')
+
+    if 'feature_class_weights_path' in gene_recall_config and 'ranked_genes' in gene_recall_config:
+        raise ValueError(
+            'Either of `feature_class_weights` or `ranked_genes` is expected, not both!'
+        )
+
+    if 'feature_class_weights_path' in gene_recall_config:
+        fcw_path = gene_recall_config['feature_class_weights_path']
+    elif 'feature_class_weights_path' not in gene_recall_config and 'ranked_genes' not in gene_recall_config:
+        fcw_path = f'{dirpath}/shap_heatmap/genes_class_weights.csv'
+
+    if fcw_path:
+        try:
+            feature_class_weights = pd.read_csv(fcw_path, index_col=0)
+        except:
+            raise KeyError(
+                'Ranked genes information not provided by user in the gene recall config. '
+                'Nor does the feature class weights matrix is found at expected path '
+                f'after the pipeline run - {fcw_path}. Please check the README!'
+            )
+
+        if reference_genes['per_category'] is not None:
+            ranked_genes['per_category'] = extract_top_k_features(
+                feature_class_weights=feature_class_weights,
+                aggregation_strategy='no_reduction',
+                k=top_K,
+                save_features=False)
+        else:
+            ranked_genes['per_category'] = None
+        if reference_genes['aggr_all_categories'] is not None:
+            ranked_genes['aggr_all_categories'] = extract_top_k_features(
+                feature_class_weights=feature_class_weights,
+                aggregation_strategy='mean',
+                k=top_K,
+                save_features=False).to_frame(
+                    name=reference_genes['aggr_all_categories'].columns.
+                    to_list()[0])
+        else:
+            ranked_genes['aggr_all_categories'] = None
+
+    if not fcw_path and 'ranked_genes' in gene_recall_config:
+        if gene_recall_config['ranked_genes'].get('per_category', []):
+            ranked_genes['per_category'] = pd.read_csv(
+                gene_recall_config['ranked_genes']['per_category'],
+                index_col=0)
+        else:
+            if 'per_category' in gene_recall_config['reference_genes']:
+                raise KeyError(
+                    'Please provide ranked genes list for per_category...')
+            ranked_genes['per_category'] = None
+        if gene_recall_config['ranked_genes'].get('aggregated', []):
+            ranked_genes['aggr_all_categories'] = pd.read_csv(
+                gene_recall_config['ranked_genes']['aggregated'], index_col=0)
+        else:
+            if 'aggregated' in gene_recall_config['reference_genes']:
+                raise KeyError(
+                    'Please provide ranked genes list for `aggregated across all categories`...'
+                )
+            ranked_genes['aggr_all_categories'] = None
+    print('-- Ranked genes are extracted.')
+
+    return ranked_genes, reference_genes
+
+
+def generate_gene_recall_curve(gene_recall_config, resultpath):
+    """This function geneerates gene recall curves for each category of target provided &
+    also plots gene recall for aggregated ranked genes across all categories if user intents to.
+
+    Args:
+        gene_recall_config: Config for gene recall.
+        resultpath: Path to fetch experiment's stored shap results.
+    """
+
+    # Validating the parameters provided in gene recal config and extract ranked & reference gene lists.
+    ranked_genes, reference_genes = validate_gene_recall_config_and_extract_genes(
+        gene_recall_config, resultpath)
+
+    # Plotting gene recall curves for each category in trait.
+    if 'per_category' in gene_recall_config['reference_genes']:
+        print('Plotting gene recall curve for each category in the target.')
+        plot_gene_recall(ranked_genes['per_category'],
+                         reference_genes['per_category'],
+                         len(ranked_genes['per_category']),
+                         resultpath,
+                         plot_type='per_category',
+                         plots_per_row=gene_recall_config.get(
+                             'plots_per_row', 5))
+
+    # Plotting gene recall curves aggregated across all categories in trait.
+    if 'aggregated' in gene_recall_config['reference_genes']:
+        print(
+            'Plotting gene recall curve for genes ranked by aggregation across all categories in the trait.'
+        )
+        plot_gene_recall(ranked_genes['aggr_all_categories'],
+                         reference_genes['aggr_all_categories'],
+                         len(ranked_genes['aggr_all_categories']),
+                         resultpath,
+                         plot_type='aggregated_across_all_categories',
+                         plots_per_row=gene_recall_config.get(
+                             'plots_per_row', 5))

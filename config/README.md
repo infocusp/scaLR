@@ -206,7 +206,7 @@ default: `0.05`
 p_val to filter the differentially expressed genes for volcano plot  
 - **y_lim_tuple** {(float, ...)}:  
 default: `null`  
-values to adjust the Y-axis limits of the plot.
+values to adjust the Y-axis limits of the plot  
 
 **gene_recall** {dict}:
 Required only if user wants to generate recall curve for the experiment.

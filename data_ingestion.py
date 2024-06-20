@@ -19,7 +19,7 @@ def ingest_data(config, log=True):
     exp_run = config['exp_run']
 
     dirpath = path.join(dirpath, f'{exp_name}_{exp_run}')
-    datapath = path.join(dirpath,'data')
+    datapath = path.join(dirpath, 'data')
 
     data_config = config['data']
     target = data_config['target']
@@ -59,16 +59,16 @@ def ingest_data(config, log=True):
 
     # changing dirpath in config
     if normalize or 'split_data' in data_config:
-        config['data']['train_datapath'] = path.join(datapath,'train')
-        config['data']['val_datapath'] = path.join(datapath,'val')
-        config['data']['test_datapath'] = path.join(datapath,'test')
+        config['data']['train_datapath'] = path.join(datapath, 'train')
+        config['data']['val_datapath'] = path.join(datapath, 'val')
+        config['data']['test_datapath'] = path.join(datapath, 'test')
 
         if sample_chunksize is None:
             config['data']['train_datapath'] += '.h5ad'
             config['data']['val_datapath'] += '.h5ad'
             config['data']['test_datapath'] += '.h5ad'
 
-    dump_yaml(config, path.join(dirpath,'config.yml'))
+    dump_yaml(config, path.join(dirpath, 'config.yml'))
     return config
 
 
