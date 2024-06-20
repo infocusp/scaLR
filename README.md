@@ -1,4 +1,4 @@
-# scaLR: a low-resource deep neural network pipeline for cell type annotation and biomarker discovery
+# scaLR: a low-resource deep neural network pipeline for cell types annotation and biomarker discovery
 
 Single cell analysis using Low Resource (scaLR) is a comprehensive end to end pipeline which is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. Major steps of the pipeline are: 
 
@@ -35,7 +35,7 @@ Flowchart explains scaLR major steps.
         - accuracy: generate accuracy of predictions
         - generate_and_save_classification_report: to generate a classwise report containing precision, recall, f1-score metrics and storing the table
 
-## Pre-requisites
+## Pre-requisites and installation scaLR
 
 
 - For smooth run of scaLAR user can create a conda environment for Python=3.9
@@ -79,8 +79,10 @@ pip install -r requirements.txt
 
 3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), and an optional flag to log all parts of the pipelines (`-l | --log`).
 
-4. `python pipeline.py --config /path/to/config --log` to run the pipeline
+4. `python pipeline.py --config /path/to/config --log` to run the pipeline 
 
 ## Interactive tutorials
+
+Please follow this [notebook](gitlabclone/single_cell_classification/scaLR_tutorial.ipynb)
 
 ## Citation

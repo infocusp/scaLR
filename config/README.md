@@ -1,6 +1,6 @@
 # Config Parameters
 
-This README explains different parameters with explanation used in config files.
+This README explains different parameters used to run scaLR using config files with explanation.
 
 ## Experiment
 **device** {str}: `cuda | cpu`  
@@ -26,7 +26,7 @@ This will be considered as the root directory for this experiment run, and all s
 
 ## Data
 **sample_chunksize** {int}: `int | null`  
-default: `10000`  
+default: `50000`  
 Useful for low resources utilization. This will ensure all data is stored in multiple chunks of atmost `sample_chunksize` samples. This does not hamper any logic in algorithms, but simply ensures that entire dataset is never loaded all at once on the RAM.  
 `null` value will disregard this optimization.
 deg
@@ -67,7 +67,7 @@ default: `feature_chunk`
 Algorithm to select top-k features. `feature_chunk` is the only available method right now.  
 
 **feature_chunksize** {int}: `int | null`  
-default: `3000`  
+default: `5000`  
 Chunks of features to subset data for training the model on iteratively.
 
 **model** {dict}:  
@@ -80,7 +80,7 @@ Type of model to train each feature-chunked-subset data. Only `nn` is available 
 default: `25`  
 Max number of epochs for to train the model.  
 --- **batch_size** {int}:  
-default: `15000`  
+default: `50000`  
 Batch_size for data loading during training. The range of this depends upon how much data can fit on GPU RAM.  
 --- **lr** {float}:  
 default: `1e-2`  
@@ -136,7 +136,7 @@ Loss function used for training of DNN.
 Weighted log is used for uneven class distribution, where weights are inverse proportions of each class size.  
 
 **batch_size** {int}:  
-default: `5000`  
+default: `50000`  
 Batch_size for data loading during training. The range of this size depends upon how much data can fit on GPU RAM.
 
 **lr** {float}:  
@@ -174,7 +174,7 @@ Uses the model checkpoint to load model for evaluation.
 If training is run before evaluation, the best model path overwrites `model_checkpoint` parameter.  
 
 **batch_size** {int}:  
-default: `5000`  
+default: `50000`  
 Batch size for data loading onto GPU during inference. Since inference does not store additional overheads for gradient, bigger numbers can be used.  
 
 **metrics** {list[str]}: `['accuracy', 'report', 'roc_auc', 'deg']`  
