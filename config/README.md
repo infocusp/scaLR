@@ -205,3 +205,28 @@ p_val to filter the differentially expressed genes for volcano plot
 - **y_lim_tuple** {(float, ...)}:  
 default: `null`  
 values to adjust the Y-axis limits of the plot  
+
+**gene_recall** {dict}:
+Required only if user wants to generate recall curve for the experiment.
+- **feature_class_weights_path**  {str}: path to feature class weights matrix. Required only if user wants to run gene recall curve explicitely after the pipeline run is over.
+- **ranked_genes** {dict}:
+    - **per_category** {str}: Path to csv which stores ranked genes per category of the trait.
+    - **aggregated** {str}: Path to csv which stores ranked genes aggregated across all categories of the trait.
+- **reference_genes** {dict}:
+    - **per_category** {str}: Path to csv which stores reference genes per category of the trait.
+    - **aggregated** {str}: Path to csv which stores reference genes aggregated across all categories of the trait.
+- **top_K**: {int}: Top k ranked genes in which reference genes recall is to be looked for.
+- **plots_per_row** {int}: Number of gene recall curve plots to plot per row in subplots.
+
+
+**Note** - Few points to be kept in mind for passing ranked/reference genes list.
+- If user intent to run only gene recall curve, consider commenting everything else. Just provide experiment name, run & dirpath & gene recall information in the config.
+- Also, stores json file for reference genes vs its rank in pipeline generated ranked gene list per category.
+- **feature_class_weights_path** when passed, is used to extract ranked genes lists for `per_category` & `aggregated` across all categories internally. So `ranked_genes` section should be omitted in that case.
+- **ranked_genes** & **reference_genes** should be a csv which has columns as category names of trait and row contains ranked genes list per category. Please check `examples/gene_recall_curve/reference_genes_per_category.csv` for your reference.
+- If **feature_class_weights_path** & **ranked_genes** section is not mentioned, then pipeline will try to look for feature_class_weights matrix at `dirpath/feature_selection/feature_class_weights.csv` path and will raise an error if matrix is not found. So user need to pass dirpath in config.yml
+- **reference_genes** section is a must for generating gene recall curve.
+- The csv should be in below format.
+    - The index should be present in csv, as while reading we use `index_col=0`. So categores should be present in columns.
+    - The reference genes csv column names should match with the actual target categoris. Please check the csv files properly.
+- A example notebook has been made inside `examples/gene_recall` for better understanding and required files are also attached there.

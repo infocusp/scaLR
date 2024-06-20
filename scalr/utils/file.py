@@ -48,9 +48,10 @@ def read_data(filepath: str,
     else:
         datas = []
         for i in range(len(os.listdir(filepath))):
-            if os.path.exists(path.join(filepath,f'{i}.h5ad')):
+            if os.path.exists(path.join(filepath, f'{i}.h5ad')):
                 datas.append(
-                    ad.read_h5ad(path.join(filepath,f'{i}.h5ad'), backed=backed))
+                    ad.read_h5ad(path.join(filepath, f'{i}.h5ad'),
+                                 backed=backed))
             else:
                 break
         data = AnnCollection(datas)

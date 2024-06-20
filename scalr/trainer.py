@@ -43,10 +43,13 @@ class Trainer:
         if not torch.cuda.is_available(): self.device = 'cpu'
 
         self.model = model.to(self.device)
-        self.opt = opt_class(self.model.parameters(), lr=lr, weight_decay=weight_decay)
+        self.opt = opt_class(self.model.parameters(),
+                             lr=lr,
+                             weight_decay=weight_decay)
 
         if model_checkpoint_path is not None:
-            state_dict = torch.load(path.join(model_checkpoint_path,'model.pt'))
+            state_dict = torch.load(
+                path.join(model_checkpoint_path, 'model.pt'))
             self.model.load_state_dict(state_dict['model_state_dict'])
             self.opt.load_state_dict(state_dict['optimizer_state_dict'])
 
@@ -150,6 +153,7 @@ class Trainer:
                 break
 
         self.model.load_state_dict(
-            torch.load(path.join(self.dirpath,'best_model','model.pt'))
-            ['model_state_dict'])
-        torch.save(self.model, path.join(self.dirpath,'best_model','model.bin'))
+            torch.load(path.join(self.dirpath, 'best_model',
+                                 'model.pt'))['model_state_dict'])
+        torch.save(self.model,
+                   path.join(self.dirpath, 'best_model', 'model.bin'))

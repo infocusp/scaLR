@@ -53,7 +53,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
     lr = model_config['params'].get('lr', 1e-2)
     weight_decay = model_config['params'].get('weight_decay', 0.1)
 
-    os.makedirs(path.join(dirpath,'model_weights'), exist_ok=True)
+    os.makedirs(path.join(dirpath, 'model_weights'), exist_ok=True)
 
     best_model_weights = []
     i = 0
@@ -82,20 +82,21 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
             }
         }
 
-        chunk_dirpath = path.join(dirpath,'model_weights',str(i))
-        os.makedirs(path.join(chunk_dirpath,'best_model'), exist_ok=True)
+        chunk_dirpath = path.join(dirpath, 'model_weights', str(i))
+        os.makedirs(path.join(chunk_dirpath, 'best_model'), exist_ok=True)
 
-        chunk_trainer = Trainer(model, opt, lr, weight_decay, loss_fn, callbacks, device,
-                                chunk_dirpath)
+        chunk_trainer = Trainer(model, opt, lr, weight_decay, loss_fn,
+                                callbacks, device, chunk_dirpath)
         chunk_trainer.train(epochs, train_dl, val_dl)
 
-        best_model_weights.append(path.join(chunk_dirpath,'best_model','model.pt'))
+        best_model_weights.append(
+            path.join(chunk_dirpath, 'best_model', 'model.pt'))
 
         i += 1
 
     # Selecting top_k features
     feature_class_weights = pd.DataFrame()
-    model_parent_path = path.join(dirpath,'model_weights')
+    model_parent_path = path.join(dirpath, 'model_weights')
 
     all_weights = []
     # Loading models from each chunk and generating feature class weights matrix.
@@ -111,15 +112,17 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
                                          index=id2label)
 
     # Storing feature class weights matrix.
-    feature_class_weights.to_csv(path.join(dirpath,'feature_class_weights.csv'))
+    feature_class_weights.to_csv(
+        path.join(dirpath, 'feature_class_weights.csv'))
 
     return feature_class_weights
 
 
 def extract_top_k_features(feature_class_weights: DataFrame,
-                           k: int,
+                           k: int = None,
                            aggregation_strategy: str = 'mean',
-                           dirpath: str = '.'):
+                           dirpath: str = '.',
+                           save_features: bool = True):
     """Extract top k features from weight matrix trained on chunked features
 
     Args:
@@ -131,15 +134,25 @@ def extract_top_k_features(feature_class_weights: DataFrame,
     Returns:
         List of top k features
     """
+    if k is None:
+        k = len(feature_class_weights.columns)
 
     if aggregation_strategy == 'mean':
         top_features_list = feature_class_weights.abs().mean().sort_values(
             ascending=False).reset_index()['index'][:k]
+    elif aggregation_strategy == 'no_reduction':
+        top_features_list = pd.DataFrame(
+            columns=feature_class_weights.index.tolist())
+        for i, category in enumerate(feature_class_weights.index.tolist()):
+            top_features_list[category] = abs(
+                feature_class_weights.iloc[i]).sort_values(
+                    ascending=False).reset_index()['index'][:k]
     else:
         raise NotImplementedError(
             'Other aggregation strategies are not implemented yet...')
 
-    with open(path.join(dirpath,'top_features.txt'), 'w') as fh:
-        fh.write('\n'.join(top_features_list) + '\n')
+    if save_features:
+        with open(f'{dirpath}/top_features.txt', 'w') as fh:
+            fh.write('\n'.join(top_features_list) + '\n')
 
     return top_features_list

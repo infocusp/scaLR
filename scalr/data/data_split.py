@@ -43,28 +43,25 @@ def _generate_train_val_test_split_indices(datapath: str,
     Splitter = GroupShuffleSplit if stratify else StratifiedShuffleSplit
 
     test_splitter = Splitter(test_size=test_ratio,
-                                      n_splits=10,
-                                      random_state=42)
+                             n_splits=10,
+                             random_state=42)
     training_inds, testing_inds = next(
-        test_splitter.split(
-            metadata,
-            metadata[target],
-            groups=metadata[stratify] if stratify else None))
+        test_splitter.split(metadata,
+                            metadata[target],
+                            groups=metadata[stratify] if stratify else None))
 
     if len(metadata[target].iloc[testing_inds].unique()) != n_cls:
         print('WARNING: All classes are not present in Test set')
 
     train_data = metadata.iloc[training_inds]
 
-    val_splitter = Splitter(test_size=val_ratio /
-                                     (val_ratio + train_ratio),
-                                     n_splits=10,
-                                     random_state=42)
+    val_splitter = Splitter(test_size=val_ratio / (val_ratio + train_ratio),
+                            n_splits=10,
+                            random_state=42)
     fake_train_inds, fake_val_inds = next(
-        val_splitter.split(
-            train_data,
-            train_data[target],
-            groups=train_data[stratify] if stratify else None))
+        val_splitter.split(train_data,
+                           train_data[target],
+                           groups=train_data[stratify] if stratify else None))
 
     true_test_inds = testing_inds.tolist()
     true_val_inds = train_data.iloc[fake_val_inds]['inds'].tolist()
@@ -94,7 +91,7 @@ def _generate_train_val_test_split_indices(datapath: str,
     }
 
     if dirpath is not None:
-        dump_json(data_split, path.join(dirpath,'data_split.json'))
+        dump_json(data_split, path.join(dirpath, 'data_split.json'))
 
     return data_split
 
@@ -127,7 +124,7 @@ def split_data(datapath: str,
                     adata.X = adata.X.A
                 adata.X = process_fn(adata.X, **kwargs)
             write_data(adata[data_split[split_name]],
-                       path.join(dirpath,f'{split_name}.h5ad'))
+                       path.join(dirpath, f'{split_name}.h5ad'))
         else:
             os.makedirs(path.join(dirpath, split_name), exist_ok=True)
             curr_chunksize = len(
@@ -145,7 +142,7 @@ def split_data(datapath: str,
                     if not isinstance(adata.X, np.ndarray):
                         adata.X = adata.X.A
                     adata.X = process_fn(adata.X, **kwargs)
-                write_data(adata, path.join(dirpath, split_name,f'{i}.h5ad'))
+                write_data(adata, path.join(dirpath, split_name, f'{i}.h5ad'))
 
 
 def generate_train_val_test_split(datapath: str,
@@ -175,4 +172,5 @@ def generate_train_val_test_split(datapath: str,
     data_split = _generate_train_val_test_split_indices(
         datapath, split_ratio, target, stratify, dirpath)
 
-    split_data(datapath, data_split, dirpath, sample_chunksize, process_fn, **kwargs)
+    split_data(datapath, data_split, dirpath, sample_chunksize, process_fn,
+               **kwargs)
