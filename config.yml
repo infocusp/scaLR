@@ -84,3 +84,9 @@ evaluation:
     #         aggregated: '/path/to/ref_genes_aggr_all_categories csv'
     #     top_K: 5000
     #     plots_per_row: 5
+    deg_config:
+        fixed_column: 'Column name in adata.obs which has the condition to subset the anndata, ex: cell_type'
+        fixed_condition: 'A condition in fixed_column to subset the anndata, ex : B cell'
+        design_factor: 'A column name in adata.obs having factor levels to perform DEG, ex : disease_status'
+        factor_categories: 'List of factors in design_factor to perform DEG, ex : [disease, normal] for disease vs normal'
+        sum_column: 'A column name in adata.obs to sum the gene expression per unique-id, ex : donor_id'     

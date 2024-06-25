@@ -106,11 +106,13 @@ def evaluate(config, log=True):
                                        resultpath, device, top_n,
                                        n_background_tensor)
 
-        if 'deg' in metrics:
-            perform_differential_expression_analysis(
-                test_data,
-                **evaluation_configs['deg_config'],
-                dirpath=resultpath)
+    if 'deg_config' in evaluation_configs:
+        full_datapath = config['data']['full_datapath']
+        ad_for_deg = read_data(full_datapath)
+        perform_differential_expression_analysis(
+            ad_for_deg,
+            **evaluation_configs['deg_config'],
+            dirpath=resultpath)    
 
     if 'gene_recall' in evaluation_configs and evaluation_configs[
             'gene_recall']:
