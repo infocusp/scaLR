@@ -154,12 +154,12 @@ def get_top_n_genes(
 
     concat_shap_values = np.concatenate(shap_values)
 
-    mean_shap_values = concat_shap_values.mean()
+    mean_shap_values = concat_shap_values.mean(axis=0)
     genes_class_shap_df = DataFrame(mean_shap_values,
                                     index=test_dl.dataset.var_names,
                                     columns=classes)
 
-    abs_mean_shap_values = np.abs(concat_shap_values).mean()
+    abs_mean_shap_values = np.abs(concat_shap_values).mean(axis=0)
     abs_genes_class_shap_df = DataFrame(abs_mean_shap_values,
                                     index=test_dl.dataset.var_names,
                                     columns=classes)
