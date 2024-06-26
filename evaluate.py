@@ -29,7 +29,6 @@ def evaluate(config, log=True):
     dirpath = path.join(dirpath, f'{exp_name}_{exp_run}')
     resultpath = path.join(dirpath, 'results')
     os.makedirs(resultpath, exist_ok=True)
-
     if 'metrics' in evaluation_configs:
         data_config = config['data']
         target = data_config['target']
@@ -104,15 +103,17 @@ def evaluate(config, log=True):
 
             save_top_genes_and_heatmap(model, train_dl, test_dl, id2label,
                                        resultpath, device, top_n,
-                                       n_background_tensor)
-
+                                       n_background_tensor) 
+            
     if 'deg_config' in evaluation_configs:
-        full_datapath = config['data']['full_datapath']
+        assert config['data'], "Input data unavailable for deg analysis"
+        assert 'full_datapath' in config['data'], "Required full_datapath for deg analysis"
+        full_datapath = config['data'].get('full_datapath')
         ad_for_deg = read_data(full_datapath)
         perform_differential_expression_analysis(
             ad_for_deg,
             **evaluation_configs['deg_config'],
-            dirpath=resultpath)    
+            dirpath=resultpath)
 
     if 'gene_recall' in evaluation_configs and evaluation_configs[
             'gene_recall']:
