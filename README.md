@@ -15,39 +15,42 @@ Single cell analysis using Low Resource (scaLR) is a comprehensive end to end pi
 Flowchart explains scaLR major steps.
 
 ## Library Structure
+A brief overview of the library Structure and functionalities
 
-- scaLR
-    - callbacks: CallbackExecutor, EarlyStopping, ModelCheckpoints, TensorbaordLogging
-    - data:
-        - split_data: function to obtain and store train/test/val splits
-        - preprocess: function that used to normalize the data 
-    - dataloader:
-        - simple_dataloader: simple dataloader and generator to prepare batched data to pass through model
-    - model:
-        - linearmodel: torch deep neural network model class
-        - shapmodel: function that use trained model for shap calculation
-    - utils:
-        - file_utils: functions to read and write - anndata, json and yaml files
- 
-    - feature selection:
-        - nn_feature_chunking: feature chunking algorithm to generate top features list
-    - trainer: Trainer class handles training and validation of model
-    - evaluation:
-        - predictions: generate predictions of trained model on data
-        - accuracy: generate accuracy of predictions
-        - get_differential_expression_results: to identify the differentially expressed genes in different conditions as baseline biomarkers
-        - generate_and_save_classification_report: to generate a classwise report containing precision, recall, f1-score metrics and storing the table
+### [scalr](./scalr/)
 
-- config
+- **callbacks**: 
+    - `CallbackExecutor`, `EarlyStopping`, `ModelCheckpoints`, `TensorbaordLogging`
+- **data**:
+    - `split_data`: function to obtain and store train/test/val splits
+    - `preprocess`: function that used to normalize the data 
+- **dataloader**:
+    - `simple_dataloader`: simple dataloader and generator to prepare batched data to pass through model
+- **model**:
+    - `linear_model`: torch deep neural network model class
+    - `shap_model`: function that use trained model for shap calculation
+- **utils**:
+    - `file_utils`: functions to read and write - anndata, json and yaml files
+
+- **feature selection**:
+    - `nn_feature_chunking`: feature chunking algorithm to generate top features list
+- **trainer**: `Trainer` class handles training and validation of model
+- **evaluation**:
+    - `get_predictions`: generate predictions of trained model on data
+    - `accuracy`: generate accuracy of predictions
+    - `get_differential_expression_results`: to identify the differentially expressed genes in different conditions as baseline biomarkers
+    - `generate_and_save_classification_report`: to generate a classwise report containing precision, recall, f1-score metrics and storing the table
+
+### [config](./config/)
   
-   - README: explains different parameters used to run scaLR using config files with explanation.
-   - full_config: consist all parameters used to run scaLR and other downstream analysis user can change as per their experiment.
-   - config: consist required parameters used to run scaLR.
+   - **README**: explains different parameters used to run scaLR using config files with explanation.
+   - **full_config**: a config template containing all parameters used to run scaLR and other downstream analysis
+   - **config**: a config template containing only some required parameters to run experiments.
 
 
-- examples
+### [examples](./examples/)
   
-   - gene_recall_curve: an example how to generate gene recall curve
+   - **gene_recall_curve**: an example how to generate gene recall curve
 
 ## Pipeline Scripts (Output Structure)
 
