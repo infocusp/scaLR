@@ -28,7 +28,6 @@ Flowchart explains scaLR major steps.
         - shapmodel: function that use trained model for shap calculation
     - utils:
         - file_utils: functions to read and write - anndata, json and yaml files
-        - config: function to load config
  
     - feature selection:
         - nn_feature_chunking: feature chunking algorithm to generate top features list
@@ -49,6 +48,50 @@ Flowchart explains scaLR major steps.
 - examples
   
    - gene_recall_curve: an example how to generate gene recall curve
+
+## Pipeline Scripts (Output Structure)
+
+- **pipeline.py**:  
+Main script to run the entire pipeline.
+    - `exp_dir`: root directory for storage of all phases of the pipeline. Specified from the config.
+        - `config.yml`: copy of config file to reproduce the experiment
+
+- **data_ingestion.py**:  
+Reads the data, and splits it into Train/Validation/Test sets for the pipeline. Then performs sample-wise normalization on the data
+    - `exp_dir`
+        - `data`
+            - `data_split.json`: contains sample indices for train/validation/test splits
+            - `train`: directory containing the train samples anndatas
+            - `val`: directory containing the validation samples anndatas
+            - `test`: directory containing the test samples anndatas
+
+- **feature-extractions.py**:  
+Performs feature selection and extraction of new datasets containing subset features
+    - `exp_dir`
+        - `feature_selection`
+            - `model_weights`: contains weights of each individual models trained on chunked data (refer to feature chunking algorithm)
+            - `train`: directory containing the new feature-subsetted train samples anndatas
+            - `val`: directory containing the new feature-subsetted validation samples anndatas
+            - `test`: directory containing the new feature-subsetted test samples anndatas
+            - `feature_class_weights.csv`: combined weights of all individual models, for each feature and class. shape: n_classes X n_features
+            - `top_features.txt`: file containing list of features selected / to be subsetted from total features.
+
+- **train.py**:
+Trains a final model on the basis of `train_datapath` and `val_datapath` in config.
+    - `exp_dir`
+        - `logs`: directory containing Tensorboard Logs for the training of model
+        - `checkpoints`: directory containing model weights checkpointed at every interval specifief in config.
+        - `best_model`: The best model checkpoint contains information to use model for inference / resume training.
+            - `config.yml`: config file containing model parameters
+            - `label_mappings.json`: contains mapping of class_names to class_ids used by model during training
+            - `model.pt`: contains model weights
+            - `model.bin`: contains model
+
+- **evaluate.py**:  
+Performs evaluation of best model trained on user defined metrics on the test set. Also performs various downstream tasks
+   - `exp_dir`
+        - `results`
+            - `classification_report.csv`: Contains classification report showing Precision, Recall, F1, and accuracy metric for each class, on the test set.
 
 ## Pre-requisites and installation scaLR
 
