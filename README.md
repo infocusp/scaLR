@@ -33,6 +33,7 @@ A complete end2end pipeline and tool for scRNA-seq tabular data (cell X genes) t
         - predictions: generate predictions of trained model on data
         - accuracy: generate accuracy of predictions
         - generate_and_save_classification_report: to generate a classwise report containing precision, recall, f1-score metrics and storing the table
+        - perform_differential_expression_analysis: to generate analysis report, and a volcano plot of pvalues vs log2_fold_change in gene expression.
 
 ## Requirements
 
