@@ -39,7 +39,7 @@ def main():
     config = load_config(args.config)
     log = args.log
 
-    if config.get('data'):
+    if config.get('data') and ('target' in config['data']):
         config = ingest_data(config, log)
 
     if 'feature_selection' in config:

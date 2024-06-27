@@ -36,8 +36,8 @@ Flowchart explains scaLR major steps.
     - evaluation:
         - predictions: generate predictions of trained model on data
         - accuracy: generate accuracy of predictions
-        - get_differential_expression_results: to identify the differentially expressed genes in different conditions as baseline biomarkers
         - generate_and_save_classification_report: to generate a classwise report containing precision, recall, f1-score metrics and storing the table
+        - perform_differential_expression_analysis: to generate deg analysis report, and a volcano plot of pvalues vs log2_fold_change in gene expression.
 
 - config
   
