@@ -11,7 +11,7 @@ def simple_dataloader(adata: Union[AnnData, AnnCollection],
                       batch_size: int = 1,
                       label_mappings: dict = None):
     """
-    A simple data loader to prepare inputs to be fed into linear model and corresponding labels
+    A simple data loader to prepare inputs to be feed into linear model and corresponding labels
 
     Args:
         adata: anndata object containing the data
