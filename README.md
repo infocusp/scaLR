@@ -78,7 +78,7 @@ Performs feature selection and extraction of new datasets containing subset feat
             - `val`: directory containing the new feature-subsetted validation samples anndatas
             - `test`: directory containing the new feature-subsetted test samples anndatas
             - `feature_class_weights.csv`: combined weights of all individual models, for each feature and class. shape: n_classes X n_features
-            - `top_features.txt`: file containing list of features selected / to be subsetted from total features.
+            - `top_features.txt`: file containing list of top features selected / to be subsetted from total features.
 
 - **train.py**:
 Trains a final model on the basis of `train_datapath` and `val_datapath` in config.
