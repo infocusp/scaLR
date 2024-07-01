@@ -167,6 +167,9 @@ def get_top_n_genes(
     abs_genes_class_shap_df.T.to_csv(
         path.join(dirpath, "genes_class_weights.csv"))
 
+    genes_class_shap_df.T.to_csv(
+        path.join(dirpath, "raw_genes_class_weights.csv"))
+
     class_top_genes = {}
     for class_name in classes:
         sorted_genes = abs_genes_class_shap_df[class_name].sort_values(
@@ -294,7 +297,7 @@ def _make_design_matrix(adata: Union[AnnData, AnnCollection],
     design_matrix_list = []
 
     # Hacky fix since deseq2 does not like `_` in column_names
-    new_control_column_name = design_factor.replace('_', '')
+    design_factor = design_factor.replace('_', '')
 
     fix_data = adata[adata.obs[fixed_column] == fixed_condition]
     for condition in factor_categories:
@@ -307,7 +310,7 @@ def _make_design_matrix(adata: Union[AnnData, AnnCollection],
                     1, len(sum_subset.var_names)),
                 var=DataFrame(index=sum_subset.var_names),
                 obs=DataFrame(index=[f'{sum_sample}_{condition}']))
-            subdata.obs[new_control_column_name] = [condition]
+            subdata.obs[design_factor] = [condition]
             design_matrix_list.append(subdata)
 
     design_matrix = ad.concat(design_matrix_list)
@@ -351,6 +354,7 @@ def get_differential_expression_results(adata: AnnData,
                               contrast=(design_factor, *factor_categories))
     result_stats.summary()
     results_df = result_stats.results_df
+    results_df.index.name = 'Gene_id'
 
     if dirpath:
         results_df.to_csv(

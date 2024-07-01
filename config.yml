@@ -83,4 +83,4 @@ evaluation:
     #         per_category: '/path/to/ref_genes_per_category csv'
     #         aggregated: '/path/to/ref_genes_aggr_all_categories csv'
     #     top_K: 5000
-    #     plots_per_row: 5
+    #     plots_per_row: 5   

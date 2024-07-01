@@ -177,16 +177,15 @@ If training is run before evaluation, the best model path overwrites `model_chec
 default: `50000`  
 Batch size for data loading onto GPU during inference. Since inference does not store additional overheads for gradient, bigger numbers can be used.  
 
-**metrics** {list[str]}: `['accuracy', 'report', 'roc_auc', 'deg']`  
+**metrics** {list[str]}: `['accuracy', 'report', 'roc_auc']`  
 default: `['accuracy', 'report']`  
 A list of evaluation metrics on the trained model.  
 `accuracy`: Accuracy score for predictions on test set  
 `report`: Detailed classification report showing how the model performed on each class, with recall, precision, f1-score metrics.  
-`roc_auc`: store ROC-AUC plot of each class  
-`deg`: perform differential gene expression analysis on data.  
+`roc_auc`: store ROC-AUC plot of each class    
 
 **deg_config** {dict}:  
-*Required* only if deg specified in `metrics`  
+*Required* only if `full_datapath` is provided.  
 specific configurations to perform DEG  
 - **fixed_column** {str}: *Required*  
 column name in `data.obs` containing a fixed condition to subset  
