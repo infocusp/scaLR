@@ -65,7 +65,7 @@ Reads the data, and splits it into Train/Validation/Test sets for the pipeline. 
     - `exp_dir`
         - `data`
             - `data_split.json`: contains sample indices for train/validation/test splits
-            - `train`: directory containing the train samples anndatas
+            - `train`: directory containing the train samples anndata files.
             - `val`: directory containing the validation samples anndatas
             - `test`: directory containing the test samples anndatas
 
