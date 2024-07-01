@@ -23,7 +23,7 @@ A brief overview of the library Structure and functionalities
     - `CallbackExecutor`, `EarlyStopping`, `ModelCheckpoints`, `TensorbaordLogging`
 - **data**:
     - `split_data`: function to obtain and store train/test/val splits
-    - `preprocess`: function that used to normalize the data 
+    - `preprocess`: function is used to normalize the data.
 - **dataloader**:
     - `simple_dataloader`: simple dataloader and generator to prepare batched data to pass through model
 - **model**:
