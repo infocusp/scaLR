@@ -66,7 +66,7 @@ Reads the data, and splits it into Train/Validation/Test sets for the pipeline. 
         - `data`
             - `data_split.json`: contains sample indices for train/validation/test splits
             - `train`: directory containing the train samples anndata files.
-            - `val`: directory containing the validation samples anndatas
+            - `val`: directory containing the validation samples anndata files.
             - `test`: directory containing the test samples anndatas
 
 - **feature-extractions.py**:  
