@@ -73,7 +73,7 @@ Reads the data, and splits it into Train/Validation/Test sets for the pipeline. 
 Performs feature selection and extraction of new datasets containing subset features
     - `exp_dir`
         - `feature_selection`
-            - `model_weights`: contains weights of each individual models trained on chunked data (refer to feature chunking algorithm)
+            - `model_weights`: contains weights of each individual models trained on feature chunked data (refer to feature chunking algorithm)
             - `train`: directory containing the new feature-subsetted train samples anndatas
             - `val`: directory containing the new feature-subsetted validation samples anndatas
             - `test`: directory containing the new feature-subsetted test samples anndatas
