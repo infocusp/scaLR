@@ -2,7 +2,7 @@
 
 Single cell analysis using Low Resource (scaLR) is a comprehensive end to end pipeline which is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. Major steps of the pipeline are:
 
-1. Data processing: Large datasets undergo preprocessing and normalization (if user selected) and are segmented into training, testing, and validation sets. 
+1. Data processing: Large datasets undergo preprocessing and normalization (if user opts to) and are segmented into training, testing, and validation sets. 
 
 2. Features extractions: A model undergoes iterative training where all samples are utilized in each cycle, with a distinct subset of features employed in every iteration. Then the top-k features are selected, to train the final model, using a feature score based on the model's coefficients/weights.
 
