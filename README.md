@@ -57,7 +57,7 @@ A brief overview of the library Structure and functionalities
 
 - **pipeline.py**:  
 Main script to run the entire pipeline.
-    - `exp_dir`: root directory for storage of all phases of the pipeline. Specified from the config.
+    - `exp_dir`: root experiment directory for storage of all phases of the pipeline. Specified from the config.
         - `config.yml`: copy of config file to reproduce the experiment
 
 - **data_ingestion.py**:  
