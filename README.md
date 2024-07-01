@@ -8,7 +8,7 @@ Single cell analysis using Low Resource (scaLR) is a comprehensive end to end pi
 
 3. Training: A Deep Neural Network (DNN) is trained on the train data and validation data is used to validate the model at each epoch & early stop if applicable.
 
-4. Evaluation: The trained model is evaluated using the test data and calculating the metrics like precision, recall, f1-score, and accuracy scores. Then various visualizations such as ROC curve of class annotation, feature rank plots, per class associated common genes heatmap, DGE analysis, gene recall curves are generated.
+4. Evaluation: The trained model is evaluated using the test data and calculating the metrics like precision, recall, f1-score, and accuracy scores. Then various visualizations such as ROC curve of class annotation, feature rank plots, heatmap of top genes per class, DGE analysis, gene recall curves are generated.
 
 ![image.jpg](Schematic-of-scPipeline.jpg)
 
