@@ -51,7 +51,7 @@ A brief overview of the library Structure and functionalities
 
 ### [examples](./examples/)
   
-   - **gene_recall_curve**: an example how to generate gene recall curve
+   - **gene_recall_curve.ipynb**: an example how to generate gene recall curve
 
 ## Pipeline Scripts (Output Structure)
 
