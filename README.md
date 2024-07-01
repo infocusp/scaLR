@@ -4,7 +4,7 @@ Single cell analysis using Low Resource (scaLR) is a comprehensive end to end pi
 
 1. Data processing: Large datasets undergo preprocessing and normalization (if user opts to) and are segmented into training, testing, and validation sets. 
 
-2. Features extractions: A model undergoes iterative training where all samples are utilized in each cycle, with a distinct subset of features employed in every iteration. Then the top-k features are selected, to train the final model, using a feature score based on the model's coefficients/weights.
+2. Features extractions: A model is trained on feature chunks & that too batch-wise, so all features and samples are utilised in the feature selection process. Then the top-k features are selected, to train the final model, using a feature score based on the model's coefficients/weights.
 
 3. Training: A Deep Neural Network (DNN) is trained on the train and validation data being used to validate the model at each epoch.
 
