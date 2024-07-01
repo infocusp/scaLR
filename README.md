@@ -25,7 +25,7 @@ A brief overview of the library Structure and functionalities
     - `split_data`: function to obtain and store train/test/val splits
     - `preprocess`: function is used to normalize the data.
 - **dataloader**:
-    - `simple_dataloader`: simple dataloader and generator to prepare batched data to pass through model
+    - `simple_dataloader`: generator object to prepare batch-wise data to pass through model.
 - **model**:
     - `linear_model`: torch deep neural network model class
     - `shap_model`: function that use trained model for shap calculation
