@@ -38,7 +38,6 @@ A brief overview of the library Structure and functionalities
 - **evaluation**:
     - `get_predictions`: generate predictions of trained model on data
     - `accuracy`: generate accuracy of predictions
-    - `get_differential_expression_results`: function to identify the differentially expressed genes in different conditions as baseline biomarkers
     - `generate_and_save_classification_report`: function to generate a classwise report containing precision, recall, f1-score metrics and storing the table
     - `perform_differential_expression_analysis`: function to generate deg analysis report, and a volcano plot of pvalues vs log2_fold_change in gene expression
     - `generate_gene_recall_curve`: function to generate gene recall curves as per user defined inputs for reference and ranked genes
@@ -46,8 +45,8 @@ A brief overview of the library Structure and functionalities
 ### [config](./config/)
   
    - **README**: explains different parameters used to run scaLR using config files with explanation.
-   - **full_config**: a config template containing all parameters used to run scaLR and other downstream analysis
-   - **config**: a config template containing only some required parameters to run experiments.
+   - **full_config_template.yml**: a config template containing all parameters used to run scaLR and other downstream analysis
+   - **config_template.yml**: a config template containing only some required parameters to run experiments.
 
 
 ### [examples](./examples/)
@@ -98,6 +97,8 @@ Performs evaluation of best model trained on user defined metrics on the test se
         - `results`
             - `classification_report.csv`: Contains classification report showing Precision, Recall, F1, and accuracy metric for each class, on the test set.
             - `gene_recall_curves_{plot_type}.png`: Gene recall curve plots for `per_category` or `aggregated_across_all_categories` plot_type - whichever applicable or opted by user
+            - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.png`: Volcano plot for DEG analysis
+            - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.csv`: Differential expression values for each gene.
 
 ## Pre-requisites and installation scaLR
 
