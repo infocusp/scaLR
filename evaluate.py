@@ -89,6 +89,7 @@ def evaluate(config, log=True):
             shap_config = evaluation_configs.get('shap_config')
             if shap_config:
                 top_n = shap_config.get('top_n', 20)
+                shap_batch_size = shap_config.get('batch_size', 100)
                 n_background_tensor = shap_config.get('background_tensor',
                                                       1000)
             else:
@@ -96,12 +97,15 @@ def evaluate(config, log=True):
 
             if train_datapath:
                 train_data = read_data(train_datapath)
-                train_dl = simple_dataloader(train_data, target, batch_size,
+                train_dl = simple_dataloader(train_data, target, train_data.shape[0],
                                              label_mappings)
             else:
                 raise ValueError("Train data path required for SHAP analysis.")
 
-            save_top_genes_and_heatmap(model, train_dl, test_dl, id2label,
+            shap_test_dl = simple_dataloader(test_data, target, shap_batch_size,
+                                        label_mappings)
+
+            save_top_genes_and_heatmap(model, train_dl, shap_test_dl, id2label,
                                        resultpath, device, top_n,
                                        n_background_tensor) 
             

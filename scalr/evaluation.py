@@ -143,9 +143,14 @@ def get_top_n_genes(
 
     model.to(device)
     shap_model = CustomShapModel(model)
+
+    full_data = next(iter(train_dl))[0]
+    random_indices = torch.randint(full_data.shape[0], (n_background_tensor,))
+    random_background_data = full_data[random_indices]
+
     explainer = shap.DeepExplainer(
         shap_model,
-        next(iter(train_dl))[0][:n_background_tensor].to(device))
+        random_background_data.to(device))
 
     shap_values = []
     for batch in test_dl:

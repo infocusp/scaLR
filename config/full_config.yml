@@ -76,6 +76,7 @@ evaluation:
     metrics: ['accuracy', 'report', 'roc_auc', 'shap']
     shap_config:
         top_n: 10
+        batch_size: 1000
         background_tensor: 200
     # gene_recall:
     #     ## `feature_class_weights_path` & `ranked_genes` are mutually exclusive. Or if you comment out both,
