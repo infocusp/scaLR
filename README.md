@@ -2,53 +2,103 @@
 
 Single cell analysis using Low Resource (scaLR) is a comprehensive end to end pipeline which is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. Major steps of the pipeline are:
 
-1. Data processing: Large datasets undergo preprocessing and normalization (if user selected) and are segmented into training, testing, and validation sets. 
+1. Data processing: Large datasets undergo preprocessing and normalization (if user opts to) and are segmented into training, testing, and validation sets. 
 
-2. Features extractions: A model undergoes iterative training where all samples are utilized in each cycle, with a distinct subset of features employed in every iteration. Then the top-k features are selected, to train the final model, using a feature score based on the model's coefficients/weights.
+2. Features extractions: A model is trained on feature chunks & that too batch-wise, so all features and samples are utilised in the feature selection process. Then the top-k features are selected, to train the final model, using a feature score based on the model's coefficients/weights.
 
-3. Training: A Deep Neural Network (DNN) is trained on the train and validation data being used to validate the model at each epoch.
+3. Training: A Deep Neural Network (DNN) is trained on the train data and validation data is used to validate the model at each epoch & early stop if applicable.
 
-4. Evaluation: The trained model is evaluated using the test data and calculating the metrics like precision, recall, f1-score, and accuracy scores. Then various visualizations such as ROC curve of class annotation, feature rank plots, per class associated common genes heatmap, DGE analysis, gene recall curves are generated.
+4. Evaluation: The trained model is evaluated using the test data and calculating the metrics like precision, recall, f1-score, and accuracy scores. Then various visualizations such as ROC curve of class annotation, feature rank plots, heatmap of top genes per class, DGE analysis, gene recall curves are generated.
 
 ![image.jpg](Schematic-of-scPipeline.jpg)
 
 Flowchart explains scaLR major steps.
 
 ## Library Structure
+A brief overview of the library Structure and functionalities
 
-- scaLR
-    - callbacks: CallbackExecutor, EarlyStopping, ModelCheckpoints, TensorbaordLogging
-    - data:
-        - split_data: function to obtain and store train/test/val splits
-        - preprocess: function that used to normalize the data 
-    - dataloader:
-        - simple_dataloader: simple dataloader and generator to prepare batched data to pass through model
-    - model:
-        - linearmodel: torch deep neural network model class
-        - shapmodel: function that use trained model for shap calculation
-    - utils:
-        - file_utils: functions to read and write - anndata, json and yaml files
-        - config: function to load config
- 
-    - feature selection:
-        - nn_feature_chunking: feature chunking algorithm to generate top features list
-    - trainer: Trainer class handles training and validation of model
-    - evaluation:
-        - predictions: generate predictions of trained model on data
-        - accuracy: generate accuracy of predictions
-        - generate_and_save_classification_report: to generate a classwise report containing precision, recall, f1-score metrics and storing the table
-        - perform_differential_expression_analysis: to generate deg analysis report, and a volcano plot of pvalues vs log2_fold_change in gene expression.
+### [scalr](./scalr/)
 
-- config
+- **callbacks**: 
+    - `CallbackExecutor`, `EarlyStopping`, `ModelCheckpoints`, `TensorbaordLogging`
+- **data**:
+    - `split_data`: function to obtain and store train/test/val splits
+    - `preprocess`: function is used to normalize the data.
+- **dataloader**:
+    - `simple_dataloader`: generator object to prepare batch-wise data to pass through model.
+- **model**:
+    - `linear_model`: torch deep neural network model class
+    - `shap_model`: function that use trained model for shap calculation
+- **utils**:
+    - `file_utils`: functions to read and write - anndata, json and yaml files
+
+- **feature selection**:
+    - `nn_feature_chunking`: feature chunking algorithm to generate top features list
+- **trainer**: `Trainer` class handles training and validation of model
+- **evaluation**:
+    - `get_predictions`: generate predictions of trained model on data
+    - `accuracy`: generate accuracy of predictions
+    - `generate_and_save_classification_report`: function to generate a classwise report containing precision, recall, f1-score metrics and storing the table
+    - `perform_differential_expression_analysis`: function to generate deg analysis report, and a volcano plot of pvalues vs log2_fold_change in gene expression
+    - `generate_gene_recall_curve`: function to generate gene recall curves as per user defined inputs for reference and ranked genes
+
+### [config](./config/)
   
-   - README: explains different parameters used to run scaLR using config files with explanation.
-   - full_config: consist all parameters used to run scaLR and other downstream analysis user can change as per their experiment.
-   - config: consist required parameters used to run scaLR.
+   - **README**: explains different parameters used to run scaLR using config files with explanation.
+   - **full_config_template.yml**: a config template containing all parameters used to run scaLR and other downstream analysis
+   - **config_template.yml**: a config template containing only some required parameters to run experiments.
 
 
-- examples
+### [examples](./examples/)
   
-   - gene_recall_curve: an example how to generate gene recall curve
+   - **gene_recall_curve.ipynb**: an example how to generate gene recall curve
+
+## Pipeline Scripts (Output Structure)
+
+- **pipeline.py**:  
+Main script to run the entire pipeline.
+    - `exp_dir`: root experiment directory for storage of all phases of the pipeline. Specified from the config.
+        - `config.yml`: copy of config file to reproduce the experiment
+
+- **data_ingestion.py**:  
+Reads the data, and splits it into Train/Validation/Test sets for the pipeline. Then performs sample-wise normalization on the data
+    - `exp_dir`
+        - `data`
+            - `data_split.json`: contains sample indices for train/validation/test splits
+            - `train`: directory containing the train samples anndata files.
+            - `val`: directory containing the validation samples anndata files.
+            - `test`: directory containing the test samples anndata files.
+
+- **feature-extractions.py**:  
+Performs feature selection and extraction of new datasets containing subset features
+    - `exp_dir`
+        - `feature_selection`
+            - `model_weights`: contains weights of each individual models trained on feature chunked data (refer to feature chunking algorithm)
+            - `train`: directory containing the new feature-subsetted train samples anndatas
+            - `val`: directory containing the new feature-subsetted validation samples anndatas
+            - `test`: directory containing the new feature-subsetted test samples anndatas
+            - `feature_class_weights.csv`: combined weights of all individual models, for each feature and class. shape: n_classes X n_features
+            - `top_features.txt`: file containing list of top features selected / to be subsetted from total features.
+
+- **train.py**:
+Trains a final model on the basis of `train_datapath` and `val_datapath` in config.
+    - `exp_dir`
+        - `logs`: directory containing Tensorboard Logs for the training of model
+        - `checkpoints`: directory containing model weights checkpointed at every interval specifief in config.
+        - `best_model`: The best model checkpoint contains information to use model for inference / resume training.
+            - `config.yml`: config file containing model parameters
+            - `label_mappings.json`: contains mapping of class_names to class_ids used by model during training
+            - `model.pt`: contains model weights
+            - `model.bin`: contains model
+
+- **evaluate.py**:  
+Performs evaluation of best model trained on user defined metrics on the test set. Also performs various downstream tasks
+   - `exp_dir`
+        - `results`
+            - `classification_report.csv`: Contains classification report showing Precision, Recall, F1, and accuracy metric for each class, on the test set.
+            - `gene_recall_curves_{plot_type}.png`: Gene recall curve plots for `per_category` or `aggregated_across_all_categories` plot_type - whichever applicable or opted by user
+            - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.png`: Volcano plot for DEG analysis
+            - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.csv`: Differential expression values for each gene.
 
 ## Pre-requisites and installation scaLR
 
