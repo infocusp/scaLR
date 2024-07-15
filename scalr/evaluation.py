@@ -118,10 +118,9 @@ def conf_matrix(test_labels: list[int],
 
 def is_early_stop(
     batch_id: int,
-    shap_values: np.array,
-    top_genes_batch_wise: dict,
+    genes_class_shap_df: pd.DataFrame,
+    prev_top_genes_batch_wise: dict,
     early_stop_config: dict,
-    genes_list: list,
     classes: list,
 ) -> bool:
     """It will check that previous and current batch's common genes number is
@@ -129,10 +128,9 @@ def is_early_stop(
 
     Args:
         batch_id: Current batch number.
-        shap_values: previous all batch samples's shap values.
-        top_genes_batch_wise: dict where batch wise per labels top genes will be stored.
+        genes_class_shap_df: label/class wise genes shap values(mean across samples).
+        prev_top_genes_batch_wise: dict where prev batch's per labels top genes are stored.
         early_stop_config: early stopping config.
-        genes_list: list of features/genes.
         classes: list classes/labels.
 
     Returns:
@@ -140,30 +138,22 @@ def is_early_stop(
     """
 
     early_stop = True
-    concat_shap_values = np.concatenate(shap_values)
-    mean_shap_values = concat_shap_values.mean(axis=0)
-    genes_class_shap_df = DataFrame(mean_shap_values,
-                                    index=genes_list,
-                                    columns=classes)
-
     top_genes_batch_wise = {}
     for label in classes:
-        top_genes_batch_wise[label] = genes_class_shap_df[label].sort_values(ascending=False)[:early_stop_config['top_genes']]
+        top_genes_batch_wise[label] = genes_class_shap_df[label].sort_values(
+            ascending=False)[:early_stop_config['top_genes']].index
 
         # Start checking after first batch.
         if batch_id >= 1:
             num_common_genes = len(
-              set(top_genes_batch_wise[label].index).intersection(
-              set(prev_top_genes_batch_wise[label].index))
-            )
-            print("common", num_common_genes)
+                set(top_genes_batch_wise[label]).intersection(
+                    set(prev_top_genes_batch_wise[label])))
             # If commnon genes are less than 90 early stop will be false.
             if num_common_genes < early_stop_config['threshold']:
                 early_stop = False
-        else:
-            prev_top_genes_batch_wise = deepcopy(top_genes_batch_wise)
 
-    return early_stop
+    return early_stop, top_genes_batch_wise
+
 
 def get_top_n_genes(
     model: LinearModel,
@@ -198,42 +188,48 @@ def get_top_n_genes(
     shap_model = CustomShapModel(model)
 
     full_data = next(iter(train_dl))[0]
-    print(full_data.shape[0])
-    random_indices = torch.randint(full_data.shape[0], (n_background_tensor,))
+    random_indices = torch.randint(full_data.shape[0], (n_background_tensor, ))
     random_background_data = full_data[random_indices]
 
-    explainer = shap.DeepExplainer(
-        shap_model,
-        random_background_data.to(device))
+    explainer = shap.DeepExplainer(shap_model,
+                                   random_background_data.to(device))
 
-    shap_values = []
-    top_genes_batch_wise = {}
+    abs_prev_top_genes_batch_wise = {}
     count_patience = 0
     for batch_id, batch in enumerate(test_dl):
-        print("batch", batch_id)
         batch_shap_values = explainer.shap_values(batch[0].to(device))
-        shap_values.append(batch_shap_values)
 
-        early_stop = is_early_stop(
-            batch_id, shap_values, top_genes_batch_wise,
-            early_stop_config, test_dl.dataset.var_names, classes
-        )
-        print("early stop", early_stop)
-        count_patience = count_patience + 1 if (early_stop and batch_id >= 1) else 0
+        abs_mean_shap_values = np.abs(batch_shap_values).mean(axis=0)
+        # calcluating 2 mean with abs values and non-abs values.
+        # Non-abs values required for heatmap.
+        mean_shap_values = batch_shap_values.mean(axis=0)
 
-        print("count_patience", count_patience)
+        if batch_id >= 1:
+            abs_mean_shap_values = np.mean(
+                [abs_mean_shap_values, abs_prev_batches_mean_shap_values],
+                axis=0)
+            mean_shap_values = np.mean(
+                [mean_shap_values, prev_batches_mean_shap_values], axis=0)
+
+        abs_genes_class_shap_df = DataFrame(abs_mean_shap_values,
+                                            index=test_dl.dataset.var_names,
+                                            columns=classes)
+
+        abs_prev_batches_mean_shap_values = abs_mean_shap_values
+        prev_batches_mean_shap_values = mean_shap_values
+
+        early_stop, abs_prev_top_genes_batch_wise = is_early_stop(
+            batch_id, abs_genes_class_shap_df, abs_prev_top_genes_batch_wise,
+            early_stop_config, classes)
+
+        count_patience = count_patience + 1 if (early_stop
+                                                and batch_id >= 1) else 0
+
         if count_patience == early_stop_config['patience']:
+            print(f"Early stopping at batch: {batch_id}")
             break
 
-    concat_shap_values = np.concatenate(shap_values)
-
-    mean_shap_values = concat_shap_values.mean(axis=0)
     genes_class_shap_df = DataFrame(mean_shap_values,
-                                    index=test_dl.dataset.var_names,
-                                    columns=classes)
-
-    abs_mean_shap_values = np.abs(concat_shap_values).mean(axis=0)
-    abs_genes_class_shap_df = DataFrame(abs_mean_shap_values,
                                     index=test_dl.dataset.var_names,
                                     columns=classes)
 
@@ -243,11 +239,11 @@ def get_top_n_genes(
     genes_class_shap_df.T.to_csv(
         path.join(dirpath, "raw_genes_class_weights.csv"))
 
-    class_top_genes = {}
-    for class_name in classes:
-        sorted_genes = abs_genes_class_shap_df[class_name].sort_values(
-            ascending=False)
-        class_top_genes[class_name] = list(sorted_genes.index[:top_n])
+    # Extract only top N genes
+    class_top_genes = {
+        class_label: genes[:top_n]
+        for class_label, genes in abs_prev_top_genes_batch_wise.items()
+    }
 
     return class_top_genes, genes_class_shap_df
 
