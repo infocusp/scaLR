@@ -60,6 +60,11 @@ def extract_features(config, log=True):
     else:
         feature_class_weights = pd.read_csv(weight_matrix, index_col=0)
 
+    extract_top_k_features(feature_class_weights,
+                           k=100,
+                           aggregation_strategy='classwise',
+                           dirpath=featurespath)
+
     top_features = extract_top_k_features(feature_class_weights,
                                           k,
                                           aggregation_strategy,
