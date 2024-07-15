@@ -72,7 +72,11 @@ def extract_features(config, log=True):
 
     # Storing the Data
     if config_fs['store_on_disk']:
-        if data_config['sample_chunksize'] is None:
+        trainpath = path.join(featurespath, 'train')
+        valpath = path.join(featurespath, 'val')
+        testpath = path.join(featurespath, 'test')
+
+        if data_config.get('sample_chunksize') is None:
             train_data[:, top_features_indices].write(path.join(
                 featurespath, 'train.h5ad'),
                                                       compression='gzip')
@@ -84,7 +88,6 @@ def extract_features(config, log=True):
                                                      compression='gzip')
         else:
             sample_chunksize = data_config['sample_chunksize']
-            trainpath = path.join(featurespath, 'train')
             os.makedirs(trainpath, exist_ok=True)
             for i, (start) in enumerate(
                     range(0, len(train_data), sample_chunksize)):
@@ -95,7 +98,6 @@ def extract_features(config, log=True):
                     train_data = train_data.to_adata()
                 write_data(train_data, path.join(trainpath, f'{i}.h5ad'))
 
-            valpath = path.join(featurespath, 'val')
             os.makedirs(valpath, exist_ok=True)
             for i, (start) in enumerate(
                     range(0, len(val_data), sample_chunksize)):
@@ -106,7 +108,6 @@ def extract_features(config, log=True):
                     val_data = val_data.to_adata()
                 write_data(val_data, path.join(valpath, f'{i}.h5ad'))
 
-            testpath = path.join(featurespath, 'test')
             os.makedirs(testpath, exist_ok=True)
             for i, (start) in enumerate(
                     range(0, len(test_data), sample_chunksize)):
@@ -121,7 +122,7 @@ def extract_features(config, log=True):
         config['data']['val_datapath'] = valpath
         config['data']['test_datapath'] = testpath
 
-        if data_config['sample_chunksize'] is None:
+        if data_config.get('sample_chunksize') is None:
             config['data']['train_datapath'] += '.h5ad'
             config['data']['val_datapath'] += '.h5ad'
             config['data']['test_datapath'] += '.h5ad'

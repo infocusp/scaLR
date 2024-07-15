@@ -9,7 +9,8 @@ from anndata import AnnData
 def simple_dataloader(adata: Union[AnnData, AnnCollection],
                       target: str,
                       batch_size: int = 1,
-                      label_mappings: dict = None):
+                      label_mappings: dict = None,
+                      shuffle: bool = False):
     """
     A simple data loader to prepare inputs to be feed into linear model and corresponding labels
 
@@ -44,4 +45,5 @@ def simple_dataloader(adata: Union[AnnData, AnnCollection],
     return AnnLoader(
         adata,
         batch_size=batch_size,
+        shuffle=shuffle,
         collate_fn=lambda batch: collate_fn(batch, target, label_mappings))

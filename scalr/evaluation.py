@@ -1,3 +1,4 @@
+from copy import deepcopy
 import json
 import os
 from os import path
@@ -115,12 +116,62 @@ def conf_matrix(test_labels: list[int],
     return confusion_matrix(test_labels, pred_labels)
 
 
+def is_early_stop(
+    batch_id: int,
+    shap_values: np.array,
+    top_genes_batch_wise: dict,
+    early_stop_config: dict,
+    genes_list: list,
+    classes: list,
+) -> bool:
+    """It will check that previous and current batch's common genes number is
+    match with threshold or not. If match it will return True else False.
+
+    Args:
+        batch_id: Current batch number.
+        shap_values: previous all batch samples's shap values.
+        top_genes_batch_wise: dict where batch wise per labels top genes will be stored.
+        early_stop_config: early stopping config.
+        genes_list: list of features/genes.
+        classes: list classes/labels.
+
+    Returns:
+        True if early stopping criteria matched.
+    """
+
+    early_stop = True
+    concat_shap_values = np.concatenate(shap_values)
+    mean_shap_values = concat_shap_values.mean(axis=0)
+    genes_class_shap_df = DataFrame(mean_shap_values,
+                                    index=genes_list,
+                                    columns=classes)
+
+    top_genes_batch_wise = {}
+    for label in classes:
+        top_genes_batch_wise[label] = genes_class_shap_df[label].sort_values(ascending=False)[:early_stop_config['top_genes']]
+
+        # Start checking after first batch.
+        if batch_id >= 1:
+            num_common_genes = len(
+              set(top_genes_batch_wise[label].index).intersection(
+              set(prev_top_genes_batch_wise[label].index))
+            )
+            print("common", num_common_genes)
+            # If commnon genes are less than 90 early stop will be false.
+            if num_common_genes < early_stop_config['threshold']:
+                early_stop = False
+        else:
+            prev_top_genes_batch_wise = deepcopy(top_genes_batch_wise)
+
+    return early_stop
+
 def get_top_n_genes(
     model: LinearModel,
     train_dl: DataLoader,
     test_dl: DataLoader,
     classes: list,
     dirpath: str,
+    early_stop_config: dict,
     device: str = 'cpu',
     top_n: int = 20,
     n_background_tensor: int = 1000,
@@ -134,8 +185,10 @@ def get_top_n_genes(
         test_dl: test dataloader.
         classes: list of class names.
         dirpath: dir where genes to class weights stored.
+        early_stop_config: early stopping configurations.
         device: device for pytorch.
         top_n: save top n genes based on shap values.
+        n_background_tensor: number of background samples for shap.
 
     Returns:
         class wise top n genes, genes * class weights matrix
@@ -145,6 +198,7 @@ def get_top_n_genes(
     shap_model = CustomShapModel(model)
 
     full_data = next(iter(train_dl))[0]
+    print(full_data.shape[0])
     random_indices = torch.randint(full_data.shape[0], (n_background_tensor,))
     random_background_data = full_data[random_indices]
 
@@ -153,9 +207,23 @@ def get_top_n_genes(
         random_background_data.to(device))
 
     shap_values = []
-    for batch in test_dl:
+    top_genes_batch_wise = {}
+    count_patience = 0
+    for batch_id, batch in enumerate(test_dl):
+        print("batch", batch_id)
         batch_shap_values = explainer.shap_values(batch[0].to(device))
         shap_values.append(batch_shap_values)
+
+        early_stop = is_early_stop(
+            batch_id, shap_values, top_genes_batch_wise,
+            early_stop_config, test_dl.dataset.var_names, classes
+        )
+        print("early stop", early_stop)
+        count_patience = count_patience + 1 if (early_stop and batch_id >= 1) else 0
+
+        print("count_patience", count_patience)
+        if count_patience == early_stop_config['patience']:
+            break
 
     concat_shap_values = np.concatenate(shap_values)
 
@@ -190,6 +258,7 @@ def save_top_genes_and_heatmap(
     test_dl: DataLoader,
     classes: list,
     dirpath: str,
+    early_stop_config: dict,
     device: str = 'cpu',
     top_n: int = 20,
     n_background_tensor: int = 1000,
@@ -203,8 +272,10 @@ def save_top_genes_and_heatmap(
         test_dl: test dataloader.
         classes: list of class names.
         dirpath: dir where shap analysis csv & heatmap stored.
+        early_stop_config: early stopping configurations.
         device: device for pytorch.
         top_n: save top n genes based on shap values.
+        n_background_tensor: number of background samples for shap.
     """
 
     shap_heatmap_path = path.join(dirpath, "shap_heatmap")
@@ -216,6 +287,7 @@ def save_top_genes_and_heatmap(
         test_dl,
         classes,
         shap_heatmap_path,
+        early_stop_config,
         device,
         top_n,
         n_background_tensor,
