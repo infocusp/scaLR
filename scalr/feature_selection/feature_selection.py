@@ -40,7 +40,7 @@ def extract_top_k_features(feature_class_weights: DataFrame,
     elif aggregation_strategy == 'classwise':
         top_features_list = dict()
         for i in range(n_cls):
-            top_features_list[feature_class_weights.index[i]] = abs(feature_class_weights.iloc[i,:]).sort_values(
+            top_features_list[feature_class_weights.index[i]] = feature_class_weights.iloc[i,:].sort_values(
                         ascending=False).reset_index()['index'][:k].tolist()
     elif aggregation_strategy == 'mix':
         classwise_features = read_json(path.join(dirpath,'classwise_features.json'))
