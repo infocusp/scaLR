@@ -37,13 +37,22 @@ def extract_top_k_features(feature_class_weights: DataFrame,
             top_features_list[category] = abs(
                 feature_class_weights.iloc[i]).sort_values(
                     ascending=False).reset_index()['index'][:k]
-    elif aggregation_strategy == 'classwise':
+    elif aggregation_strategy == 'classwise_promoters':
         top_features_list = dict()
         for i in range(n_cls):
             top_features_list[feature_class_weights.index[i]] = feature_class_weights.iloc[i,:].sort_values(
                         ascending=False).reset_index()['index'][:k].tolist()
+    elif aggregation_strategy == 'classwise':
+        top_features_list = dict()
+        for i in range(n_cls):
+            top_features_list[feature_class_weights.index[i]] = abs(feature_class_weights).iloc[i,:].sort_values(
+                        ascending=False).reset_index()['index'][:k].tolist()
     elif aggregation_strategy == 'mix':
-        classwise_features = read_json(path.join(dirpath,'classwise_features.json'))
+        classwise_features = extract_top_k_features(feature_class_weights,
+                                                    k=100,
+                                                    aggregation_strategy = 'classwise',
+                                                    save_features=False)
+        # classwise_features = read_json(path.join(dirpath,'classwise_features.json'))
         classwise_features_list = []
         for key in classwise_features.keys():
             classwise_features_list += classwise_features[key]
@@ -60,10 +69,10 @@ def extract_top_k_features(feature_class_weights: DataFrame,
             'Other aggregation strategies are not implemented yet...')
 
     if save_features:
-        if aggregation_strategy != 'classwise':
+        if 'classwise' not in aggregation_strategy:
             with open(path.join(dirpath,'top_features.txt'), 'w') as fh:
                 fh.write('\n'.join(top_features_list) + '\n')
         else:
-            dump_json(top_features_list, path.join(dirpath,'classwise_features.json'))
+            dump_json(top_features_list, path.join(dirpath,'biomarkers.json'))
 
     return top_features_list
