@@ -75,9 +75,13 @@ evaluation:
     batch_size: 5000
     metrics: ['accuracy', 'report', 'roc_auc', 'shap']
     shap_config:
-        top_n: 10
-        batch_size: 1000
+        top_n: 50
+        batch_size: 5000
         background_tensor: 200
+        early_stop:
+            patience: 5
+            top_genes: 100 # Extract top genes from each batch and compare with previous batch.
+            threshold: 90
     # gene_recall:
     #     ## `feature_class_weights_path` & `ranked_genes` are mutually exclusive. Or if you comment out both,
     #     ## then pipeline generated feature_class_weights matrix is used.

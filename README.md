@@ -19,7 +19,7 @@ A brief overview of the library Structure and functionalities
 
 ### [scalr](./scalr/)
 
-- **callbacks**: 
+- **callbacks**:
     - `CallbackExecutor`, `EarlyStopping`, `ModelCheckpoints`, `TensorbaordLogging`
 - **data**:
     - `split_data`: function to obtain and store train/test/val splits
@@ -41,26 +41,30 @@ A brief overview of the library Structure and functionalities
     - `generate_and_save_classification_report`: function to generate a classwise report containing precision, recall, f1-score metrics and storing the table
     - `perform_differential_expression_analysis`: function to generate deg analysis report, and a volcano plot of pvalues vs log2_fold_change in gene expression
     - `generate_gene_recall_curve`: function to generate gene recall curves as per user defined inputs for reference and ranked genes
+    - `get_top_n_genes`: funtion will use SHAP to extract top N genes/features per class/label.
+    - `plot_heatmap`: Generate heatmap of top genes in each class/label.
+    - `save_top_genes_and_heatmap`: Save top N genes and generate heatmap of top genes per class/label.
+    - `plot_roc_auc_curve`: Use model probabity and generate roc_auc curve.
 
 ### [config](./config/)
-  
+
    - **README**: explains different parameters used to run scaLR using config files with explanation.
    - **full_config_template.yml**: a config template containing all parameters used to run scaLR and other downstream analysis
    - **config_template.yml**: a config template containing only some required parameters to run experiments.
 
 
 ### [examples](./examples/)
-  
+
    - **gene_recall_curve.ipynb**: an example how to generate gene recall curve
 
 ## Pipeline Scripts (Output Structure)
 
-- **pipeline.py**:  
+- **pipeline.py**:
 Main script to run the entire pipeline.
     - `exp_dir`: root experiment directory for storage of all phases of the pipeline. Specified from the config.
         - `config.yml`: copy of config file to reproduce the experiment
 
-- **data_ingestion.py**:  
+- **data_ingestion.py**:
 Reads the data, and splits it into Train/Validation/Test sets for the pipeline. Then performs sample-wise normalization on the data
     - `exp_dir`
         - `data`
@@ -69,7 +73,7 @@ Reads the data, and splits it into Train/Validation/Test sets for the pipeline. 
             - `val`: directory containing the validation samples anndata files.
             - `test`: directory containing the test samples anndata files.
 
-- **feature-extractions.py**:  
+- **feature-extractions.py**:
 Performs feature selection and extraction of new datasets containing subset features
     - `exp_dir`
         - `feature_selection`
@@ -91,7 +95,7 @@ Trains a final model on the basis of `train_datapath` and `val_datapath` in conf
             - `model.pt`: contains model weights
             - `model.bin`: contains model
 
-- **evaluate.py**:  
+- **evaluate.py**:
 Performs evaluation of best model trained on user defined metrics on the test set. Also performs various downstream tasks
    - `exp_dir`
         - `results`
@@ -99,6 +103,12 @@ Performs evaluation of best model trained on user defined metrics on the test se
             - `gene_recall_curves_{plot_type}.png`: Gene recall curve plots for `per_category` or `aggregated_across_all_categories` plot_type - whichever applicable or opted by user
             - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.png`: Volcano plot for DEG analysis
             - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.csv`: Differential expression values for each gene.
+            - `roc_auc.png`: ROC-AUC curve plot.
+            - `shap_heatmap`
+                - `heatmap.png`: heatmap of all genes from each class wise genes.
+                - `shap_analysis.csv`: class/label wise top genes.
+                - `raw_gene_class_weights.csv`: original values mean of SHAP values per class/label. It contain negtive as well.
+                - `genes_class_weights.csv`: abs values of genes per class/label.
 
 ## Pre-requisites and installation scaLR
 
