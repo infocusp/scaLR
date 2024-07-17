@@ -33,7 +33,8 @@ A brief overview of the library Structure and functionalities
     - `file_utils`: functions to read and write - anndata, json and yaml files
 
 - **feature selection**:
-    - `nn_feature_chunking`: feature chunking algorithm to generate top features list
+    - `feature_chunking`: feature chunking algorithm to generate top features list  
+    - `extract_top_k_features`: extract top-k features from a weight matrix using some aggregation stratergy.  
 - **trainer**: `Trainer` class handles training and validation of model
 - **evaluation**:
     - `get_predictions`: generate predictions of trained model on data
@@ -79,6 +80,7 @@ Performs feature selection and extraction of new datasets containing subset feat
             - `test`: directory containing the new feature-subsetted test samples anndatas
             - `feature_class_weights.csv`: combined weights of all individual models, for each feature and class. shape: n_classes X n_features
             - `top_features.txt`: file containing list of top features selected / to be subsetted from total features.
+            - `biomarkers.json`: json file containing a dictionary of classwise biomarkers/top-features.
 
 - **train.py**:
 Trains a final model on the basis of `train_datapath` and `val_datapath` in config.

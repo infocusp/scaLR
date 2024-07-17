@@ -107,6 +107,8 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
         all_weights.append(weights)
 
     full_weights_matrix = torch.cat(all_weights, dim=1)
+    # Just to make sure index name is "index".
+    train_data.var_names.name = "index"
     feature_class_weights = pd.DataFrame(full_weights_matrix,
                                          columns=train_data.var_names,
                                          index=id2label)
