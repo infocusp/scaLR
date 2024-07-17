@@ -17,10 +17,12 @@ from ..dataloader import simple_dataloader
 
 def feature_chunking(train_data: Union[AnnData, AnnCollection],
                      val_data: Union[AnnData, AnnCollection],
+                     test_data: Union[AnnData, AnnCollection],
                      target: str,
                      model_config: dict,
                      feature_chunksize: int,
                      dirpath: str,
+                     batch_correction: bool = False,
                      device: Literal['cpu', 'cuda'] = 'cpu') -> list[str]:
     """Select features using feature chunking approach.
 
@@ -41,11 +43,30 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
 
     label_mappings = {}
     label_mappings[target] = {}
-    id2label = train_data.obs[target].astype(
-        'category').cat.categories.tolist()
+    id2label = sorted(
+        list(
+            set(train_data.obs[target].astype(
+                'category').cat.categories.tolist() +
+                val_data.obs[target].astype(
+                    'category').cat.categories.tolist() +
+                test_data.obs[target].astype(
+                    'category').cat.categories.tolist())))
     label2id = {id2label[i]: i for i in range(len(id2label))}
     label_mappings[target]['id2label'] = id2label
     label_mappings[target]['label2id'] = label2id
+
+    # Batch correction before feature selection process.
+    if batch_correction:
+        batch_mappings = {}
+        batches = sorted(
+            list(
+                set(
+                    list(train_data.obs.batch) + list(val_data.obs.batch) +
+                    list(test_data.obs.batch))))
+        for i, batch in enumerate(batches):
+            batch_mappings[batch] = i
+    else:
+        batch_mappings = None
 
     n_cls = len(id2label)
     epochs = model_config['params'].get('epochs', 25)
@@ -59,16 +80,21 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
     i = 0
     for start in range(0, len(train_data.var_names), feature_chunksize):
 
+        print(f'\nFeature selection - iteration {i+1}.\n')
         train_features_subset = train_data[:, start:start + feature_chunksize]
         val_features_subset = val_data[:, start:start + feature_chunksize]
 
         train_dl = simple_dataloader(train_features_subset, target, batch_size,
-                                     label_mappings)
+                                     label_mappings, batch_mappings)
         val_dl = simple_dataloader(val_features_subset, target, batch_size,
-                                   label_mappings)
+                                   label_mappings, batch_mappings)
 
-        model = LinearModel([len(train_features_subset.var_names), n_cls],
-                            weights_init_zero=True)
+        in_features = len(train_features_subset.var_names)
+        # Incrementing a feature count if batch correction is set to true.
+        if batch_mappings:
+            in_features += 1
+
+        model = LinearModel([in_features, n_cls], weights_init_zero=True)
         opt = torch.optim.SGD
         loss_fn = nn.CrossEntropyLoss()
 
@@ -104,6 +130,10 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
 
         weights = torch.load(
             filename)['model_state_dict']['out_layer.weight'].cpu()
+
+        # Removing the batch effect feature after model training for feature selection.
+        if batch_mappings:
+            weights = weights[:, :-1]
         all_weights.append(weights)
 
     full_weights_matrix = torch.cat(all_weights, dim=1)

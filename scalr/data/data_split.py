@@ -120,6 +120,7 @@ def split_data(datapath: str,
         if sample_chunksize is None:
             adata = read_data(datapath).to_memory()
             if process_fn is not None:
+                print('\nNormalizing the data...')
                 if not isinstance(adata.X, np.ndarray):
                     adata.X = adata.X.A
                 adata.X = process_fn(adata.X, **kwargs)

@@ -124,6 +124,7 @@ def get_top_n_genes(
     device: str = 'cpu',
     top_n: int = 20,
     n_background_tensor: int = 1000,
+    batch_correction: bool = False,
 ) -> None:
     """
     Function to get top n genes of each class and its weights.
@@ -155,14 +156,18 @@ def get_top_n_genes(
     concat_shap_values = np.concatenate(shap_values)
 
     mean_shap_values = concat_shap_values.mean(axis=0)
+    if batch_correction:
+        mean_shap_values = mean_shap_values[:-1, :]
     genes_class_shap_df = DataFrame(mean_shap_values,
                                     index=test_dl.dataset.var_names,
                                     columns=classes)
 
     abs_mean_shap_values = np.abs(concat_shap_values).mean(axis=0)
+    if batch_correction:
+        abs_mean_shap_values = abs_mean_shap_values[:-1, :]
     abs_genes_class_shap_df = DataFrame(abs_mean_shap_values,
-                                    index=test_dl.dataset.var_names,
-                                    columns=classes)
+                                        index=test_dl.dataset.var_names,
+                                        columns=classes)
 
     abs_genes_class_shap_df.T.to_csv(
         path.join(dirpath, "genes_class_weights.csv"))
@@ -188,6 +193,7 @@ def save_top_genes_and_heatmap(
     device: str = 'cpu',
     top_n: int = 20,
     n_background_tensor: int = 1000,
+    batch_correction: bool = False,
 ) -> None:
     """
     Function to save top n genes of each class and save heatmap of genes & their class weight.
@@ -214,6 +220,7 @@ def save_top_genes_and_heatmap(
         device,
         top_n,
         n_background_tensor,
+        batch_correction,
     )
 
     DataFrame(class_top_genes).to_csv(path.join(shap_heatmap_path,

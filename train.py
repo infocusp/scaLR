@@ -30,6 +30,7 @@ def train(config, log=True):
     target = data_config['target']
     train_datapath = data_config['train_datapath']
     val_datapath = data_config['val_datapath']
+    test_datapath = data_config['test_datapath']
 
     train_config = config['training']
     optimizer = train_config['opt']
@@ -51,6 +52,7 @@ def train(config, log=True):
         config['model']['start_checkpoint'] = None
     model_type = config['model']['type']
     model_hp = config['model']['hyperparameters']
+    batch_correction = config['model']['batch_correction']
 
     if 'evaluation' in config:
         config['evaluation']['model_checkpoint'] = path.join(
@@ -66,12 +68,38 @@ def train(config, log=True):
 
     train_data = read_data(train_datapath)
     val_data = read_data(val_datapath)
+    test_data = read_data(test_datapath)
+
+    # Prepare batch mappings for batch correction if applicable.
+    if batch_correction:
+        batch_mappings = {}
+        batches = sorted(
+            list(
+                set(
+                    list(train_data.obs.batch) + list(val_data.obs.batch) +
+                    list(test_data.obs.batch))))
+        for i, batch in enumerate(batches):
+            batch_mappings[batch] = i
+
+        # Adding a batch feature count for in_features in model as batch_correction is set to true.
+        layers = model_hp['layers']
+        layers[0] += 1
+        model_hp['layers'] = layers
+        config['model']['hyperparameters'] = model_hp
+    else:
+        batch_mappings = None
 
     # Create mappings for targets to be used by testing
     label_mappings = {}
     label_mappings[target] = {}
-    id2label = train_data.obs[target].astype(
-        'category').cat.categories.tolist()
+    id2label = sorted(
+        list(
+            set(train_data.obs[target].astype(
+                'category').cat.categories.tolist() +
+                val_data.obs[target].astype(
+                    'category').cat.categories.tolist() +
+                test_data.obs[target].astype(
+                    'category').cat.categories.tolist())))
     label2id = {id2label[i]: i for i in range(len(id2label))}
     label_mappings[target]['id2label'] = id2label
     label_mappings[target]['label2id'] = label2id
@@ -81,9 +109,9 @@ def train(config, log=True):
         model = LinearModel(**model_hp)
 
         train_dl = simple_dataloader(train_data, target, batch_size,
-                                     label_mappings)
+                                     label_mappings, batch_mappings)
         val_dl = simple_dataloader(val_data, target, batch_size,
-                                   label_mappings)
+                                   label_mappings, batch_mappings)
     else:
         raise NotImplementedError('Only `linear` available as options!')
 
@@ -117,6 +145,9 @@ def train(config, log=True):
     dump_yaml(config['model'], path.join(dirpath, 'best_model', 'config.yml'))
     dump_json(label_mappings,
               path.join(dirpath, 'best_model', 'label_mappings.json'))
+    if batch_correction:
+        dump_json(batch_mappings,
+                  path.join(dirpath, 'best_model', 'batch_mappings.json'))
     dump_yaml(config, path.join(dirpath, 'config.yml'))
     return config
 

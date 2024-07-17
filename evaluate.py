@@ -23,6 +23,7 @@ def evaluate(config, log=True):
     dirpath = config['dirpath']
     exp_name = config['exp_name']
     exp_run = config['exp_run']
+    batch_correction = config['model']['batch_correction']
 
     evaluation_configs = config['evaluation']
 
@@ -50,6 +51,11 @@ def evaluate(config, log=True):
 
         label_mappings = read_json(
             path.join(model_checkpoint, 'label_mappings.json'))
+        if batch_correction:
+            batch_mappings = read_json(
+                path.join(model_checkpoint, 'batch_mappings.json'))
+        else:
+            batch_mappings = None
 
         if model_type == 'linear':
             model = LinearModel(**model_hp).to(device)
@@ -58,7 +64,7 @@ def evaluate(config, log=True):
                                      'model.pt'))['model_state_dict'])
 
             test_dl = simple_dataloader(test_data, target, batch_size,
-                                        label_mappings)
+                                        label_mappings, batch_mappings)
 
         # Evaluation
         id2label = label_mappings[target]['id2label']
@@ -97,23 +103,22 @@ def evaluate(config, log=True):
             if train_datapath:
                 train_data = read_data(train_datapath)
                 train_dl = simple_dataloader(train_data, target, batch_size,
-                                             label_mappings)
+                                             label_mappings, batch_mappings)
             else:
                 raise ValueError("Train data path required for SHAP analysis.")
 
             save_top_genes_and_heatmap(model, train_dl, test_dl, id2label,
                                        resultpath, device, top_n,
-                                       n_background_tensor) 
-            
+                                       n_background_tensor, batch_correction)
+
     if 'deg_config' in evaluation_configs:
         assert config['data'], "Input data unavailable for deg analysis"
-        assert 'full_datapath' in config['data'], "Required full_datapath for deg analysis"
+        assert 'full_datapath' in config[
+            'data'], "Required full_datapath for deg analysis"
         full_datapath = config['data'].get('full_datapath')
         ad_for_deg = read_data(full_datapath)
         perform_differential_expression_analysis(
-            ad_for_deg,
-            **evaluation_configs['deg_config'],
-            dirpath=resultpath)
+            ad_for_deg, **evaluation_configs['deg_config'], dirpath=resultpath)
 
     if 'gene_recall' in evaluation_configs and evaluation_configs[
             'gene_recall']:

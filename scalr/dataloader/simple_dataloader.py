@@ -1,5 +1,6 @@
 from typing import Union
 
+import numpy as np
 import torch
 import anndata as ad
 from anndata.experimental import AnnLoader, AnnCollection
@@ -9,7 +10,8 @@ from anndata import AnnData
 def simple_dataloader(adata: Union[AnnData, AnnCollection],
                       target: str,
                       batch_size: int = 1,
-                      label_mappings: dict = None):
+                      label_mappings: dict = None,
+                      batch_mappings: dict = None):
     """
     A simple data loader to prepare inputs to be feed into linear model and corresponding labels
 
@@ -34,14 +36,21 @@ def simple_dataloader(adata: Union[AnnData, AnnCollection],
     else:
         label_mappings = label_mappings[target]['label2id']
 
-    def collate_fn(batch, target, label_mappings):
+    def collate_fn(batch, target, label_mappings, batch_mappings):
         x = batch.X.float()
+        if batch_mappings:
+            x = torch.cat(
+                (x,
+                 torch.as_tensor(batch.obs['batch'].astype(
+                     'category').cat.rename_categories(batch_mappings).astype(
+                         'int64').values).reshape(-1, 1)),
+                dim=1)
         y = torch.as_tensor(
             batch.obs[target].astype('category').cat.rename_categories(
                 label_mappings).astype('int64').values)
         return x, y
 
-    return AnnLoader(
-        adata,
-        batch_size=batch_size,
-        collate_fn=lambda batch: collate_fn(batch, target, label_mappings))
+    return AnnLoader(adata,
+                     batch_size=batch_size,
+                     collate_fn=lambda batch: collate_fn(
+                         batch, target, label_mappings, batch_mappings))
