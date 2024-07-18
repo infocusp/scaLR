@@ -45,7 +45,7 @@ def main():
 
     dirpath = os.path.join(dirpath, f'{exp_name}_{exp_run}')
     if os.path.exists(dirpath):
-        raise FileExistsError(f"{dirpath} path is already exists.")
+        raise FileExistsError(f"{dirpath} directory already exists.")
 
     if config.get('data') and ('target' in config['data']):
         config = ingest_data(config, log)
