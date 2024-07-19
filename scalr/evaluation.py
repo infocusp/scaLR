@@ -137,6 +137,8 @@ def get_top_n_genes(
         dirpath: dir where genes to class weights stored.
         device: device for pytorch.
         top_n: save top n genes based on shap values.
+        n_background_tensor: Number of bakcground tensors to be used for shap analysis
+        batch_correction: Wether the batch correction is applied or not
 
     Returns:
         class wise top n genes, genes * class weights matrix
@@ -206,6 +208,8 @@ def save_top_genes_and_heatmap(
         dirpath: dir where shap analysis csv & heatmap stored.
         device: device for pytorch.
         top_n: save top n genes based on shap values.
+        n_background_tensor: Number of bakcground tensors to be used for shap analysis
+        batch_correction: Wether the batch correction is applied or not
     """
 
     shap_heatmap_path = path.join(dirpath, "shap_heatmap")

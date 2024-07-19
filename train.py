@@ -71,8 +71,8 @@ def train(config, log=True):
     test_data = read_data(test_datapath)
 
     # Prepare batch mappings for batch correction if applicable.
+    batch_mappings = {}
     if batch_correction:
-        batch_mappings = {}
         batches = sorted(
             list(
                 set(
@@ -86,8 +86,6 @@ def train(config, log=True):
         layers[0] += 1
         model_hp['layers'] = layers
         config['model']['hyperparameters'] = model_hp
-    else:
-        batch_mappings = None
 
     # Create mappings for targets to be used by testing
     label_mappings = {}

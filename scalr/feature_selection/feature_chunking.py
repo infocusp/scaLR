@@ -35,6 +35,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
             model_config: dict containing type of model, and it related config
             feature_chunksize: number of features to take in one training instance
             dirpath: directory to store all model_weights and top_features
+            batch_correction: Wether to apply batch correction or not 
             device: [cpu/cuda] device to perform training on.
 
         Return:
@@ -56,8 +57,8 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
     label_mappings[target]['label2id'] = label2id
 
     # Batch correction before feature selection process.
+    batch_mappings = {}
     if batch_correction:
-        batch_mappings = {}
         batches = sorted(
             list(
                 set(
@@ -65,8 +66,6 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
                     list(test_data.obs.batch))))
         for i, batch in enumerate(batches):
             batch_mappings[batch] = i
-    else:
-        batch_mappings = None
 
     n_cls = len(id2label)
     epochs = model_config['params'].get('epochs', 25)
@@ -80,7 +79,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
     i = 0
     for start in range(0, len(train_data.var_names), feature_chunksize):
 
-        print(f'\nFeature selection - iteration {i+1}.\n')
+        print(f'\nFeature selection - chunk {i+1}.\n')
         train_features_subset = train_data[:, start:start + feature_chunksize]
         val_features_subset = val_data[:, start:start + feature_chunksize]
 

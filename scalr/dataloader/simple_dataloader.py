@@ -21,20 +21,13 @@ def simple_dataloader(adata: Union[AnnData, AnnCollection],
                 must be present as a column_name in adata.obs
         batch_size: size of batches returned
         label_mappings: mapping the target name to respective ids
+        batch_mappings: mapping of batches to respective ids
 
     Return:
         PyTorch DataLoader object with (X: Tensor [batch_size, features], y: Tensor [batch_size, ])
     """
 
-    if label_mappings is None:
-        label_mappings = adata.obs[target].astype(
-            'category').cat.categories.tolist()
-        label_mappings = {
-            label_mappings[i]: i
-            for i in range(len(label_mappings))
-        }
-    else:
-        label_mappings = label_mappings[target]['label2id']
+    label_mappings = label_mappings[target]['label2id']
 
     def collate_fn(batch, target, label_mappings, batch_mappings):
         x = batch.X.float()

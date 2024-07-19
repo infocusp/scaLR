@@ -117,7 +117,7 @@ def split_data(datapath: str,
     for split_name in data_split.keys():
         if data_split[split_name] == -1:
             data_split[split_name] = list(range(total_samples))
-        if sample_chunksize is None:
+        if not sample_chunksize:
             adata = read_data(datapath).to_memory()
             if process_fn is not None:
                 print('\nNormalizing the data...')
@@ -140,6 +140,7 @@ def split_data(datapath: str,
                     adata = adata.to_adata()
                 adata = adata.to_memory()
                 if process_fn is not None:
+                    print('\nNormalizing the data...')
                     if not isinstance(adata.X, np.ndarray):
                         adata.X = adata.X.A
                     adata.X = process_fn(adata.X, **kwargs)
