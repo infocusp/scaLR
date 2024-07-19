@@ -64,6 +64,13 @@ def extract_features(config, log=True):
             device=device)
     else:
         feature_class_weights = pd.read_csv(weight_matrix, index_col=0)
+        feature_class_weights.to_csv(
+            path.join(featurespath, 'feature_class_weights.csv'))
+
+    extract_top_k_features(feature_class_weights,
+                           k=100,
+                           aggregation_strategy='classwise_promoters',
+                           dirpath=featurespath)
 
     top_features = extract_top_k_features(feature_class_weights,
                                           k,

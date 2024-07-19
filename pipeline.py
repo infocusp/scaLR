@@ -39,6 +39,14 @@ def main():
     config = load_config(args.config)
     log = args.log
 
+    dirpath = config['dirpath']
+    exp_name = config['exp_name']
+    exp_run = config['exp_run']
+
+    dirpath = os.path.join(dirpath, f'{exp_name}_{exp_run}')
+    if os.path.exists(dirpath):
+        raise FileExistsError(f"{dirpath} directory already exists.")
+
     if config.get('data') and ('target' in config['data']):
         print('\nInitializing data ingestion...')
         config = ingest_data(config, log)

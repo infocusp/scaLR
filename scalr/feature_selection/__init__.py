@@ -1,1 +1,2 @@
-from .feature_chunking import feature_chunking, extract_top_k_features
+from .feature_chunking import feature_chunking
+from .feature_selection import extract_top_k_features
