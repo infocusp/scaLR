@@ -107,6 +107,8 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
         all_weights.append(weights)
 
     full_weights_matrix = torch.cat(all_weights, dim=1)
+    # Just to make sure index name is "index".
+    train_data.var_names.name = "index"
     feature_class_weights = pd.DataFrame(full_weights_matrix,
                                          columns=train_data.var_names,
                                          index=id2label)
@@ -116,43 +118,3 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
         path.join(dirpath, 'feature_class_weights.csv'))
 
     return feature_class_weights
-
-
-def extract_top_k_features(feature_class_weights: DataFrame,
-                           k: int = None,
-                           aggregation_strategy: str = 'mean',
-                           dirpath: str = '.',
-                           save_features: bool = True):
-    """Extract top k features from weight matrix trained on chunked features
-
-    Args:
-        feature_class_weights: DataFrame object containing weights of all features across all classes
-        k: number of features to select from all_features
-        aggregation_strategy: stratergy to aggregate features from each class, default: 'mean' 
-        dirpath: directory to store all model_weights and top_features
-
-    Returns:
-        List of top k features
-    """
-    if k is None:
-        k = len(feature_class_weights.columns)
-
-    if aggregation_strategy == 'mean':
-        top_features_list = feature_class_weights.abs().mean().sort_values(
-            ascending=False).reset_index()['index'][:k]
-    elif aggregation_strategy == 'no_reduction':
-        top_features_list = pd.DataFrame(
-            columns=feature_class_weights.index.tolist())
-        for i, category in enumerate(feature_class_weights.index.tolist()):
-            top_features_list[category] = abs(
-                feature_class_weights.iloc[i]).sort_values(
-                    ascending=False).reset_index()['index'][:k]
-    else:
-        raise NotImplementedError(
-            'Other aggregation strategies are not implemented yet...')
-
-    if save_features:
-        with open(f'{dirpath}/top_features.txt', 'w') as fh:
-            fh.write('\n'.join(top_features_list) + '\n')
-
-    return top_features_list
