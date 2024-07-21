@@ -14,6 +14,57 @@ The following flowchart explains the major steps of the scaLR pipeline.
 
 ![image.jpg](Schematic-of-scPipeline.jpg)
 
+## Pre-requisites and installation scaLR
+
+
+- ScalR can be installed using Conda or pip. It is tested for Python 3.9 at this moment. 
+
+```
+conda create -n scaLR_env python=3.9
+
+```
+
+- install pytorch using the below command
+
+```
+conda install pytorch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 pytorch-cuda=11.8 -c pytorch -c nvidia
+
+```
+
+OR
+
+```
+pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
+
+If `torch not found` error pops-up if running the pipeline when installed using option 1 above, consider installing it using option 2.
+```
+
+
+- Last step is to clone the git repository and install required packages by activating the conda env
+
+
+```
+conda activate scaLR_env
+
+pip install -r requirements.txt
+
+```
+
+## Input Data
+- Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only)
+- The anndata object should contain cell samples as `obs` and genes as `var`.
+- `adata.X` contains all gene counts/expression values.
+- `adata.obs` contains any metadata regarding cells, including a column for `target` which will be used for classification. Index of `adata.obs` is cell_barcodes.
+- `adata.var` contains all gene_names as Index.
+
+
+## How to run
+
+1. It is necessary that the user must modify the configuration file and for each stage of the pipeline is the available inside the config folder [config.yml] or [full_config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
+2. Config folder consists of two config file i.e. [config.yml] or [full_config.yml] and its detailed README file how to use different parameters and files.
+3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), and an optional flag to log all parts of the pipelines (`-l | --log`).
+4. `python pipeline.py --config /path/to/config --log` to run the scaLR. 
+
 ## Library Structure
 A brief overview of the library Structure and functionalities
 
@@ -102,53 +153,8 @@ Performs evaluation of best model trained on user defined metrics on the test se
             - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.png`: Volcano plot for DEG analysis
             - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.csv`: Differential expression values for each gene.
 
-## Pre-requisites and installation scaLR
 
 
-- For smooth run of scaLR user can create a conda environment for Python=3.9
-
-```
-conda create -n scaLR_env python=3.9
-
-```
-
-- Then install pytorch using below command
-
-```
-conda install pytorch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 pytorch-cuda=11.8 -c pytorch -c nvidia
-
-OR
-
-pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
-
-If `torch not found` error pops-up if running the pipeline when installed using option 1 above, consider installing it using option 2.
-```
-
-
-- Last step is to clone the git repository and install required packages by activating the conda env
-
-
-```
-conda activate scaLR_env
-
-pip install -r requirements.txt
-
-```
-
-## Input Data
-- Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only)
-- The anndata object should contain cell samples as `obs` and genes as `var`.
-- `adata.X` contains all gene counts/expression values.
-- `adata.obs` contains any metadata regarding cells, including a column for `target` which will be used for classification. Index of `adata.obs` is cell_barcodes.
-- `adata.var` contains all gene_names as Index.
-
-
-## How to run
-
-1. It is necessary that the user must modify the configuration file and for each stage of the pipeline is the available inside the config folder [config.yml] or [full_config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
-2. Config folder consists of two config file i.e. [config.yml] or [full_config.yml] and its detailed README file how to use different parameters and files.
-3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), and an optional flag to log all parts of the pipelines (`-l | --log`).
-4. `python pipeline.py --config /path/to/config --log` to run the scaLR. 
 
 
 ## Citation
