@@ -1,18 +1,18 @@
 # scaLR: a low-resource deep neural network pipeline for cell types annotation and biomarker discovery
 
-Single cell analysis using Low Resource (scaLR) is a comprehensive end to end pipeline which is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. Major steps of the pipeline are:
+Single cell analysis using Low Resource (scaLR) is a comprehensive end-to-end pipeline that is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. The major steps of the pipeline are:
 
-1. Data processing: Large datasets undergo preprocessing and normalization (if user opts to) and are segmented into training, testing, and validation sets. 
+1. Data processing: Large datasets undergo preprocessing and normalization (if the user opts to) and are segmented into training, testing, and validation sets. 
 
-2. Features extractions: A model is trained on feature chunks & that too batch-wise, so all features and samples are utilised in the feature selection process. Then the top-k features are selected, to train the final model, using a feature score based on the model's coefficients/weights.
+2. Features extraction: A model is trained on feature subsets in a batch-wise process, so all features and samples are utilised in the feature selection process. Then, the top-k features are selected to train the final model, using a feature score based on the model's coefficients/weights.
 
-3. Training: A Deep Neural Network (DNN) is trained on the train data and validation data is used to validate the model at each epoch & early stop if applicable.
+3. Training: A Deep Neural Network (DNN) is trained on the training dataset. The validation dataset is used to validate the model at each epoch and early stopping is performed if applicable.
 
-4. Evaluation: The trained model is evaluated using the test data and calculating the metrics like precision, recall, f1-score, and accuracy scores. Then various visualizations such as ROC curve of class annotation, feature rank plots, heatmap of top genes per class, DGE analysis, gene recall curves are generated.
+4. Evaluation: The trained model is evaluated using the test dataset through calculating metrics such as precision, recall, f1-score, and accuracy. Various visualizations such as ROC curve of class annotation, feature rank plots, heatmap of top genes per class, DGE analysis, gene recall curves are generated.
+
+The following flowchart explains the major steps of the scaLR pipeline.
 
 ![image.jpg](Schematic-of-scPipeline.jpg)
-
-Flowchart explains scaLR major steps.
 
 ## Library Structure
 A brief overview of the library Structure and functionalities
@@ -23,7 +23,7 @@ A brief overview of the library Structure and functionalities
     - `CallbackExecutor`, `EarlyStopping`, `ModelCheckpoints`, `TensorbaordLogging`
 - **data**:
     - `split_data`: function to obtain and store train/test/val splits
-    - `preprocess`: function is used to normalize the data.
+    - `preprocess`: This function is used to normalize the data.
 - **dataloader**:
     - `simple_dataloader`: generator object to prepare batch-wise data to pass through model.
 - **model**:
@@ -39,7 +39,7 @@ A brief overview of the library Structure and functionalities
 - **evaluation**:
     - `get_predictions`: generate predictions of trained model on data
     - `accuracy`: generate accuracy of predictions
-    - `generate_and_save_classification_report`: function to generate a classwise report containing precision, recall, f1-score metrics and storing the table
+    - `generate_and_save_classification_report`: function to generate a classwise report containing precision, recall, f1-score metrics and to store the table
     - `perform_differential_expression_analysis`: function to generate deg analysis report, and a volcano plot of pvalues vs log2_fold_change in gene expression
     - `generate_gene_recall_curve`: function to generate gene recall curves as per user defined inputs for reference and ranked genes
 
