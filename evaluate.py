@@ -9,7 +9,6 @@ from torch import nn
 import numpy as np
 
 from config.utils import load_config
-from config import default_config
 from scalr import Trainer
 from scalr.dataloader import simple_dataloader
 from scalr.evaluation import get_predictions, accuracy, generate_and_save_classification_report, plot_roc_auc_curve, perform_differential_expression_analysis, generate_gene_recall_curve, save_top_genes_and_heatmap
@@ -90,15 +89,10 @@ def evaluate(config, log=True):
             print("\nSHAP analysis:")
             shap_config = evaluation_configs.get('shap_config')
 
-            if not shap_config:
-                shap_config = deepcopy(default_config.shap_config)
-
-            top_n = shap_config.get('top_n', 20)
-            shap_batch_size = shap_config.get('batch_size', 1000)
-            n_background_tensor = shap_config.get(
-                'background_tensor', 200)
-            early_stop_config = shap_config.get(
-                'early_stop', default_config.shap_config['early_stop'])
+            top_n = shap_config.get('top_n')
+            shap_batch_size = shap_config.get('batch_size')
+            n_background_tensor = shap_config.get('background_tensor')
+            early_stop_config = shap_config.get('early_stop')
 
             if train_datapath:
                 train_data = read_data(train_datapath)

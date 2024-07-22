@@ -20,6 +20,7 @@ def simple_dataloader(adata: Union[AnnData, AnnCollection],
                 must be present as a column_name in adata.obs
         batch_size: size of batches returned
         label_mappings: mapping the target name to respective ids
+        shuffle: Shuffle indices before sampling batch.
 
     Return:
         PyTorch DataLoader object with (X: Tensor [batch_size, features], y: Tensor [batch_size, ])

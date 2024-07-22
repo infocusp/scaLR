@@ -80,7 +80,7 @@ evaluation:
         background_tensor: 200
         early_stop:
             patience: 5
-            top_genes: 100 # Extract top genes from each batch and compare with previous batch.
+            top_genes: 100
             threshold: 90
     # gene_recall:
     #     ## `feature_class_weights_path` & `ranked_genes` are mutually exclusive. Or if you comment out both,
@@ -99,4 +99,4 @@ evaluation:
         fixed_condition: 'A condition in fixed_column to subset the anndata, ex : B cell'
         design_factor: 'A column name in adata.obs having factor levels to perform DEG, ex : disease_status'
         factor_categories: 'List of factors in design_factor to perform DEG, ex : [disease, normal] for disease vs normal'
-        sum_column: 'A column name in adata.obs to sum the gene expression per unique-id, ex : donor_id'    
+        sum_column: 'A column name in adata.obs to sum the gene expression per unique-id, ex : donor_id'

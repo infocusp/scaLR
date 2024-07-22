@@ -122,9 +122,10 @@ def is_early_stop(
     prev_top_genes_batch_wise: dict,
     early_stop_config: dict,
     classes: list,
-) -> bool:
-    """It will check that previous and current batch's common genes number is
-    match with threshold or not. If match it will return True else False.
+) -> Tuple[bool, dict]:
+    """Function to check whether previous and current batches' common genes are
+        are greater greater than or equal to the threshold and return top genes
+        batch wise.
 
     Args:
         batch_id: Current batch number.
@@ -134,7 +135,7 @@ def is_early_stop(
         classes: list classes/labels.
 
     Returns:
-        True if early stopping criteria matched.
+        early stop value, top genes batch wise.
     """
 
     early_stop = True
@@ -151,6 +152,8 @@ def is_early_stop(
             # If commnon genes are less than 90 early stop will be false.
             if num_common_genes < early_stop_config['threshold']:
                 early_stop = False
+        else:
+            early_stop = False
 
     return early_stop, top_genes_batch_wise
 
@@ -186,13 +189,12 @@ def get_top_n_genes(
     model.to(device)
     shap_model = CustomShapModel(model)
 
-    full_data = next(iter(train_dl))[0]
-    random_indices = torch.randint(full_data.shape[0], (n_background_tensor,))
-    random_background_data = full_data[random_indices]
+    random_background_data = next(iter(train_dl))[:-1]
+    random_background_data = [data.to(device) for data in random_background_data]
 
     explainer = shap.DeepExplainer(
         shap_model,
-        random_background_data.to(device))
+        *random_background_data)
 
     abs_prev_top_genes_batch_wise = {}
     count_patience = 0
@@ -220,7 +222,7 @@ def get_top_n_genes(
             early_stop_config, classes
         )
 
-        count_patience = count_patience + 1 if (early_stop and batch_id >= 1) else 0
+        count_patience = count_patience + 1 if early_stop else 0
 
         if count_patience == early_stop_config['patience']:
             print(f"Early stopping at batch: {batch_id}")

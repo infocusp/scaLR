@@ -186,20 +186,20 @@ A list of evaluation metrics on the trained model.
 `shap`: SHAP(importance feature extraction method) run on the final model.
 
 **shap_config** {dict}:
-*Required* when shap is mentioned metrics.
+*Required* when shap is mentioned metrics, otherwise default will run.
 
-- **top_n** {int}: *Required*
+- **top_n** {int}:
 Top N genes/features expract per class/label.
-- **batch_size** {int}: *Required*
+- **batch_size** {int}:
 Test data will be pass to SHAP in this size.
-- **background_tensor** {int}: *Required*
+- **background_tensor** {int}:
 Number of samples from train data used.
 - **early_stop** {dict}:
-    - **patience** {int}: *Required*
+    - **patience** {int}:
       If top N genes common upto this number of batch, then stop SHAP processing.
-    - **top_genes** {int}: *Required*
+    - **top_genes** {int}:
       Number of top genes use to compare with earlier batches top genes.
-    - **threshold** {int}: *Required*
+    - **threshold** {int}:
       How many genes should be overlap between current and earlier batches top genes.
 
 **deg_config** {dict}:  
