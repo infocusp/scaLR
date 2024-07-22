@@ -1,18 +1,69 @@
 # scaLR: a low-resource deep neural network pipeline for cell types annotation and biomarker discovery
 
-Single cell analysis using Low Resource (scaLR) is a comprehensive end to end pipeline which is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. Major steps of the pipeline are:
+Single cell analysis using Low Resource (scaLR) is a comprehensive end-to-end pipeline that is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. The major steps of the pipeline are:
 
-1. Data processing: Large datasets undergo preprocessing and normalization (if user opts to) and are segmented into training, testing, and validation sets. 
+1. Data processing: Large datasets undergo preprocessing and normalization (if the user opts to) and are segmented into training, testing, and validation sets. 
 
-2. Features extractions: A model is trained on feature chunks & that too batch-wise, so all features and samples are utilised in the feature selection process. Then the top-k features are selected, to train the final model, using a feature score based on the model's coefficients/weights.
+2. Features extraction: A model is trained on feature subsets in a batch-wise process, so all features and samples are utilised in the feature selection process. Then, the top-k features are selected to train the final model, using a feature score based on the model's coefficients/weights.
 
-3. Training: A Deep Neural Network (DNN) is trained on the train data and validation data is used to validate the model at each epoch & early stop if applicable. Also, batch correction method is available to correct batch effects during training in the pipeline.
+3. Training: A Deep Neural Network (DNN) is trained on the training dataset. The validation dataset is used to validate the model at each epoch and early stopping is performed if applicable. Also, batch correction method is available to correct batch effects during training in the pipeline.
 
-4. Evaluation: The trained model is evaluated using the test data and calculating the metrics like precision, recall, f1-score, and accuracy scores. Then various visualizations such as ROC curve of class annotation, feature rank plots, heatmap of top genes per class, DGE analysis, gene recall curves are generated.
+4. Evaluation: The trained model is evaluated using the test dataset through calculating metrics such as precision, recall, f1-score, and accuracy. Various visualizations such as ROC curve of class annotation, feature rank plots, heatmap of top genes per class, DGE analysis, gene recall curves are generated.
+
+The following flowchart explains the major steps of the scaLR pipeline.
 
 ![image.jpg](Schematic-of-scPipeline.jpg)
 
-Flowchart explains scaLR major steps.
+## Pre-requisites and installation scaLR
+
+
+- ScalR can be installed using Conda or pip. It is tested for Python 3.9 at this moment. 
+
+```
+conda create -n scaLR_env python=3.9
+
+```
+
+- install pytorch using the below command
+
+```
+conda install pytorch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 pytorch-cuda=11.8 -c pytorch -c nvidia
+
+```
+
+OR
+
+```
+pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
+
+If `torch not found` error pops-up if running the pipeline when installed using option 1 above, consider installing it using option 2.
+```
+
+
+- Last step is to clone the git repository and install required packages by activating the conda env
+
+
+```
+conda activate scaLR_env
+
+pip install -r requirements.txt
+
+```
+
+## Input Data
+- Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only)
+- The anndata object should contain cell samples as `obs` and genes as `var`.
+- `adata.X` contains all gene counts/expression values.
+- `adata.obs` contains any metadata regarding cells, including a column for `target` which will be used for classification. Index of `adata.obs` is cell_barcodes.
+- `adata.var` contains all gene_names as Index.
+
+
+## How to run
+
+1. It is necessary that the user must modify the configuration file and for each stage of the pipeline is the available inside the config folder [config.yml] or [full_config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
+2. Config folder consists of two config file i.e. [config.yml] or [full_config.yml] and its detailed README file how to use different parameters and files.
+3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), and an optional flag to log all parts of the pipelines (`-l | --log`).
+4. `python pipeline.py --config /path/to/config --log` to run the scaLR. 
 
 ## Library Structure
 A brief overview of the library Structure and functionalities
@@ -23,7 +74,7 @@ A brief overview of the library Structure and functionalities
     - `CallbackExecutor`, `EarlyStopping`, `ModelCheckpoints`, `TensorbaordLogging`
 - **data**:
     - `split_data`: function to obtain and store train/test/val splits
-    - `preprocess`: function is used to normalize the data.
+    - `preprocess`: This function is used to normalize the data.
 - **dataloader**:
     - `simple_dataloader`: generator object to prepare batch-wise data to pass through model.
 - **model**:
@@ -39,7 +90,7 @@ A brief overview of the library Structure and functionalities
 - **evaluation**:
     - `get_predictions`: generate predictions of trained model on data
     - `accuracy`: generate accuracy of predictions
-    - `generate_and_save_classification_report`: function to generate a classwise report containing precision, recall, f1-score metrics and storing the table
+    - `generate_and_save_classification_report`: function to generate a classwise report containing precision, recall, f1-score metrics and to store the table
     - `perform_differential_expression_analysis`: function to generate deg analysis report, and a volcano plot of pvalues vs log2_fold_change in gene expression
     - `generate_gene_recall_curve`: function to generate gene recall curves as per user defined inputs for reference and ranked genes
 
@@ -102,53 +153,8 @@ Performs evaluation of best model trained on user defined metrics on the test se
             - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.png`: Volcano plot for DEG analysis
             - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.csv`: Differential expression values for each gene.
 
-## Pre-requisites and installation scaLR
 
 
-- For smooth run of scaLR user can create a conda environment for Python=3.9
-
-```
-conda create -n scaLR_env python=3.9
-
-```
-
-- Then install pytorch using below command
-
-```
-conda install pytorch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 pytorch-cuda=11.8 -c pytorch -c nvidia
-
-OR
-
-pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
-
-If `torch not found` error pops-up if running the pipeline when installed using option 1 above, consider installing it using option 2.
-```
-
-
-- Last step is to clone the git repository and install required packages by activating the conda env
-
-
-```
-conda activate scaLR_env
-
-pip install -r requirements.txt
-
-```
-
-## Input Data
-- Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only)
-- The anndata object should contain cell samples as `obs` and genes as `var`.
-- `adata.X` contains all gene counts/expression values.
-- `adata.obs` contains any metadata regarding cells, including a column for `target` which will be used for classification. Index of `adata.obs` is cell_barcodes.
-- `adata.var` contains all gene_names as Index.
-
-
-## How to run
-
-1. It is necessary that the user must modify the configuration file and for each stage of the pipeline is the available inside the config folder [config.yml] or [full_config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
-2. Config folder consists of two config file i.e. [config.yml] or [full_config.yml] and its detailed README file how to use different parameters and files.
-3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), and an optional flag to log all parts of the pipelines (`-l | --log`).
-4. `python pipeline.py --config /path/to/config --log` to run the scaLR. 
 
 
 ## Citation
