@@ -141,14 +141,14 @@ def is_early_stop(
     early_stop = True
     top_genes_batch_wise = {}
     for label in classes:
-        top_genes_batch_wise[label] = genes_class_shap_df[label].sort_values(ascending=False)[:early_stop_config['top_genes']].index
+        top_genes_batch_wise[label] = genes_class_shap_df[label].sort_values(
+            ascending=False)[:early_stop_config['top_genes']].index
 
         # Start checking after first batch.
         if batch_id >= 1:
             num_common_genes = len(
-              set(top_genes_batch_wise[label]).intersection(
-              set(prev_top_genes_batch_wise[label]))
-            )
+                set(top_genes_batch_wise[label]).intersection(
+                    set(prev_top_genes_batch_wise[label])))
             # If commnon genes are less than 90 early stop will be false.
             if num_common_genes < early_stop_config['threshold']:
                 early_stop = False
@@ -157,9 +157,10 @@ def is_early_stop(
 
     return early_stop, top_genes_batch_wise
 
+
 def get_top_n_genes(
     model: LinearModel,
-    train_dl: DataLoader,
+    train_data: Union[AnnData, AnnCollection],
     test_dl: DataLoader,
     classes: list,
     dirpath: str,
@@ -173,7 +174,7 @@ def get_top_n_genes(
 
     Args:
         model: trained model to extract weights from
-        train_dl: train dataloader.
+        train_data: train data.
         test_dl: test dataloader.
         classes: list of class names.
         dirpath: dir where genes to class weights stored.
@@ -189,12 +190,11 @@ def get_top_n_genes(
     model.to(device)
     shap_model = CustomShapModel(model)
 
-    random_background_data = next(iter(train_dl))[:-1]
-    random_background_data = [data.to(device) for data in random_background_data]
+    random_background_data = data_utils.get_random_samples(train_data,
+                                                           n_background_tensor,
+                                                           device)
 
-    explainer = shap.DeepExplainer(
-        shap_model,
-        *random_background_data)
+    explainer = shap.DeepExplainer(shap_model, random_background_data)
 
     abs_prev_top_genes_batch_wise = {}
     count_patience = 0
@@ -207,20 +207,22 @@ def get_top_n_genes(
         mean_shap_values = batch_shap_values.mean(axis=0)
 
         if batch_id >= 1:
-            abs_mean_shap_values = np.mean([abs_mean_shap_values, abs_prev_batches_mean_shap_values], axis=0)
-            mean_shap_values = np.mean([mean_shap_values, prev_batches_mean_shap_values], axis=0)
+            abs_mean_shap_values = np.mean(
+                [abs_mean_shap_values, abs_prev_batches_mean_shap_values],
+                axis=0)
+            mean_shap_values = np.mean(
+                [mean_shap_values, prev_batches_mean_shap_values], axis=0)
 
         abs_genes_class_shap_df = DataFrame(abs_mean_shap_values,
-                                        index=test_dl.dataset.var_names,
-                                        columns=classes)
+                                            index=test_dl.dataset.var_names,
+                                            columns=classes)
 
         abs_prev_batches_mean_shap_values = abs_mean_shap_values
         prev_batches_mean_shap_values = mean_shap_values
 
         early_stop, abs_prev_top_genes_batch_wise = is_early_stop(
             batch_id, abs_genes_class_shap_df, abs_prev_top_genes_batch_wise,
-            early_stop_config, classes
-        )
+            early_stop_config, classes)
 
         count_patience = count_patience + 1 if early_stop else 0
 
@@ -239,7 +241,8 @@ def get_top_n_genes(
         path.join(dirpath, "raw_genes_class_weights.csv"))
 
     # Extract only top N genes
-    class_top_genes = {class_label:genes[:top_n]
+    class_top_genes = {
+        class_label: genes[:top_n]
         for class_label, genes in abs_prev_top_genes_batch_wise.items()
     }
 
@@ -248,7 +251,7 @@ def get_top_n_genes(
 
 def save_top_genes_and_heatmap(
     model: LinearModel,
-    train_dl: DataLoader,
+    train_data: Union[AnnData, AnnCollection],
     test_dl: DataLoader,
     classes: list,
     dirpath: str,
@@ -262,7 +265,7 @@ def save_top_genes_and_heatmap(
 
     Args:
         model: trained model to extract weights from
-        train_dl: train dataloader.
+        train_data: train data.
         test_dl: test dataloader.
         classes: list of class names.
         dirpath: dir where shap analysis csv & heatmap stored.
@@ -277,7 +280,7 @@ def save_top_genes_and_heatmap(
 
     class_top_genes, genes_class_shap_df = get_top_n_genes(
         model,
-        train_dl,
+        train_data,
         test_dl,
         classes,
         shap_heatmap_path,
@@ -310,6 +313,8 @@ def plot_heatmap(class_genes_weights: DataFrame, dirpath: str):
 
     sns.set(rc={'figure.figsize': (9, 12)})
     sns.heatmap(class_genes_weights, vmin=-1e-2, vmax=1e-2)
+
+    plt.tight_layout()
 
     plt.savefig(path.join(dirpath, "heatmap.png"))
 

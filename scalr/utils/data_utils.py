@@ -1,4 +1,9 @@
+from typing import Union
+
+from anndata import AnnData
+from anndata.experimental import AnnCollection
 import numpy as np
+import torch
 
 
 def get_one_hot_matrix(labels: np.array):
@@ -14,3 +19,30 @@ def get_one_hot_matrix(labels: np.array):
     one_hot_matrix[np.arange(labels.size), labels] = 1
 
     return one_hot_matrix
+
+
+def get_random_samples(
+    data: Union[AnnData, AnnCollection],
+    n_random_samples: int,
+    device: str,
+) -> torch.tensor:
+    """Returns random N samples from given data.
+
+    Args:
+        data: AnnData or AnnCollection object data.
+        n_random_samples: number of random samples extract from data.
+
+    Returns:
+        random samples tensor.
+    """
+
+    random_indices = np.random.randint(0, data.shape[0], n_random_samples)
+    random_background_data = data[random_indices].X
+
+    if isinstance(data, AnnCollection):
+        random_background_data = random_background_data.A
+
+    random_background_data = torch.as_tensor(random_background_data,
+                                             dtype=torch.float32).to(device)
+
+    return random_background_data

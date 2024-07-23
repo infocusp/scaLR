@@ -30,6 +30,7 @@ def evaluate(config, log=True):
     dirpath = path.join(dirpath, f'{exp_name}_{exp_run}')
     resultpath = path.join(dirpath, 'results')
     os.makedirs(resultpath, exist_ok=True)
+
     if 'metrics' in evaluation_configs:
         data_config = config['data']
         target = data_config['target']
@@ -96,27 +97,27 @@ def evaluate(config, log=True):
 
             if train_datapath:
                 train_data = read_data(train_datapath)
-                train_dl = simple_dataloader(train_data, target, train_data.shape[0],
-                                             label_mappings, shuffle=True)
             else:
                 raise ValueError("Train data path required for SHAP analysis.")
 
-            shap_test_dl = simple_dataloader(test_data, target, shap_batch_size,
-                                        label_mappings, shuffle=True)
+            shap_test_dl = simple_dataloader(test_data,
+                                             target,
+                                             shap_batch_size,
+                                             label_mappings,
+                                             shuffle=True)
 
-            save_top_genes_and_heatmap(model, train_dl, shap_test_dl, id2label,
-                                       resultpath, early_stop_config, device,
-                                       top_n, n_background_tensor)
+            save_top_genes_and_heatmap(model, train_data, shap_test_dl,
+                                       id2label, resultpath, early_stop_config,
+                                       device, top_n, n_background_tensor)
 
     if 'deg_config' in evaluation_configs:
         assert config['data'], "Input data unavailable for deg analysis"
-        assert 'full_datapath' in config['data'], "Required full_datapath for deg analysis"
+        assert 'full_datapath' in config[
+            'data'], "Required full_datapath for deg analysis"
         full_datapath = config['data'].get('full_datapath')
         ad_for_deg = read_data(full_datapath)
         perform_differential_expression_analysis(
-            ad_for_deg,
-            **evaluation_configs['deg_config'],
-            dirpath=resultpath)
+            ad_for_deg, **evaluation_configs['deg_config'], dirpath=resultpath)
 
     if 'gene_recall' in evaluation_configs and evaluation_configs[
             'gene_recall']:
