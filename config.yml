@@ -13,7 +13,14 @@ data:
         split_ratio: [7, 1, 2.5]
         stratify: 'donor_id'
 
-    normalize_samples: True
+    normalize_fn:
+        name: standard_scale
+        params:
+            with_mean: True
+            with_std: True
+        # name: normalize_samples
+        # params:
+        #     scaling_factor: 1.0
 
     # train_datapath: '/path/to/train_data'
     # val_datapath: '/path/to/val_data'

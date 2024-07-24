@@ -1,4 +1,4 @@
-data_config = {'sample_chunksize': 10000, 'normalize_samples': False}
+data_config = {'sample_chunksize': 10000}
 
 data_split_config = {'split_ratio': [7, 1, 2]}
 

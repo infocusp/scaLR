@@ -10,10 +10,11 @@ from config.utils import load_config
 from data_ingestion import ingest_data
 from evaluate import evaluate
 from feature_extraction import extract_features
+from scalr.data import preprocess
 from train import train
 
 
-def set_seed(seed:int):
+def set_seed(seed: int):
     os.environ['PYTHONHASHSEED'] = str(seed)
     random.seed(seed)
     np.random.seed(seed)
@@ -27,6 +28,7 @@ def main():
                         '--config',
                         type=str,
                         help='config.yml file path',
+                        default='config.yml',
                         required=True)
     parser.add_argument('-l',
                         '--log',
@@ -49,6 +51,10 @@ def main():
 
     if config.get('data') and ('target' in config['data']):
         config = ingest_data(config, log)
+
+        # Normalize data if applicable
+        if ('normalize_fn' in config['data']):
+            preprocess.normalize_features_data(config)
 
     if 'feature_selection' in config:
         config = extract_features(config, log)

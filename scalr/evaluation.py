@@ -161,8 +161,8 @@ def get_top_n_genes(
 
     abs_mean_shap_values = np.abs(concat_shap_values).mean(axis=0)
     abs_genes_class_shap_df = DataFrame(abs_mean_shap_values,
-                                    index=test_dl.dataset.var_names,
-                                    columns=classes)
+                                        index=test_dl.dataset.var_names,
+                                        columns=classes)
 
     abs_genes_class_shap_df.T.to_csv(
         path.join(dirpath, "genes_class_weights.csv"))
@@ -552,7 +552,7 @@ def plot_gene_recall(ranked_genes_df: pd.DataFrame,
     for i, category in enumerate(
             set(ranked_genes_df.columns).intersection(ref_genes_df.columns)):
         ranked_genes = ranked_genes_df[category].values
-        ref_genes = ref_genes_df[category].values
+        ref_genes = ref_genes_df[category].dropna().values
         k = top_K
 
         assert k >= len(
