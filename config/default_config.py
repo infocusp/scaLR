@@ -28,7 +28,8 @@ model_config = {
         'weights_init_zero': False
     },
     'start_checkpoint': None,
-    'resume_from_checkpoint': False
+    'resume_from_checkpoint': False,
+    'batch_correction': False
 }
 
 train_config = {

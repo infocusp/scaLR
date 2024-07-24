@@ -142,6 +142,11 @@ To resume training from a past checkpoint
 default: `null`  
 *Required* if `resume_from_checkpoint` is True. Specifies the model checkpoint path to initiate weights and optimizer and start training  
 
+**batch_correction** {bool}: `True | False`  
+default: `False`  
+To apply batch correction in pipeline
+
+
 ## Training
 **opt** {str}: `adam | sgd`  
 default: `adam`  

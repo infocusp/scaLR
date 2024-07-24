@@ -50,6 +50,7 @@ def main():
         raise FileExistsError(f"{dirpath} directory already exists.")
 
     if config.get('data') and ('target' in config['data']):
+        print('\nInitializing data ingestion...')
         config = ingest_data(config, log)
 
         # Normalize data if applicable
@@ -57,12 +58,15 @@ def main():
             preprocess.normalize_features_data(config)
 
     if 'feature_selection' in config:
+        print('\nInitializing feature selection...')
         config = extract_features(config, log)
 
     if 'training' in config:
+        print('\nInitializing model training...')
         config = train(config, log)
 
     if 'evaluation' in config:
+        print('\nInitializing model evaluation...')
         config = evaluate(config, log)
 
 
