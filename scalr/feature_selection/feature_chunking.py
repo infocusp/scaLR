@@ -17,10 +17,12 @@ from ..dataloader import simple_dataloader
 
 def feature_chunking(train_data: Union[AnnData, AnnCollection],
                      val_data: Union[AnnData, AnnCollection],
+                     test_data: Union[AnnData, AnnCollection],
                      target: str,
                      model_config: dict,
                      feature_chunksize: int,
                      dirpath: str,
+                     batch_correction: bool = False,
                      device: Literal['cpu', 'cuda'] = 'cpu') -> list[str]:
     """Select features using feature chunking approach.
 
@@ -33,6 +35,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
             model_config: dict containing type of model, and it related config
             feature_chunksize: number of features to take in one training instance
             dirpath: directory to store all model_weights and top_features
+            batch_correction: Whether to apply batch correction or not
             device: [cpu/cuda] device to perform training on.
 
         Return:
@@ -41,11 +44,28 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
 
     label_mappings = {}
     label_mappings[target] = {}
-    id2label = train_data.obs[target].astype(
-        'category').cat.categories.tolist()
+    id2label = sorted(
+        list(
+            set(train_data.obs[target].astype(
+                'category').cat.categories.tolist() +
+                val_data.obs[target].astype(
+                    'category').cat.categories.tolist() +
+                test_data.obs[target].astype(
+                    'category').cat.categories.tolist())))
     label2id = {id2label[i]: i for i in range(len(id2label))}
     label_mappings[target]['id2label'] = id2label
     label_mappings[target]['label2id'] = label2id
+
+    # Batch correction before feature selection process.
+    batch_mappings = {}
+    if batch_correction:
+        batches = sorted(
+            list(
+                set(
+                    list(train_data.obs.batch) + list(val_data.obs.batch) +
+                    list(test_data.obs.batch))))
+        for i, batch in enumerate(batches):
+            batch_mappings[batch] = i
 
     n_cls = len(id2label)
     epochs = model_config['params'].get('epochs', 25)
@@ -59,16 +79,21 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
     i = 0
     for start in range(0, len(train_data.var_names), feature_chunksize):
 
+        print(f'\nFeature selection - chunk {i+1}.\n')
         train_features_subset = train_data[:, start:start + feature_chunksize]
         val_features_subset = val_data[:, start:start + feature_chunksize]
 
         train_dl = simple_dataloader(train_features_subset, target, batch_size,
-                                     label_mappings)
+                                     label_mappings, batch_mappings)
         val_dl = simple_dataloader(val_features_subset, target, batch_size,
-                                   label_mappings)
+                                   label_mappings, batch_mappings)
 
-        model = LinearModel([len(train_features_subset.var_names), n_cls],
-                            weights_init_zero=True)
+        in_features = len(train_features_subset.var_names)
+        # Incrementing a feature count if batch correction is set to true.
+        if batch_mappings:
+            in_features += 1
+
+        model = LinearModel([in_features, n_cls], weights_init_zero=True)
         opt = torch.optim.SGD
         loss_fn = nn.CrossEntropyLoss()
 
@@ -104,6 +129,10 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
 
         weights = torch.load(
             filename)['model_state_dict']['out_layer.weight'].cpu()
+
+        # Removing the batch effect feature after model training for feature selection.
+        if batch_mappings:
+            weights = weights[:, :-1]
         all_weights.append(weights)
 
     full_weights_matrix = torch.cat(all_weights, dim=1)
@@ -118,43 +147,3 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
         path.join(dirpath, 'feature_class_weights.csv'))
 
     return feature_class_weights
-
-
-def extract_top_k_features(feature_class_weights: DataFrame,
-                           k: int = None,
-                           aggregation_strategy: str = 'mean',
-                           dirpath: str = '.',
-                           save_features: bool = True):
-    """Extract top k features from weight matrix trained on chunked features
-
-    Args:
-        feature_class_weights: DataFrame object containing weights of all features across all classes
-        k: number of features to select from all_features
-        aggregation_strategy: stratergy to aggregate features from each class, default: 'mean' 
-        dirpath: directory to store all model_weights and top_features
-
-    Returns:
-        List of top k features
-    """
-    if k is None:
-        k = len(feature_class_weights.columns)
-
-    if aggregation_strategy == 'mean':
-        top_features_list = feature_class_weights.abs().mean().sort_values(
-            ascending=False).reset_index()['index'][:k]
-    elif aggregation_strategy == 'no_reduction':
-        top_features_list = pd.DataFrame(
-            columns=feature_class_weights.index.tolist())
-        for i, category in enumerate(feature_class_weights.index.tolist()):
-            top_features_list[category] = abs(
-                feature_class_weights.iloc[i]).sort_values(
-                    ascending=False).reset_index()['index'][:k]
-    else:
-        raise NotImplementedError(
-            'Other aggregation strategies are not implemented yet...')
-
-    if save_features:
-        with open(f'{dirpath}/top_features.txt', 'w') as fh:
-            fh.write('\n'.join(top_features_list) + '\n')
-
-    return top_features_list

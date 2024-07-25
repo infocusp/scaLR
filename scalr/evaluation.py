@@ -168,6 +168,7 @@ def get_top_n_genes(
     device: str = 'cpu',
     top_n: int = 20,
     n_background_tensor: int = 1000,
+    batch_correction: bool = False,
 ) -> None:
     """
     Function to get top n genes of each class and its weights.
@@ -181,7 +182,8 @@ def get_top_n_genes(
         early_stop_config: early stopping configurations.
         device: device for pytorch.
         top_n: save top n genes based on shap values.
-        n_background_tensor: number of background samples for shap.
+        n_background_tensor: Number of bakcground tensors to be used for shap analysis
+        batch_correction: Whether the batch correction is applied or not
 
     Returns:
         class wise top n genes, genes * class weights matrix
@@ -230,9 +232,17 @@ def get_top_n_genes(
             print(f"Early stopping at batch: {batch_id}")
             break
 
+    if batch_correction:
+        mean_shap_values = mean_shap_values[:-1, :]
+        abs_mean_shap_values = abs_mean_shap_values[:-1, :]
+
     genes_class_shap_df = DataFrame(mean_shap_values,
                                     index=test_dl.dataset.var_names,
                                     columns=classes)
+
+    abs_genes_class_shap_df = DataFrame(abs_mean_shap_values,
+                                        index=test_dl.dataset.var_names,
+                                        columns=classes)
 
     abs_genes_class_shap_df.T.to_csv(
         path.join(dirpath, "genes_class_weights.csv"))
@@ -259,6 +269,7 @@ def save_top_genes_and_heatmap(
     device: str = 'cpu',
     top_n: int = 20,
     n_background_tensor: int = 1000,
+    batch_correction: bool = False,
 ) -> None:
     """
     Function to save top n genes of each class and save heatmap of genes & their class weight.
@@ -272,7 +283,8 @@ def save_top_genes_and_heatmap(
         early_stop_config: early stopping configurations.
         device: device for pytorch.
         top_n: save top n genes based on shap values.
-        n_background_tensor: number of background samples for shap.
+        n_background_tensor: Number of bakcground tensors to be used for shap analysis
+        batch_correction: Whether the batch correction is applied or not
     """
 
     shap_heatmap_path = path.join(dirpath, "shap_heatmap")
@@ -288,6 +300,7 @@ def save_top_genes_and_heatmap(
         device,
         top_n,
         n_background_tensor,
+        batch_correction,
     )
 
     DataFrame(class_top_genes).to_csv(path.join(shap_heatmap_path,

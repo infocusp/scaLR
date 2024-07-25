@@ -94,11 +94,11 @@ Configs for extracting top-k features
 - **k** {int}:  
 default: `5000`  
 Number of top features to select.  
-- **aggregation_strategy** {str}: `mean`  
+- **aggregation_strategy** {str}: `mean`|`mix`  
 default: `mean`  
 Strategy to use model weights to give a score for each feature.  
 `mean`: take the mean of absolute values of across all classes for each feature.  
-
+`mix`: take the top-100 absolute for each class (to get classwise bio markers) along with `mean` method.  
 
 ## Model
 **type** {str}: `linear`  
@@ -124,6 +124,11 @@ To resume training from a past checkpoint
 **start_checkpoint** {str}: `/path/to/model`  
 default: `null`  
 *Required* if `resume_from_checkpoint` is True. Specifies the model checkpoint path to initiate weights and optimizer and start training  
+
+**batch_correction** {bool}: `True | False`  
+default: `False`  
+To apply batch correction in pipeline
+
 
 ## Training
 **opt** {str}: `adam | sgd`  

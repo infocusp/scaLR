@@ -24,6 +24,7 @@ def evaluate(config, log=True):
     dirpath = config['dirpath']
     exp_name = config['exp_name']
     exp_run = config['exp_run']
+    batch_correction = config['model']['batch_correction']
 
     evaluation_configs = config['evaluation']
 
@@ -52,6 +53,11 @@ def evaluate(config, log=True):
 
         label_mappings = read_json(
             path.join(model_checkpoint, 'label_mappings.json'))
+        if batch_correction:
+            batch_mappings = read_json(
+                path.join(model_checkpoint, 'batch_mappings.json'))
+        else:
+            batch_mappings = None
 
         if model_type == 'linear':
             model = LinearModel(**model_hp).to(device)
@@ -60,7 +66,7 @@ def evaluate(config, log=True):
                                      'model.pt'))['model_state_dict'])
 
             test_dl = simple_dataloader(test_data, target, batch_size,
-                                        label_mappings)
+                                        label_mappings, batch_mappings)
 
         # Evaluation
         id2label = label_mappings[target]['id2label']

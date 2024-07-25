@@ -46,19 +46,31 @@ def extract_features(config, log=True):
     aggregation_strategy = config_fs['top_features_stats'][
         'aggregation_strategy']
 
+    batch_correction = config['model']['batch_correction']
+
     if weight_matrix is None:
         feature_chunksize = config_fs['feature_chunksize']
         model_config = config_fs['model']
 
-        feature_class_weights = feature_chunking(train_data,
-                                                 val_data,
-                                                 target,
-                                                 model_config,
-                                                 feature_chunksize,
-                                                 dirpath=featurespath,
-                                                 device=device)
+        feature_class_weights = feature_chunking(
+            train_data,
+            val_data,
+            test_data,
+            target,
+            model_config,
+            feature_chunksize,
+            dirpath=featurespath,
+            batch_correction=batch_correction,
+            device=device)
     else:
         feature_class_weights = pd.read_csv(weight_matrix, index_col=0)
+        feature_class_weights.to_csv(
+            path.join(featurespath, 'feature_class_weights.csv'))
+
+    extract_top_k_features(feature_class_weights,
+                           k=100,
+                           aggregation_strategy='classwise_promoters',
+                           dirpath=featurespath)
 
     top_features = extract_top_k_features(feature_class_weights,
                                           k,

@@ -38,8 +38,8 @@ feature_selection:
           weight_decay: 0.1
 
     top_features_stats:
-        k: 3000
-        aggregation_strategy: mean
+        k: 5000
+        aggregation_strategy: mix
 
 # MODEL
 model:
