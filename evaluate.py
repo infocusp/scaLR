@@ -99,6 +99,7 @@ def evaluate(config, log=True):
             top_n = shap_config.get('top_n')
             shap_batch_size = shap_config.get('batch_size')
             n_background_tensor = shap_config.get('background_tensor')
+            heatmap_from_n_genes = shap_config.get('heatmap_n_genes')
             early_stop_config = shap_config.get('early_stop')
 
             if train_datapath:
@@ -114,7 +115,7 @@ def evaluate(config, log=True):
 
             save_top_genes_and_heatmap(model, train_data, shap_test_dl,
                                        id2label, resultpath, early_stop_config,
-                                       device, top_n, n_background_tensor)
+                                       device, top_n, n_background_tensor, heatmap_from_n_genes)
 
     if 'deg_config' in evaluation_configs:
         assert config['data'], "Input data unavailable for deg analysis"

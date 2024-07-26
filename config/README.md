@@ -199,6 +199,8 @@ Top N genes/features expract per class/label.
 Test data will be pass to SHAP in this size.
 - **background_tensor** {int}:
 Number of samples from train data used.
+- **heatmap_n_genes** {int}:
+Number of genes used from plot heatmap.
 - **early_stop** {dict}:
     - **patience** {int}:
       If top N genes common upto this number of batch, then stop SHAP processing.

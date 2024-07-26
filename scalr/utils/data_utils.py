@@ -2,6 +2,7 @@ from typing import Union
 
 from anndata import AnnData
 from anndata.experimental import AnnCollection
+from scipy import sparse
 import numpy as np
 import torch
 
@@ -39,7 +40,7 @@ def get_random_samples(
     random_indices = np.random.randint(0, data.shape[0], n_random_samples)
     random_background_data = data[random_indices].X
 
-    if isinstance(data, AnnCollection):
+    if isinstance(random_background_data, sparse.csr_matrix):
         random_background_data = random_background_data.A
 
     random_background_data = torch.as_tensor(random_background_data,

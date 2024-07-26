@@ -269,6 +269,7 @@ def save_top_genes_and_heatmap(
     device: str = 'cpu',
     top_n: int = 20,
     n_background_tensor: int = 1000,
+    heatmap_from_n_genes: int = 20,
     batch_correction: bool = False,
 ) -> None:
     """
@@ -284,11 +285,13 @@ def save_top_genes_and_heatmap(
         device: device for pytorch.
         top_n: save top n genes based on shap values.
         n_background_tensor: Number of bakcground tensors to be used for shap analysis
+        heatmap_from_n_genes: Number of top N genes which used for plot heatmap.
         batch_correction: Whether the batch correction is applied or not
     """
 
     shap_heatmap_path = path.join(dirpath, "shap_heatmap")
-    os.makedirs(shap_heatmap_path, exist_ok=True)
+    heatmap_path = path.join(shap_heatmap_path, "heatmap")
+    os.makedirs(heatmap_path, exist_ok=True)
 
     class_top_genes, genes_class_shap_df = get_top_n_genes(
         model,
@@ -307,14 +310,13 @@ def save_top_genes_and_heatmap(
                                                 "shap_analysis.csv"),
                                       index=False)
 
-    common_genes = set()
+    # Plot heatmap for individual class/label's top genes w.r.t other class/label.
     for class_name, genes in class_top_genes.items():
-        common_genes.update(genes)
-    plot_heatmap(genes_class_shap_df.loc[list(common_genes)],
-                 shap_heatmap_path)
+        plot_heatmap(genes_class_shap_df.loc[genes[:heatmap_from_n_genes]],
+                     heatmap_path, f"{class_name}.png")
 
 
-def plot_heatmap(class_genes_weights: DataFrame, dirpath: str):
+def plot_heatmap(class_genes_weights: DataFrame, dirpath: str, filename: str):
     """
     Generate a heatmap for top n genes across all classes.
 
@@ -322,6 +324,7 @@ def plot_heatmap(class_genes_weights: DataFrame, dirpath: str):
         class_genes_weights: genes * classes matrix which contains
                              shap_value/weights of each gene to class.
         dirpath: path to store the heatmap image.
+        filename: heatmap image name.
     """
 
     sns.set(rc={'figure.figsize': (9, 12)})
@@ -329,7 +332,8 @@ def plot_heatmap(class_genes_weights: DataFrame, dirpath: str):
 
     plt.tight_layout()
 
-    plt.savefig(path.join(dirpath, "heatmap.png"))
+    plt.savefig(path.join(dirpath, filename))
+    plt.clf()
 
 
 def plot_roc_auc_curve(test_labels: list[int],
