@@ -35,7 +35,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
             model_config: dict containing type of model, and it related config
             feature_chunksize: number of features to take in one training instance
             dirpath: directory to store all model_weights and top_features
-            batch_correction: Wether to apply batch correction or not 
+            batch_correction: Whether to apply batch correction or not
             device: [cpu/cuda] device to perform training on.
 
         Return:
