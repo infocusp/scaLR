@@ -20,17 +20,21 @@ def normalize_features_data(config):
     params = data_config['normalize_fn']['params']
 
     if fn_name == 'standard_scale':
-        standard_scale(train_data, data_config, params)
+        normalization_fn = standard_scale(train_data, data_config, params)
     elif fn_name == 'normalize_samples':
-        normalize_samples(data_config,
-                          params)  # implement here and remove from split_data
+        normalization_fn = normalize_samples(data_config, params)
     else:
         raise NotImplementedError(
             f'Specified normalization technique - {fn_name} is not implemented in pipeline!'
         )
 
+    # Normalize the data & store it back.
+    _scale_and_store_data(data_config['train_datapath'], normalization_fn)
+    _scale_and_store_data(data_config['val_datapath'], normalization_fn)
+    _scale_and_store_data(data_config['test_datapath'], normalization_fn)
 
-def _scale_and_store_data(datapath, normalization_fn):
+
+def _scale_and_store_data(datapath: str, normalization_fn: dict):
     """This function transforms the data using said normalization & stores back the scaled data.
     
     Args:
@@ -54,10 +58,6 @@ def _scale_and_store_data(datapath, normalization_fn):
             elif normalization_fn['name'] == 'normalize_samples':
                 data.X *= (normalization_fn['params']['scaling_factor'] /
                            (data.X.sum(axis=1).reshape(len(data), 1)))
-            else:
-                print(
-                    '`{normalization_fn["name"]}` is not supported in the pipeline!'
-                )
 
             # Removing the existing raw anndata file.
             remove(path.join(root, file))
@@ -66,15 +66,15 @@ def _scale_and_store_data(datapath, normalization_fn):
             write_data(data, path.join(root, file))
 
 
-def normalize_samples(data_config, params):
+def normalize_samples(data_config, params: dict):
     """Normalize sample-wise in data
 
     Args:
         data: numpy array object to normalize
         scaling_factor: factor by which to scale normalized data
 
-    Returns
-        Nothing, writes sample-normalized data.
+    Returns:
+        Normalization function dict.
     """
 
     print('Performing cell-wise normnalisation of data...')
@@ -84,23 +84,22 @@ def normalize_samples(data_config, params):
             'scaling_factor': params['scaling_factor']
         }
     }
-    _scale_and_store_data(data_config['train_datapath'], normalization_fn)
-    _scale_and_store_data(data_config['val_datapath'], normalization_fn)
-    _scale_and_store_data(data_config['test_datapath'], normalization_fn)
+
+    return normalization_fn
 
 
 def standard_scale(train_data, data_config, params):
     """This function performs standard scaler on the data.
         Scaler object is fit on train data and then transformed on train, val & test data.
 
-        Args:
-            train_data: Train data AnnCollection
-            data_config: config having data details
-            params: normalization function parameters
+    Args:
+        train_data: Train data AnnCollection
+        data_config: config having data details
+        params: normalization function parameters
 
-        Returns
-            Nothing, writes standard scaled data.
-        """
+    Returns:
+        Normalization function dict.
+    """
 
     print('Performing standard scaler on data...')
 
@@ -148,6 +147,5 @@ def standard_scale(train_data, data_config, params):
             'std': train_std
         }
     }
-    _scale_and_store_data(data_config['train_datapath'], normalization_fn)
-    _scale_and_store_data(data_config['val_datapath'], normalization_fn)
-    _scale_and_store_data(data_config['test_datapath'], normalization_fn)
+
+    return normalization_fn
