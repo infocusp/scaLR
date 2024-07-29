@@ -187,7 +187,27 @@ default: `['accuracy', 'report']`
 A list of evaluation metrics on the trained model.  
 `accuracy`: Accuracy score for predictions on test set  
 `report`: Detailed classification report showing how the model performed on each class, with recall, precision, f1-score metrics.  
-`roc_auc`: store ROC-AUC plot of each class    
+`roc_auc`: store ROC-AUC plot of each class
+`shap`: SHAP(importance feature extraction method) run on the final model.
+
+**shap_config** {dict}:
+*Required* when shap is mentioned in metrics, otherwise default will run.
+
+- **top_n** {int}:
+Top N genes/features to extract per class/label.
+- **batch_size** {int}:
+Test data will be pass to SHAP of this size.
+- **background_tensor** {int}:
+Number of samples from train data used.
+- **heatmap_n_genes** {int}:
+Number of genes used to plot heatmap.
+- **early_stop** {dict}:
+    - **patience** {int}:
+      If top N genes are common for #patience number of batches, then stop further SHAP processing.
+    - **top_genes** {int}:
+      Number of top genes use to compare with earlier batches top genes.
+    - **threshold** {int}:
+      How many genes should be overlap between current and earlier batches top genes.
 
 **deg_config** {dict}:  
 *Required* only if `full_datapath` is provided.  

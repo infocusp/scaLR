@@ -52,3 +52,15 @@ train_config = {
 }
 
 evaluation_config = {'batch_size': 15000, 'model_checkpoint': None}
+
+shap_config = {
+    "top_n": 50,
+    "batch_size": 1000,
+    "background_tensor": 200,
+    "heatmap_n_genes": 20,
+    "early_stop": {
+        "patience": 5,
+        "top_genes": 100,
+        "threshold": 90,
+    }
+}

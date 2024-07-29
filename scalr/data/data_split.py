@@ -165,10 +165,9 @@ def generate_train_val_test_split(datapath: str,
         stratify: optional parameter to stratify the split upon parameter.
         dirpath: dirpath to store generated split in json format
         sample_chunksize: number of samples to store in one chunk, after splitting the data.
-    
+
     Returns:
         dict with 'train', 'test' and 'val' indices list.
-
     """
 
     data_split = _generate_train_val_test_split_indices(
