@@ -313,7 +313,7 @@ def save_top_genes_and_heatmap(
     # Plot heatmap for individual class/label's top genes w.r.t other class/label.
     for class_name, genes in class_top_genes.items():
         plot_heatmap(genes_class_shap_df.loc[genes[:heatmap_from_n_genes]],
-                     heatmap_path, f"{class_name}.png")
+                     heatmap_path, f"{class_name}.svg")
 
 
 def plot_heatmap(class_genes_weights: DataFrame, dirpath: str, filename: str):
