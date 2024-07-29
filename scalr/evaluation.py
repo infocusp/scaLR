@@ -645,7 +645,7 @@ def plot_gene_recall(ranked_genes_df: pd.DataFrame,
     for i, category in enumerate(
             set(ranked_genes_df.columns).intersection(ref_genes_df.columns)):
         ranked_genes = ranked_genes_df[category].values
-        ref_genes = ref_genes_df[category].values
+        ref_genes = ref_genes_df[category].dropna().values
         k = top_K
 
         assert k >= len(

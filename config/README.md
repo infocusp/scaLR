@@ -41,9 +41,26 @@ default: `null`
 Column in metadata which has multiple groups, based upon which split is stratified. This ensures that one group can belong only to one split
 
 
-**normalize_samples** {bool}: `True | False`  
-default: `False`  
+**normalize_fn** {dict}:
+- **name** {str}: `standard_scale`
+- **params** {dict}:
+  - **with_mean** {bool}: `True | False`
+  - **with_std** {bool}: `True | False`
+
+To perform standard scaler normalization
+
+------------------------------OR------------------------------
+
+- **name** {str}: `normalize_samples`
+- **params** {dict}:
+  - **scaling_factor** {float}: 1.0
+
 To perform sample-wise normalization of expression values
+
+**NOTE**:
+- You can apply any one of the normalization techniques mentioned above. Adding both in config will take into
+account last mentioned normalization as final.
+- If you dont want to apply any normalization, you can simply comment out `normalize_fn` config section. 
 
 **full_datapath** {str}: `/path/to/data`  
 Full data path, will be split into train, test, and val sets.  
