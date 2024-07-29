@@ -93,7 +93,7 @@ A brief overview of the library Structure and functionalities
     - `generate_and_save_classification_report`: function to generate a classwise report containing precision, recall, f1-score metrics and to store the table
     - `perform_differential_expression_analysis`: function to generate deg analysis report, and a volcano plot of pvalues vs log2_fold_change in gene expression
     - `generate_gene_recall_curve`: function to generate gene recall curves as per user defined inputs for reference and ranked genes
-    - `get_top_n_genes`: funtion will use SHAP to extract top N genes/features per class/label.
+    - `get_top_n_genes`: This funtion will use SHAP to extract top N genes/features per class/label.
     - `plot_heatmap`: Generate heatmap of top genes in each class/label.
     - `save_top_genes_and_heatmap`: Save top N genes and generate heatmap of top genes per class/label.
     - `plot_roc_auc_curve`: Use model probabity and generate roc_auc curve.

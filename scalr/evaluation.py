@@ -124,7 +124,7 @@ def is_early_stop(
     classes: list,
 ) -> Tuple[bool, dict]:
     """Function to check whether previous and current batches' common genes are
-        are greater greater than or equal to the threshold and return top genes
+        are greater than or equal to the threshold and return top genes
         batch wise.
 
     Args:

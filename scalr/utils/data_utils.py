@@ -30,11 +30,11 @@ def get_random_samples(
     """Returns random N samples from given data.
 
     Args:
-        data: AnnData or AnnCollection object data.
-        n_random_samples: number of random samples extract from data.
+        data: AnnData or AnnCollection object.
+        n_random_samples: number of random samples to extract from the data.
 
     Returns:
-        random samples tensor.
+        Chosen random samples tensor.
     """
 
     random_indices = np.random.randint(0, data.shape[0], n_random_samples)

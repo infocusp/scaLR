@@ -88,7 +88,7 @@ def extract_features(config, log=True):
         valpath = path.join(featurespath, 'val')
         testpath = path.join(featurespath, 'test')
 
-        if data_config.get('sample_chunksize') is None:
+        if not data_config.get('sample_chunksize'):
             train_data[:, top_features_indices].write(path.join(
                 featurespath, 'train.h5ad'),
                                                       compression='gzip')
@@ -134,7 +134,7 @@ def extract_features(config, log=True):
         config['data']['val_datapath'] = valpath
         config['data']['test_datapath'] = testpath
 
-        if data_config.get('sample_chunksize') is None:
+        if not data_config.get('sample_chunksize'):
             config['data']['train_datapath'] += '.h5ad'
             config['data']['val_datapath'] += '.h5ad'
             config['data']['test_datapath'] += '.h5ad'
