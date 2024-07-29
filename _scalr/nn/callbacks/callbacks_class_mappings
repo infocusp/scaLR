@@ -1,0 +1,5 @@
+from _scalr.model.callbacks import TensorBoardLogging
+
+CALLBACKS_CLASS_MAPPINGS = {
+    'tensorboard_logging': TensorBoardLogging
+}
