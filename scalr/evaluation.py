@@ -116,7 +116,7 @@ def conf_matrix(test_labels: list[int],
     return confusion_matrix(test_labels, pred_labels)
 
 
-def is_early_stop(
+def is_shap_early_stop(
     batch_id: int,
     genes_class_shap_df: pd.DataFrame,
     prev_top_genes_batch_wise: dict,
@@ -222,7 +222,7 @@ def get_top_n_genes(
         abs_prev_batches_mean_shap_values = abs_mean_shap_values
         prev_batches_mean_shap_values = mean_shap_values
 
-        early_stop, abs_prev_top_genes_batch_wise = is_early_stop(
+        early_stop, abs_prev_top_genes_batch_wise = is_shap_early_stop(
             batch_id, abs_genes_class_shap_df, abs_prev_top_genes_batch_wise,
             early_stop_config, classes)
 
