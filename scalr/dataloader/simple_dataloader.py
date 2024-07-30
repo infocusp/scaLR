@@ -11,8 +11,8 @@ def simple_dataloader(adata: Union[AnnData, AnnCollection],
                       target: str,
                       batch_size: int = 1,
                       label_mappings: dict = None,
-                      shuffle: bool = False,
-                      batch_mappings: dict = None):
+                      batch_mappings: dict = None,
+                      shuffle: bool = False):
     """
     A simple data loader to prepare inputs to be feed into linear model and corresponding labels
 

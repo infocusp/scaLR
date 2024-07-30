@@ -65,8 +65,11 @@ def evaluate(config, log=True):
                 torch.load(path.join(model_checkpoint,
                                      'model.pt'))['model_state_dict'])
 
-            test_dl = simple_dataloader(test_data, target, batch_size,
-                                        label_mappings, batch_mappings)
+            test_dl = simple_dataloader(adata=test_data,
+                                        target=target,
+                                        batch_size=batch_size,
+                                        label_mappings=label_mappings,
+                                        batch_mappings=batch_mappings)
 
         # Evaluation
         id2label = label_mappings[target]['id2label']
@@ -107,15 +110,16 @@ def evaluate(config, log=True):
             else:
                 raise ValueError("Train data path required for SHAP analysis.")
 
-            shap_test_dl = simple_dataloader(test_data,
-                                             target,
-                                             shap_batch_size,
-                                             label_mappings,
+            shap_test_dl = simple_dataloader(adata=test_data,
+                                             target=target,
+                                             batch_size=shap_batch_size,
+                                             label_mappings=label_mappings,
                                              shuffle=True)
 
             save_top_genes_and_heatmap(model, train_data, shap_test_dl,
                                        id2label, resultpath, early_stop_config,
-                                       device, top_n, n_background_tensor, heatmap_from_n_genes)
+                                       device, top_n, n_background_tensor,
+                                       heatmap_from_n_genes)
 
     if 'deg_config' in evaluation_configs:
         assert config['data'], "Input data unavailable for deg analysis"
