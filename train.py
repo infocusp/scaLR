@@ -106,10 +106,16 @@ def train(config, log=True):
     if model_type == 'linear':
         model = LinearModel(**model_hp)
 
-        train_dl = simple_dataloader(train_data, target, batch_size,
-                                     label_mappings, batch_mappings)
-        val_dl = simple_dataloader(val_data, target, batch_size,
-                                   label_mappings, batch_mappings)
+        train_dl = simple_dataloader(adata=train_data,
+                                     target=target,
+                                     batch_size=batch_size,
+                                     label_mappings=label_mappings,
+                                     batch_mappings=batch_mappings)
+        val_dl = simple_dataloader(adata=val_data,
+                                   target=target,
+                                   batch_size=batch_size,
+                                   label_mappings=label_mappings,
+                                   batch_mappings=batch_mappings)
     else:
         raise NotImplementedError('Only `linear` available as options!')
 

@@ -83,10 +83,16 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
         train_features_subset = train_data[:, start:start + feature_chunksize]
         val_features_subset = val_data[:, start:start + feature_chunksize]
 
-        train_dl = simple_dataloader(train_features_subset, target, batch_size,
-                                     label_mappings, batch_mappings)
-        val_dl = simple_dataloader(val_features_subset, target, batch_size,
-                                   label_mappings, batch_mappings)
+        train_dl = simple_dataloader(adata=train_features_subset,
+                                     target=target,
+                                     batch_size=batch_size,
+                                     label_mappings=label_mappings,
+                                     batch_mappings=batch_mappings)
+        val_dl = simple_dataloader(adata=val_features_subset,
+                                   target=target,
+                                   batch_size=batch_size,
+                                   label_mappings=label_mappings,
+                                   batch_mappings=batch_mappings)
 
         in_features = len(train_features_subset.var_names)
         # Incrementing a feature count if batch correction is set to true.
