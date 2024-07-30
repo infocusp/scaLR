@@ -1,17 +1,11 @@
-from abc import ABC, abstractmethod
+from anndata.experimental import AnnLoader
 
-from anndata.experimental import AnnLoader, AnnCollection
-from anndata import AnnData
-import torch
-from torch import nn
-from torch import Tensor
+class DataLoaderBase:
 
-from _scalr.model.datalaoder import DATALOADER_CLASS_MAPPINGS
-
-class DataLoaderBase(ABC):
-
-    @abstractmethod
     def collate_fn(self, batch, **kwargs):
+        """Given an input anndata of batch_size,
+        the collate function creates inputs and outputs
+        """
         pass
     
     # This method returns a torch DataLoader object
@@ -22,8 +16,7 @@ class DataLoaderBase(ABC):
                          batch, **kwargs))
         
 
-def dataloader_builder(name, **kwargs):
+def build_dataloader(name, adata, batch_size, **kwargs):
     
-    dataloader = DATALOADER_CLASS_MAPPINGS[name](**kwargs)
-    
+    dataloader = getattr(_scalr.nn.dataloader, name)(adata, batch_size, **kwargs)
     return dataloader

@@ -1,5 +1,0 @@
-from _sclar.model.dataloader import SimpleDataLoder
-
-DATALOADER_CLASS_MAPPINGS = {
-    'simple': SimpleDataLoder
-}

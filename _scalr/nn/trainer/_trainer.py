@@ -8,8 +8,8 @@ from torch.nn import Module
 from torch.utils.data import DataLoader
 from torch.optim import Optimizer
 
-from .model.callbacks import CallbackExecutor
-from .model import LinearModel
+from _scalr.nn.callbacks import CallbackExecutor
+from _scalr.nn.model import LinearModel
 
 
 class TrainerBase:
@@ -23,16 +23,7 @@ class TrainerBase:
                  loss_fn,
                  callback):
         """
-        Args:
-            model: model to train
-            opt_class: optimizer class to train model parameters
-            lr: learning rate for optimizer
-            weight_decay: L2 penalty for weights
-            loss_fn: loss function for training
-            callback_params: callback params : dict {'model_checkpoint_interval', 'early_stop_patience', 'early_stop_min_delta'}
-            device: device for compuations ('cpu'/'cuda')
-            dirpath: dirpath for storing logs, checkpoints, best_model
-            model_checkpoint_path: path to resume training from given checkpoint
+        get the training objects
         """
         pass
     
@@ -60,3 +51,7 @@ class TrainerBase:
         """
         
         return total_loss, accuracy
+
+def build_trainer(name, **kwargs):
+    
+    return getattr(_scalr.nn.trainer, name)(**kwargs)

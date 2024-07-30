@@ -9,7 +9,15 @@ class DownstreamAnalysis:
         
         pass
     
-    def analysis_executor():
+    def get_predictions(data):
+        """Returns model predictions on given data"""
+        return
+    
+    def get_accuracy(preds, test):
+        """Returns accuracy of predictions"""
+        return
+    
+    def generate_anlaysis():
         for analysis in analyses:
             # initialize analysis object
             # get and store results

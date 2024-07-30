@@ -1,5 +1,6 @@
-class LinearModelTrainer(Trainer):
+class LinearModelTrainer(TrainerBase):
     def __init__():
+        super().__init__()
         pass
     
     def train_one_epoch(self, dl: DataLoader) -> (float, float):

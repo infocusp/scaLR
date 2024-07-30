@@ -1,4 +1,10 @@
-class Scoring:
+class ScoringBase:
     
     def generate_scores():
-        return weights: (num_classes X num_features)
+        """Executor function, to return score of each feature for each class
+        score: (num_classes X num_features)
+        """
+        return
+    
+def build_scorer():
+    pass

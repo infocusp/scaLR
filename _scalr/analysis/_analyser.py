@@ -1,15 +1,15 @@
-class Analysis:
+class AnalysisBase:
     
     def __init__(self):
         pass
     
-    def analyse_and_store_results(self, dirpath):
+    def generate_analysis(self, model, data, **kwargs):
         pass
     
     
 def build_analyser(analysis_config):
     name = analysis_config['name']
-    params = analysis_config['params']
+    params = analysis_config.get('params', None)
     
     analyser = getattr(_scalr.analysis,name)(**params)
     return analyser

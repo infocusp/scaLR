@@ -1,5 +1,10 @@
-class Selection:
+class SelectionBase:
     
     def select_features(weights: DataFrame, k: int):
-        pass 
+        """Given scores of each feature for each class
+        use an algorithm to return top features"""
+        return
+    
+def build(selector):
+    pass
     

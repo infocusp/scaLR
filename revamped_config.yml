@@ -26,22 +26,24 @@ data:
         - name: StandardNorm
           params: 
                 **args
-            
 
     target: Cell_Type    
 
 # FEATURE_SELECTION_CONFIG
 feature_selection:
 
-    # weight_matrix: '/path/to/matrix'
+    # scores: '/path/to/matrix'
     scoring_method: 
-        name: feature_chunk
+        name: FeatureChunk
         feature_chunksize: 3000
 
         model:
-            name: 'linear'
+            name: LinearModel
 
         model_train_config:
+            trainer: LinearModelTrainer
+            dataloader: SimpleDataLoader
+            loss_fn: CrossEntropyLoss
             epochs: 1
             batch_size: 15000
             lr: 1.0e-3
@@ -52,55 +54,48 @@ feature_selection:
         aggregation_strategy: mix
 
 # TRAINING
-training:
+final_training:
 
     model:
-        name: 'linear'
+        name: LinearModel
         params:
             layers: [3000, 6]
             dropout: 0
             weights_init_zero: False
 
-    start_checkpoint: null
-    resume_from_checkpoint: False
+    model_train_config:
+        resume_from_checkpoint: null
 
-    opt: 'Adam'
-    loss: 'CrossEntropyLoss'
-    batch_size: 15000
-    lr: 1.0e-3
-    weight_decay: 0
-    epochs: 1
+        trainer: LinearModelTrainer
+        dataloader: SimpleDataLoader
+        optimizer: Adam
+        loss_fn: CrossEntropyLoss
+        batch_size: 15000
+        lr: 1.0e-3
+        weight_decay: 0
+        epochs: 1
 
-    callbacks:
-        - name: TensorboardLogging
-        - name: EarlyStopping
-          params:
-            patience: 3
-            min_delta: 1.0e-4
-        - name: ModelCheckpointing
-          params:
-            interval: 5
+        callbacks:
+            - name: TensorboardLogging
+            - name: EarlyStopping
+            params:
+                patience: 3
+                min_delta: 1.0e-4
+            - name: ModelCheckpointing
+            params:
+                interval: 5
 
 # ANALYSIS
-analysis:
+downstream_analysis:
+
     model_checkpoint: '/path/to/model'
+    dataloader: SimpleDataLoader
     batch_size: 15000
     
     analysis_methods:
-        - name: deg
+
+        - name: DEG
           params: **args
 
-        - name: gene_recall
+        - name: GeneRecall
           params: **args
-    # gene_recall:
-    #     ## `feature_class_weights_path` & `ranked_genes` are mutually exclusive. Or if you comment out both,
-    #     ## then pipeline generated feature_class_weights matrix is used.
-    #     # feature_class_weights_path: '/path/to/feature_class_weights matrix csv'
-    #     # ranked_genes:
-    #     #     per_category: '/path/to/ranked_genes_per_category'
-    #     #     aggregated: '/path/to/ranked_genes_aggr_all_categories csv'
-    #     reference_genes:
-    #         per_category: '/path/to/ref_genes_per_category csv'
-    #         aggregated: '/path/to/ref_genes_aggr_all_categories csv'
-    #     top_K: 5000
-    #     plots_per_row: 5   

@@ -1,4 +1,4 @@
-class FeatureChunking(Scoring):
+class FeatureChunking(ScoringBase):
     
     def __init__(self, chunk_model_name, chunk_model_train_config, data_config):
         

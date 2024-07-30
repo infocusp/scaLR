@@ -2,22 +2,31 @@ class DataIngestion:
     
     def __init__(self, data_config):
         # Load params here
-        # Load paths
+        # Load data from paths
         
         # List of preprocssings to do
         # [std_norm, sample_norm]
-        # To be read from config
         '''
         data_config:
 
+            sample_chunksize: int
+            target: str
+            
+            data_splits:
+
+                full_datapath: path
+                tvt_split: **args
+
+                train_datapath:
+                val_datapath:
+                test_datapath:
+
             preprocess:
                 - name: SampleNorm
-                  params:
-                        **args
+                  params: **args
 
                 - name: StandardNorm
-                  params: 
-                        **arg
+                  params: **args
         
         '''
         self.preprocess = []
@@ -31,13 +40,15 @@ class DataIngestion:
     # Expects data_config to have indivudal preprocess configs
     def preprocess_data(self):
         for preprocess_type in self.preprocess:
-            # preprocess_data
+            # build preprocess class using the builder
+            # execute the store_params on train data
+            for chunked_data in full_data:
+                # execute preprocessing on numpy array
+                pass
             pass
         pass
     
-    # useful to append target or batch mappings from `str->int`
-    # append directly to the obs of data
-    # To decide in depth later
+    # create int mappings to str labels/targets
     def generate_mappings(self, column_name):
         # create a mapping dict
         pass
