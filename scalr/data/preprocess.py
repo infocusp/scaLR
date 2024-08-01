@@ -43,6 +43,7 @@ def _scale_and_store_data(config, datapath: str, normalization_fn: dict):
     """This function transforms the data using said normalization & stores back the scaled data.
     
     Args:
+        config: config for extracting datapath params.
         datapath: Path to store scaled data
         normalization_fn: Data dict that stores normalization and it's parameters.
     """
