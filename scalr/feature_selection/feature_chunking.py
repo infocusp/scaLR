@@ -59,6 +59,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
     # Batch correction before feature selection process.
     batch_mappings = {}
     if batch_correction:
+        print('Batch Correction method will be applied during model training time...')
         batches = sorted(
             list(
                 set(

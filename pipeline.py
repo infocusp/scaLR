@@ -55,7 +55,7 @@ def main():
 
         # Normalize data if applicable
         if ('normalize_fn' in config['data']):
-            preprocess.normalize_features_data(config)
+            config = preprocess.normalize_features_data(config)
 
     if 'feature_selection' in config:
         print('\nInitializing feature selection...')

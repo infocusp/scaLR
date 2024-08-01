@@ -29,18 +29,44 @@ def normalize_features_data(config):
         )
 
     # Normalize the data & store it back.
-    _scale_and_store_data(data_config['train_datapath'], normalization_fn)
-    _scale_and_store_data(data_config['val_datapath'], normalization_fn)
-    _scale_and_store_data(data_config['test_datapath'], normalization_fn)
+    _scale_and_store_data(config, data_config['train_datapath'],
+                          normalization_fn)
+    _scale_and_store_data(config, data_config['val_datapath'],
+                          normalization_fn)
+    _scale_and_store_data(config, data_config['test_datapath'],
+                          normalization_fn)
+
+    return config
 
 
-def _scale_and_store_data(datapath: str, normalization_fn: dict):
+def _scale_and_store_data(config, datapath: str, normalization_fn: dict):
     """This function transforms the data using said normalization & stores back the scaled data.
     
     Args:
         datapath: Path to store scaled data
         normalization_fn: Data dict that stores normalization and it's parameters.
     """
+
+    dirpath = config['dirpath']
+    exp_name = config['exp_name']
+    exp_run = config['exp_run']
+    remove_existing_data = False
+    data_type = datapath.split('/')[-1]
+    expected_datapath = path.join(dirpath, f'{exp_name}_{exp_run}', 'data')
+
+    # Making sure the scaled data is written in the expreiment directory.
+    if path.join(expected_datapath, data_type) != datapath:
+        store_path = path.join(expected_datapath, data_type)
+        print(
+            f'\nThe normalized {data_type} data will be written to path: `{store_path}`...'
+        )
+
+        makedirs(store_path)
+        # Update split's data path in config.
+        config['data'][f'{data_type}_datapath'] = store_path
+    else:
+        remove_existing_data = True
+        store_path = datapath
 
     # Walk through each anndata file and transform as per parameters.
     for root, _, files in walk(datapath):
@@ -60,10 +86,12 @@ def _scale_and_store_data(datapath: str, normalization_fn: dict):
                            (data.X.sum(axis=1).reshape(len(data), 1)))
 
             # Removing the existing raw anndata file.
-            remove(path.join(root, file))
+            if remove_existing_data:
+                assert store_path == root, 'tvt_datapath doesn"t match with expected tvt_datapath'
+                remove(path.join(root, file))
 
             # Writing the new scaled data file.
-            write_data(data, path.join(root, file))
+            write_data(data, path.join(store_path, file))
 
 
 def normalize_samples(data_config, params: dict):
