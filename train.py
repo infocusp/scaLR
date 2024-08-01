@@ -73,6 +73,7 @@ def train(config, log=True):
     # Prepare batch mappings for batch correction if applicable.
     batch_mappings = {}
     if batch_correction:
+        print('Batch correction will be applied during model training time...')
         batches = sorted(
             list(
                 set(
