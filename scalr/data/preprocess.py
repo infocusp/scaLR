@@ -62,7 +62,7 @@ def _scale_and_store_data(config, datapath: str, normalization_fn: dict):
             f'\nThe normalized {data_type} data will be written to path: `{store_path}`...'
         )
 
-        makedirs(store_path)
+        makedirs(store_path, exist_ok=True)
         # Update split's data path in config.
         config['data'][f'{data_type}_datapath'] = store_path
     else:
