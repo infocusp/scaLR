@@ -114,12 +114,14 @@ def evaluate(config, log=True):
                                              target=target,
                                              batch_size=shap_batch_size,
                                              label_mappings=label_mappings,
+                                             batch_mappings=batch_mappings,
                                              shuffle=True)
 
             save_top_genes_and_heatmap(model, train_data, shap_test_dl,
                                        id2label, resultpath, early_stop_config,
                                        device, top_n, n_background_tensor,
-                                       heatmap_from_n_genes)
+                                       heatmap_from_n_genes,
+                                       batch_mappings=batch_mappings)
 
     if 'deg_config' in evaluation_configs:
         assert config['data'], "Input data unavailable for deg analysis"

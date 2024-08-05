@@ -25,6 +25,7 @@ def get_random_samples(
     data: Union[AnnData, AnnCollection],
     n_random_samples: int,
     device: str,
+    batch_mappings: dict = None,
 ) -> torch.tensor:
     """Returns random N samples from given data.
 
@@ -41,6 +42,16 @@ def get_random_samples(
 
     if not isinstance(random_background_data, np.ndarray):
         random_background_data = random_background_data.A
+
+    # Handle batch correction when selecing random samples.
+    ## Add batch field from obs to features data.
+    if batch_mappings:
+        random_background_data = torch.cat(
+            (torch.as_tensor(random_background_data),
+            torch.as_tensor(data[random_indices].obs['batch'].astype(
+                'category').cat.rename_categories(batch_mappings).astype(
+                    'int64').values).reshape(-1, 1)),
+            dim=1)
 
     random_background_data = torch.as_tensor(random_background_data,
                                              dtype=torch.float32).to(device)

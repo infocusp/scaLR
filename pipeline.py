@@ -47,7 +47,15 @@ def main():
 
     dirpath = os.path.join(dirpath, f'{exp_name}_{exp_run}')
     if os.path.exists(dirpath):
-        raise FileExistsError(f"{dirpath} directory already exists.")
+        user_input = input(
+            f"\nThe directory '{dirpath}' exists. Do you still want to proceed? (y/n): "
+        ).strip().lower()
+        if user_input == 'n':
+            raise FileExistsError(f"{dirpath} directory already exists.")
+        elif user_input == 'y':
+            pass
+        else:
+            print("Invalid input. Please enter 'y' for yes or 'n' for no.")
 
     if config.get('data') and ('target' in config['data']):
         print('\nInitializing data ingestion...')
