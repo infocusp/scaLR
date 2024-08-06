@@ -3,7 +3,7 @@ from os import path
 
 import torch
 
-from _scalr.nn._callbacks import CallbackBase
+from _scalr.nn.callbacks import CallbackBase
 
 
 class EarlyStopping(CallbackBase):
