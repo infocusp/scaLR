@@ -9,7 +9,5 @@ class CustomLossBase(nn.Module):
         pass
 
 def build_loss(name, **kwargs):
-    try:
-        return getattr(torch.nn, name)(**kwargs)
-    except:
-        return getattr(_scalr.nn.loss, name)(**kwargs)
+    # Logging
+    return getattr([torch.nn, _scalr.nn.loss], name)(**kwargs)

@@ -17,7 +17,7 @@ class ModelTrainer:
         
         self.opt = self.build_optimizer
         self.loss_fn = build_loss
-        self.model = build_model
+        self.model = build_model(model_config)
         self.callback_executor = CallbackExecutor
         self.trainer = build_trainer(trainer_name, model, opt, loss, callbacks)
         

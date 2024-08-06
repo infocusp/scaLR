@@ -7,7 +7,7 @@ from torch.utils.tensorboard import SummaryWriter
 from _scalr.model.callbacks import Callback
 
 
-class TensorboardLogger(Callback):
+class TensorboardLogger(CallbackBase):
     """
     Tensorboard logging of training process.
 

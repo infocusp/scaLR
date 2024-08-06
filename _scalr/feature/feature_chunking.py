@@ -38,8 +38,8 @@ class FeatureChunking(ScoringBase):
     def generate_scores():
         for feature_chunk in full_data:
             trained_model = trained_model(feature_chunk)
-            feature_weights = extract_classwise_feature_weights(trained_model)
-            weights.append(feature_weights)
+            scores = scorer(trained_model)
+            scores.append(feature_weights)
             
         return weights
         

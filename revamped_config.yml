@@ -4,19 +4,34 @@ dirpath: '.'
 exp_name: 'scalr_test'
 exp_run: 0
 
+
 # DATA_CONFIG
 data:
     sample_chunksize: 10000
 
-    data_splits:
-        full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
-        split_data:
-            split_ratio: [7, 1, 2.5]
-            stratify: 'donor_id'
+    train_val_test:
+        splitting:
+            full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
+            splitter_config:
+                name: StratifiedSplitter
+                params:
+                    split_ratio: [7, 1, 2.5]
+                    stratify: 'donor_id'
 
-        # train_datapath: '/path/to/train_data'
-        # val_datapath: '/path/to/val_data'
-        # test_datapath: '/path/to/test_data'
+        split_datapaths:
+            train_datapath: '/path/to/train_data'
+            val_datapath: '/path/to/val_data'
+            test_datapath: '/path/to/test_data'
+
+        final_datapaths:
+            train_datapath: '/path/to/train_data'
+            val_datapath: '/path/to/val_data'
+            test_datapath: '/path/to/test_data'
+
+        feature_subset_datapaths:
+            train_datapath: '/path/to/train_data'
+            val_datapath: '/path/to/val_data'
+            test_datapath: '/path/to/test_data'
 
     preprocess:
         - name: SampleNorm
@@ -33,22 +48,27 @@ data:
 feature_selection:
 
     # scores: '/path/to/matrix'
+    # feature_subset: 3000
+
+    model:
+        name: LinearModel
+        params:
+            hidden_layers: []
+
+    model_train_config:
+        trainer: LinearModelTrainer
+        dataloader: MetaDataLoader
+        loss_fn: CrossEntropyLoss
+        opt: Adam
+        epochs: 1
+        batch_size: 15000
+        lr: 1.0e-3
+        weight_decay: 0.1
+
     scoring_method: 
-        name: FeatureChunk
-        feature_chunksize: 3000
-
-        model:
-            name: LinearModel
-
-        model_train_config:
-            trainer: LinearModelTrainer
-            dataloader: SimpleDataLoader
-            loss_fn: CrossEntropyLoss
-            epochs: 1
-            batch_size: 15000
-            lr: 1.0e-3
-            weight_decay: 0.1
-
+        name: SingleLayer
+        params: **args
+        
     top_features:
         k: 5000
         aggregation_strategy: mix
@@ -59,8 +79,13 @@ final_training:
     model:
         name: LinearModel
         params:
-            layers: [3000, 6]
-            dropout: 0
+            layers: 
+                - linear
+                - dropout (0.2)
+                - linear 
+
+            hidden_layers: 3000 -> [100, 16] -> 6
+            dropout: 0 | [0.2, 0.2]
             weights_init_zero: False
 
     model_train_config:
