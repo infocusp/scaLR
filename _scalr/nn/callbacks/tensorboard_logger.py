@@ -4,7 +4,7 @@ from os import path
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
-from _scalr.model.callbacks import Callback
+from _scalr.nn.callbacks import CallbackBase
 
 
 class TensorboardLogger(CallbackBase):
@@ -32,3 +32,8 @@ class TensorboardLogger(CallbackBase):
         self.epoch += 1
         self.writer.add_scalars('Loss', {'train': train_loss, 'val': val_loss}, self.epoch)
         self.writer.add_scalars('Accuracy', {'train': train_acc, 'val': val_acc}, self.epoch)
+
+    @classmethod
+    def get_default_params(cls):
+        """Class method to get default params for model_config"""
+        return dict(dirpath='.')

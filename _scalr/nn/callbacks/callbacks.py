@@ -1,6 +1,7 @@
 import os
 from os import path
 
+from _scalr.utils import build_object
 
 class CallbackBase:
     """Base class to build callbacks"""
@@ -15,6 +16,10 @@ class CallbackBase:
         """Execute the callback here"""
         pass
 
+    @classmethod
+    def get_default_params(cls):
+        """Class method to get default params for callbacks config"""
+        return None
 
 class CallbackExecutor:
     """
@@ -42,16 +47,17 @@ class CallbackExecutor:
         self.callbacks = []
 
         for callback in callbacks:
-            self.callbacks.append(build_callback(callback))
+            self.callbacks.append(build_object(_scalr.nn.callbacks, callback))
 
-    def build_callback():
-        # builder class to create callback object
-        pass
-
-    def execute(self, model_state_dict: dict, opt_state_dict: dict,
-                train_loss: float, train_acc: float, val_loss: float,
-                val_acc: float) -> bool:
+    def execute(self, **kwargs) -> bool:
         """
         Execute all the enabled callbacks. Returns early stopping condition.
         """
-        return False
+
+        early_stop=False
+        for callback in self.callbacks:
+            # Below `| False` is to handle cases when callbacks returns None.
+            # And we want to return true when early stopping is achieved 
+            early_stop|= callback(**kwargs) or False
+
+        return early_stop
