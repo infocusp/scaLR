@@ -28,7 +28,7 @@ class PreprocessorBase:
         """
         pass
 
-    def from_data(
+    def update_from_data(
         self,
         data: Union[AnnData, AnnCollection],
         targets: list[str],

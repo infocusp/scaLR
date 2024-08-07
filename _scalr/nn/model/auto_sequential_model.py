@@ -34,8 +34,8 @@ class AutoSequentialModel(SequentialModel):
         layers = [1] + hidden_layers + [1]
         super().__init__(layers, dropout, activation, weights_init_zero)
 
-    def from_data(self, data: Union[AnnCollection, AnnData],
-                  targets: list[str]):
+    def update_from_data(self, data: Union[AnnCollection, AnnData],
+                         targets: list[str]):
         """To set the input and output features based upon data
 
         Args:
@@ -55,24 +55,6 @@ class AutoSequentialModel(SequentialModel):
 
         if self.weights_init_zero:
             self.make_weights_zero()
-
-    def forward(self, x: Tensor) -> Tensor:
-        """pass input through the network.
-
-            Args:
-                x: Tensor, shape [batch_size, layers[0]]
-
-            Returns:
-                output dict containing batched layers[-1]-dimensional vectors in ['cls_output'] key.
-        """
-        output = {}
-
-        for i, layer in enumerate(self.layers):
-            x = layer(x)
-            output[f'layer{i}_output'] = x
-
-        output['cls_output'] = self.out_layer(x)
-        return output
 
     @classmethod
     def get_default_params(cls):

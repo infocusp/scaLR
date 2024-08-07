@@ -48,11 +48,12 @@ data:
 feature_selection:
 
     # scores: '/path/to/matrix'
-    # feature_subset: 3000
+    feature_subset: 3000
 
     model:
         name: LinearModel
         params:
+            layers: [3000, ]
             hidden_layers: []
 
     model_train_config:
@@ -86,7 +87,7 @@ final_training:
     model:
         name: LinearModel
         params:
-            layers: 
+            layers: [5000, 2] 
                 - linear
                 - dropout (0.2)
                 - linear 
@@ -99,16 +100,21 @@ final_training:
         resume_from_checkpoint: null
 
         trainer: LinearModelTrainer
+
         dataloader: 
             name: SimpleDataLoader
             params:
-                batch_size: 32
+                batch_size: 15000
                 **args
-        optimizer: Adam
+        
+        optimizer:
+            name: Adam
+            params:
+                lr: 1.0e-3
+                weight_decay: 0
+
         loss_fn: CrossEntropyLoss
-        batch_size: 15000
-        lr: 1.0e-3
-        weight_decay: 0
+        
         epochs: 1
 
         callbacks:

@@ -16,7 +16,10 @@ class EarlyStopping(CallbackBase):
                             i.e. an absolute change of less than min_delta, will count as no improvement.
     """
 
-    def __init__(self, patience: int = 3, min_delta: float = 1e-4):
+    def __init__(self,
+                 dirpath: str = None,
+                 patience: int = 3,
+                 min_delta: float = 1e-4):
         """
         Args:
             patience: number of epochs with no improvement after which training will be stopped
@@ -43,9 +46,8 @@ class EarlyStopping(CallbackBase):
             if self.epoch >= self.patience:
                 return True
         return False
-    
+
     @classmethod
     def get_default_params(cls):
         """Class method to get default params for model_config"""
-        return dict(patience=3,
-                    min_delta=1e-4)
+        return dict(patience=3, min_delta=1e-4)

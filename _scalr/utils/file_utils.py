@@ -106,6 +106,38 @@ def write_chunkwise_data(datapath: str,
         write_data(data, path.join(dirpath, f'{i}.h5ad'))
 
 
+def load_train_val_data_from_config(data_config):
+    if data_config.get('feature_subset_datapaths'):
+        train_data = read_data(
+            data_config['feature_subset_datapaths']['train'])
+        val_data = read_data(data_config['feature_subset_datapaths']['val'])
+    elif data_config.get('final_datapaths'):
+        train_data = read_data(data_config['final_datapaths']['train'])
+        val_data = read_data(data_config['final_datapaths']['val'])
+    elif data_config.get('split_datapaths'):
+        train_data = read_data(data_config['split_datapaths']['train'])
+        val_data = read_data(data_config['split_datapaths']['val'])
+    else:
+        raise ValueError('Split Datapaths not given')
+
+    return train_data, val_data
+
+
+def load_test_data_from_config(data_config):
+    if data_config.get('feature_subset_datapaths'):
+        test_data = read_data(data_config['feature_subset_datapaths']['test'])
+    elif data_config.get('final_datapaths'):
+
+        test_data = read_data(data_config['final_datapaths']['test'])
+    elif data_config.get('split_datapaths'):
+
+        test_data = read_data(data_config['split_datapaths']['test'])
+    else:
+        raise ValueError('Split Datapaths not given')
+
+    return test_data
+
+
 # Readers
 def read_yaml(filepath: str) -> dict:
     """Returns the config file loaded from yaml."""

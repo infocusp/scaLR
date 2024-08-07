@@ -7,7 +7,7 @@ from _scalr.utils import read_data, write_data
 from _scalr.data.preprocess import build_preprocessor
 
 
-class DataIngestion:
+class DataIngestionPipeline:
     """Class for Data Ingestion into the pipeline"""
 
     def __init__(self, data_config: dict, dirpath: str = '.'):

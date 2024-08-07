@@ -18,7 +18,8 @@ class ModelBase(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         pass
 
-    def from_data(self, data: Union[AnnCollection, AnnData], targets: list[str]):
+    def update_from_data(self, data: Union[AnnCollection, AnnData],
+                         targets: list[str]):
         """To use data to build any part of class
         This method is optional and cannot return anything. 
         It should only be used to create of modify arguments
