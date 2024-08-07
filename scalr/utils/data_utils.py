@@ -2,6 +2,7 @@ from typing import Union
 
 from anndata import AnnData
 from anndata.experimental import AnnCollection
+from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 import torch
 
@@ -25,7 +26,7 @@ def get_random_samples(
     data: Union[AnnData, AnnCollection],
     n_random_samples: int,
     device: str,
-    batch_mappings: dict = None,
+    batch_onehotencoder: OneHotEncoder = None,
 ) -> torch.tensor:
     """Returns random N samples from given data.
 
@@ -45,14 +46,13 @@ def get_random_samples(
 
     # Handle batch correction when selecing random samples.
     ## Add batch field from obs to features data.
-    if batch_mappings:
+    if batch_onehotencoder:
         random_background_data = torch.cat(
             (torch.as_tensor(random_background_data),
-            torch.as_tensor(data[random_indices].obs['batch'].astype(
-                'category').cat.rename_categories(batch_mappings).astype(
-                    'int64').values).reshape(-1, 1)),
+             torch.as_tensor(batch_onehotencoder.transform(
+                 data[random_indices].obs['batch'].values.reshape(-1, 1)).A,
+                             dtype=torch.float32)),
             dim=1)
-
     random_background_data = torch.as_tensor(random_background_data,
                                              dtype=torch.float32).to(device)
 

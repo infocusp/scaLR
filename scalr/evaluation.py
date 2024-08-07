@@ -17,6 +17,7 @@ import scanpy as sc
 import seaborn as sns
 import shap
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, RocCurveDisplay, roc_curve, auc
+from sklearn.preprocessing import OneHotEncoder
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
@@ -169,7 +170,7 @@ def get_top_n_genes(
     top_n: int = 20,
     n_background_tensor: int = 1000,
     batch_correction: bool = False,
-    batch_mappings: dict = {},
+    batch_onehotencoder: OneHotEncoder = None,
 ) -> None:
     """
     Function to get top n genes of each class and its weights.
@@ -193,11 +194,12 @@ def get_top_n_genes(
     model.to(device)
     shap_model = CustomShapModel(model)
 
-    random_background_data = data_utils.get_random_samples(train_data,
-                                                           n_background_tensor,
-                                                           device,
-                                                           batch_mappings,
-                                                           )
+    random_background_data = data_utils.get_random_samples(
+        train_data,
+        n_background_tensor,
+        device,
+        batch_onehotencoder,
+    )
 
     explainer = shap.DeepExplainer(shap_model, random_background_data)
 
@@ -211,10 +213,12 @@ def get_top_n_genes(
         # Non-abs values required for heatmap.
         mean_shap_values = batch_shap_values.mean(axis=0)
 
-        # Handle batch correction. Remove batch feature from analysis.
-        if batch_mappings:
-            mean_shap_values = mean_shap_values[:-1, :]
-            abs_mean_shap_values = abs_mean_shap_values[:-1, :]
+        # Handle batch correction. Remove batch features from analysis.
+        if batch_onehotencoder:
+            mean_shap_values = mean_shap_values[:-len(batch_onehotencoder.
+                                                      categories_[0]), :]
+            abs_mean_shap_values = abs_mean_shap_values[:-len(
+                batch_onehotencoder.categories_[0]), :]
 
         if batch_id >= 1:
             abs_mean_shap_values = np.mean(
@@ -275,7 +279,7 @@ def save_top_genes_and_heatmap(
     n_background_tensor: int = 1000,
     heatmap_from_n_genes: int = 20,
     batch_correction: bool = False,
-    batch_mappings: dict = {},
+    batch_onehotencoder: OneHotEncoder = None,
 ) -> None:
     """
     Function to save top n genes of each class and save heatmap of genes & their class weight.
@@ -309,7 +313,7 @@ def save_top_genes_and_heatmap(
         top_n,
         n_background_tensor,
         batch_correction,
-        batch_mappings,
+        batch_onehotencoder,
     )
 
     DataFrame(class_top_genes).to_csv(path.join(shap_heatmap_path,

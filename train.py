@@ -3,9 +3,12 @@ from os import path
 import sys
 import argparse
 
-import torch
-from torch import nn
+import joblib
 import numpy as np
+import torch
+
+from sklearn.preprocessing import OneHotEncoder
+from torch import nn
 
 from config.utils import load_config
 from scalr.utils import read_data, read_yaml, dump_yaml, dump_json
@@ -71,20 +74,36 @@ def train(config, log=True):
     test_data = read_data(test_datapath)
 
     # Prepare batch mappings for batch correction if applicable.
-    batch_mappings = {}
+    batch_onehotencoder = None
     if batch_correction:
-        print('Batch correction will be applied during model training time...')
-        batches = sorted(
-            list(
-                set(
-                    list(train_data.obs.batch) + list(val_data.obs.batch) +
-                    list(test_data.obs.batch))))
-        for i, batch in enumerate(batches):
-            batch_mappings[batch] = i
+        print(
+            'Batch Correction method will be applied during model training time...'
+        )
+
+        if path.exists(
+                path.join(dirpath, 'feature_selection',
+                          'batch_onehotencoder.pkl')):
+            batch_onehotencoder = joblib.load(
+                path.join(dirpath, 'feature_selection',
+                          'batch_onehotencoder.pkl'))
+        else:
+            batches = sorted(
+                list(
+                    set(
+                        list(train_data.obs.batch) + list(val_data.obs.batch) +
+                        list(test_data.obs.batch))))
+
+            # Generating OneHotEncoder object for batch information.
+            batch_onehotencoder = OneHotEncoder()
+            batch_onehotencoder.fit(np.array(batches).reshape(-1, 1))
+            joblib.dump(
+                batch_onehotencoder,
+                path.join(dirpath, 'feature_selection',
+                          'batch_onehotencoder.pkl'))
 
         # Adding a batch feature count for in_features in model as batch_correction is set to true.
         layers = model_hp['layers']
-        layers[0] += 1
+        layers[0] += len(batch_onehotencoder.categories_[0])
         model_hp['layers'] = layers
         config['model']['hyperparameters'] = model_hp
 
@@ -111,12 +130,12 @@ def train(config, log=True):
                                      target=target,
                                      batch_size=batch_size,
                                      label_mappings=label_mappings,
-                                     batch_mappings=batch_mappings)
+                                     batch_onehotencoder=batch_onehotencoder)
         val_dl = simple_dataloader(adata=val_data,
                                    target=target,
                                    batch_size=batch_size,
                                    label_mappings=label_mappings,
-                                   batch_mappings=batch_mappings)
+                                   batch_onehotencoder=batch_onehotencoder)
     else:
         raise NotImplementedError('Only `linear` available as options!')
 
@@ -150,9 +169,9 @@ def train(config, log=True):
     dump_yaml(config['model'], path.join(dirpath, 'best_model', 'config.yml'))
     dump_json(label_mappings,
               path.join(dirpath, 'best_model', 'label_mappings.json'))
-    if batch_correction:
-        dump_json(batch_mappings,
-                  path.join(dirpath, 'best_model', 'batch_mappings.json'))
+    # if batch_correction:
+    #     dump_json(batch_onehotencoder,
+    #               path.join(dirpath, 'best_model', 'batch_onehotencoder.json'))
     dump_yaml(config, path.join(dirpath, 'config.yml'))
     return config
 
