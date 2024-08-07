@@ -1,6 +1,48 @@
+import torch
+from typing import Union
+from anndata import AnnData
+from anndata.experimental import AnnCollection
+from _scalr.nn.dataloader import DataLoaderBase
+
+
 class SimpleDataLoader(DataLoaderBase):
-    
-    def collate_fn(self, batch):
-        return x,y
-    
-    
+    """Simple DataLoader which converts all adata values to inputs, and target column in metadata 
+    to output labels
+        
+    Returns:
+        PyTorch DataLoader object with (X: Tensor [batch_size, features], y: Tensor [batch_size, ])
+    """
+
+    def __init__(self, batch_size: int, target: str, mappings: dict):
+        """
+        Args:
+            batch_size (int): number of samples to be loaded in each batch
+            target (str): corresponding metadata name to be treated as 
+                          training objective in classification.
+                          Must be present as a column_name in adata.obs
+            mappings (dict): mapping the target name to respective ids
+
+        Returns:
+            _type_: _description_
+        """
+
+    def collate_fn(
+        self,
+        adata_batch: Union[AnnData, AnnCollection],
+    ):
+        """Given an input anndata of batch_size,
+        the collate function creates inputs and outputs
+
+        Args:
+            adata_batch (Union[AnnData, AnnCollection]): anndata view object with batch_size samples
+
+        Returns:
+            Tuple(x, y): input to model, output from data
+        """
+        target_mappings = self.mappings[self.target]['label2id']
+
+        x = adata_batch.X.float()
+        y = torch.as_tensor(
+            adata_batch.obs[self.target].astype('category').cat.
+            rename_categories(target_mappings).astype('int64').values)
+        return x, y

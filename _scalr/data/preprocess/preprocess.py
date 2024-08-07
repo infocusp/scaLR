@@ -5,7 +5,7 @@ from anndata.experimental import AnnCollection
 import numpy as np
 
 import _scalr
-from _scalr.utils import write_chunkwise_data
+from _scalr.utils import write_chunkwise_data, build_object
 
 
 class PreprocessorBase:
@@ -28,9 +28,10 @@ class PreprocessorBase:
         """
         pass
 
-    def generate_transform_attributes(
+    def from_data(
         self,
         data: Union[AnnData, AnnCollection],
+        targets: list[str],
     ) -> None:
         """Applicable only when you need to see entire train data and
         calculate attributes, as required in StdScaler, etc.
@@ -40,6 +41,7 @@ class PreprocessorBase:
 
         Args:
             data (Union[AnnData, AnnCollection]): train_data in backed mode
+            targets (list[string]): target columns present in `obs`
         """
         pass
 
@@ -64,7 +66,4 @@ class PreprocessorBase:
 
 
 def build_preprocessor(preprocessing_config):
-    name = preprocessing_config['name']
-    params = preprocessing_config.get('params', list())
-
-    return getattr(_scalr.data.preprocess, name)(**params)
+    return build_object(_scalr.data.preprocess, preprocessing_config)

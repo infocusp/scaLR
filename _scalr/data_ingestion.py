@@ -47,12 +47,11 @@ class DataIngestion:
 
             full_datapath = self.data_config['splitting']['full_datapath']
             splitter_config = self.data_config['splitting']['splitter']
-            splitter = build_splitter(splitter_config['name'])
+            splitter = build_splitter(splitter_config)
 
             # Make data splits
             train_val_test_split_indices = splitter.generate_train_val_test_split_indices(
-                full_datapath, self.target,
-                **splitter_config.get('params', dict()))
+                full_datapath, self.target)
 
             write_data(train_val_test_split_indices,
                        path.join(self.datadir, 'train_val_test_split.json'))
@@ -121,8 +120,7 @@ class DataIngestion:
         for preprocess in all_preprocessings:
             preprocessor = build_preprocessor(preprocess)
 
-            preprocessor.generate_transform_attributes(
-                read_data(data_dirpaths['train']))
+            preprocessor.from_data(read_data(data_dirpaths['train']))
 
             preprocessor.process_data(data_dirpaths, self.sample_chunksize,
                                       processed_data_dirpaths)

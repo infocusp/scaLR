@@ -57,9 +57,16 @@ feature_selection:
 
     model_train_config:
         trainer: LinearModelTrainer
-        dataloader: MetaDataLoader
+
+        dataloader: 
+            name: SimpleDataLoader
+            params:
+                batch_size: 32
+                **args
+
         loss_fn: CrossEntropyLoss
         opt: Adam
+        
         epochs: 1
         batch_size: 15000
         lr: 1.0e-3
@@ -92,7 +99,11 @@ final_training:
         resume_from_checkpoint: null
 
         trainer: LinearModelTrainer
-        dataloader: SimpleDataLoader
+        dataloader: 
+            name: SimpleDataLoader
+            params:
+                batch_size: 32
+                **args
         optimizer: Adam
         loss_fn: CrossEntropyLoss
         batch_size: 15000

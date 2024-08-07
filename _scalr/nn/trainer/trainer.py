@@ -14,20 +14,20 @@ from _scalr.nn.model import LinearModel
 
 class TrainerBase:
     """
-    Trainer class to train and validate a model from scratch or resume from checkpoint
+    Trainer Base class to train and validate a model from scratch or resume from checkpoint
+    Common functionality required for trainers is given. May or may not be overwritten
+    by child classes.
     """
 
-    def __init__(self,
-                 model,
-                 opt,
-                 loss_fn,
-                 callback):
+    def __init__(self, model_config:dict, train_config:dict, data_config:dict):
         """
-        get the training objects
+        Args:
+            model_config (dict): model configuration
+            train_config (dict): training configuration
+            data_config (dict): data configuration
         """
         pass
-    
-    
+
     def train_one_epoch(self, dl: DataLoader) -> (float, float):
         """Trains one epoch
 
@@ -39,7 +39,6 @@ class TrainerBase:
         """
         return total_loss, accuracy
 
-
     def validation(self, dl: DataLoader) -> (float, float):
         """ Validates after training one epoch
 
@@ -49,9 +48,10 @@ class TrainerBase:
         Returns:
             Validation Loss, Validation Accuracy
         """
-        
+
         return total_loss, accuracy
 
+
 def build_trainer(name, **kwargs):
-    
+
     return getattr(_scalr.nn.trainer, name)(**kwargs)

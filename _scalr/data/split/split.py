@@ -2,7 +2,7 @@ import os
 from os import path
 
 import _scalr
-from _scalr.utils import read_data, write_data, write_chunkwise_data
+from _scalr.utils import read_data, write_data, write_chunkwise_data, build_object
 
 
 class SplitterBase:
@@ -111,5 +111,5 @@ class SplitterBase:
         return filepaths
 
 
-def build_splitter(splitter_name):
-    return getattr(_scalr.data.split, splitter_name)()
+def build_splitter(splitter_config):
+    return build_object(_scalr.data.split, splitter_config)
