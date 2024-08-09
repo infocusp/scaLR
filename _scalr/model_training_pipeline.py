@@ -1,6 +1,7 @@
 import torch
 import os
 from os import path
+from copy import deepcopy
 
 from typing import Union
 from anndata import AnnData
@@ -119,7 +120,7 @@ class ModelTrainingPipeline:
             'dataloader', dict(name='SimpleDataLoader'))
         dataloader_config['params'] = dataloader_config.get(
             'params', dict(batch_size=1))
-        self.train_config['dataloader'] = dataloader_config
+        self.train_config['dataloader'] = deepcopy(dataloader_config)
 
         dataloader_config['params']['target'] = self.target
         dataloader_config['params']['mappings'] = self.mappings
