@@ -27,7 +27,6 @@ def overwrite_default(user_config: dict, default_config: dict) -> dict:
 
 
 def build_object(module, config: dict):
-
     name = config.get('name')
     if not name:
         raise ValueError('class name not provided!')
@@ -35,5 +34,6 @@ def build_object(module, config: dict):
     params = config.get('params', dict())
     default_params = getattr(module, name).get_default_params()
     params = overwrite_default(params, default_params)
+    final_config = dict(name=name, params=params)
 
-    return getattr(module, name)(**params)
+    return getattr(module, name)(**params), final_config

@@ -1,17 +1,17 @@
 import argparse
 import os
+from os import path
 import random
 import sys
 
 import numpy as np
 import torch
 
-from _scalr.utils.config import load_config
-from _scalr.utils import set_seed
-from projects.biocusp.scripts._scalr.data_ingestion_pipeline import DataIngestionPipeline
-from projects.biocusp.scripts._scalr.feature_extraction_pipeline import FeatureExtraction
-from projects.biocusp.scripts._scalr.model_training_pipeline import ModelTrainingPipeline
-from projects.biocusp.scripts._scalr.downstream_analysis_pipeline import DownstreamAnalysis
+from _scalr.utils import set_seed, write_data, read_data
+from _scalr.data_ingestion_pipeline import DataIngestionPipeline
+# from _scalr.feature_extraction_pipeline import FeatureExtraction
+from _scalr.model_training_pipeline import ModelTrainingPipeline
+# from _scalr.downstream_analysis_pipeline import DownstreamAnalysis
 
 
 def get_args():
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     set_seed(42)
     args = get_args()
 
-    config = load_config(args.config)
+    config = read_data(args.config)
     log = args.log
 
     dirpath = config['dirpath']
@@ -51,28 +51,33 @@ if __name__ == '__main__':
     ingest_data = DataIngestionPipeline(config['data'], dirpath)
     ingest_data.generate_train_val_test_split()
     ingest_data.preprocess_data()
-    ingest_data.generate_label_mappings()
-    config = ingest_data(config)
+    ingest_data.generate_mappings()
+    config['data'] = ingest_data.get_updated_config()
+    write_data(config, path.join(dirpath, 'config.yaml'))
 
     if config.get('final_training'):
         model_trainer = ModelTrainingPipeline(
-            dirpath, config['final_training']['model'],
-            config['final_training']['training_config'], config['data'],
-            device)
+            config['final_training']['model'],
+            config['final_training']['train_config'], dirpath, device)
 
-        model_trainer.load_data_from_config()
+        model_trainer.load_data_and_targets_from_config(config['data'])
+        model_trainer.build_model_training_artifacts()
         model_trainer.train()
+        model_config, train_config = model_trainer.get_updated_config()
+        config['final_training']['model'] = model_config
+        config['final_training']['train_config'] = train_config
+        write_data(config, path.join(dirpath, 'config.yaml'))
 
     # INCOMPLETE BELOW
     ##############################################################################
-    if config.get('feature_selection'):
-        extract_features = FeatureExtraction()
-        extract_features.feature_scoring()
-        extract_features.top_feature_extraction()
-        extract_features.write_top_features_subset_data()
+    # if config.get('feature_selection'):
+    #     extract_features = FeatureExtraction()
+    #     extract_features.feature_scoring()
+    #     extract_features.top_feature_extraction()
+    #     extract_features.write_top_features_subset_data()
 
-    final_model_trainer = ModelTrainer()
-    final_model_trainer.train()
+    # final_model_trainer = ModelTrainer()
+    # final_model_trainer.train()
 
-    analyser = DownstreamAnalysis()
-    analyser.generate_analysis()
+    # analyser = DownstreamAnalysis()
+    # analyser.generate_analysis()

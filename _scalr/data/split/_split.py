@@ -22,7 +22,7 @@ class SplitterBase:
         """
         pass
 
-    def check_splits(datapath: str, data_splits: dict, target: str):
+    def check_splits(self, datapath: str, data_splits: dict, target: str):
         """Performs certains checks regarding splits and logs
         the distribution of target classes in each split
 
@@ -78,7 +78,7 @@ class SplitterBase:
         print(metadata[target].iloc[test_inds].value_counts())
         print()
 
-    def write_splits(full_datapath: str, data_split_indices: dict,
+    def write_splits(self, full_datapath: str, data_split_indices: dict,
                      sample_chunksize: int, dirpath: int) -> dict:
         """Writes the train validation and test splits to disk
 
@@ -95,20 +95,24 @@ class SplitterBase:
 
         for split in data_split_indices.keys():
             if sample_chunksize:
-                dirpath = path.join(dirpath, split)
-                os.makedirs(dirpath, exist_ok=True)
-
-                write_chunkwise_data(full_datapath, sample_chunksize, dirpath,
-                                     data_split_indices[split])
-                filepaths[f'{split}_datapath'] = filepath
+                split_dirpath = path.join(dirpath, split)
+                os.makedirs(split_dirpath, exist_ok=True)
+                write_chunkwise_data(full_datapath, sample_chunksize,
+                                     split_dirpath, data_split_indices[split])
+                filepaths[f'{split}'] = split_dirpath
             else:
                 full_data = read_data(full_datapath)
                 filepath = path.join(dirpath, f'{split}.h5ad')
                 write_data(full_data[data_split_indices[split]], filepath)
 
-                filepaths[f'{split}_datapath'] = filepath
+                filepaths[f'{split}'] = filepath
 
         return filepaths
+
+    @classmethod
+    def get_default_params(cls) -> dict:
+        """Class method to get default params for model_config"""
+        return dict()
 
 
 def build_splitter(splitter_config):

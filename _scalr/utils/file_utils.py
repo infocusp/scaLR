@@ -62,7 +62,7 @@ def write_chunkwise_data(datapath: str,
                          dirpath: str,
                          sample_inds: Union[list[int], int] = -1,
                          feature_inds: Union[list[int], int] = -1,
-                         transform: function = None):
+                         transform=None):
     """Write data subsets iteratively in a chunkwise manner, to ensure
     only at most `sample_chunksize` samples are loaded at a time.
     
@@ -80,7 +80,7 @@ def write_chunkwise_data(datapath: str,
                                                         Defaults to all features.
         transform (function): a function to apply transformation on chunked numpy array
     """
-    if path.exists(dirpath): os.makedirs(dirpath)
+    if not path.exists(dirpath): os.makedirs(dirpath)
 
     data = read_data(datapath)
 
@@ -91,7 +91,9 @@ def write_chunkwise_data(datapath: str,
     if sample_chunksize >= len(data): sample_chunksize = len(data) - 1
 
     for i, (start) in enumerate(range(0, len(sample_inds), sample_chunksize)):
-        data = read_data(datapath)[sample_inds]
+        data = read_data(datapath)
+        if isinstance(data, AnnData): data = AnnCollection([data])
+        data = data[sample_inds]
         data = data[start:start + sample_chunksize, feature_inds]
         if not isinstance(data, AnnData):
             data = data.to_adata()
@@ -106,32 +108,42 @@ def write_chunkwise_data(datapath: str,
         write_data(data, path.join(dirpath, f'{i}.h5ad'))
 
 
+# TODO: add logging!
 def load_train_val_data_from_config(data_config):
-    if data_config.get('feature_subset_datapaths'):
+    train_val_test_paths = data_config.get('train_val_test')
+    if not train_val_test_paths:
+        raise ValueError('Split Datapaths not given')
+    if train_val_test_paths.get('feature_subset_datapaths'):
         train_data = read_data(
-            data_config['feature_subset_datapaths']['train'])
-        val_data = read_data(data_config['feature_subset_datapaths']['val'])
-    elif data_config.get('final_datapaths'):
-        train_data = read_data(data_config['final_datapaths']['train'])
-        val_data = read_data(data_config['final_datapaths']['val'])
-    elif data_config.get('split_datapaths'):
-        train_data = read_data(data_config['split_datapaths']['train'])
-        val_data = read_data(data_config['split_datapaths']['val'])
+            train_val_test_paths['feature_subset_datapaths']['train'])
+        val_data = read_data(
+            train_val_test_paths['feature_subset_datapaths']['val'])
+    elif train_val_test_paths.get('final_datapaths'):
+        train_data = read_data(
+            train_val_test_paths['final_datapaths']['train'])
+        val_data = read_data(train_val_test_paths['final_datapaths']['val'])
+    elif train_val_test_paths.get('split_datapaths'):
+        train_data = read_data(
+            train_val_test_paths['split_datapaths']['train'])
+        val_data = read_data(train_val_test_paths['split_datapaths']['val'])
     else:
         raise ValueError('Split Datapaths not given')
 
     return train_data, val_data
 
 
+# TODO: add logging!
 def load_test_data_from_config(data_config):
-    if data_config.get('feature_subset_datapaths'):
-        test_data = read_data(data_config['feature_subset_datapaths']['test'])
-    elif data_config.get('final_datapaths'):
-
-        test_data = read_data(data_config['final_datapaths']['test'])
-    elif data_config.get('split_datapaths'):
-
-        test_data = read_data(data_config['split_datapaths']['test'])
+    train_val_test_paths = data_config.get('train_val_test')
+    if not train_val_test_paths:
+        raise ValueError('Split Datapaths not given')
+    if train_val_test_paths.get('feature_subset_datapaths'):
+        test_data = read_data(
+            train_val_test_paths['feature_subset_datapaths']['test'])
+    elif train_val_test_paths.get('final_datapaths'):
+        test_data = read_data(train_val_test_paths['final_datapaths']['test'])
+    elif train_val_test_paths.get('split_datapaths'):
+        test_data = read_data(train_val_test_paths['split_datapaths']['test'])
     else:
         raise ValueError('Split Datapaths not given')
 

@@ -31,7 +31,7 @@ class PreprocessorBase:
     def update_from_data(
         self,
         data: Union[AnnData, AnnCollection],
-        targets: list[str],
+        sample_chunksize: int,
     ) -> None:
         """Applicable only when you need to see entire train data and
         calculate attributes, as required in StdScaler, etc.
@@ -41,7 +41,8 @@ class PreprocessorBase:
 
         Args:
             data (Union[AnnData, AnnCollection]): train_data in backed mode
-            targets (list[string]): target columns present in `obs`
+            sample_chunksize (int): number of samples of data that can at most
+                                    be loaded in memory
         """
         pass
 

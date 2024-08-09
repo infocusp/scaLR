@@ -70,20 +70,21 @@ class StratifiedSplitter(SplitterBase):
 
         # split testing and (train+val) indices
         training_inds, testing_inds = self._split_data_with_stratification(
-            metadata, target, test_ratio, self.stratify)
+            metadata, target, test_ratio)
 
         train_val_data = metadata.iloc[training_inds]
         val_ratio = val_ratio / (val_ratio + train_ratio)
 
         # get train and val indices, relative to the `train_val_data`
         relative_train_inds, relative_val_inds = self._split_data_with_stratification(
-            train_val_data, target, val_ratio, self.stratify)
+            train_val_data, target, val_ratio)
 
         # get true_indices relative to entire data
         true_test_inds = testing_inds.tolist()
-        true_val_inds = train_val_data.iloc[relative_val_inds]['inds'].tolist()
+        true_val_inds = train_val_data.iloc[relative_val_inds][
+            'true_index'].tolist()
         true_train_inds = train_val_data.iloc[relative_train_inds][
-            'inds'].tolist()
+            'true_index'].tolist()
 
         data_split = {
             'train': true_train_inds,
@@ -92,3 +93,8 @@ class StratifiedSplitter(SplitterBase):
         }
 
         return data_split
+
+    @classmethod
+    def get_default_params(cls) -> dict:
+        """Class method to get default params for model_config"""
+        return dict(split_ratio=[7, 1, 2], stratify='donor_id')

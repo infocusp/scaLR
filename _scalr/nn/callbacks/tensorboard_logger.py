@@ -25,13 +25,19 @@ class TensorboardLogger(CallbackBase):
         self.epoch = 0
 
     def __call__(self, train_loss: float, train_acc: float, val_loss: float,
-                 val_acc: float):
+                 val_acc: float, **kwargs):
         """
         Logs the train_loss, val_loss, train_accuracy, val_accuracy for each epoch.
         """
         self.epoch += 1
-        self.writer.add_scalars('Loss', {'train': train_loss, 'val': val_loss}, self.epoch)
-        self.writer.add_scalars('Accuracy', {'train': train_acc, 'val': val_acc}, self.epoch)
+        self.writer.add_scalars('Loss', {
+            'train': train_loss,
+            'val': val_loss
+        }, self.epoch)
+        self.writer.add_scalars('Accuracy', {
+            'train': train_acc,
+            'val': val_acc
+        }, self.epoch)
 
     @classmethod
     def get_default_params(cls):

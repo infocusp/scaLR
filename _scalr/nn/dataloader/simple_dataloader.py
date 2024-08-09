@@ -21,10 +21,8 @@ class SimpleDataLoader(DataLoaderBase):
                           training objective in classification.
                           Must be present as a column_name in adata.obs
             mappings (dict): mapping the target name to respective ids
-
-        Returns:
-            _type_: _description_
         """
+        super().__init__(batch_size, target, mappings)
 
     def collate_fn(
         self,
@@ -39,10 +37,12 @@ class SimpleDataLoader(DataLoaderBase):
         Returns:
             Tuple(x, y): input to model, output from data
         """
-        target_mappings = self.mappings[self.target]['label2id']
 
         x = adata_batch.X.float()
-        y = torch.as_tensor(
-            adata_batch.obs[self.target].astype('category').cat.
-            rename_categories(target_mappings).astype('int64').values)
+        y = self.get_targets_ids_from_mappings(adata_batch)[0]
         return x, y
+
+    @classmethod
+    def get_default_params(cls) -> dict:
+        """Class method to get default params for model_config"""
+        return dict(batch_size=1, target=None, mappings=dict())

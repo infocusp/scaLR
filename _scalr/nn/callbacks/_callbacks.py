@@ -46,7 +46,8 @@ class CallbackExecutor:
         for callback in callbacks:
             if callback.get('params'): callback['params']['dirpath'] = dirpath
             else: callback['params'] = dict(dirpath=dirpath)
-            self.callbacks.append(build_object(_scalr.nn.callbacks, callback))
+            callback_object, _ = build_object(_scalr.nn.callbacks, callback)
+            self.callbacks.append(callback_object)
 
     def execute(self, **kwargs) -> bool:
         """

@@ -31,17 +31,17 @@ class EarlyStopping(CallbackBase):
         self.patience = int(patience)
         self.min_delta = float(min_delta)
         self.epoch = 0
-        self.min_validation_loss = float('inf')
+        self.min_val_loss = float('inf')
 
-    def __call__(self, validation_loss: float) -> bool:
+    def __call__(self, val_loss: float, **kwargs) -> bool:
         """
         Return `True` if model training needs to be stopped based upon improvement conditions. Else returns
         `False` for continued training.
         """
-        if validation_loss < self.min_validation_loss:
-            self.min_validation_loss = validation_loss
+        if val_loss < self.min_val_loss:
+            self.min_val_loss = val_loss
             self.epoch = 0
-        elif validation_loss >= (self.min_validation_loss + self.min_delta):
+        elif val_loss >= (self.min_val_loss + self.min_delta):
             self.epoch += 1
             if self.epoch >= self.patience:
                 return True

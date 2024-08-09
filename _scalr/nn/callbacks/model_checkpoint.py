@@ -8,7 +8,7 @@ from _scalr.nn.callbacks import CallbackBase
 
 class ModelCheckpoint(CallbackBase):
     """
-    Model checkpointing to save model weights at regular intervals and best model.
+    Model checkpointing to save model weights at regular intervals
 
     Attributes:
         epoch: An interger count of epochs trained.
@@ -24,11 +24,9 @@ class ModelCheckpoint(CallbackBase):
         """
 
         self.epoch = 0
-        self.max_validation_acc = float(0)
         self.interval = int(interval)
         self.dirpath = dirpath
 
-        os.makedirs(path.join(dirpath, 'best_model'), exist_ok=True)
         if self.interval:
             os.makedirs(path.join(dirpath, 'checkpoints'), exist_ok=True)
 
@@ -41,22 +39,15 @@ class ModelCheckpoint(CallbackBase):
                 'optimizer_state_dict': opt_state_dict
             }, path)
 
-    def __call__(self, model_state_dict: dict, opt_state_dict: dict,
-                 validation_acc: dict):
+    def __call__(self, model_state_dict: dict, opt_state_dict: dict, **kwargs):
         self.epoch += 1
-        if validation_acc > self.max_validation_acc:
-            self.max_validation_acc = validation_acc
-            self.save_checkpoint(
-                model_state_dict, opt_state_dict,
-                path.join(self.dirpath, 'best_model', 'model.pt'))
         if self.interval and self.epoch % self.interval == 0:
             self.save_checkpoint(
                 model_state_dict, opt_state_dict,
                 path.join(self.dirpath, 'checkpoints',
                           f'model_{self.epoch}.pt'))
-            
+
     @classmethod
     def get_default_params(cls):
         """Class method to get default params for model_config"""
-        return dict(dirpath='.',
-                    interval=5)
+        return dict(dirpath='.', interval=5)

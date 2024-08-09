@@ -20,6 +20,7 @@ class DownstreamAnalysis:
     def generate_anlaysis():
         for analysis in analyses:
             # initialize analysis object
+            obj.get_analysis(a,b,c,d,e)
             # get and store results
             pass
         pass

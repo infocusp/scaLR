@@ -85,15 +85,10 @@ feature_selection:
 final_training:
 
     model:
-        name: LinearModel
+        name: SequentialModel
         params:
-            layers: [5000, 2] 
-                - linear
-                - dropout (0.2)
-                - linear 
-
-            hidden_layers: 3000 -> [100, 16] -> 6
-            dropout: 0 | [0.2, 0.2]
+            layers: [5000, 6]
+            dropout: 0
             weights_init_zero: False
 
     model_train_config:
@@ -105,7 +100,7 @@ final_training:
             name: SimpleDataLoader
             params:
                 batch_size: 15000
-                **args
+                meta_columns: ['sex', 'disease']
         
         optimizer:
             name: Adam

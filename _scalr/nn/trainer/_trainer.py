@@ -1,6 +1,7 @@
 import os
 from os import path
 from time import time
+from copy import deepcopy
 
 import torch
 from torch import nn
@@ -9,7 +10,6 @@ from torch.utils.data import DataLoader
 from torch.optim import Optimizer
 
 from _scalr.nn.callbacks import CallbackExecutor
-from _scalr.nn.model import LinearModel
 
 
 class TrainerBase:
@@ -109,6 +109,7 @@ class TrainerBase:
             train_dl: training dataloader
             val_dl: validation dataloader
         """
+        best_val_acc = 0
 
         for epoch in range(epochs):
             ep_start = time()
@@ -124,10 +125,16 @@ class TrainerBase:
             ep_end = time()
             print(f'Time: {ep_end-ep_start}\n', flush=True)
 
-            if self.callbacks.execute(self.model.state_dict(),
-                                      self.opt.state_dict(), train_loss,
-                                      train_acc, val_loss, val_acc):
+            if val_acc > best_val_acc:
+                best_val_acc = val_acc
+                best_model = deepcopy(self.model)
+
+            if self.callbacks.execute(model_state_dict=self.model.state_dict(),
+                                      opt_state_dict=self.opt.state_dict(),
+                                      train_loss=train_loss,
+                                      train_acc=train_acc,
+                                      val_loss=val_loss,
+                                      val_acc=val_acc):
                 break
 
-        # TODO: return best model here
-        return self.model
+        return best_model
