@@ -1,4 +1,5 @@
 import argparse
+from copy import deepcopy
 import os
 from os import path
 import sys
@@ -30,6 +31,7 @@ def evaluate(config, log=True):
     dirpath = path.join(dirpath, f'{exp_name}_{exp_run}')
     resultpath = path.join(dirpath, 'results')
     os.makedirs(resultpath, exist_ok=True)
+
     if 'metrics' in evaluation_configs:
         data_config = config['data']
         target = data_config['target']
@@ -63,8 +65,11 @@ def evaluate(config, log=True):
                 torch.load(path.join(model_checkpoint,
                                      'model.pt'))['model_state_dict'])
 
-            test_dl = simple_dataloader(test_data, target, batch_size,
-                                        label_mappings, batch_mappings)
+            test_dl = simple_dataloader(adata=test_data,
+                                        target=target,
+                                        batch_size=batch_size,
+                                        label_mappings=label_mappings,
+                                        batch_mappings=batch_mappings)
 
         # Evaluation
         id2label = label_mappings[target]['id2label']
@@ -93,23 +98,28 @@ def evaluate(config, log=True):
         if 'shap' in metrics:
             print("\nSHAP analysis:")
             shap_config = evaluation_configs.get('shap_config')
-            if shap_config:
-                top_n = shap_config.get('top_n', 20)
-                n_background_tensor = shap_config.get('background_tensor',
-                                                      1000)
-            else:
-                raise ValueError("Shap config required.")
+
+            top_n = shap_config.get('top_n')
+            shap_batch_size = shap_config.get('batch_size')
+            n_background_tensor = shap_config.get('background_tensor')
+            heatmap_from_n_genes = shap_config.get('heatmap_n_genes')
+            early_stop_config = shap_config.get('early_stop')
 
             if train_datapath:
                 train_data = read_data(train_datapath)
-                train_dl = simple_dataloader(train_data, target, batch_size,
-                                             label_mappings, batch_mappings)
             else:
                 raise ValueError("Train data path required for SHAP analysis.")
 
-            save_top_genes_and_heatmap(model, train_dl, test_dl, id2label,
-                                       resultpath, device, top_n,
-                                       n_background_tensor, batch_correction)
+            shap_test_dl = simple_dataloader(adata=test_data,
+                                             target=target,
+                                             batch_size=shap_batch_size,
+                                             label_mappings=label_mappings,
+                                             shuffle=True)
+
+            save_top_genes_and_heatmap(model, train_data, shap_test_dl,
+                                       id2label, resultpath, early_stop_config,
+                                       device, top_n, n_background_tensor,
+                                       heatmap_from_n_genes)
 
     if 'deg_config' in evaluation_configs:
         assert config['data'], "Input data unavailable for deg analysis"

@@ -35,7 +35,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
             model_config: dict containing type of model, and it related config
             feature_chunksize: number of features to take in one training instance
             dirpath: directory to store all model_weights and top_features
-            batch_correction: Wether to apply batch correction or not 
+            batch_correction: Whether to apply batch correction or not
             device: [cpu/cuda] device to perform training on.
 
         Return:
@@ -59,6 +59,7 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
     # Batch correction before feature selection process.
     batch_mappings = {}
     if batch_correction:
+        print('Batch Correction method will be applied during model training time...')
         batches = sorted(
             list(
                 set(
@@ -83,10 +84,16 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
         train_features_subset = train_data[:, start:start + feature_chunksize]
         val_features_subset = val_data[:, start:start + feature_chunksize]
 
-        train_dl = simple_dataloader(train_features_subset, target, batch_size,
-                                     label_mappings, batch_mappings)
-        val_dl = simple_dataloader(val_features_subset, target, batch_size,
-                                   label_mappings, batch_mappings)
+        train_dl = simple_dataloader(adata=train_features_subset,
+                                     target=target,
+                                     batch_size=batch_size,
+                                     label_mappings=label_mappings,
+                                     batch_mappings=batch_mappings)
+        val_dl = simple_dataloader(adata=val_features_subset,
+                                   target=target,
+                                   batch_size=batch_size,
+                                   label_mappings=label_mappings,
+                                   batch_mappings=batch_mappings)
 
         in_features = len(train_features_subset.var_names)
         # Incrementing a feature count if batch correction is set to true.

@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from scalr.utils.file import read_yaml
-from .default_config import data_config, data_split_config, feature_selection_config, train_config, model_config, evaluation_config
+from .default_config import data_config, data_split_config, feature_selection_config, train_config, model_config, evaluation_config, shap_config
 
 # THE DEFAULT CONFIGS TEMPLATE
 default_config_template = {
@@ -55,5 +55,8 @@ def load_config(path: str) -> dict:
     if 'evaluation' in user_config:
         default_config['evaluation'] = evaluation_config
         default_config['model'] = model_config
+
+        if 'metrics' in user_config['evaluation'] and 'shap' in user_config['evaluation']['metrics']:
+            default_config['evaluation']['shap_config'] = shap_config
 
     return overwrite_default(user_config, default_config)
