@@ -2,7 +2,10 @@ import os
 from os import path
 
 import _scalr
-from _scalr.utils import read_data, write_data, write_chunkwise_data, build_object
+from _scalr.utils import build_object
+from _scalr.utils import read_data
+from _scalr.utils import write_chunkwise_data
+from _scalr.utils import write_data
 
 
 class SplitterBase:
@@ -27,7 +30,7 @@ class SplitterBase:
         the distribution of target classes in each split
 
         TODO: check for class distribution
-        
+
         Args:
             datapath (str): path to full data
             data_splits (dict): split of 'train', 'val' and 'test' indices.

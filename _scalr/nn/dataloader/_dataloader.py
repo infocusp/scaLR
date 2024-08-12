@@ -1,10 +1,12 @@
-from anndata.experimental import AnnLoader, AnnCollection
 from typing import Union
+
 from anndata import AnnData
-from typing import Union
+from anndata.experimental import AnnCollection
+from anndata.experimental import AnnLoader
+import torch
+
 import _scalr
 from _scalr.utils import build_object
-import torch
 
 
 class DataLoaderBase:
@@ -19,7 +21,7 @@ class DataLoaderBase:
         Args:
             batch_size (int, optional): _description_. Defaults to 1.
             target ([str, list[str]]): list of target. Defaults to None.
-            mappings (dict): list of label mappings of each target to . 
+            mappings (dict): list of label mappings of each target to .
                               Defaults to None.
         """
         self.batch_size = batch_size
@@ -29,14 +31,14 @@ class DataLoaderBase:
     def collate_fn(self, batch):
         """Given an input anndata of batch_size,
         the collate function creates inputs and outputs.
-        It can also be used to perform batch-wise 
+        It can also be used to perform batch-wise
         operations.
         """
         pass
 
     def get_targets_ids_from_mappings(self, adata: Union[AnnData,
                                                          AnnCollection]):
-        """Helper function to generate 
+        """Helper function to generate
 
         Args:
             adata (Union[AnnData, AnnCollection]): anndata object containing

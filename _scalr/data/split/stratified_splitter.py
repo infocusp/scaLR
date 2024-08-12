@@ -1,13 +1,14 @@
-from sklearn.model_selection import GroupShuffleSplit, StratifiedShuffleSplit
 from pandas import DataFrame
+from sklearn.model_selection import GroupShuffleSplit
+from sklearn.model_selection import StratifiedShuffleSplit
 
-from _scalr.utils import read_data
 from _scalr.data.split import SplitterBase
+from _scalr.utils import read_data
 
 
 class StratifiedSplitter(SplitterBase):
     """Generate Stratified split of data into train, validation and test
-    sets. Stratification ensures samples having same value for `stratify` 
+    sets. Stratification ensures samples having same value for `stratify`
     column, can not belong to different sets.
     """
 
@@ -29,9 +30,9 @@ class StratifiedSplitter(SplitterBase):
             metadata (DataFrame): dataframe containing all samples to be split
             target (str): target for classification present in `obs`
             test_ratio (float): ratio of samples belonging to the test split
-            
+
         Returns:
-            (list(int), list(int)): two lists consisting train and test indices 
+            (list(int), list(int)): two lists consisting train and test indices
         """
         splitter = GroupShuffleSplit(test_size=test_ratio,
                                      n_splits=1,

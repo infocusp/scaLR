@@ -21,10 +21,10 @@ class ModelBase(nn.Module):
     def update_from_data(self, data: Union[AnnCollection, AnnData],
                          targets: list[str]):
         """To use data to build any part of class
-        This method is optional and cannot return anything. 
+        This method is optional and cannot return anything.
         It should only be used to create of modify arguments
         Eg. To use data shape to build input and output features, or
-        use data to calculate and build weights. It is important to note 
+        use data to calculate and build weights. It is important to note
         data should ONLY be read in chunks at a time.
 
         Args:

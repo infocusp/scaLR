@@ -1,22 +1,22 @@
+import json
 import os
 from os import path
-import json
 from typing import Union
 
+from anndata import AnnData
+import anndata as ad
+from anndata.experimental import AnnCollection
 import numpy as np
 import yaml
-import anndata as ad
-from anndata import AnnData
-from anndata.experimental import AnnCollection
 
 
 def read_data(filepath: str,
               backed: str = 'r') -> Union[dict, AnnData, AnnCollection]:
     """Reads a json, yaml or AnnData object file if filepath contains it.
-    Returns an AnnCollection in case of a directory with chunked anndatas. 
+    Returns an AnnCollection in case of a directory with chunked anndatas.
 
     Args:
-        filepath (str): path to `json`, `yaml` or `h5ad` file. 
+        filepath (str): path to `json`, `yaml` or `h5ad` file.
                         Or directory containing multiple `h5ad` files.
         backed (str, optional): To load AnnData / AnnCollection in backed mode. Defaults to 'r'.
 
@@ -65,18 +65,18 @@ def write_chunkwise_data(datapath: str,
                          transform=None):
     """Write data subsets iteratively in a chunkwise manner, to ensure
     only at most `sample_chunksize` samples are loaded at a time.
-    
+
     This function can also applies transformation on each chunk.
 
     Args:
         datapath (str): path/to/data to be written in chunks
         sample_chunksize (int): number of samples to be loaded at a time
         dirpath (str): path/to/directory to write the chunks of data
-        sample_inds (Union[list[int], int], optional): To be used in case of chunking 
-                                                       only a subset of samples. 
+        sample_inds (Union[list[int], int], optional): To be used in case of chunking
+                                                       only a subset of samples.
                                                        Defaults to all samples.
         feature_inds (Union[list[int], int], optional): To be used in case of writing
-                                                        only a subset of features. 
+                                                        only a subset of features.
                                                         Defaults to all features.
         transform (function): a function to apply transformation on chunked numpy array
     """
@@ -172,7 +172,7 @@ def read_anndata(filepath: str, backed: str = 'r') -> AnnData:
 
 
 def read_chunked_anndatas(dirpath: str, backed: str = 'r') -> AnnCollection:
-    """Returns an AnnCollection object from multiple anndatas 
+    """Returns an AnnCollection object from multiple anndatas
     in dirpath directory
     """
     datas = []

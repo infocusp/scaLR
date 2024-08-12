@@ -1,0 +1,11 @@
+repos:
+-   repo: https://github.com/pre-commit/mirrors-yapf
+    rev: v0.32.0
+    hooks:
+    -   id: yapf
+        args: ['--style', '.style.yapf']
+-   repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.10.1
+    hooks:
+    -   id: isort
+        args: ['--settings-path', '.isort.cfg']
