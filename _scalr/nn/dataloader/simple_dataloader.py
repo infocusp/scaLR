@@ -1,14 +1,16 @@
-import torch
 from typing import Union
+
 from anndata import AnnData
 from anndata.experimental import AnnCollection
+import torch
+
 from _scalr.nn.dataloader import DataLoaderBase
 
 
 class SimpleDataLoader(DataLoaderBase):
-    """Simple DataLoader which converts all adata values to inputs, and target column in metadata 
+    """Simple DataLoader which converts all adata values to inputs, and target column in metadata
     to output labels
-        
+
     Returns:
         PyTorch DataLoader object with (X: Tensor [batch_size, features], y: Tensor [batch_size, ])
     """
@@ -17,7 +19,7 @@ class SimpleDataLoader(DataLoaderBase):
         """
         Args:
             batch_size (int): number of samples to be loaded in each batch
-            target (str): corresponding metadata name to be treated as 
+            target (str): corresponding metadata name to be treated as
                           training objective in classification.
                           Must be present as a column_name in adata.obs
             mappings (dict): mapping the target name to respective ids

@@ -1,8 +1,10 @@
 import os
 from os import path
 from typing import Union
+
 from anndata import AnnData
 from anndata.experimental import AnnCollection
+
 import _scalr
 from _scalr.utils import build_object
 
@@ -29,7 +31,7 @@ class CallbackBase:
 class CallbackExecutor:
     """
     Wrapper class to execute all enabled callbacks
-    
+
     Enabled callbacks are executed with the early stopping callback
     executed last to return a flag for continuation or stopping of model training
     """

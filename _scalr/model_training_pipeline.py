@@ -1,18 +1,20 @@
-import torch
+from copy import deepcopy
 import os
 from os import path
-from copy import deepcopy
-
 from typing import Union
+
 from anndata import AnnData
 from anndata.experimental import AnnCollection
+import torch
 
 import _scalr
-from _scalr.nn.model import build_model
-from _scalr.nn.loss import build_loss_fn
-from _scalr.nn.dataloader import build_dataloader
-from _scalr.utils import read_data, load_train_val_data_from_config, write_data
 from _scalr.nn.callbacks import CallbackExecutor
+from _scalr.nn.dataloader import build_dataloader
+from _scalr.nn.loss import build_loss_fn
+from _scalr.nn.model import build_model
+from _scalr.utils import load_train_val_data_from_config
+from _scalr.utils import read_data
+from _scalr.utils import write_data
 
 
 class ModelTrainingPipeline:

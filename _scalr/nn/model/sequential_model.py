@@ -18,8 +18,8 @@ class SequentialModel(ModelBase):
         Args:
             layers (list[int]): List of layers' feature size going from
                                                  input_features to output_features.
-            dropout (float, optional): dropout after each layer. 
-                                       Floating point value [0,1). 
+            dropout (float, optional): dropout after each layer.
+                                       Floating point value [0,1).
                                        Defaults to 0.
             activation (str, optional): activation function class after each layer.
                                         Defaults to 'ReLU'.

@@ -1,13 +1,13 @@
+from copy import deepcopy
 import os
 from os import path
 from time import time
-from copy import deepcopy
 
 import torch
 from torch import nn
 from torch.nn import Module
-from torch.utils.data import DataLoader
 from torch.optim import Optimizer
+from torch.utils.data import DataLoader
 
 from _scalr.nn.callbacks import CallbackExecutor
 

@@ -5,7 +5,8 @@ from anndata.experimental import AnnCollection
 import numpy as np
 
 import _scalr
-from _scalr.utils import write_chunkwise_data, build_object
+from _scalr.utils import build_object
+from _scalr.utils import write_chunkwise_data
 
 
 class PreprocessorBase:

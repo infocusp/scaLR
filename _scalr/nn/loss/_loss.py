@@ -1,9 +1,10 @@
 from typing import Union
+
 from anndata import AnnData
 from anndata.experimental import AnnCollection
-
 import torch
 from torch import nn
+
 import _scalr
 
 
