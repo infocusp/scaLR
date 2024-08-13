@@ -17,7 +17,7 @@ class PreprocessorBase:
         pass
 
     #REQUIRED
-    def process_samples(self, data: np.ndarray) -> np.ndarray:
+    def transform(self, data: np.ndarray) -> np.ndarray:
         """The method called by the pipeline to process a chunk of
         samples.
 
@@ -29,7 +29,7 @@ class PreprocessorBase:
         """
         pass
 
-    def update_from_data(
+    def fit(
         self,
         data: Union[AnnData, AnnCollection],
         sample_chunksize: int,
@@ -64,7 +64,7 @@ class PreprocessorBase:
             write_chunkwise_data(datapaths[split],
                                  sample_chunksize,
                                  dirpaths[split],
-                                 transform=self.process_samples)
+                                 transform=self.transform)
 
 
 def build_preprocessor(preprocessing_config):
