@@ -68,14 +68,14 @@ class ModelTrainingPipeline:
         self.model.to(self.device)
 
         # Optimizer Building
-        opt_config = self.train_config.get('optimizer')
+        opt_config = deepcopy(self.train_config.get('optimizer'))
         self.opt, opt_config = self.build_optimizer(
             self.train_config.get('optimizer'))
         self.train_config['optimizer'] = opt_config
 
         # Build Loss Function
         self.loss_fn, loss_config = build_loss_fn(
-            self.train_config.get('loss', dict()))
+            deepcopy(self.train_config.get('loss', dict())))
         self.train_config['loss'] = loss_config
         self.loss_fn.to(self.device)
 
@@ -98,7 +98,8 @@ class ModelTrainingPipeline:
                               'model.pt'))['optimizer_state_dict'])
 
     def build_optimizer(self, opt_config: dict = None):
-        if not opt_config: opt_config = dict()
+        if not opt_config:
+            opt_config = dict()
         name = opt_config.get('name', 'Adam')
         opt_config['name'] = name
         params = opt_config.get('params', dict(lr=1e-3))
@@ -118,8 +119,9 @@ class ModelTrainingPipeline:
                           self.device)
 
         # Build DataLoaders
-        dataloader_config = self.train_config.get(
-            'dataloader', dict(name='SimpleDataLoader'))
+        dataloader_config = deepcopy(
+            self.train_config.get('dataloader', dict(name='SimpleDataLoader')))
+
         dataloader_config['params'] = dataloader_config.get(
             'params', dict(batch_size=1))
         self.train_config['dataloader'] = deepcopy(dataloader_config)
@@ -139,7 +141,7 @@ class ModelTrainingPipeline:
             os.makedirs(best_model_dir, exist_ok=True)
             best_model.save_weights(path.join(best_model_dir, 'model.pt'))
             write_data(self.model_config,
-                       path.join(best_model_dir, 'model_config.json'))
+                       path.join(best_model_dir, 'model_config.yaml'))
             write_data(self.mappings, path.join(best_model_dir,
                                                 'mappings.json'))
 

@@ -61,9 +61,8 @@ class SplitterBase:
         assert len(
             set(val_inds).intersection(train_inds)
         ) == 0, "Validation and Train sets contain overlapping samples"
-        assert len(
-            set(test_inds).intersection(val_inds)
-        ) == 0, "Test and Validation sets contain overlapping samples"
+        assert len(set(test_inds).intersection(val_inds)
+                  ) == 0, "Test and Validation sets contain overlapping samples"
 
         # LOG
         print('Length of train set: ', len(train_inds))
@@ -94,7 +93,6 @@ class SplitterBase:
         Returns:
             dict: path of each split
         """
-        filepaths = {}
 
         for split in data_split_indices.keys():
             if sample_chunksize:
@@ -102,15 +100,10 @@ class SplitterBase:
                 os.makedirs(split_dirpath, exist_ok=True)
                 write_chunkwise_data(full_datapath, sample_chunksize,
                                      split_dirpath, data_split_indices[split])
-                filepaths[f'{split}'] = split_dirpath
             else:
                 full_data = read_data(full_datapath)
                 filepath = path.join(dirpath, f'{split}.h5ad')
                 write_data(full_data[data_split_indices[split]], filepath)
-
-                filepaths[f'{split}'] = filepath
-
-        return filepaths
 
     @classmethod
     def get_default_params(cls) -> dict:

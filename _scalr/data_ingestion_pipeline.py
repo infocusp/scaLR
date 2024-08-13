@@ -20,9 +20,9 @@ class DataIngestionPipeline:
             dirpath (str): Experiment root directory. Defaults to '.'.
         """
 
-        self.data_config = data_config
-        self.target = data_config.get('target')
-        self.sample_chunksize = data_config.get('sample_chunksize')
+        self.data_config = deepcopy(data_config)
+        self.target = self.data_config.get('target')
+        self.sample_chunksize = self.data_config.get('sample_chunksize')
 
         # Make some nessecary checks and logs
         if not self.target:
@@ -40,19 +40,18 @@ class DataIngestionPipeline:
         """Function to split data into train, validation and test sets.
         """
 
-        if self.data_config['train_val_test'].get('splitting'):
+        if self.data_config['train_val_test'].get('full_datapath'):
             if not self.target:
                 raise Warning(
                     '''Target not provided. Will not be able to perform
                     checks regarding splits.
                     ''')
 
-            full_datapath = self.data_config['train_val_test']['splitting'][
-                'full_datapath']
-            splitter_config = self.data_config['train_val_test']['splitting'][
-                'splitter_config']
+            full_datapath = self.data_config['train_val_test']['full_datapath']
+            splitter_config = deepcopy(
+                self.data_config['train_val_test']['splitter_config'])
             splitter, splitter_config = build_splitter(splitter_config)
-            self.data_config['train_val_test']['splitting'][
+            self.data_config['train_val_test'][
                 'splitter_config'] = splitter_config
 
             # Make data splits
@@ -71,12 +70,12 @@ class DataIngestionPipeline:
             train_val_test_split_dirpath = path.join(self.datadir,
                                                      'train_val_test_split')
             os.makedirs(train_val_test_split_dirpath, exist_ok=True)
-            filepaths = splitter.write_splits(full_datapath,
-                                              train_val_test_split_indices,
-                                              self.sample_chunksize,
-                                              train_val_test_split_dirpath)
+            splitter.write_splits(full_datapath, train_val_test_split_indices,
+                                  self.sample_chunksize,
+                                  train_val_test_split_dirpath)
 
-            self.data_config['train_val_test']['split_datapaths'] = filepaths
+            self.data_config['train_val_test'][
+                'split_datapaths'] = train_val_test_split_dirpath
 
         elif self.data_config['train_val_test'].get('split_datapaths'):
             # LOG
@@ -105,45 +104,43 @@ class DataIngestionPipeline:
 
         self.data_config['train_val_test']['final_datapaths'] = deepcopy(
             self.data_config['train_val_test']['split_datapaths'])
+
         all_preprocessings = self.data_config.get('preprocess', list())
         if not all_preprocessings:
             return
 
-        data_dirpaths = dict([
-            (split,
-             self.data_config['train_val_test']['final_datapaths'][f'{split}'])
-            for split in ['train', 'val', 'test']
-        ])
+        datapath = self.data_config['train_val_test']['final_datapaths']
 
-        processed_data_dirpaths = dict([(split,
-                                         path.join(self.datadir,
-                                                   'processed_data', split))
-                                        for split in ['train', 'val', 'test']])
+        processed_datapath = path.join(self.datadir, 'processed_data')
+        os.makedirs(processed_datapath, exist_ok=True)
 
         for i, (preprocess) in enumerate(all_preprocessings):
-            preprocessor, preprocessor_config = build_preprocessor(preprocess)
+            preprocessor, preprocessor_config = build_preprocessor(
+                deepcopy(preprocess))
             self.data_config['preprocess'][i] = preprocessor_config
 
-            preprocessor.fit(read_data(data_dirpaths['train']),
+            preprocessor.fit(read_data(path.join(datapath, 'train')),
                              self.sample_chunksize)
 
-            preprocessor.process_data(data_dirpaths, self.sample_chunksize,
-                                      processed_data_dirpaths)
+            preprocessor.process_data(datapath, self.sample_chunksize,
+                                      processed_datapath)
 
-            data_dirpaths = processed_data_dirpaths
+            datapath = processed_datapath
 
         self.data_config['train_val_test'][
-            'final_datapaths'] = processed_data_dirpaths
+            'final_datapaths'] = processed_datapath
 
     def generate_mappings(self):
         """Generate an Integer mapping to and from target columns"""
         # print(self.data_config)
-        column_names = read_data(self.data_config['train_val_test']
-                                 ['final_datapaths']['val']).obs.columns
+        column_names = read_data(
+            path.join(self.data_config['train_val_test']['final_datapaths'],
+                      'val')).obs.columns
 
         datas = []
-        for datapath in self.data_config['train_val_test'][
-                'final_datapaths'].values():
+        for split in ['train', 'val', 'test']:
+            datapath = path.join(
+                self.data_config['train_val_test']['final_datapaths'], split)
             datas.append(read_data(datapath))
 
         label_mappings = {}

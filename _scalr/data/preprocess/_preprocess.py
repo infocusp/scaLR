@@ -1,3 +1,4 @@
+from os import path
 from typing import Union
 
 from anndata import AnnData
@@ -47,23 +48,22 @@ class PreprocessorBase:
         """
         pass
 
-    def process_data(self, datapaths: str, sample_chunksize: int,
-                     dirpaths: str):
+    def process_data(self, datapath: dict, sample_chunksize: int, dirpath: str):
         """Process each split of the data chunkwise
 
         Args:
-            datapaths (str): _description_
-            sample_chunksize (int): _description_
-            dirpaths (str): _description_
+            datapath (str): datapath to read data from for transformation
+            sample_chunksize (int): number of samples in one chunk 
+            dirpath (str): dirpath to write the data to
         """
         if not sample_chunksize:
             raise NotImplementedError(
                 'Preprocessing does not work without sample chunksize')
 
-        for split in datapaths.keys():
-            write_chunkwise_data(datapaths[split],
+        for split in ['train', 'val', 'test']:
+            write_chunkwise_data(path.join(datapath, split),
                                  sample_chunksize,
-                                 dirpaths[split],
+                                 path.join(dirpath, split),
                                  transform=self.transform)
 
 
