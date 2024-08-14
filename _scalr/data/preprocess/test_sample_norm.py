@@ -1,3 +1,5 @@
+'''This is a test file for sample-norm normalization.'''
+
 import anndata
 import numpy as np
 import scanpy as sc
@@ -5,7 +7,11 @@ import scanpy as sc
 from _scalr.data.preprocess import sample_norm
 
 
-def test_fit():
+def test_transform():
+    '''This function tests transform function of sample-norm normalization.
+    
+    There is no fit() involved in sample-norm normalization.
+    '''
 
     # Setting seed for reproducibility
     np.random.seed(0)
@@ -18,7 +24,7 @@ def test_fit():
 
     # scalr sample-wise normalization
     scalr_sample_norm = sample_norm.SampleNorm(scaling_factor=target_sum)
-    # No need to fit() for sample-norm
+    # No need to fit() for sample-norm normalization
     scalr_scaled_data = scalr_sample_norm.transform(adata.X)
 
     # scanpy sample-wise normalization

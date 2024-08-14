@@ -1,3 +1,5 @@
+'''This is a test file for standard-scaler normalization.'''
+
 import anndata
 import numpy as np
 from sklearn import preprocessing
@@ -6,6 +8,11 @@ from _scalr.data.preprocess import standard_scale
 
 
 def test_fit():
+    '''This function tests fit() function of sample-norm normalization.
+    
+    fit() function is enough for testing, as we can compare mean and std with
+    sklean standard-scaler object params.
+    '''
 
     # Setting seed for reproducibility
     np.random.seed(0)
