@@ -1,7 +1,7 @@
 # EXPERIMENT
 device: 'cuda'
 dirpath: '.'
-exp_name: 'revamped_scalr_test'
+exp_name: 'revamped_scalr_test_fs'
 exp_run: 0
 
 
@@ -10,28 +10,19 @@ data:
     sample_chunksize: 10000
 
     train_val_test:
-        splitting:
-            full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
-            splitter_config:
-                name: StratifiedSplitter
-                params:
-                    split_ratio: [7, 1, 2.5]
-                    stratify: 'donor_id'
+        # full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
 
-        # split_datapaths:
-        #     train: './revamped_scalr_test_4/data/train_val_test_split/train'
-        #     val: './revamped_scalr_test_4/data/train_val_test_split/val'
-        #     test: './revamped_scalr_test_4/data/train_val_test_split/test'
+        # splitter_config:
+        #     name: StratifiedSplitter
+        #     params:
+        #         split_ratio: [7, 1, 2.5]
+        #         stratify: 'donor_id'
+
+        split_datapaths: './revamped_scalr_test_5/data/train_val_test_split'
 
         # final_datapaths:
-        #     train_datapath: '/path/to/train_data'
-        #     val_datapath: '/path/to/val_data'
-        #     test_datapath: '/path/to/test_data'
 
         # feature_subset_datapaths:
-        #     train_datapath: '/path/to/train_data'
-        #     val_datapath: '/path/to/val_data'
-        #     test_datapath: '/path/to/test_data'
 
     # preprocess:
     #     - name: SampleNorm
@@ -44,17 +35,56 @@ data:
 
     target: Cell_Type    
 
+feature_selection:
+
+    # scores: '/path/to/matrix'
+    feature_chunksize: 5000
+
+    model:
+        name: SequentialModel
+        params:
+            layers: [5000, 6]
+            weights_init_zero: True
+
+    model_train_config:
+        trainer: SimpleModelTrainer
+
+        dataloader: 
+            name: SimpleDataLoader
+            params:
+                batch_size: 25000
+        
+        optimizer:
+            name: SGD
+            params:
+                lr: 1.0e-3
+                weight_decay: 0.1
+
+        # loss:
+        #     name: CrossEntropyLoss
+        
+        epochs: 1
+
+    scoring_config: 
+        name: LinearScorer
+        
+    features_selector:
+        name: AbsMean
+        params:
+            k: 5000
+
+
 # TRAINING
 final_training:
 
     model:
         name: SequentialModel
         params:
-            layers: [22858, 6]
+            layers: [5000, 6]
             # dropout: 0
             # weights_init_zero: False
 
-    train_config:
+    model_train_config:
         # resume_from_checkpoint: null
 
         # trainer: LinearModelTrainer

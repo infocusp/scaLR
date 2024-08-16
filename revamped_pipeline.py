@@ -7,10 +7,13 @@ import sys
 import numpy as np
 import torch
 
-from _scalr.utils import set_seed, write_data, read_data
 from _scalr.data_ingestion_pipeline import DataIngestionPipeline
-# from _scalr.feature_extraction_pipeline import FeatureExtraction
+from _scalr.feature_extraction_pipeline import FeatureExtractionPipeline
 from _scalr.model_training_pipeline import ModelTrainingPipeline
+from _scalr.utils import read_data
+from _scalr.utils import set_seed
+from _scalr.utils import write_data
+
 # from _scalr.downstream_analysis_pipeline import DownstreamAnalysis
 
 
@@ -55,17 +58,32 @@ if __name__ == '__main__':
     config['data'] = ingest_data.get_updated_config()
     write_data(config, path.join(dirpath, 'config.yaml'))
 
+    if config.get('feature_selection'):
+        extract_features = FeatureExtractionPipeline(
+            config['feature_selection'], config['data'], dirpath, device)
+        extract_features.feature_chunked_model_training()
+        extract_features.feature_scoring()
+        extract_features.top_feature_extraction()
+        extract_features.write_top_features_subset_data()
+
+        feature_selection_config, data_config = extract_features.get_updated_config(
+        )
+        config['feature_selection'] = feature_selection_config
+        config['data'] = data_config
+        write_data(config, path.join(dirpath, 'config.yaml'))
+
     if config.get('final_training'):
         model_trainer = ModelTrainingPipeline(
             config['final_training']['model'],
-            config['final_training']['train_config'], dirpath, device)
+            config['final_training']['model_train_config'], dirpath, device)
 
         model_trainer.load_data_and_targets_from_config(config['data'])
         model_trainer.build_model_training_artifacts()
         model_trainer.train()
-        model_config, train_config = model_trainer.get_updated_config()
+
+        model_config, model_train_config = model_trainer.get_updated_config()
         config['final_training']['model'] = model_config
-        config['final_training']['train_config'] = train_config
+        config['final_training']['model_train_config'] = model_train_config
         write_data(config, path.join(dirpath, 'config.yaml'))
 
     # INCOMPLETE BELOW

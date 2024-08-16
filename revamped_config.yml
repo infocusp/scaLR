@@ -10,28 +10,19 @@ data:
     sample_chunksize: 10000
 
     train_val_test:
-        splitting:
-            full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
-            splitter_config:
-                name: StratifiedSplitter
-                params:
-                    split_ratio: [7, 1, 2.5]
-                    stratify: 'donor_id'
+        full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
 
-        split_datapaths:
-            train_datapath: '/path/to/train_data'
-            val_datapath: '/path/to/val_data'
-            test_datapath: '/path/to/test_data'
+        splitter_config:
+            name: StratifiedSplitter
+            params:
+                split_ratio: [7, 1, 2.5]
+                stratify: 'donor_id'
 
-        final_datapaths:
-            train_datapath: '/path/to/train_data'
-            val_datapath: '/path/to/val_data'
-            test_datapath: '/path/to/test_data'
+        # split_datapaths:
 
-        feature_subset_datapaths:
-            train_datapath: '/path/to/train_data'
-            val_datapath: '/path/to/val_data'
-            test_datapath: '/path/to/test_data'
+        # final_datapaths:
+
+        # feature_subset_datapaths:
 
     preprocess:
         - name: SampleNorm
@@ -54,7 +45,6 @@ feature_selection:
         name: LinearModel
         params:
             layers: [3000, ]
-            hidden_layers: []
 
     model_train_config:
         trainer: LinearModelTrainer
@@ -73,13 +63,14 @@ feature_selection:
         lr: 1.0e-3
         weight_decay: 0.1
 
-    scoring_method: 
-        name: SingleLayer
-        params: **args
+    scoring_config: 
+        name: LinearScorer
         
-    top_features:
-        k: 5000
-        aggregation_strategy: mix
+    features_selector:
+        name: AbsMean
+        params:
+            k: 5000
+
 
 # TRAINING
 final_training:
