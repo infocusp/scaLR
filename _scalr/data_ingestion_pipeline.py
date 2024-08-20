@@ -118,12 +118,14 @@ class DataIngestionPipeline:
             preprocessor, preprocessor_config = build_preprocessor(
                 deepcopy(preprocess))
             self.data_config['preprocess'][i] = preprocessor_config
-
+            # Fit on train data
             preprocessor.fit(read_data(path.join(datapath, 'train')),
                              self.sample_chunksize)
-
-            preprocessor.process_data(datapath, self.sample_chunksize,
-                                      processed_datapath)
+            # Transform on train, val & test split
+            for split in ['train', 'val', 'test']:
+                preprocessor.process_data(path.join(datapath, split),
+                                          self.sample_chunksize,
+                                          path.join(processed_datapath, split))
 
             datapath = processed_datapath
 
