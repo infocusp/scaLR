@@ -56,8 +56,7 @@ def evaluate(config, log=True):
             path.join(model_checkpoint, 'label_mappings.json'))
         if batch_correction:
             batch_onehotencoder = joblib.load(
-                path.join(dirpath, 'feature_selection',
-                          'batch_onehotencoder.pkl'))
+                path.join(model_checkpoint, 'batch_onehotencoder.pkl'))
         else:
             batch_onehotencoder = None
 

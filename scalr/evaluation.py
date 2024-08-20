@@ -205,34 +205,37 @@ def get_top_n_genes(
 
     abs_prev_top_genes_batch_wise = {}
     count_patience = 0
+    total_samples = 0
+
     for batch_id, batch in enumerate(test_dl):
+        total_samples += batch[0].shape[0]
+
         batch_shap_values = explainer.shap_values(batch[0].to(device))
 
-        abs_mean_shap_values = np.abs(batch_shap_values).mean(axis=0)
+        abs_sum_shap_values = np.abs(batch_shap_values).sum(axis=0)
         # calcluating 2 mean with abs values and non-abs values.
         # Non-abs values required for heatmap.
-        mean_shap_values = batch_shap_values.mean(axis=0)
+        sum_shap_values = batch_shap_values.sum(axis=0)
+        if batch_id >= 1:
+            abs_sum_shap_values = np.sum(
+                [abs_sum_shap_values, abs_prev_batches_sum_shap_values],
+                axis=0)
+            sum_shap_values = np.sum(
+                [sum_shap_values, prev_batches_sum_shap_values], axis=0)
+
+        abs_mean_shap_values = abs_sum_shap_values / total_samples
 
         # Handle batch correction. Remove batch features from analysis.
         if batch_onehotencoder:
-            mean_shap_values = mean_shap_values[:-len(batch_onehotencoder.
-                                                      categories_[0]), :]
             abs_mean_shap_values = abs_mean_shap_values[:-len(
                 batch_onehotencoder.categories_[0]), :]
-
-        if batch_id >= 1:
-            abs_mean_shap_values = np.mean(
-                [abs_mean_shap_values, abs_prev_batches_mean_shap_values],
-                axis=0)
-            mean_shap_values = np.mean(
-                [mean_shap_values, prev_batches_mean_shap_values], axis=0)
 
         abs_genes_class_shap_df = DataFrame(abs_mean_shap_values,
                                             index=test_dl.dataset.var_names,
                                             columns=classes)
 
-        abs_prev_batches_mean_shap_values = abs_mean_shap_values
-        prev_batches_mean_shap_values = mean_shap_values
+        abs_prev_batches_sum_shap_values = abs_sum_shap_values
+        prev_batches_sum_shap_values = sum_shap_values
 
         early_stop, abs_prev_top_genes_batch_wise = is_shap_early_stop(
             batch_id, abs_genes_class_shap_df, abs_prev_top_genes_batch_wise,
@@ -244,6 +247,12 @@ def get_top_n_genes(
             print(f"Early stopping at batch: {batch_id}")
             break
 
+    mean_shap_values = sum_shap_values/total_samples
+
+    # Handle batch correction. Remove batch features from analysis.
+    if batch_onehotencoder:
+        mean_shap_values = mean_shap_values[:-len(batch_onehotencoder.
+                                                  categories_[0]), :]
     genes_class_shap_df = DataFrame(mean_shap_values,
                                     index=test_dl.dataset.var_names,
                                     columns=classes)

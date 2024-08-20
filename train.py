@@ -169,9 +169,9 @@ def train(config, log=True):
     dump_yaml(config['model'], path.join(dirpath, 'best_model', 'config.yml'))
     dump_json(label_mappings,
               path.join(dirpath, 'best_model', 'label_mappings.json'))
-    # if batch_correction:
-    #     dump_json(batch_onehotencoder,
-    #               path.join(dirpath, 'best_model', 'batch_onehotencoder.json'))
+    if batch_correction:
+        joblib.dump(batch_onehotencoder,
+                    path.join(dirpath, 'best_model', 'batch_onehotencoder.pkl'))
     dump_yaml(config, path.join(dirpath, 'config.yml'))
     return config
 
