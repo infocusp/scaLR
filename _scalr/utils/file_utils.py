@@ -91,8 +91,8 @@ def write_chunkwise_data(datapath: str,
         feature_inds = list(range(len(data.var_names)))
 
     # Hacky fix for an AnnCollection working/bug
-    if sample_chunksize >= len(data):
-        sample_chunksize = len(data) - 1
+    if sample_chunksize >= len(sample_inds):
+        sample_chunksize = len(sample_inds) - 1
 
     for i, (start) in enumerate(range(0, len(sample_inds), sample_chunksize)):
         data = read_data(datapath)
