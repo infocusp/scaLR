@@ -60,11 +60,10 @@ class PreprocessorBase:
             raise NotImplementedError(
                 'Preprocessing does not work without sample chunksize')
 
-        for split in ['train', 'val', 'test']:
-            write_chunkwise_data(path.join(datapath, split),
-                                 sample_chunksize,
-                                 path.join(dirpath, split),
-                                 transform=self.transform)
+        write_chunkwise_data(datapath,
+                             sample_chunksize,
+                             dirpath,
+                             transform=self.transform)
 
 
 def build_preprocessor(preprocessing_config):

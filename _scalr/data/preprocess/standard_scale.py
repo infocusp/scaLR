@@ -40,10 +40,6 @@ class StandardScaler(PreprocessorBase):
         """
 
         if not self.with_mean:
-            logging.info(
-                'Setting `train_mean` to be zero, as `with_mean` is set to False!'
-            )
-            # train_mean = 0 # check this if you want it to be an array
             train_mean = np.zeros((1, data.shape[1]))
         else:
             train_mean = self.train_mean
@@ -76,6 +72,11 @@ class StandardScaler(PreprocessorBase):
             train_sum += data[i * sample_chunksize:i * sample_chunksize +
                               sample_chunksize].X.sum(axis=0)
         self.train_mean = train_sum / data.shape[0]
+
+        if not self.with_mean:
+            logging.info(
+                '`train_mean` will be set to zero during `transform()`, as `with_mean` is set to False!'
+            )
 
     def calculate_std(self, data: Union[AnnData, AnnCollection],
                       sample_chunksize: int) -> None:
