@@ -88,13 +88,13 @@ class ModelTrainingPipeline:
         # Do we want to make model according to checkpoint?
         # OR
         # Only load weights from a checkpoint?
-        if self.train_config.get('resume_from_checkpoint'):
+        if self.train_config.get('resume_from_model_weights'):
             self.model.load_weights(
-                path.join(self.train_config['resume_from_checkpoint'],
+                path.join(self.train_config['resume_from_model_weights'],
                           'model.pt'))
             self.opt.load_state_dict(
                 torch.load(
-                    path.join(self.train_config['resume_from_checkpoint'],
+                    path.join(self.train_config['resume_from_model_weights'],
                               'model.pt'))['optimizer_state_dict'])
 
     def build_optimizer(self, opt_config: dict = None):
@@ -119,18 +119,16 @@ class ModelTrainingPipeline:
                           self.device)
 
         # Build DataLoaders
-        dataloader_config = deepcopy(
-            self.train_config.get('dataloader', dict(name='SimpleDataLoader')))
+        dataloader_config = self.train_config.get('dataloader')
+        train_dl, dataloader_config = build_dataloader(dataloader_config,
+                                                       self.train_data,
+                                                       self.target,
+                                                       self.mappings)
+        val_dl, dataloader_config = build_dataloader(dataloader_config,
+                                                     self.val_data, self.target,
+                                                     self.mappings)
+        self.train_config['dataloader'] = dataloader_config
 
-        dataloader_config['params'] = dataloader_config.get(
-            'params', dict(batch_size=1))
-        self.train_config['dataloader'] = deepcopy(dataloader_config)
-
-        dataloader_config['params']['target'] = self.target
-        dataloader_config['params']['mappings'] = self.mappings
-
-        train_dl, _ = build_dataloader(dataloader_config, self.train_data)
-        val_dl, _ = build_dataloader(dataloader_config, self.val_data)
         epochs = self.train_config.get('epochs', 1)
         self.train_config['epochs'] = epochs
 

@@ -1,24 +1,24 @@
 # EXPERIMENT
 device: 'cuda'
 dirpath: '.'
-exp_name: 'revamped_scalr_test_fs'
+exp_name: 'revamped_scalr_test_full'
 exp_run: 0
 
 
 # DATA_CONFIG
 data:
-    sample_chunksize: 10000
+    sample_chunksize: 15000
 
     train_val_test:
-        # full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
+        full_datapath: '/home/biocusp/data/lungcancer_data/lung_cancer_adata.h5ad'
 
-        # splitter_config:
-        #     name: StratifiedSplitter
-        #     params:
-        #         split_ratio: [7, 1, 2.5]
-        #         stratify: 'donor_id'
+        splitter_config:
+            name: StratifiedSplitter
+            params:
+                split_ratio: [7, 1, 2.5]
+                stratify: 'donor_id'
 
-        split_datapaths: './revamped_scalr_test_5/data/train_val_test_split'
+        # split_datapaths: '/home/saiyam/projects/biocusp/scripts/revamped_scalr_test_fs_debug_0/feature_extraction/feature_subset_data'
 
         # final_datapaths:
 
@@ -33,17 +33,17 @@ data:
     #       params: 
     #             **args
 
-    target: Cell_Type    
+    target: cell_type    
 
 feature_selection:
 
     # scores: '/path/to/matrix'
-    feature_chunksize: 5000
+    feature_chunksize: 6000
 
     model:
         name: SequentialModel
         params:
-            layers: [5000, 6]
+            layers: [6000, 6]
             weights_init_zero: True
 
     model_train_config:
@@ -114,3 +114,29 @@ final_training:
             - name: ModelCheckpoint
             # params:
             #     interval: 5
+
+analysis:
+
+    model_checkpoint: ''
+
+    dataloader:
+        name: SimpleDataLoader
+        params:
+            batch_size: 15000
+
+    gene_analysis:
+        scoring_config:
+            name: LinearScorer
+
+        features_selector:
+            name: AbsMean
+            params:
+                k: 100
+
+    # downstream_analysis:
+    #     - name: DGE
+    #       params: **args
+
+    # downstream_analysis:
+    #     - name: deg
+    #       params: **args

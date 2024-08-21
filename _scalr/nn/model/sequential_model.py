@@ -1,6 +1,9 @@
+from typing import Tuple
+
 import torch
 from torch import nn
 from torch import Tensor
+from torch.utils.data import DataLoader
 
 from _scalr.nn.model import ModelBase
 
@@ -46,7 +49,8 @@ class SequentialModel(ModelBase):
         self.out_layer = nn.Linear(layers[n - 2], layers[n - 1])
 
         self.weights_init_zero = weights_init_zero
-        if weights_init_zero: self.make_weights_zero()
+        if weights_init_zero:
+            self.make_weights_zero()
 
     def make_weights_zero(self):
         for layer in self.layers:
@@ -70,6 +74,35 @@ class SequentialModel(ModelBase):
 
         output['cls_output'] = self.out_layer(x)
         return output
+
+    def get_predictions(
+            self,
+            dl: DataLoader,
+            device: str = 'cpu'
+    ) -> Tuple[list[int], list[int], list[list[int]]]:
+        """Method to get predictions from a model, from the DataLoader
+
+        Args:
+            dl (DataLoader): DataLoader object containing samples
+            device (str, optional): Device to run the model on. Defaults to 'cpu'.
+
+        Returns:
+            True labels, Predicted labels, Predicted probabilities of all samples
+            in DataLoader
+        """
+        self.eval()
+        test_labels, pred_labels, pred_probabilities = [], [], []
+
+        for batch in dl:
+            with torch.no_grad():
+                x, y = batch[0].to(device), batch[1].to(device)
+                out = self(x)['cls_output']
+
+            test_labels += y.tolist()
+            pred_labels += torch.argmax(out, dim=1).tolist()
+            pred_probabilities += out.tolist()
+
+        return test_labels, pred_labels, pred_probabilities
 
     @classmethod
     def get_default_params(cls):

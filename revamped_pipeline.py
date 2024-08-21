@@ -8,6 +8,7 @@ import numpy as np
 import torch
 
 from _scalr.data_ingestion_pipeline import DataIngestionPipeline
+from _scalr.eval_and_analysis_pipeline import EvalAndAnalysisPipeline
 from _scalr.feature_extraction_pipeline import FeatureExtractionPipeline
 from _scalr.model_training_pipeline import ModelTrainingPipeline
 from _scalr.utils import read_data
@@ -51,31 +52,48 @@ if __name__ == '__main__':
 
     #PIPELINE RUN
 
-    ingest_data = DataIngestionPipeline(config['data'], dirpath)
-    ingest_data.generate_train_val_test_split()
-    ingest_data.preprocess_data()
-    ingest_data.generate_mappings()
-    config['data'] = ingest_data.get_updated_config()
-    write_data(config, path.join(dirpath, 'config.yaml'))
+    if config.get('data'):
+        data_dirpath = path.join(dirpath, 'data')
+        os.makedirs(data_dirpath, exist_ok=True)
+
+        ingest_data = DataIngestionPipeline(config['data'], data_dirpath)
+        ingest_data.generate_train_val_test_split()
+        ingest_data.preprocess_data()
+        ingest_data.generate_mappings()
+
+        config['data'] = ingest_data.get_updated_config()
+        write_data(config, path.join(dirpath, 'config.yaml'))
 
     if config.get('feature_selection'):
-        extract_features = FeatureExtractionPipeline(
-            config['feature_selection'], config['data'], dirpath, device)
-        extract_features.feature_chunked_model_training()
-        extract_features.feature_scoring()
-        extract_features.top_feature_extraction()
-        extract_features.write_top_features_subset_data()
+        feature_extraction_dirpath = path.join(dirpath, 'feature_extraction')
+        os.makedirs(feature_extraction_dirpath, exist_ok=True)
 
-        feature_selection_config, data_config = extract_features.get_updated_config(
-        )
-        config['feature_selection'] = feature_selection_config
-        config['data'] = data_config
+        extract_features = FeatureExtractionPipeline(
+            config['feature_selection'], feature_extraction_dirpath, device)
+        extract_features.load_data_and_targets_from_config(config['data'])
+
+        if not config['feature_selection'].get('score_matrix'):
+            extract_features.feature_chunked_model_training()
+            extract_features.feature_scoring()
+        else:
+            extract_features.set_score_matrix(
+                read_data(config['feature_selection'].get('score_matrix')))
+
+        extract_features.top_feature_extraction()
+        config['data'] = extract_features.write_top_features_subset_data(
+            config['data'])
+
+        config['feature_selection'] = extract_features.get_updated_config()
         write_data(config, path.join(dirpath, 'config.yaml'))
 
     if config.get('final_training'):
+        model_training_dirpath = path.join(dirpath, 'model')
+        os.makedirs(model_training_dirpath, exist_ok=True)
+
         model_trainer = ModelTrainingPipeline(
             config['final_training']['model'],
-            config['final_training']['model_train_config'], dirpath, device)
+            config['final_training']['model_train_config'],
+            model_training_dirpath, device)
 
         model_trainer.load_data_and_targets_from_config(config['data'])
         model_trainer.build_model_training_artifacts()
@@ -86,16 +104,25 @@ if __name__ == '__main__':
         config['final_training']['model_train_config'] = model_train_config
         write_data(config, path.join(dirpath, 'config.yaml'))
 
-    # INCOMPLETE BELOW
-    ##############################################################################
-    # if config.get('feature_selection'):
-    #     extract_features = FeatureExtraction()
-    #     extract_features.feature_scoring()
-    #     extract_features.top_feature_extraction()
-    #     extract_features.write_top_features_subset_data()
+    if config.get('analysis'):
+        analysis_dirpath = path.join(dirpath, 'analysis')
+        os.makedirs(analysis_dirpath, exist_ok=True)
 
-    # final_model_trainer = ModelTrainer()
-    # final_model_trainer.train()
+        if config.get('final_training'):
+            config['analysis']['model_checkpoint'] = path.join(
+                model_training_dirpath, 'best_model')
 
-    # analyser = DownstreamAnalysis()
-    # analyser.generate_analysis()
+        analyser = EvalAndAnalysisPipeline(config['analysis'], analysis_dirpath,
+                                           device)
+        analyser.load_data_and_targets_from_config(config['data'])
+
+        if config['analysis'].get('model_checkpoint'):
+            analyser.evaluation_and_classification_report()
+
+            if config['analysis'].get('gene_analysis'):
+                analyser.gene_analysis()
+
+        analyser.perform_downstream_anlaysis()
+
+        config['analysis'] = analyser.get_updated_config()
+        write_data(config, path.join(dirpath, 'config.yaml'))

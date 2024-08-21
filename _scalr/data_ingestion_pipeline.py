@@ -17,7 +17,7 @@ class DataIngestionPipeline:
 
         Args:
             data_config (dict): Data processing configuration and paths
-            dirpath (str): Experiment root directory. Defaults to '.'.
+            dirpath (str): Experiment data directory. Defaults to '.'.
         """
 
         self.data_config = deepcopy(data_config)
@@ -33,8 +33,7 @@ class DataIngestionPipeline:
                 '''Sample chunksize not given. Will default to not using chunking.
                    Might results in excessive use of memory.''')
 
-        self.datadir = path.join(dirpath, 'data')
-        os.makedirs(self.datadir, exist_ok=True)
+        self.datadir = dirpath
 
     def generate_train_val_test_split(self):
         """Function to split data into train, validation and test sets.
@@ -134,7 +133,6 @@ class DataIngestionPipeline:
 
     def generate_mappings(self):
         """Generate an Integer mapping to and from target columns"""
-        # print(self.data_config)
         column_names = read_data(
             path.join(self.data_config['train_val_test']['final_datapaths'],
                       'val')).obs.columns

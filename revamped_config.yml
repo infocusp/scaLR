@@ -39,29 +39,32 @@ data:
 feature_selection:
 
     # scores: '/path/to/matrix'
-    feature_subset: 3000
+    feature_chunksize: 5000
 
     model:
-        name: LinearModel
+        name: SequentialModel
         params:
-            layers: [3000, ]
+            layers: [5000, 6]
+            weights_init_zero: True
 
     model_train_config:
-        trainer: LinearModelTrainer
+        trainer: SimpleModelTrainer
 
         dataloader: 
             name: SimpleDataLoader
             params:
-                batch_size: 32
-                **args
+                batch_size: 25000
+        
+        optimizer:
+            name: SGD
+            params:
+                lr: 1.0e-3
+                weight_decay: 0.1
 
-        loss_fn: CrossEntropyLoss
-        opt: Adam
+        # loss:
+        #     name: CrossEntropyLoss
         
         epochs: 1
-        batch_size: 15000
-        lr: 1.0e-3
-        weight_decay: 0.1
 
     scoring_config: 
         name: LinearScorer
@@ -70,7 +73,6 @@ feature_selection:
         name: AbsMean
         params:
             k: 5000
-
 
 # TRAINING
 final_training:
@@ -83,7 +85,8 @@ final_training:
             weights_init_zero: False
 
     model_train_config:
-        resume_from_checkpoint: null
+
+        resume_from_model_weights: null
 
         trainer: LinearModelTrainer
 
@@ -114,16 +117,30 @@ final_training:
                 interval: 5
 
 # ANALYSIS
-downstream_analysis:
+analysis:
 
     model_checkpoint: '/path/to/model'
-    dataloader: SimpleDataLoader
-    batch_size: 15000
+
+    dataloader:
+        name: SimpleDataLoader
+        params:
+            batch_size: 15000
+
+    gene_analysis:
+        scoring_config:
+            name: LinearScorer
+
+        features_selector:
+            name: AbsMean
+            params:
+                k: 100
+
+    downstream_analysis:
+        - name: DGE
+          params: **args
+
+    # downstream_analysis:
+    #     - name: deg
+    #       params: **args
+
     
-    analysis_methods:
-
-        - name: DEG
-          params: **args
-
-        - name: GeneRecall
-          params: **args

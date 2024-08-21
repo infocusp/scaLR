@@ -5,6 +5,7 @@ from anndata.experimental import AnnCollection
 import torch
 from torch import nn
 from torch import Tensor
+from torch.utils.data import DataLoader
 
 import _scalr
 from _scalr.utils import build_object
@@ -35,12 +36,15 @@ class ModelBase(nn.Module):
 
     def load_weights(self, model_weights_path: str):
         """method to initialize model weights from previous weights"""
-        self.load_state_dict(
-            torch.load(model_weights_path)['model_state_dict'])
+        self.load_state_dict(torch.load(model_weights_path)['model_state_dict'])
 
     def save_weights(self, model_weights_path: str):
         """method to save model weights at path"""
         torch.save({'model_state_dict': self.state_dict()}, model_weights_path)
+
+    def get_predictions(self, dl: DataLoader, device: str = 'cpu'):
+        """Method to get predictions from the dataloader"""
+        pass
 
     @classmethod
     def get_default_params(cls) -> dict:

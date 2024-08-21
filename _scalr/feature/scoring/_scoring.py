@@ -16,7 +16,8 @@ class ScoringBase:
 
     def generate_scores(self, model: nn.Module,
                         train_data: Union[AnnData, AnnCollection],
-                        val_data: Union[AnnData, AnnCollection]) -> np.ndarray:
+                        val_data: Union[AnnData, AnnCollection], target: str,
+                        mappings: dict) -> np.ndarray:
         """Executor function, to return score of each feature for each class
         score: (num_classes X num_features)
         """

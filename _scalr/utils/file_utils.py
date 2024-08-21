@@ -7,6 +7,7 @@ from anndata import AnnData
 import anndata as ad
 from anndata.experimental import AnnCollection
 import numpy as np
+import pandas as pd
 import yaml
 
 
@@ -30,6 +31,8 @@ def read_data(filepath: str,
         data = read_json(filepath)
     elif filepath.endswith('.yaml'):
         data = read_yaml(filepath)
+    elif filepath.endswith('.csv'):
+        data = read_csv(filepath)
     elif filepath.endswith('.h5ad'):
         data = read_anndata(filepath, backed=backed)
     elif path.exists(path.join(filepath, '0.h5ad')):
@@ -41,12 +44,14 @@ def read_data(filepath: str,
     return data
 
 
-def write_data(data: Union[dict, AnnData], filepath: str):
+def write_data(data: Union[dict, AnnData, pd.DataFrame], filepath: str):
     """Writes data to `json`, `yaml` or `h5ad` file"""
     if filepath.endswith('.json'):
         dump_json(data, filepath)
     elif filepath.endswith('.yaml'):
         dump_yaml(data, filepath)
+    elif filepath.endswith('.csv'):
+        dump_csv(data, filepath)
     elif filepath.endswith('.h5ad'):
         assert type(
             data
@@ -183,6 +188,11 @@ def read_json(filepath: str) -> dict:
     return config
 
 
+def read_csv(filepath: str) -> pd.DataFrame:
+    """Returns the DataFrame file object"""
+    return pd.read_csv(filepath)
+
+
 def read_anndata(filepath: str, backed: str = 'r') -> AnnData:
     """Returns the Anndata object from filepath"""
     data = ad.read_h5ad(filepath, backed=backed)
@@ -216,6 +226,12 @@ def dump_yaml(config: dict, filepath: str):
     """Stores the config file to filepath"""
     with open(filepath, 'w') as fh:
         config = yaml.dump(config, fh)
+    return
+
+
+def dump_csv(df: pd.DataFrame, filepath: str):
+    """Stores the config file to filepath"""
+    df.to_csv(filepath)
     return
 
 

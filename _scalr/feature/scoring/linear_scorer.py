@@ -14,9 +14,7 @@ class LinearScorer(ScoringBase):
     def __init__(self):
         pass
 
-    def generate_scores(self, model: nn.Module,
-                        train_data: Union[AnnData, AnnCollection],
-                        val_data: Union[AnnData, AnnCollection]) -> np.ndarray:
+    def generate_scores(self, model: nn.Module, *args, **kwargs) -> np.ndarray:
         """Return the weights of model as score
         """
         return model.state_dict()['out_layer.weight'].cpu().detach().numpy()

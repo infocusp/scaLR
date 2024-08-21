@@ -45,8 +45,10 @@ class DataLoaderBase:
                                                    targets in `obs`
         """
         target_ids = []
-        if isinstance(self.target, str): targets = [self.target]
-        else: targets = self.target
+        if isinstance(self.target, str):
+            targets = [self.target]
+        else:
+            targets = self.target
 
         for target in targets:
             target_mappings = self.mappings[target]['label2id']
@@ -69,7 +71,18 @@ class DataLoaderBase:
         return dict()
 
 
-def build_dataloader(dataloader_config, adata):
-    dataloader_object, dataloader_config = build_object(
-        _scalr.nn.dataloader, dataloader_config)
+def build_dataloader(dataloader_config, adata, target, mappings):
+    if not dataloader_config.get('name'):
+        raise ValueError('DataLoader name is required!')
+
+    dataloader_config['params'] = dataloader_config.get('params',
+                                                        dict(batch_size=1))
+    dataloader_config['params']['target'] = target
+    dataloader_config['params']['mappings'] = mappings
+
+    dataloader_object, dataloader_config = build_object(_scalr.nn.dataloader,
+                                                        dataloader_config)
+    dataloader_config['params'].pop('target')
+    dataloader_config['params'].pop('mappings')
+
     return dataloader_object(adata), dataloader_config
