@@ -29,8 +29,6 @@ class FeatureExtractionPipeline:
         4. Feature subset data writing
         '''
         self.feature_selection_config = deepcopy(feature_selction_config)
-        self.dirpath = path.join(dirpath, 'feature_extraction')
-        os.makedirs(self.dirpath, exist_ok=True)
         self.device = device
 
     def load_data_and_targets_from_config(self, data_config: dict):
@@ -100,12 +98,14 @@ class FeatureExtractionPipeline:
                                            self.mappings)
             all_scores.append(score)
 
-        all_scores = np.concatenate(all_scores, axis=1)
-        self.train_data.var_names.name = "index"
+        columns = self.train_data.var_names
+        columns.name = "index"
         class_labels = self.mappings[self.target]['id2label']
+        all_scores = np.concatenate(all_scores, axis=1)
+        all_scores = all_scores[:, :len(columns)]
 
         self.score_matrix = pd.DataFrame(all_scores,
-                                         columns=self.train_data.var_names,
+                                         columns=columns,
                                          index=class_labels)
         write_data(self.score_matrix, path.join(self.dirpath,
                                                 'score_matrix.csv'))

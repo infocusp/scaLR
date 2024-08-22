@@ -2,15 +2,15 @@
 device: 'cuda'
 dirpath: '.'
 exp_name: 'revamped_scalr_test_full'
-exp_run: 0
+exp_run: 2
 
 
 # DATA_CONFIG
 data:
-    sample_chunksize: 15000
+    sample_chunksize: 10000
 
     train_val_test:
-        full_datapath: '/home/biocusp/data/lungcancer_data/lung_cancer_adata.h5ad'
+        full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
 
         splitter_config:
             name: StratifiedSplitter
@@ -18,7 +18,7 @@ data:
                 split_ratio: [7, 1, 2.5]
                 stratify: 'donor_id'
 
-        # split_datapaths: '/home/saiyam/projects/biocusp/scripts/revamped_scalr_test_fs_debug_0/feature_extraction/feature_subset_data'
+        # split_datapaths: '/home/saiyam/projects/biocusp/scripts/revamped_scalr_test_full_2/data/train_val_test_split'
 
         # final_datapaths:
 
@@ -33,7 +33,7 @@ data:
     #       params: 
     #             **args
 
-    target: cell_type    
+    target: Cell_Type    
 
 feature_selection:
 
@@ -53,6 +53,7 @@ feature_selection:
             name: SimpleDataLoader
             params:
                 batch_size: 25000
+                padding: 6000
         
         optimizer:
             name: SGD
@@ -74,7 +75,6 @@ feature_selection:
             k: 5000
 
 
-# TRAINING
 final_training:
 
     model:
@@ -129,7 +129,7 @@ analysis:
             name: LinearScorer
 
         features_selector:
-            name: AbsMean
+            name: ClasswisePromoters
             params:
                 k: 100
 

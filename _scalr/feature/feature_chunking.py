@@ -67,11 +67,6 @@ class FeatureChunking:
 
             chunk_model_config = deepcopy(self.chunk_model_config)
 
-            ### TODO: INCOMPLETE: handle generic for all models
-            if len(val_features_subset.var_names) < self.feature_chunksize:
-                chunk_model_config['params']['layers'][0] = len(
-                    val_features_subset.var_names)
-
             model_trainer = ModelTrainingPipeline(chunk_model_config,
                                                   self.chunk_model_train_config,
                                                   chunk_dirpath, self.device)
@@ -82,9 +77,8 @@ class FeatureChunking:
             model_trainer.build_model_training_artifacts()
             best_model = model_trainer.train()
 
-            if len(val_features_subset.var_names) == self.feature_chunksize:
-                self.chunk_model_config, self.chunk_model_train_config = model_trainer.get_updated_config(
-                )
+            self.chunk_model_config, self.chunk_model_train_config = model_trainer.get_updated_config(
+            )
 
             models.append(best_model)
 

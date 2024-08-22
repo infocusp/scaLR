@@ -105,8 +105,7 @@ def write_chunkwise_data(datapath: str,
             data = AnnCollection([data])
         data = data[sample_inds]
         data = data[start:start + sample_chunksize, feature_inds]
-        if not isinstance(data, AnnData):
-            data = data.to_adata()
+        data = data.to_adata()
         data = data.to_memory()
 
         # Transformation
