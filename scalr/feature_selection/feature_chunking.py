@@ -2,6 +2,7 @@ import os
 from os import path
 from typing import Union, Literal
 
+import joblib
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
@@ -9,6 +10,7 @@ import torch
 from torch import nn
 from anndata import AnnData
 from anndata.experimental import AnnCollection
+from sklearn.preprocessing import OneHotEncoder
 
 from ..model import LinearModel
 from ..trainer import Trainer
@@ -57,16 +59,22 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
     label_mappings[target]['label2id'] = label2id
 
     # Batch correction before feature selection process.
-    batch_mappings = {}
+    batch_onehotencoder = None
     if batch_correction:
-        print('Batch Correction method will be applied during model training time...')
+        print(
+            'Batch Correction method will be applied during model training time...'
+        )
         batches = sorted(
             list(
                 set(
                     list(train_data.obs.batch) + list(val_data.obs.batch) +
                     list(test_data.obs.batch))))
-        for i, batch in enumerate(batches):
-            batch_mappings[batch] = i
+
+        # Generating OneHotEncoder object for batch information.
+        batch_onehotencoder = OneHotEncoder()
+        batch_onehotencoder.fit(np.array(batches).reshape(-1, 1))
+        joblib.dump(batch_onehotencoder,
+                    path.join(dirpath, 'batch_onehotencoder.pkl'))
 
     n_cls = len(id2label)
     epochs = model_config['params'].get('epochs', 25)
@@ -88,17 +96,17 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
                                      target=target,
                                      batch_size=batch_size,
                                      label_mappings=label_mappings,
-                                     batch_mappings=batch_mappings)
+                                     batch_onehotencoder=batch_onehotencoder)
         val_dl = simple_dataloader(adata=val_features_subset,
                                    target=target,
                                    batch_size=batch_size,
                                    label_mappings=label_mappings,
-                                   batch_mappings=batch_mappings)
+                                   batch_onehotencoder=batch_onehotencoder)
 
         in_features = len(train_features_subset.var_names)
         # Incrementing a feature count if batch correction is set to true.
-        if batch_mappings:
-            in_features += 1
+        if batch_onehotencoder:
+            in_features += len(batch_onehotencoder.categories_[0])
 
         model = LinearModel([in_features, n_cls], weights_init_zero=True)
         opt = torch.optim.SGD
@@ -138,8 +146,8 @@ def feature_chunking(train_data: Union[AnnData, AnnCollection],
             filename)['model_state_dict']['out_layer.weight'].cpu()
 
         # Removing the batch effect feature after model training for feature selection.
-        if batch_mappings:
-            weights = weights[:, :-1]
+        if batch_onehotencoder:
+            weights = weights[:, :-len(batch_onehotencoder.categories_[0])]
         all_weights.append(weights)
 
     full_weights_matrix = torch.cat(all_weights, dim=1)
