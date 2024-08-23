@@ -5,9 +5,8 @@ import argparse
 
 import joblib
 import numpy as np
-import torch
-
 from sklearn.preprocessing import OneHotEncoder
+import torch
 from torch import nn
 
 from config.utils import load_config

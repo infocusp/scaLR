@@ -51,7 +51,7 @@ def main():
             f"\nThe directory '{dirpath}' exists. Do you still want to proceed? (y/n): "
         ).strip().lower()
         if user_input == 'n':
-            raise FileExistsError(f"{dirpath} directory already exists.")
+            sys.exit("Program terminated as user don't want to overwrite in existing directory!")
         elif user_input == 'y':
             pass
         else:

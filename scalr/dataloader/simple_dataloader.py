@@ -5,7 +5,6 @@ import torch
 import anndata as ad
 from anndata.experimental import AnnLoader, AnnCollection
 from anndata import AnnData
-
 from sklearn.preprocessing import OneHotEncoder
 
 def simple_dataloader(adata: Union[AnnData, AnnCollection],

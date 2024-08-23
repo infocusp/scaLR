@@ -109,9 +109,6 @@ def evaluate(config, log=True):
 
             if train_datapath:
                 train_data = read_data(train_datapath)
-                train_dl = simple_dataloader(train_data, target, batch_size,
-                                             label_mappings,
-                                             batch_onehotencoder=batch_onehotencoder)
             else:
                 raise ValueError("Train data path required for SHAP analysis.")
 
