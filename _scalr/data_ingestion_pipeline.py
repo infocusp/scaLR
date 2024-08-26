@@ -28,10 +28,11 @@ class DataIngestionPipeline:
         if not self.target:
             raise Warning('Target not given')
 
-        if not self.sample_chunksize:
-            raise Warning(
-                '''Sample chunksize not given. Will default to not using chunking.
-                   Might results in excessive use of memory.''')
+        # if not self.sample_chunksize:
+        #     raise Warning(
+        #         '''Sample chunksize not given. Will default to not using chunking.
+        #            Might results in excessive use of memory.''')
+        # TODO: Handle `Warning` everywhere in code.
 
         self.datadir = dirpath
 

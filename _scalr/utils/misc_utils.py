@@ -1,7 +1,6 @@
 import os
 import random
 
-from absl import logging
 import numpy as np
 import torch
 
@@ -37,9 +36,6 @@ def build_object(module, config: dict):
     default_params = getattr(module, name).get_default_params()
     params = overwrite_default(params, default_params)
     final_config = dict(name=name, params=params)
+    print(final_config)
 
     return getattr(module, name)(**params), final_config
-
-
-def set_logging_level(level='info'):
-    logging.set_verbosity(level)

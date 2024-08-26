@@ -12,7 +12,8 @@ import yaml
 
 
 def read_data(filepath: str,
-              backed: str = 'r') -> Union[dict, AnnData, AnnCollection]:
+              backed: str = 'r',
+              index_col: int = 0) -> Union[dict, AnnData, AnnCollection]:
     """Reads a json, yaml or AnnData object file if filepath contains it.
     Returns an AnnCollection in case of a directory with chunked anndatas.
 
@@ -32,7 +33,7 @@ def read_data(filepath: str,
     elif filepath.endswith('.yaml'):
         data = read_yaml(filepath)
     elif filepath.endswith('.csv'):
-        data = read_csv(filepath)
+        data = read_csv(filepath, index_col=index_col)
     elif filepath.endswith('.h5ad'):
         data = read_anndata(filepath, backed=backed)
     elif path.exists(path.join(filepath, '0.h5ad')):
@@ -187,9 +188,9 @@ def read_json(filepath: str) -> dict:
     return config
 
 
-def read_csv(filepath: str) -> pd.DataFrame:
+def read_csv(filepath: str, index_col: int = 0) -> pd.DataFrame:
     """Returns the DataFrame file object"""
-    return pd.read_csv(filepath)
+    return pd.read_csv(filepath, index_col=index_col)
 
 
 def read_anndata(filepath: str, backed: str = 'r') -> AnnData:

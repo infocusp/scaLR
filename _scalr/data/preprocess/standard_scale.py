@@ -1,12 +1,10 @@
 from typing import Union
 
-from absl import logging
 from anndata import AnnData
 from anndata.experimental import AnnCollection
 import numpy as np
 
 from _scalr.data.preprocess import PreprocessorBase
-from _scalr.utils.misc_utils import set_logging_level
 
 
 class StandardScaler(PreprocessorBase):
@@ -24,9 +22,6 @@ class StandardScaler(PreprocessorBase):
         # Parameters for standard scaler
         self.train_mean = None
         self.train_std = None
-
-        set_logging_level('INFO')
-        logging.info('Applying Standard Scaler normalization on data.')
 
     def transform(self, data: np.ndarray) -> np.ndarray:
         """The method called by the pipeline to process a chunk of
@@ -64,7 +59,7 @@ class StandardScaler(PreprocessorBase):
             Nothing, stores mean per feature of the train data.
             """
 
-        logging.info('Calculating mean of data...')
+        print('Calculating mean of data...')
         train_sum = np.zeros(data.shape[1]).reshape(1, -1)
 
         # Iterate through batches of data to get mean statistics
@@ -74,7 +69,7 @@ class StandardScaler(PreprocessorBase):
         self.train_mean = train_sum / data.shape[0]
 
         if not self.with_mean:
-            logging.info(
+            print(
                 '`train_mean` will be set to zero during `transform()`, as `with_mean` is set to False!'
             )
 
@@ -92,7 +87,7 @@ class StandardScaler(PreprocessorBase):
 
         # Getting standard deviation of entire train data per feature.
         if self.with_std:
-            logging.info('Calculating standard deviation of data...')
+            print('Calculating standard deviation of data...')
             self.train_std = np.zeros(data.shape[1]).reshape(1, -1)
             # Iterate through batches of data to get std statistics
             for i in range(int(np.ceil(data.shape[0] / sample_chunksize))):
@@ -107,11 +102,10 @@ class StandardScaler(PreprocessorBase):
             self.train_std[self.train_std == 0] = 1
         else:
             # If `with_std` is False, set train_std to 1.
-            logging.info(
-                'Setting `train_std` to be 1, as `with_std` is set to False!')
+            print('Setting `train_std` to be 1, as `with_std` is set to False!')
             self.train_std = np.ones((1, data.shape[1]))
 
     @classmethod
     def get_default_params(cls) -> dict:
         """Class method to get default params for preprocess_config"""
-        return dict(with_mean=True, with_std=False)
+        return dict(with_mean=True, with_std=True)

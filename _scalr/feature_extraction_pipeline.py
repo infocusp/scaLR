@@ -20,7 +20,7 @@ from _scalr.utils import write_data
 
 class FeatureExtractionPipeline:
 
-    def __init__(self, feature_selction_config, dirpath, device):
+    def __init__(self, feature_selection_config, dirpath, device):
         '''
         Feature extraction is done in 4 steps:
         1. Model(s) training on chunked/all features
@@ -28,8 +28,11 @@ class FeatureExtractionPipeline:
         3. Top features extraction
         4. Feature subset data writing
         '''
-        self.feature_selection_config = deepcopy(feature_selction_config)
+        self.feature_selection_config = deepcopy(feature_selection_config)
         self.device = device
+
+        self.dirpath = dirpath
+        os.makedirs(dirpath, exist_ok=True)
 
     def load_data_and_targets_from_config(self, data_config: dict):
         """load data and targets from data config"""
