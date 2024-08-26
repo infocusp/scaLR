@@ -5,6 +5,8 @@ from typing import Union
 
 from _scalr.data.preprocess import build_preprocessor
 from _scalr.data.split import build_splitter
+from _scalr.utils import EventLogger
+from _scalr.utils import FlowLogger
 from _scalr.utils import read_data
 from _scalr.utils import write_data
 
@@ -20,19 +22,20 @@ class DataIngestionPipeline:
             dirpath (str): Experiment data directory. Defaults to '.'.
         """
 
+        self.flow_logger = FlowLogger('DataIngestion')
+
         self.data_config = deepcopy(data_config)
         self.target = self.data_config.get('target')
         self.sample_chunksize = self.data_config.get('sample_chunksize')
 
         # Make some nessecary checks and logs
         if not self.target:
-            raise Warning('Target not given')
+            self.flow_logger.warning('Target not given')
 
-        # if not self.sample_chunksize:
-        #     raise Warning(
-        #         '''Sample chunksize not given. Will default to not using chunking.
-        #            Might results in excessive use of memory.''')
-        # TODO: Handle `Warning` everywhere in code.
+        if not self.sample_chunksize:
+            self.flow_logger.warning(
+                '''Sample chunksize not given. Will default to not using chunking.
+                   Might results in excessive use of memory.''')
 
         self.datadir = dirpath
 
@@ -41,8 +44,10 @@ class DataIngestionPipeline:
         """
 
         if self.data_config['train_val_test'].get('full_datapath'):
+            self.flow_logger.info(
+                'Generating Training, Validation and Test sets')
             if not self.target:
-                raise Warning(
+                self.flow_logger.warning(
                     '''Target not provided. Will not be able to perform
                     checks regarding splits.
                     ''')
@@ -70,6 +75,7 @@ class DataIngestionPipeline:
             train_val_test_split_dirpath = path.join(self.datadir,
                                                      'train_val_test_split')
             os.makedirs(train_val_test_split_dirpath, exist_ok=True)
+
             splitter.write_splits(full_datapath, train_val_test_split_indices,
                                   self.sample_chunksize,
                                   train_val_test_split_dirpath)
@@ -78,8 +84,8 @@ class DataIngestionPipeline:
                 'split_datapaths'] = train_val_test_split_dirpath
 
         elif self.data_config['train_val_test'].get('split_datapaths'):
-            # LOG
-            pass
+            self.flow_logger.info(
+                'Reading Training, Validation and Test sets from config')
 
         elif self.data_config['train_val_test'].get('final_datapaths'):
             raise ValueError(
@@ -109,12 +115,15 @@ class DataIngestionPipeline:
         if not all_preprocessings:
             return
 
+        self.flow_logger.info('Preprocessing data')
         datapath = self.data_config['train_val_test']['final_datapaths']
 
         processed_datapath = path.join(self.datadir, 'processed_data')
         os.makedirs(processed_datapath, exist_ok=True)
 
         for i, (preprocess) in enumerate(all_preprocessings):
+            self.flow_logger.info(f'Applying {preprocess["name"]}')
+
             preprocessor, preprocessor_config = build_preprocessor(
                 deepcopy(preprocess))
             self.data_config['preprocess'][i] = preprocessor_config
@@ -134,6 +143,10 @@ class DataIngestionPipeline:
 
     def generate_mappings(self):
         """Generate an Integer mapping to and from target columns"""
+
+        self.flow_logger.info(
+            'Generate label mappings for all columns in metadata')
+
         column_names = read_data(
             path.join(self.data_config['train_val_test']['final_datapaths'],
                       'val')).obs.columns

@@ -10,6 +10,8 @@ from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 
 from _scalr.nn.callbacks import CallbackExecutor
+from _scalr.utils import EventLogger
+from _scalr.utils import FlowLogger
 
 
 class TrainerBase:
@@ -31,6 +33,8 @@ class TrainerBase:
             callbacks (CallbackExecutor): callback executor object to carry out callbacks
             device (str, optional): device to train the data on (cuda/cpu). Defaults to 'cpu'.
         """
+        self.event_logger = EventLogger('ModelTrainer')
+
         self.model = model
         self.opt = opt
         self.loss_fn = loss_fn
@@ -51,8 +55,8 @@ class TrainerBase:
         hits = 0
         total_samples = 0
         for batch in dl:
-            x, y = [example.to(self.device)
-                    for example in batch[:-1]], batch[-1].to(self.device)
+            x, y = [example.to(self.device) for example in batch[:-1]
+                   ], batch[-1].to(self.device)
 
             out = self.model(*x)['cls_output']
             loss = self.loss_fn(out, y)
@@ -86,8 +90,8 @@ class TrainerBase:
         total_samples = 0
         for batch in dl:
             with torch.no_grad():
-                x, y = [example.to(self.device)
-                        for example in batch[:-1]], batch[-1].to(self.device)
+                x, y = [example.to(self.device) for example in batch[:-1]
+                       ], batch[-1].to(self.device)
                 out = self.model(*x)['cls_output']
                 loss = self.loss_fn(out, y)
 
@@ -113,17 +117,17 @@ class TrainerBase:
 
         for epoch in range(epochs):
             ep_start = time()
-            print(f'Epoch {epoch+1}:')
+            self.event_logger.info(f'Epoch {epoch+1}:')
             train_loss, train_acc = self.train_one_epoch(train_dl)
-            print(
+            self.event_logger.info(
                 f'Training Loss: {train_loss} || Training Accuracy: {train_acc}'
             )
             val_loss, val_acc = self.validation(val_dl)
-            print(
+            self.event_logger.info(
                 f'Validation Loss: {val_loss} || Validation Accuracy: {val_acc}'
             )
             ep_end = time()
-            print(f'Time: {ep_end-ep_start}\n', flush=True)
+            self.event_logger.info(f'Time: {ep_end-ep_start}\n')
 
             if val_acc > best_val_acc:
                 best_val_acc = val_acc

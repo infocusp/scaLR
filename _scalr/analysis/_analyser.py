@@ -9,7 +9,7 @@ class AnalysisBase:
     def __init__(self):
         pass
 
-    def generate_analysis(self, model, test_data, test_dl, **kwargs):
+    def generate_analysis(self, model, test_data, test_dl, dirpath, **kwargs):
         pass
 
     @classmethod

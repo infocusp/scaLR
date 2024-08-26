@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 from os import path
 import random
@@ -11,6 +12,8 @@ from _scalr.data_ingestion_pipeline import DataIngestionPipeline
 from _scalr.eval_and_analysis_pipeline import EvalAndAnalysisPipeline
 from _scalr.feature_extraction_pipeline import FeatureExtractionPipeline
 from _scalr.model_training_pipeline import ModelTrainingPipeline
+from _scalr.utils import EventLogger
+from _scalr.utils import FlowLogger
 from _scalr.utils import read_data
 from _scalr.utils import set_seed
 from _scalr.utils import write_data
@@ -43,16 +46,28 @@ if __name__ == '__main__':
     config = read_data(args.config)
     log = args.log
 
+    flow_logger = FlowLogger('ROOT', logging.INFO)
+
     dirpath = config['dirpath']
     exp_name = config['exp_name']
     exp_run = config['exp_run']
     dirpath = os.path.join(dirpath, f'{exp_name}_{exp_run}')
     device = config['device']
+
+    flow_logger.info(f'Experiment directory: `{dirpath}`')
+    if os.path.exists(dirpath):
+        flow_logger.warning('Experiment directory already exists!')
+
     os.makedirs(dirpath, exist_ok=True)
 
-    #PIPELINE RUN
+    event_logger = EventLogger('ROOT', logging.INFO,
+                               path.join(dirpath, 'logs.txt'))
 
+    #PIPELINE RUN
     if config.get('data'):
+        flow_logger.info('Data Ingestion pipeline running')
+        event_logger.info('Data ingestion\n')
+
         data_dirpath = path.join(dirpath, 'data')
         os.makedirs(data_dirpath, exist_ok=True)
 
@@ -65,6 +80,9 @@ if __name__ == '__main__':
         write_data(config, path.join(dirpath, 'config.yaml'))
 
     if config.get('feature_selection'):
+        flow_logger.info('Feature Extraction pipeline running')
+        event_logger.info('\n\nFeature Extraction\n')
+
         feature_extraction_dirpath = path.join(dirpath, 'feature_extraction')
         os.makedirs(feature_extraction_dirpath, exist_ok=True)
 
@@ -87,6 +105,9 @@ if __name__ == '__main__':
         write_data(config, path.join(dirpath, 'config.yaml'))
 
     if config.get('final_training'):
+        flow_logger.info('Final Model Training pipeline running')
+        event_logger.info('\n\nFinal Model Training\n')
+
         model_training_dirpath = path.join(dirpath, 'model')
         os.makedirs(model_training_dirpath, exist_ok=True)
 
@@ -105,6 +126,9 @@ if __name__ == '__main__':
         write_data(config, path.join(dirpath, 'config.yaml'))
 
     if config.get('analysis'):
+        flow_logger.info('Analysis pipeline running')
+        event_logger.info('\n\nAnalysis Pipeline\n')
+
         analysis_dirpath = path.join(dirpath, 'analysis')
         os.makedirs(analysis_dirpath, exist_ok=True)
 

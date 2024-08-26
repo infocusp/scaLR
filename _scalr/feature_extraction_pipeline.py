@@ -12,6 +12,8 @@ from torch import nn
 from _scalr.feature import FeatureChunking
 from _scalr.feature.scoring import build_scorer
 from _scalr.feature.selector import build_selector
+from _scalr.utils import EventLogger
+from _scalr.utils import FlowLogger
 from _scalr.utils import load_train_val_data_from_config
 from _scalr.utils import read_data
 from _scalr.utils import write_chunkwise_data
@@ -28,6 +30,8 @@ class FeatureExtractionPipeline:
         3. Top features extraction
         4. Feature subset data writing
         '''
+        self.flow_logger = FlowLogger('FeatureExtraction')
+
         self.feature_selection_config = deepcopy(feature_selection_config)
         self.device = device
 
@@ -60,6 +64,7 @@ class FeatureExtractionPipeline:
         self.mappings = mappings
 
     def feature_chunked_model_training(self):
+        self.flow_logger.info('Feature chunked models training')
 
         feature_chunksize = self.feature_selection_config.get(
             'feature_chunksize', len(self.val_data.var_names))
@@ -90,6 +95,8 @@ class FeatureExtractionPipeline:
         """To generate scores of each feature for each class using a scorer
         and chunked models
         """
+        self.flow_logger.info('Feature scoring')
+
         scorer, scorer_config = build_scorer(
             deepcopy(self.feature_selection_config.get('scoring_config')))
         self.feature_selection_config['scoring_config'] = scorer_config
@@ -118,6 +125,8 @@ class FeatureExtractionPipeline:
         self.score_matrix = score_matrix
 
     def top_feature_extraction(self):
+        self.flow_logger.info('Top features extraction')
+
         selector_config = self.feature_selection_config.get(
             'features_selector', dict(name='AbsMean'))
         selector, selector_config = build_selector(selector_config)
@@ -130,6 +139,8 @@ class FeatureExtractionPipeline:
         return self.top_features
 
     def write_top_features_subset_data(self, data_config):
+        self.flow_logger.info('Writing feature-subset data onto disk')
+
         datapath = data_config['train_val_test'].get('final_datapaths')
         feature_subset_datapath = path.join(self.dirpath, 'feature_subset_data')
         os.makedirs(feature_subset_datapath, exist_ok=True)
