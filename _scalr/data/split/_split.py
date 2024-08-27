@@ -3,12 +3,16 @@ from os import path
 
 import _scalr
 from _scalr.utils import build_object
+from _scalr.utils import EventLogger
 from _scalr.utils import read_data
 from _scalr.utils import write_chunkwise_data
 from _scalr.utils import write_data
 
 
 class SplitterBase:
+
+    def __init__(self):
+        self.event_logger = EventLogger('Splitter')
 
     # Abstract
     def generate_train_val_test_split_indices(datapath: str, target: str,
@@ -29,8 +33,6 @@ class SplitterBase:
         """Performs certains checks regarding splits and logs
         the distribution of target classes in each split
 
-        TODO: check for class distribution
-
         Args:
             datapath (str): path to full data
             data_splits (dict): split of 'train', 'val' and 'test' indices.
@@ -47,13 +49,15 @@ class SplitterBase:
 
         # check for classes present in splits
         if len(metadata[target].iloc[train_inds].unique()) != n_cls:
-            raise Warning('All classes are not present in Train set')
+            self.event_logger.warning(
+                'All classes are not present in Train set')
 
         if len(metadata[target].iloc[val_inds].unique()) != n_cls:
-            raise Warning('All classes are not present in Validation set')
+            self.event_logger.warning(
+                'All classes are not present in Validation set')
 
         if len(metadata[target].iloc[test_inds].unique()) != n_cls:
-            raise Warning('All classes are not present in Test set')
+            self.event_logger.warning('All classes are not present in Test set')
 
         # Check for overlapping samples
         assert len(set(train_inds).intersection(
@@ -65,20 +69,21 @@ class SplitterBase:
                   ) == 0, "Test and Validation sets contain overlapping samples"
 
         # LOG
-        print('Length of train set: ', len(train_inds))
-        print('Distribution of train set: ')
-        print(metadata[target].iloc[train_inds].value_counts())
-        print()
+        self.event_logger.info('Train|Validation|Test Splits\n')
+        self.event_logger.info(f'Length of train set: {len(train_inds)}')
+        self.event_logger.info(f'Distribution of train set: ')
+        self.event_logger.info(
+            f'{metadata[target].iloc[train_inds].value_counts()}\n')
 
-        print('Length of val set: ', len(val_inds))
-        print('Distribution of val set: ')
-        print(metadata[target].iloc[val_inds].value_counts())
-        print()
+        self.event_logger.info(f'Length of val set: {len(val_inds)}')
+        self.event_logger.info(f'Distribution of val set: ')
+        self.event_logger.info(
+            f'{metadata[target].iloc[val_inds].value_counts()}\n')
 
-        print('Length of test set: ', len(test_inds))
-        print('Distribution of test set: ')
-        print(metadata[target].iloc[test_inds].value_counts())
-        print()
+        self.event_logger.info(f'Length of test set: {len(test_inds)}')
+        self.event_logger.info(f'Distribution of test set: ')
+        self.event_logger.info(
+            f'{metadata[target].iloc[test_inds].value_counts()}\n')
 
     def write_splits(self, full_datapath: str, data_split_indices: dict,
                      sample_chunksize: int, dirpath: int) -> dict:

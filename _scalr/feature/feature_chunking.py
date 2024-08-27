@@ -7,6 +7,8 @@ from anndata import AnnData
 from anndata.experimental import AnnCollection
 
 from _scalr.model_training_pipeline import ModelTrainingPipeline
+from _scalr.utils import EventLogger
+from _scalr.utils import FlowLogger
 
 
 class FeatureChunking:
@@ -37,6 +39,7 @@ class FeatureChunking:
             dirpath (str, optional): dirpath to store chunked model weights. Defaults to None.
             device (str, optional): device to train models on. Defaults to 'cpu'.
         """
+        self.event_logger = EventLogger('FeatureChunking')
 
         self.feature_chunksize = feature_chunksize
         self.chunk_model_config = chunk_model_config
@@ -49,6 +52,7 @@ class FeatureChunking:
         self.device = device
 
     def train_chunked_models(self):
+        self.event_logger.info('Feature chunked models training\n')
         models = []
         chunked_models_dirpath = path.join(self.dirpath, 'chunked_models')
         os.makedirs(chunked_models_dirpath, exist_ok=True)
@@ -56,6 +60,7 @@ class FeatureChunking:
         i = 0
         for start in range(0, len(self.train_data.var_names),
                            self.feature_chunksize):
+            self.event_logger.info(f'\nChunk {i}')
             chunk_dirpath = path.join(chunked_models_dirpath, str(i))
             os.makedirs(chunk_dirpath, exist_ok=True)
             i += 1

@@ -18,6 +18,7 @@ class StratifiedSplitter(SplitterBase):
             split_ratio (list[float]): ratio to split number of samples in
             stratify (str): column name to metadata the split upon in `obs`
         """
+        super().__init__()
         self.stratify = stratify
         self.split_ratio = split_ratio
 

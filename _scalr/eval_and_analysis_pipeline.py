@@ -12,6 +12,8 @@ from _scalr.analysis.evaluation import get_accuracy
 from _scalr.feature_extraction_pipeline import FeatureExtractionPipeline
 from _scalr.nn.dataloader import build_dataloader
 from _scalr.nn.model import build_model
+from _scalr.utils import EventLogger
+from _scalr.utils import FlowLogger
 from _scalr.utils import load_test_data_from_config
 from _scalr.utils import load_train_val_data_from_config
 from _scalr.utils import read_data
@@ -20,6 +22,8 @@ from _scalr.utils import read_data
 class EvalAndAnalysisPipeline:
 
     def __init__(self, analysis_config, dirpath, device):
+        """Evaluation and Analysis of trained model"""
+        self.flow_logger = FlowLogger('Eval&Analysis')
 
         self.analysis_config = deepcopy(analysis_config)
         self.dirpath = dirpath
@@ -97,6 +101,10 @@ class EvalAndAnalysisPipeline:
     def evaluation_and_classification_report(self):
         """Evaluate the trained model and generate classification report
         on test data"""
+        self.flow_logger.info(
+            'Calculating accuracy and generating classification report on test set'
+        )
+
         test_labels, pred_labels, pred_probabilities = self.model.get_predictions(
             self.test_dl, self.device)
 
@@ -104,9 +112,8 @@ class EvalAndAnalysisPipeline:
         self.primary_analysis['pred_labels'] = pred_labels
         self.primary_analysis['pred_probabilities'] = pred_probabilities
 
-        print('Accuracy: ', get_accuracy(test_labels, pred_labels))
+        accuracy = get_accuracy(test_labels, pred_labels)
 
-        print('\nClassification Report:')
         generate_and_save_classification_report(
             test_labels,
             pred_labels,
@@ -114,6 +121,7 @@ class EvalAndAnalysisPipeline:
             mapping=self.mappings[self.target]['id2label'])
 
     def gene_analysis(self):
+        self.flow_logger.info('Performing gene analysis')
         gene_analysis_path = path.join(self.dirpath, 'gene_analysis')
         gene_analyser = FeatureExtractionPipeline(
             self.analysis_config.get('gene_analysis'), gene_analysis_path,
@@ -129,9 +137,12 @@ class EvalAndAnalysisPipeline:
         self.primary_analysis['top_features'] = top_features
 
     def perform_downstream_anlaysis(self):
+        self.flow_logger.info('Performing Downstream Analysis')
         downstream_analysis = self.analysis_config.get('downstream_analysis',
                                                        list())
         for i, (analysis_config) in enumerate(downstream_analysis):
+            self.flow_logger.info(f'Performing {analysis_config["name"]}')
+
             analysis_config = deepcopy(analysis_config)
             analyser, analysis_config = build_analyser(analysis_config)
             downstream_analysis[i] = analysis_config
@@ -142,7 +153,7 @@ class EvalAndAnalysisPipeline:
                                                   dirpath=self.dirpath,
                                                   **self.primary_analysis)
 
-            # To be able to use any above anlyses in other downstream
+            # To be able to use any above analyses in other downstream
             # Analysis
             if analysis:
                 self.primary_analysis[analysis_config['name']] = analysis
