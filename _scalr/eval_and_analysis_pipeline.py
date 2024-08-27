@@ -34,14 +34,23 @@ class EvalAndAnalysisPipeline:
             self.model.to(self.device)
             self.model.load_weights(model_weights)
         else:
-            raise Warning('''Model path not provided. Unable to perform 
-                          model based analysis!''')
+            # raise Warning('''Model path not provided. Unable to perform
+            #               model based analysis!''')
+            # TODO: raise above warning
+            self.model = None
 
         # dict to transfer information between analyses
         self.primary_analysis = dict()
 
     def build_dataloaders(self):
         dataloader_config = deepcopy(self.analysis_config.get('dataloader'))
+
+        if not dataloader_config:
+            # raise proper WARNING here.
+            self.train_dl = None
+            self.val_dl = None
+            self.test_dl = None
+            return
 
         self.train_dl, _ = build_dataloader(dataloader_config, self.train_data,
                                             self.target, self.mappings)
@@ -127,8 +136,10 @@ class EvalAndAnalysisPipeline:
             analyser, analysis_config = build_analyser(analysis_config)
             downstream_analysis[i] = analysis_config
 
-            analysis = analyser.generate_analysis(self.model, self.test_data,
-                                                  self.test_dl,
+            analysis = analyser.generate_analysis(model=self.model,
+                                                  test_data=self.test_data,
+                                                  test_dl=self.test_dl,
+                                                  dirpath=self.dirpath,
                                                   **self.primary_analysis)
 
             # To be able to use any above anlyses in other downstream

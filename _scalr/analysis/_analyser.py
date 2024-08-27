@@ -9,7 +9,7 @@ class AnalysisBase:
     def __init__(self):
         pass
 
-    def generate_analysis(self, model, test_data, test_dl, **kwargs):
+    def generate_analysis(self, model, test_data, test_dl, dirpath, **kwargs):
         pass
 
     @classmethod
@@ -19,4 +19,4 @@ class AnalysisBase:
 
 
 def build_analyser(analysis_config):
-    return build_object(_scalr.nn.analysis, analysis_config)
+    return build_object(_scalr.analysis, analysis_config)
