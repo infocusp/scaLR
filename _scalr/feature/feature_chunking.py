@@ -52,7 +52,7 @@ class FeatureChunking:
         self.device = device
 
     def train_chunked_models(self):
-        self.event_logger.info('Feature chunked models training\n')
+        self.event_logger.info('Feature chunked models training')
         models = []
         chunked_models_dirpath = path.join(self.dirpath, 'chunked_models')
         os.makedirs(chunked_models_dirpath, exist_ok=True)
