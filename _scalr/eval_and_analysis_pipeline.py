@@ -12,7 +12,6 @@ from _scalr.analysis.evaluation import get_accuracy
 from _scalr.feature_extraction_pipeline import FeatureExtractionPipeline
 from _scalr.nn.dataloader import build_dataloader
 from _scalr.nn.model import build_model
-from _scalr.utils import EventLogger
 from _scalr.utils import FlowLogger
 from _scalr.utils import load_test_data_from_config
 from _scalr.utils import load_train_val_data_from_config
@@ -128,9 +127,11 @@ class EvalAndAnalysisPipeline:
         self.primary_analysis['top_features'] = top_features
 
     def perform_downstream_anlaysis(self):
-        self.flow_logger.info('Performing Downstream Analysis')
         downstream_analysis = self.analysis_config.get('downstream_analysis',
                                                        list())
+        if downstream_analysis:
+            self.flow_logger.info('Performing Downstream Analysis')
+
         for i, (analysis_config) in enumerate(downstream_analysis):
             self.flow_logger.info(f'Performing {analysis_config["name"]}')
 

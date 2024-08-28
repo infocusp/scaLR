@@ -66,7 +66,7 @@ if __name__ == '__main__':
     #PIPELINE RUN
     if config.get('data'):
         flow_logger.info('Data Ingestion pipeline running')
-        event_logger.info('Data ingestion\n')
+        event_logger.heading('Data Ingestion')
 
         data_dirpath = path.join(dirpath, 'data')
         os.makedirs(data_dirpath, exist_ok=True)
@@ -81,7 +81,7 @@ if __name__ == '__main__':
 
     if config.get('feature_selection'):
         flow_logger.info('Feature Extraction pipeline running')
-        event_logger.info('\n\nFeature Extraction\n')
+        event_logger.heading('Feature Selection')
 
         feature_extraction_dirpath = path.join(dirpath, 'feature_extraction')
         os.makedirs(feature_extraction_dirpath, exist_ok=True)
@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
     if config.get('final_training'):
         flow_logger.info('Final Model Training pipeline running')
-        event_logger.info('\n\nFinal Model Training\n')
+        event_logger.heading('Final Model Training')
 
         model_training_dirpath = path.join(dirpath, 'model')
         os.makedirs(model_training_dirpath, exist_ok=True)
@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
     if config.get('analysis'):
         flow_logger.info('Analysis pipeline running')
-        event_logger.info('\n\nAnalysis Pipeline\n')
+        event_logger.heading('Analysis')
 
         analysis_dirpath = path.join(dirpath, 'analysis')
         os.makedirs(analysis_dirpath, exist_ok=True)
