@@ -12,3 +12,8 @@ class AbsMean(SelectorBase):
         top_features_list = list(score_matrix.abs().mean().sort_values(
             ascending=False).reset_index()['index'][:self.k])
         return top_features_list
+
+    @classmethod
+    def get_default_params(cls) -> dict:
+        """Class method to get default params for preprocess_config"""
+        return dict(k=int(1e6))

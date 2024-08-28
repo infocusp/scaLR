@@ -3,6 +3,7 @@ from typing import Union
 import numpy as np
 
 from _scalr.data.preprocess import PreprocessorBase
+from _scalr.utils import EventLogger
 
 
 class SampleNorm(PreprocessorBase):
@@ -15,6 +16,8 @@ class SampleNorm(PreprocessorBase):
 
         self.scaling_factor = scaling_factor
 
+        self.event_logger = EventLogger('Sample norm normalization')
+
     def transform(self, data: np.ndarray) -> np.ndarray:
         """The method called by the pipeline to process a chunk of
         samples.
@@ -25,6 +28,8 @@ class SampleNorm(PreprocessorBase):
         Returns:
             np.ndarray: processed data
         """
+        self.event_logger.info('\Transforming data using sample norm')
+
         data *= (self.scaling_factor / (data.sum(axis=1).reshape(len(data), 1)))
         return data
 

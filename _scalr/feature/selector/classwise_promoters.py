@@ -19,3 +19,8 @@ class ClasswisePromoters(SelectorBase):
                     )['index'][:self.k].tolist()
 
         return classwise_promoters
+
+    @classmethod
+    def get_default_params(cls) -> dict:
+        """Class method to get default params for preprocess_config"""
+        return dict(k=int(1e6))

@@ -136,11 +136,12 @@ analysis:
                 k: 100
 
     downstream_analysis:
-        - name: DGE
-          params: **args
-
-    # downstream_analysis:
-    #     - name: deg
-    #       params: **args
-
-    
+        # - name: DGE
+        #   params: **args
+        - name: GeneRecallCurve
+          params:reference_genes_csv: '/home/anand/bioc_repo/single_cell_classification/tutorials/analysis/gene_recall_curve/reference_genes.csv'
+            top_K: 500
+            plots_per_row: 5
+            features_selector:
+                name: ClasswiseAbs
+                params: {}
