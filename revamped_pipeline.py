@@ -4,7 +4,10 @@ import os
 from os import path
 import random
 import sys
+from time import time
 
+from memory_profiler import memory_usage
+from memory_profiler import profile
 import numpy as np
 import torch
 
@@ -17,8 +20,6 @@ from _scalr.utils import FlowLogger
 from _scalr.utils import read_data
 from _scalr.utils import set_seed
 from _scalr.utils import write_data
-
-# from _scalr.downstream_analysis_pipeline import DownstreamAnalysis
 
 
 def get_args():
@@ -33,37 +34,26 @@ def get_args():
                         '--log',
                         action='store_true',
                         help='flag to store logs for the experiment')
+    parser.add_argument('--level',
+                        type=str,
+                        default='INFO',
+                        help='set the level of logging')
+    parser.add_argument('--logpath',
+                        type=str,
+                        default=False,
+                        help='path to store the logs')
+    parser.add_argument('-m',
+                        '--memoryprofiler',
+                        action='store_true',
+                        help='flag to get memory usage analysis')
 
     args = parser.parse_args()
     return args
 
 
-if __name__ == '__main__':
-
-    set_seed(42)
-    args = get_args()
-
-    config = read_data(args.config)
-    log = args.log
-
-    flow_logger = FlowLogger('ROOT', logging.INFO)
-
-    dirpath = config['dirpath']
-    exp_name = config['exp_name']
-    exp_run = config['exp_run']
-    dirpath = os.path.join(dirpath, f'{exp_name}_{exp_run}')
-    device = config['device']
-
-    flow_logger.info(f'Experiment directory: `{dirpath}`')
-    if os.path.exists(dirpath):
-        flow_logger.warning('Experiment directory already exists!')
-
-    os.makedirs(dirpath, exist_ok=True)
-
-    event_logger = EventLogger('ROOT', logging.INFO,
-                               path.join(dirpath, 'logs.txt'))
-
-    #PIPELINE RUN
+# Uncomment `@profile` to get line-by-line memory analysis
+# @profile
+def pipeline(config, dirpath, device, flow_logger, event_logger):
     if config.get('data'):
         flow_logger.info('Data Ingestion pipeline running')
         event_logger.heading('Data Ingestion')
@@ -150,3 +140,63 @@ if __name__ == '__main__':
 
         config['analysis'] = analyser.get_updated_config()
         write_data(config, path.join(dirpath, 'config.yaml'))
+
+    return config
+
+
+if __name__ == '__main__':
+    set_seed(42)
+    args = get_args()
+
+    start_time = time()
+
+    config = read_data(args.config)
+
+    dirpath = config['dirpath']
+    exp_name = config['exp_name']
+    exp_run = config['exp_run']
+    dirpath = os.path.join(dirpath, f'{exp_name}_{exp_run}')
+    device = config['device']
+
+    flow_logger = FlowLogger('ROOT', logging.INFO)
+    flow_logger.info(f'Experiment directory: `{dirpath}`')
+    if os.path.exists(dirpath):
+        flow_logger.warning('Experiment directory already exists!')
+
+    os.makedirs(dirpath, exist_ok=True)
+
+    # Logging
+    log = args.log
+    if log:
+        level = getattr(logging, args.level)
+        logpath = args.logpath if args.logpath else path.join(
+            dirpath, 'logs.txt')
+    else:
+        level = logging.CRITICAL
+        logpath = None
+
+    event_logger = EventLogger('ROOT', level, logpath)
+
+    kwargs = dict(config=config,
+                  dirpath=dirpath,
+                  device=device,
+                  flow_logger=flow_logger,
+                  event_logger=event_logger)
+
+    if args.memoryprofiler:
+        max_memory = memory_usage((pipeline, [], kwargs),
+                                  max_usage=True,
+                                  interval=0.5,
+                                  max_iterations=1)
+    else:
+        pipeline(**kwargs)
+
+    end_time = time()
+    flow_logger.info(f'Total time taken: {end_time - start_time}')
+
+    event_logger.heading('Runtime Analyis')
+    event_logger.info(f'Total time taken: {end_time - start_time}')
+
+    if args.memoryprofiler:
+        flow_logger.info(f'Maximum memory usage: {max_memory}')
+        event_logger.info(f'Maximum memory usage: {max_memory}')

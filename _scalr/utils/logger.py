@@ -35,17 +35,18 @@ class EventLogger(logging.Logger):
         if not EventLogger.level:
             EventLogger.level = logging.INFO
 
+        super().__init__(name, EventLogger.level)
+
         if filepath:
             EventLogger.filepath = filepath
 
         if not EventLogger.filepath:
-            EventLogger.filepath = 'logs.txt'
-
-        super().__init__(name, EventLogger.level)
+            handler = logging.NullHandler()
+        else:
+            handler = logging.FileHandler(EventLogger.filepath)
 
         formatter = logging.Formatter('%(message)s')
 
-        handler = logging.FileHandler(EventLogger.filepath)
         handler.setLevel(EventLogger.level)
         handler.setFormatter(formatter)
         self.addHandler(handler)
