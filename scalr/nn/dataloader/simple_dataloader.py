@@ -29,6 +29,7 @@ class SimpleDataLoader(DataLoaderBase):
                           training objective in classification.
                           Must be present as a column_name in adata.obs
             mappings (dict): mapping the target name to respective ids
+            padding (int): padding size incase of #features < model input size
         """
         super().__init__(batch_size, target, mappings)
         self.padding = padding

@@ -8,3 +8,11 @@ repos:
     hooks:
     -   id: isort
         args: ['--settings-path', '.isort.cfg']
+-   repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest -s
+        language: system
+        pass_filenames: false
+        stages: [commit]
