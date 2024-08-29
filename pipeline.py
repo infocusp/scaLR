@@ -56,7 +56,7 @@ def get_args():
 def pipeline(config, dirpath, device, flow_logger, event_logger):
     if config.get('data'):
         flow_logger.info('Data Ingestion pipeline running')
-        event_logger.heading('Data Ingestion')
+        event_logger.heading1('Data Ingestion')
 
         data_dirpath = path.join(dirpath, 'data')
         os.makedirs(data_dirpath, exist_ok=True)
@@ -71,7 +71,7 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
 
     if config.get('feature_selection'):
         flow_logger.info('Feature Extraction pipeline running')
-        event_logger.heading('Feature Selection')
+        event_logger.heading1('Feature Selection')
 
         feature_extraction_dirpath = path.join(dirpath, 'feature_extraction')
         os.makedirs(feature_extraction_dirpath, exist_ok=True)
@@ -96,7 +96,7 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
 
     if config.get('final_training'):
         flow_logger.info('Final Model Training pipeline running')
-        event_logger.heading('Final Model Training')
+        event_logger.heading1('Final Model Training')
 
         model_training_dirpath = path.join(dirpath, 'model')
         os.makedirs(model_training_dirpath, exist_ok=True)
@@ -117,7 +117,7 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
 
     if config.get('analysis'):
         flow_logger.info('Analysis pipeline running')
-        event_logger.heading('Analysis')
+        event_logger.heading1('Analysis')
 
         analysis_dirpath = path.join(dirpath, 'analysis')
         os.makedirs(analysis_dirpath, exist_ok=True)
@@ -194,7 +194,7 @@ if __name__ == '__main__':
     end_time = time()
     flow_logger.info(f'Total time taken: {end_time - start_time}')
 
-    event_logger.heading('Runtime Analyis')
+    event_logger.heading1('Runtime Analyis')
     event_logger.info(f'Total time taken: {end_time - start_time}')
 
     if args.memoryprofiler:

@@ -110,6 +110,8 @@ class EvalAndAnalysisPipeline:
         self.primary_analysis['test_labels'] = test_labels
         self.primary_analysis['pred_labels'] = pred_labels
         self.primary_analysis['pred_probabilities'] = pred_probabilities
+        self.primary_analysis['mapping'] = self.mappings[
+            self.target]['id2label']
 
         accuracy = get_accuracy(test_labels, pred_labels)
 

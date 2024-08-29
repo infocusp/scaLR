@@ -22,7 +22,7 @@ class GeneRecallCurve(AnalysisBase):
                  save_plots: bool = True,
                  features_selector: dict = None):
         '''Load required paramters for gene recall curve.
-        
+
         Args:
             reference_genes_path: Reference genes csv path
             ranked_genes_path: List of ranked genes csv's we want to check recall against. List is used to support
@@ -49,13 +49,13 @@ class GeneRecallCurve(AnalysisBase):
                           dirpath: str = '.',
                           **kwargs):
         '''This function calls function to generate gene recall after setting few parameters.
-        
+
         Args:
             score_matrix: Matrix that contains score of each gene for each category
             dirpath: Path to store gene recall curve if applicable
         '''
 
-        self.event_logger.info('\n\nStarting Gene Recall Curve analysis.')
+        self.event_logger.heading2("Gene Recall Curve analysis")
 
         # Handle to ensure reference genes are provided.
         if not self.reference_genes_path:

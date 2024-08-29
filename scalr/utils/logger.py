@@ -51,10 +51,11 @@ class EventLogger(logging.Logger):
         handler.setFormatter(formatter)
         self.addHandler(handler)
 
-    def heading(self, str):
-        msg = '\n'
-        msg += ''.join(['<' for _ in range(10)])
-        msg += ' ' + str + ' '
-        msg += ''.join(['>' for _ in range(10)])
-        msg += '\n'
-        self.info(msg)
+    def heading(self, msg, prefix, suffix, count):
+        self.info(f"\n{prefix*count} {msg} {suffix*count}\n")
+
+    def heading1(self, msg):
+        self.heading(msg, "<", ">", 10)
+
+    def heading2(self, msg):
+        self.heading(msg, "-", "-", 5)
