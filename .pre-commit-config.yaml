@@ -11,8 +11,8 @@ repos:
 -   repo: local
     hooks:
       - id: pytest
-        name: pytest
-        entry: pytest -s
+        name: Running test cases in pipeline...
+        entry: pytest -s -v
         language: system
         pass_filenames: false
         stages: [commit]
