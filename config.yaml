@@ -102,7 +102,7 @@ final_training:
         epochs: 1
 
         callbacks:
-            - name: TensorboardLogging
+            - name: TensorboardLogger
             - name: EarlyStopping
               params:
                 patience: 3

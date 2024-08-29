@@ -102,11 +102,13 @@ class FeatureExtractionPipeline:
         self.feature_selection_config['scoring_config'] = scorer_config
 
         all_scores = []
+        feature_chunksize = self.feature_selection_config.get(
+            'feature_chunksize', len(self.val_data.var_names))
         for model in self.chunked_models:
             score = scorer.generate_scores(model, self.train_data,
                                            self.val_data, self.target,
                                            self.mappings)
-            all_scores.append(score)
+            all_scores.append(score[:feature_chunksize])
 
         columns = self.train_data.var_names
         columns.name = "index"
