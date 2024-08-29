@@ -21,14 +21,13 @@ class CustomLossBase(nn.Module):
 
 
 def build_loss_fn(loss_config):
-    # Logging
-    if not loss_config:
-        loss_config = dict()
-    name = loss_config.get('name', 'CrossEntropyLoss')
-    loss_config['name'] = name
-    params = loss_config.get('params', dict())
-    if params:
-        loss_config['params'] = params
+    """Builder object to get Loss function, updated loss_config"""
+    name = loss_config.get('name')
+    if not name:
+        raise ValueError('Loss function not provided')
 
+    params = loss_config.get('params', dict())
+
+    # TODO: Add provision for custom loss object
     loss_fn = getattr(torch.nn, name)(**params)
     return loss_fn, loss_config

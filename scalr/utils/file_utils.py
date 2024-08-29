@@ -10,11 +10,13 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from scalr.utils.logger import FlowLogger
+
 
 def read_data(filepath: str,
               backed: str = 'r',
               index_col: int = 0) -> Union[dict, AnnData, AnnCollection]:
-    """Reads a json, yaml or AnnData object file if filepath contains it.
+    """Reads a json, yaml, csv or AnnData object file if filepath contains it.
     Returns an AnnCollection in case of a directory with chunked anndatas.
 
     Args:
@@ -39,14 +41,15 @@ def read_data(filepath: str,
     elif path.exists(path.join(filepath, '0.h5ad')):
         data = read_chunked_anndatas(filepath, backed=backed)
     else:
-        raise ValueError('''`filepath` is not a `json`, `yaml`, or `h5ad` file,
+        raise ValueError(
+            '''`filepath` is not a `json`, `yaml`, `csv` or `h5ad` file,
             or directory containing `h5ad` files.
             ''')
     return data
 
 
 def write_data(data: Union[dict, AnnData, pd.DataFrame], filepath: str):
-    """Writes data to `json`, `yaml` or `h5ad` file"""
+    """Writes data to `json`, `yaml`, `csv` or `h5ad` file"""
     if filepath.endswith('.json'):
         dump_json(data, filepath)
     elif filepath.endswith('.yaml'):
@@ -118,8 +121,9 @@ def write_chunkwise_data(datapath: str,
         write_data(data, path.join(dirpath, f'{i}.h5ad'))
 
 
-# TODO: add logging!
 def load_train_val_data_from_config(data_config):
+    flow_logger = FlowLogger('File Utils')
+
     train_val_test_paths = data_config.get('train_val_test')
     if not train_val_test_paths:
         raise ValueError('Split Datapaths not given')
@@ -130,18 +134,21 @@ def load_train_val_data_from_config(data_config):
                       'train'))
         val_data = read_data(
             path.join(train_val_test_paths['feature_subset_datapaths'], 'val'))
+        flow_logger.debug('Train&Val Data Loaded from Feature subset datapaths')
 
     elif train_val_test_paths.get('final_datapaths'):
         train_data = read_data(
             path.join(train_val_test_paths['final_datapaths'], 'train'))
         val_data = read_data(
             path.join(train_val_test_paths['final_datapaths'], 'val'))
+        flow_logger.debug('Train&Val Data Loaded from Final datapaths')
 
     elif train_val_test_paths.get('split_datapaths'):
         train_data = read_data(
             path.join(train_val_test_paths['split_datapaths'], 'train'))
         val_data = read_data(
             path.join(train_val_test_paths['split_datapaths'], 'val'))
+        flow_logger.debug('Train&Val Data Loaded from Split datapaths')
 
     else:
         raise ValueError('Split Datapaths not given')
@@ -149,8 +156,9 @@ def load_train_val_data_from_config(data_config):
     return train_data, val_data
 
 
-# TODO: add logging!
 def load_test_data_from_config(data_config):
+    flow_logger = FlowLogger('File Utils')
+
     train_val_test_paths = data_config.get('train_val_test')
     if not train_val_test_paths:
         raise ValueError('Split Datapaths not given')
@@ -158,14 +166,17 @@ def load_test_data_from_config(data_config):
     if train_val_test_paths.get('feature_subset_datapaths'):
         test_data = read_data(
             path.join(train_val_test_paths['feature_subset_datapaths'], 'test'))
+        flow_logger.debug('Test Data Loaded from Feature subset datapaths')
 
     elif train_val_test_paths.get('final_datapaths'):
         test_data = read_data(
             path.join(train_val_test_paths['final_datapaths'], 'test'))
+        flow_logger.debug('Test Data Loaded from Final datapaths')
 
     elif train_val_test_paths.get('split_datapaths'):
         test_data = read_data(
             path.join(train_val_test_paths['split_datapaths'], 'test'))
+        flow_logger.debug('Test Data Loaded from Split datapaths')
 
     else:
         raise ValueError('Split Datapaths not given')

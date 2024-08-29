@@ -10,6 +10,7 @@ from scalr.utils import write_data
 
 
 class SplitterBase:
+    """Base class for splitter, to make Train|Val|Test Splits"""
 
     def __init__(self):
         self.event_logger = EventLogger('Splitter')
@@ -68,7 +69,7 @@ class SplitterBase:
         assert len(set(test_inds).intersection(val_inds)
                   ) == 0, "Test and Validation sets contain overlapping samples"
 
-        # LOG
+        # LOGGING
         self.event_logger.info('Train|Validation|Test Splits\n')
         self.event_logger.info(f'Length of train set: {len(train_inds)}')
         self.event_logger.info(f'Distribution of train set: ')
@@ -86,7 +87,7 @@ class SplitterBase:
             f'{metadata[target].iloc[test_inds].value_counts()}\n')
 
     def write_splits(self, full_datapath: str, data_split_indices: dict,
-                     sample_chunksize: int, dirpath: int) -> dict:
+                     sample_chunksize: int, dirpath: int):
         """Writes the train validation and test splits to disk
 
         Args:
@@ -116,5 +117,6 @@ class SplitterBase:
         return dict()
 
 
-def build_splitter(splitter_config):
+def build_splitter(splitter_config: dict) -> tuple[SplitterBase, dict]:
+    """Builder object to get splitter, updated splitter_config"""
     return build_object(scalr.data.split, splitter_config)

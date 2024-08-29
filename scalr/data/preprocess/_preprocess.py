@@ -11,16 +11,15 @@ from scalr.utils import write_chunkwise_data
 
 
 class PreprocessorBase:
-    """Base class to build preprocessor"""
+    """Base class for preprocessor"""
 
     def __init__(self, **kwargs):
         # store all params here
         pass
 
-    #REQUIRED
+    # Abstract
     def transform(self, data: np.ndarray) -> np.ndarray:
-        """The method called by the pipeline to process a chunk of
-        samples.
+        """Required function to transform a numpy array
 
         Args:
             data (np.ndarray): raw data
@@ -38,7 +37,7 @@ class PreprocessorBase:
         """Applicable only when you need to see entire train data and
         calculate attributes, as required in StdScaler, etc.
         This method should not return anything only used to store
-        attributes which will be used by `process_samples` method
+        attributes which will be used by `transform` method
         IMPORTANT to ensure data is read in chunks only
 
         Args:
@@ -49,7 +48,8 @@ class PreprocessorBase:
         pass
 
     def process_data(self, datapath: dict, sample_chunksize: int, dirpath: str):
-        """Process each split of the data chunkwise
+        """Process the entire data chunkwise and write the processed data
+        to disk
 
         Args:
             datapath (str): datapath to read data from for transformation
@@ -57,6 +57,7 @@ class PreprocessorBase:
             dirpath (str): dirpath to write the data to
         """
         if not sample_chunksize:
+            # TODO
             raise NotImplementedError(
                 'Preprocessing does not work without sample chunksize')
 
@@ -66,5 +67,7 @@ class PreprocessorBase:
                              transform=self.transform)
 
 
-def build_preprocessor(preprocessing_config):
+def build_preprocessor(
+        preprocessing_config: dict) -> tuple[PreprocessorBase, dict]:
+    """Builder object to get processor, updated preprocessing_config"""
     return build_object(scalr.data.preprocess, preprocessing_config)
