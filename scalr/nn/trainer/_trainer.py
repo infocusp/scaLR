@@ -11,12 +11,11 @@ from torch.utils.data import DataLoader
 
 from scalr.nn.callbacks import CallbackExecutor
 from scalr.utils import EventLogger
-from scalr.utils import FlowLogger
 
 
 class TrainerBase:
     """
-    Trainer class to train and validate a model from scratch or resume from checkpoint
+    Trainer class to train and validate a model
     """
 
     def __init__(self,
@@ -106,7 +105,7 @@ class TrainerBase:
         return total_loss, accuracy
 
     def train(self, epochs: int, train_dl: DataLoader, val_dl: DataLoader):
-        """Trains the model.
+        """Trains the model
 
         Args:
             epochs: max number of epochs to train model on

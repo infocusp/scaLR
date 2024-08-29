@@ -1,5 +1,4 @@
 from os import path
-from typing import Tuple
 
 from pandas import DataFrame
 from sklearn.metrics import accuracy_score
@@ -13,6 +12,15 @@ from scalr.utils import write_data
 
 
 def get_accuracy(test_labels: list[int], pred_labels: list[int]) -> float:
+    """Function to get accuracy of predictions
+
+    Args:
+        test_labels (list[int]): true labels from test sete
+        pred_labels (list[int]): predicted labels from trained model
+
+    Returns:
+        float: accuracy score
+    """
     event_logger = EventLogger('Accuracy')
     accuracy = accuracy_score(test_labels, pred_labels)
     event_logger.info(f'Accuracy: {accuracy}')

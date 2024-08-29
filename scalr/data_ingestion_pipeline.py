@@ -1,11 +1,9 @@
 from copy import deepcopy
 import os
 from os import path
-from typing import Union
 
 from scalr.data.preprocess import build_preprocessor
 from scalr.data.split import build_splitter
-from scalr.utils import EventLogger
 from scalr.utils import FlowLogger
 from scalr.utils import read_data
 from scalr.utils import write_data

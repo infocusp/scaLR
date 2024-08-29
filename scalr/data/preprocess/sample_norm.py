@@ -7,12 +7,13 @@ from scalr.utils import EventLogger
 
 
 class SampleNorm(PreprocessorBase):
+    """Samplewise Normalization"""
 
     def __init__(self, scaling_factor: float = 1.0):
         """
         Args:
             scaling_factor: `Target sum` to keep for each sample.
-            """
+        """
 
         self.scaling_factor = scaling_factor
 

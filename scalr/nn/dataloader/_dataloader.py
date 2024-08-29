@@ -4,6 +4,7 @@ from anndata import AnnData
 from anndata.experimental import AnnCollection
 from anndata.experimental import AnnLoader
 import torch
+from torch import Tensor
 
 import scalr
 from scalr.utils import build_object
@@ -28,6 +29,7 @@ class DataLoaderBase:
         self.target = target
         self.mappings = mappings
 
+    # Abstract
     def collate_fn(self, batch):
         """Given an input anndata of batch_size,
         the collate function creates inputs and outputs.
@@ -36,9 +38,9 @@ class DataLoaderBase:
         """
         pass
 
-    def get_targets_ids_from_mappings(self, adata: Union[AnnData,
-                                                         AnnCollection]):
-        """Helper function to generate
+    def get_targets_ids_from_mappings(
+            self, adata: Union[AnnData, AnnCollection]) -> list[Tensor]:
+        """Helper function to generate target ids from label mappings
 
         Args:
             adata (Union[AnnData, AnnCollection]): anndata object containing
@@ -71,7 +73,17 @@ class DataLoaderBase:
         return dict()
 
 
-def build_dataloader(dataloader_config, adata, target, mappings):
+def build_dataloader(dataloader_config: dict,
+                     adata: Union[AnnData, AnnCollection], target: str,
+                     mappings: dict) -> tuple[DataLoaderBase, dict]:
+    """Builder object to get DataLoader, updated dataloader_config
+
+    Args:
+        dataloader_config (dict): config to build dataloader
+        adata (Union[AnnData, AnnCollection]): data
+        target (str): target column in data.obs
+        mappings (dict): mappings of column labels to ids
+    """
     if not dataloader_config.get('name'):
         raise ValueError('DataLoader name is required!')
 

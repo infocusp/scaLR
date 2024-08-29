@@ -15,7 +15,10 @@ def set_seed(seed: int):
 
 
 def overwrite_default(user_config: dict, default_config: dict) -> dict:
-    """The function recursively overwrites information from user_config onto the default_config"""
+    """The function recursively overwrites information from user_config 
+    onto the default_config
+    """
+
     for key in user_config.keys():
         if key not in default_config.keys() or not isinstance(
                 user_config[key], dict):
@@ -28,6 +31,14 @@ def overwrite_default(user_config: dict, default_config: dict) -> dict:
 
 
 def build_object(module, config: dict):
+    """Builder function to build a object from its config
+    
+    Args:
+    module: module containing the class
+    config: contains name of class and params to initialize object
+    
+    Returns: object, updated config
+    """
     name = config.get('name')
     if not name:
         raise ValueError('class name not provided!')

@@ -5,6 +5,7 @@ from typing import Union
 
 from anndata import AnnData
 from anndata.experimental import AnnCollection
+from torch import nn
 
 from scalr.model_training_pipeline import ModelTrainingPipeline
 from scalr.utils import EventLogger
@@ -12,10 +13,9 @@ from scalr.utils import FlowLogger
 
 
 class FeatureChunking:
-    '''
-        FeatureChunking trains models for subsetted datasets, each containing
-        `feature_chunksize` features
-    '''
+    """FeatureChunking trains a model for each subsetted datasets, 
+    each containing `feature_chunksize` genes as features
+    """
 
     def __init__(self,
                  feature_chunksize: int,
@@ -51,7 +51,12 @@ class FeatureChunking:
         self.dirpath = dirpath
         self.device = device
 
-    def train_chunked_models(self):
+    def train_chunked_models(self) -> list[nn.Module]:
+        """Trains a model for each subset data
+
+        Returns:
+            list[nn.Module]: list of models for each subset
+        """
         self.event_logger.info('Feature chunked models training')
         models = []
         chunked_models_dirpath = path.join(self.dirpath, 'chunked_models')
@@ -90,4 +95,5 @@ class FeatureChunking:
         return models
 
     def get_updated_configs(self):
+        """Returns updated configs"""
         return self.chunk_model_config, self.chunk_model_train_config

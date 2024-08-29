@@ -19,9 +19,9 @@ from scalr.utils import read_data
 
 
 class EvalAndAnalysisPipeline:
+    """Evaluation and Analysis of trained model"""
 
     def __init__(self, analysis_config, dirpath, device):
-        """Evaluation and Analysis of trained model"""
         self.flow_logger = FlowLogger('Eval&Analysis')
 
         self.analysis_config = deepcopy(analysis_config)
@@ -37,9 +37,9 @@ class EvalAndAnalysisPipeline:
             self.model.to(self.device)
             self.model.load_weights(model_weights)
         else:
-            # raise Warning('''Model path not provided. Unable to perform
-            #               model based analysis!''')
-            # TODO: raise above warning
+            self.flow_logger.warning(
+                'Model path not provided. Unable to perform model based analysis!'
+            )
             self.model = None
 
         # dict to transfer information between analyses
@@ -49,7 +49,7 @@ class EvalAndAnalysisPipeline:
         dataloader_config = deepcopy(self.analysis_config.get('dataloader'))
 
         if not dataloader_config:
-            # raise proper WARNING here.
+            self.flow_logger.warning('DataLoader configs not provided!')
             self.train_dl = None
             self.val_dl = None
             self.test_dl = None
@@ -120,6 +120,9 @@ class EvalAndAnalysisPipeline:
             mapping=self.mappings[self.target]['id2label'])
 
     def gene_analysis(self):
+        """Method to perform anlaysis on trained model to get top genes
+        and biomarkers"""
+
         self.flow_logger.info('Performing gene analysis')
         gene_analysis_path = path.join(self.dirpath, 'gene_analysis')
         gene_analyser = FeatureExtractionPipeline(
@@ -136,6 +139,7 @@ class EvalAndAnalysisPipeline:
         self.primary_analysis['top_features'] = top_features
 
     def perform_downstream_anlaysis(self):
+        """Perform Downstream analysis on model and data"""
         downstream_analysis = self.analysis_config.get('downstream_analysis',
                                                        list())
         if downstream_analysis:
@@ -162,5 +166,6 @@ class EvalAndAnalysisPipeline:
         if downstream_analysis:
             self.analysis_config['downstream_analysis'] = downstream_analysis
 
-    def get_updated_config(self):
+    def get_updated_config(self) -> dict:
+        """Get updated configs"""
         return self.analysis_config

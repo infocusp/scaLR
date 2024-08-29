@@ -10,18 +10,30 @@ from scalr.utils import build_object
 
 
 class ScoringBase:
+    """Base class for scorer"""
 
     def __init__(self):
         pass
 
+    # Abstract
     def generate_scores(self, model: nn.Module,
                         train_data: Union[AnnData, AnnCollection],
                         val_data: Union[AnnData, AnnCollection], target: str,
                         mappings: dict) -> np.ndarray:
-        """Executor function, to return score of each feature for each class
-        score: (num_classes X num_features)
+        """Function to return score of each feature for each class
+
+        Args:
+            model (nn.Module): trained model to generate scores from
+            train_data (Union[AnnData, AnnCollection]): training data of model
+            val_data (Union[AnnData, AnnCollection]): validation data of model
+            target (str): column in data, used to train the model on
+            mappings (dict): mapping of model output dimension to its 
+                             corresponding labels in the metadata columns
+
+        Returns:
+            np.ndarray: score_matrix [num_classes X num_features]
         """
-        return
+        pass
 
     @classmethod
     def get_default_params(cls) -> dict:
@@ -29,5 +41,6 @@ class ScoringBase:
         return dict()
 
 
-def build_scorer(scorer_config):
+def build_scorer(scorer_config: dict) -> tuple[ScoringBase, dict]:
+    """Builder object to get scorer, updated scorer_config"""
     return build_object(scalr.feature.scoring, scorer_config)

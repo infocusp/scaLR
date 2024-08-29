@@ -12,7 +12,6 @@ from torch import nn
 from scalr.feature import FeatureChunking
 from scalr.feature.scoring import build_scorer
 from scalr.feature.selector import build_selector
-from scalr.utils import EventLogger
 from scalr.utils import FlowLogger
 from scalr.utils import load_train_val_data_from_config
 from scalr.utils import read_data
@@ -63,7 +62,9 @@ class FeatureExtractionPipeline:
         self.target = target
         self.mappings = mappings
 
-    def feature_chunked_model_training(self):
+    def feature_chunked_model_training(self) -> list[nn.Module]:
+        """Train models on subsetted data containing `feature_chunksize` genes"""
+
         self.flow_logger.info('Feature chunked models training')
 
         feature_chunksize = self.feature_selection_config.get(
@@ -89,9 +90,10 @@ class FeatureExtractionPipeline:
         return self.chunked_models
 
     def set_model(self, models: list[nn.Module]):
+        """Method to set trained model for downstream feature tasks"""
         self.chunked_models = models
 
-    def feature_scoring(self):
+    def feature_scoring(self) -> pd.DataFrame:
         """To generate scores of each feature for each class using a scorer
         and chunked models
         """
@@ -122,9 +124,12 @@ class FeatureExtractionPipeline:
         return self.score_matrix
 
     def set_score_matrix(self, score_matrix: pd.DataFrame):
+        """Method to set score_matrix for feature extraction"""
         self.score_matrix = score_matrix
 
-    def top_feature_extraction(self):
+    def top_feature_extraction(self) -> Union[list[str], dict]:
+        """Get top features using `Selector`"""
+
         self.flow_logger.info('Top features extraction')
 
         selector_config = self.feature_selection_config.get(
@@ -138,7 +143,10 @@ class FeatureExtractionPipeline:
 
         return self.top_features
 
-    def write_top_features_subset_data(self, data_config):
+    def write_top_features_subset_data(self, data_config: dict) -> dict:
+        """Writing top features subset data onto disk, 
+        returns updated data_config"""
+
         self.flow_logger.info('Writing feature-subset data onto disk')
 
         datapath = data_config['train_val_test'].get('final_datapaths')
@@ -161,5 +169,6 @@ class FeatureExtractionPipeline:
 
         return data_config
 
-    def get_updated_config(self):
+    def get_updated_config(self) -> dict:
+        """Return updated configs"""
         return self.feature_selection_config

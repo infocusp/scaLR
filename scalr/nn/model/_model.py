@@ -17,21 +17,7 @@ class ModelBase(nn.Module):
         super().__init__()
 
     def forward(self, x: Tensor) -> Tensor:
-        pass
-
-    def update_from_data(self, data: Union[AnnCollection, AnnData],
-                         targets: list[str]):
-        """To use data to build any part of class
-        This method is optional and cannot return anything.
-        It should only be used to create of modify arguments
-        Eg. To use data shape to build input and output features, or
-        use data to calculate and build weights. It is important to note
-        data should ONLY be read in chunks at a time.
-
-        Args:
-            data (Union[AnnCollection, AnnData]): train_data for processing
-            targets (list[string]): target columns present in `obs`
-        """
+        """method for forward pass of model to generate outputs"""
         pass
 
     def load_weights(self, model_weights_path: str):
@@ -52,5 +38,6 @@ class ModelBase(nn.Module):
         return dict()
 
 
-def build_model(model_config):
+def build_model(model_config: dict) -> tuple[nn.Module, dict]:
+    """Builder object to get Model, updated model_config"""
     return build_object(scalr.nn.model, model_config)

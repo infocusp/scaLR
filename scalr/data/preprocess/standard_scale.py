@@ -9,6 +9,7 @@ from scalr.utils import EventLogger
 
 
 class StandardScaler(PreprocessorBase):
+    """Standard Normalization"""
 
     def __init__(self, with_mean: bool = True, with_std: bool = True):
         """

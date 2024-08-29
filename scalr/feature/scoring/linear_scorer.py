@@ -10,6 +10,8 @@ from scalr.feature.scoring import ScoringBase
 
 
 class LinearScorer(ScoringBase):
+    """The Scorer only applicable for linear (single-layer) models.
+    It directly uses the weights as score for each feature."""
 
     def __init__(self):
         pass

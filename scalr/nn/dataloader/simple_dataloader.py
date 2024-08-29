@@ -3,6 +3,7 @@ from typing import Union
 from anndata import AnnData
 from anndata.experimental import AnnCollection
 import torch
+from torch import Tensor
 from torch.nn.functional import pad
 
 from scalr.nn.dataloader import DataLoaderBase
@@ -35,7 +36,7 @@ class SimpleDataLoader(DataLoaderBase):
     def collate_fn(
         self,
         adata_batch: Union[AnnData, AnnCollection],
-    ):
+    ) -> tuple[Tensor, Tensor]:
         """Given an input anndata of batch_size,
         the collate function creates inputs and outputs
 

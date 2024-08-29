@@ -4,11 +4,21 @@ from scalr.feature.selector import SelectorBase
 
 
 class ClasswisePromoters(SelectorBase):
+    """Classwise scorer returns a dict for each class, containing top 
+    positive scored genes"""
 
     def __init__(self, k: int = 1e6):
         self.k = k
 
     def get_feature_list(self, score_matrix: DataFrame):
+        """
+        Args:
+            score_matrix (DataFrame): score of each feature across all classes
+                                      [num_classes X num_features]
+
+        Returns:
+            list[str]: list of top k features
+        """
         classwise_promoters = dict()
         n_cls = len(score_matrix)
 

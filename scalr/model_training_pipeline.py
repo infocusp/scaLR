@@ -105,6 +105,7 @@ class ModelTrainingPipeline:
                               'model.pt'))['optimizer_state_dict'])
 
     def build_optimizer(self, opt_config: dict = None):
+        """Function to build optimizer"""
         if not opt_config:
             opt_config = dict()
         name = opt_config.get('name', 'Adam')
