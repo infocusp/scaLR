@@ -158,13 +158,6 @@ if __name__ == '__main__':
     dirpath = os.path.join(dirpath, f'{exp_name}_{exp_run}')
     device = config['device']
 
-    flow_logger = FlowLogger('ROOT', logging.INFO)
-    flow_logger.info(f'Experiment directory: `{dirpath}`')
-    if os.path.exists(dirpath):
-        flow_logger.warning('Experiment directory already exists!')
-
-    os.makedirs(dirpath, exist_ok=True)
-
     # Logging
     log = args.log
     if log:
@@ -174,6 +167,13 @@ if __name__ == '__main__':
     else:
         level = logging.CRITICAL
         logpath = None
+
+    flow_logger = FlowLogger('ROOT', level)
+    flow_logger.info(f'Experiment directory: `{dirpath}`')
+    if os.path.exists(dirpath):
+        flow_logger.warning('Experiment directory already exists!')
+
+    os.makedirs(dirpath, exist_ok=True)
 
     event_logger = EventLogger('ROOT', level, logpath)
 
@@ -194,7 +194,7 @@ if __name__ == '__main__':
     end_time = time()
     flow_logger.info(f'Total time taken: {end_time - start_time}')
 
-    event_logger.heading('Runtime Analyis')
+    event_logger.heading('Runtime Analysis')
     event_logger.info(f'Total time taken: {end_time - start_time}')
 
     if args.memoryprofiler:

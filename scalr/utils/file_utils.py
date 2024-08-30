@@ -134,21 +134,21 @@ def load_train_val_data_from_config(data_config):
                       'train'))
         val_data = read_data(
             path.join(train_val_test_paths['feature_subset_datapaths'], 'val'))
-        flow_logger.debug('Train&Val Data Loaded from Feature subset datapaths')
+        flow_logger.info('Train&Val Data Loaded from Feature subset datapaths')
 
     elif train_val_test_paths.get('final_datapaths'):
         train_data = read_data(
             path.join(train_val_test_paths['final_datapaths'], 'train'))
         val_data = read_data(
             path.join(train_val_test_paths['final_datapaths'], 'val'))
-        flow_logger.debug('Train&Val Data Loaded from Final datapaths')
+        flow_logger.info('Train&Val Data Loaded from Final datapaths')
 
     elif train_val_test_paths.get('split_datapaths'):
         train_data = read_data(
             path.join(train_val_test_paths['split_datapaths'], 'train'))
         val_data = read_data(
             path.join(train_val_test_paths['split_datapaths'], 'val'))
-        flow_logger.debug('Train&Val Data Loaded from Split datapaths')
+        flow_logger.info('Train&Val Data Loaded from Split datapaths')
 
     else:
         raise ValueError('Split Datapaths not given')
@@ -166,17 +166,17 @@ def load_test_data_from_config(data_config):
     if train_val_test_paths.get('feature_subset_datapaths'):
         test_data = read_data(
             path.join(train_val_test_paths['feature_subset_datapaths'], 'test'))
-        flow_logger.debug('Test Data Loaded from Feature subset datapaths')
+        flow_logger.info('Test Data Loaded from Feature subset datapaths')
 
     elif train_val_test_paths.get('final_datapaths'):
         test_data = read_data(
             path.join(train_val_test_paths['final_datapaths'], 'test'))
-        flow_logger.debug('Test Data Loaded from Final datapaths')
+        flow_logger.info('Test Data Loaded from Final datapaths')
 
     elif train_val_test_paths.get('split_datapaths'):
         test_data = read_data(
             path.join(train_val_test_paths['split_datapaths'], 'test'))
-        flow_logger.debug('Test Data Loaded from Split datapaths')
+        flow_logger.info('Test Data Loaded from Split datapaths')
 
     else:
         raise ValueError('Split Datapaths not given')
