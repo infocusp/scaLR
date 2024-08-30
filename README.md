@@ -110,50 +110,48 @@ A brief overview of the library Structure and functionalities
    - **gene_recall_curve.ipynb**: an example how to generate gene recall curve
 
 ## Pipeline Scripts (Output Structure)
+**pipeline.py**:
+Main script to run the entire pipeline.  
+    - `exp_dir`: root experiment directory for storage of all phases of the pipeline. Specified from the config.  
+    - `config.yml`: copy of config file to reproduce the experiment
 
-- **pipeline.py**:
-Main script to run the entire pipeline.
-    - `exp_dir`: root experiment directory for storage of all phases of the pipeline. Specified from the config.
-        - `config.yml`: copy of config file to reproduce the experiment
-
-- **data_ingestion.py**:
+- **data_ingestion**:
 Reads the data, and splits it into Train/Validation/Test sets for the pipeline. Then performs sample-wise normalization on the data
     - `exp_dir`
         - `data`
-            - `data_split.json`: contains sample indices for train/validation/test splits
-            - `train`: directory containing the train samples anndata files.
-            - `val`: directory containing the validation samples anndata files.
-            - `test`: directory containing the test samples anndata files.
+            - `train_val_test_split.json`: contains sample indices for train/validation/test splits
+            - `label_mappings.json`: contains mappings of all metadata columns between labels and ids
+            - `train_val_test_split`: directory containing the train, validation and test samples anndata files.
 
-- **feature-extractions.py**:
+- **feature_extraction**:
 Performs feature selection and extraction of new datasets containing subset features
     - `exp_dir`
-        - `feature_selection`
-            - `model_weights`: contains weights of each individual models trained on feature chunked data (refer to feature chunking algorithm)
-            - `train`: directory containing the new feature-subsetted train samples anndatas
-            - `val`: directory containing the new feature-subsetted validation samples anndatas
-            - `test`: directory containing the new feature-subsetted test samples anndatas
-            - `feature_class_weights.csv`: combined weights of all individual models, for each feature and class. shape: n_classes X n_features
-            - `top_features.txt`: file containing list of top features selected / to be subsetted from total features.
-            - `biomarkers.json`: json file containing a dictionary of classwise biomarkers/top-features.
+        - `feature_extraction`
+            - `chunked_models`: contains weights of each individual models trained on feature chunked data (refer to feature chunking algorithm)
+            - `feature_subset_data`: directory containing the new feature-subsetted train, val and test samples anndatas
+            - `score_matrix.csv`: combined scores of all individual models, for each feature and class. shape: n_classes X n_features
+            - `top_features.json`: file containing list of top features selected / to be subsetted from total features.
 
-- **train.py**:
+- **final_model_training**:
 Trains a final model on the basis of `train_datapath` and `val_datapath` in config.
     - `exp_dir`
-        - `logs`: directory containing Tensorboard Logs for the training of model
-        - `checkpoints`: directory containing model weights checkpointed at every interval specifief in config.
-        - `best_model`: The best model checkpoint contains information to use model for inference / resume training.
-            - `config.yml`: config file containing model parameters
-            - `label_mappings.json`: contains mapping of class_names to class_ids used by model during training
-            - `model.pt`: contains model weights
-            - `model.bin`: contains model
+        - `model`
+            - `logs`: directory containing Tensorboard Logs for the training of model
+            - `checkpoints`: directory containing model weights checkpointed at every interval specifief in config.
+            - `best_model`: The best model checkpoint contains information to use model for inference / resume training.
+                - `config.yml`: config file containing model parameters
+                - `label_mappings.json`: contains mapping of class_names to class_ids used by model during training
+                - `model.pt`: contains model weights
 
-- **evaluate.py**:
+- **eval&analysis**:
 Performs evaluation of best model trained on user defined metrics on the test set. Also performs various downstream tasks
    - `exp_dir`
-        - `results`
+        - `analysis`
             - `classification_report.csv`: Contains classification report showing Precision, Recall, F1, and accuracy metric for each class, on the test set.
-            - `gene_recall_curves_{plot_type}.png`: Gene recall curve plots for `per_category` or `aggregated_across_all_categories` plot_type - whichever applicable or opted by user
+            - `gene_analysis`
+                - `score_matrix.csv`: score of final model, for each feature and class. shape: n_classes X n_features
+                - `top_features.json`: file containing list of top features selected / biomarkers
+            <!-- - `gene_recall_curves_{plot_type}.png`: Gene recall curve plots for `per_category` or `aggregated_across_all_categories` plot_type - whichever applicable or opted by user
             - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.png`: Volcano plot for DEG analysis
             - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.csv`: Differential expression values for each gene.
             - `roc_auc.png`: ROC-AUC curve plot.
@@ -161,7 +159,7 @@ Performs evaluation of best model trained on user defined metrics on the test se
                 - `heatmap.png`: heatmap of all genes from each class wise genes.
                 - `shap_analysis.csv`: class/label wise top genes.
                 - `raw_gene_class_weights.csv`: original values mean of SHAP values per class/label. It contain negtive as well.
-                - `genes_class_weights.csv`: abs values of genes per class/label.
+                - `genes_class_weights.csv`: abs values of genes per class/label. -->
 
 
 
