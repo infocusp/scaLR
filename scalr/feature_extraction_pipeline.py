@@ -67,7 +67,7 @@ class FeatureExtractionPipeline:
 
         self.flow_logger.info('Feature chunked models training')
 
-        feature_chunksize = self.feature_selection_config.get(
+        self.feature_chunksize = self.feature_selection_config.get(
             'feature_chunksize', len(self.val_data.var_names))
 
         chunk_model_config = self.feature_selection_config.get('model')
@@ -75,9 +75,9 @@ class FeatureExtractionPipeline:
             'model_train_config')
 
         chunked_features_model_trainer = FeatureChunking(
-            feature_chunksize, chunk_model_config, chunk_model_train_config,
-            self.train_data, self.val_data, self.target, self.mappings,
-            self.dirpath, self.device)
+            self.feature_chunksize, chunk_model_config,
+            chunk_model_train_config, self.train_data, self.val_data,
+            self.target, self.mappings, self.dirpath, self.device)
 
         self.chunked_models = chunked_features_model_trainer.train_chunked_models(
         )
@@ -104,10 +104,18 @@ class FeatureExtractionPipeline:
         self.feature_selection_config['scoring_config'] = scorer_config
 
         all_scores = []
-        for model in self.chunked_models:
-            score = scorer.generate_scores(model, self.train_data,
-                                           self.val_data, self.target,
+        for i, (model) in enumerate(self.chunked_models):
+            subset_train_data = self.train_data[:, i *
+                                                self.feature_chunksize:(i + 1) *
+                                                self.feature_chunksize]
+            subset_val_data = self.val_data[:,
+                                            i * self.feature_chunksize:(i + 1) *
+                                            self.feature_chunksize]
+            score = scorer.generate_scores(model, subset_train_data,
+                                           subset_val_data, self.target,
                                            self.mappings)
+            print(score.shape)
+
             all_scores.append(score)
 
         columns = self.train_data.var_names
@@ -144,7 +152,7 @@ class FeatureExtractionPipeline:
         return self.top_features
 
     def write_top_features_subset_data(self, data_config: dict) -> dict:
-        """Writing top features subset data onto disk, 
+        """Writing top features subset data onto disk,
         returns updated data_config"""
 
         self.flow_logger.info('Writing feature-subset data onto disk')

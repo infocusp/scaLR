@@ -13,7 +13,7 @@ from scalr.utils import FlowLogger
 
 
 class FeatureChunking:
-    """FeatureChunking trains a model for each subsetted datasets, 
+    """FeatureChunking trains a model for each subsetted datasets,
     each containing `feature_chunksize` genes as features
     """
 

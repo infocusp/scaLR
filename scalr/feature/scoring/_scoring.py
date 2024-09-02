@@ -27,7 +27,7 @@ class ScoringBase:
             train_data (Union[AnnData, AnnCollection]): training data of model
             val_data (Union[AnnData, AnnCollection]): validation data of model
             target (str): column in data, used to train the model on
-            mappings (dict): mapping of model output dimension to its 
+            mappings (dict): mapping of model output dimension to its
                              corresponding labels in the metadata columns
 
         Returns:

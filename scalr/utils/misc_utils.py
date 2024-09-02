@@ -15,7 +15,7 @@ def set_seed(seed: int):
 
 
 def overwrite_default(user_config: dict, default_config: dict) -> dict:
-    """The function recursively overwrites information from user_config 
+    """The function recursively overwrites information from user_config
     onto the default_config
     """
 
@@ -32,11 +32,11 @@ def overwrite_default(user_config: dict, default_config: dict) -> dict:
 
 def build_object(module, config: dict):
     """Builder function to build a object from its config
-    
+
     Args:
-    module: module containing the class
-    config: contains name of class and params to initialize object
-    
+        module: module containing the class
+        config: contains name of class and params to initialize object
+
     Returns: object, updated config
     """
     name = config.get('name')
