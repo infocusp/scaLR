@@ -1,10 +1,9 @@
 '''This is a test file for standard-scaler normalization.'''
 
-import anndata
-import numpy as np
 from sklearn import preprocessing
 
 from scalr.data.preprocess import standard_scale
+from scalr.utils import generate_dummy_anndata
 
 
 def test_fit():
@@ -14,11 +13,8 @@ def test_fit():
     sklean standard-scaler object params.
     '''
 
-    # Setting seed for reproducibility
-    np.random.seed(0)
-
-    # Anndata object is required for using pipeline normalization functions.
-    adata = anndata.AnnData(X=np.random.rand(100, 25))
+    # Creating annadata object.
+    adata = generate_dummy_anndata(n_samples=100, n_features=25)
 
     # standard scaler parameters
     with_mean = False

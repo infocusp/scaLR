@@ -5,21 +5,13 @@ import numpy as np
 import pandas as pd
 
 from scalr.nn.dataloader import build_dataloader
+from scalr.utils import generate_dummy_anndata
 
 
 def test_metadataloader():
 
-    # Setting seed for reproducibility
-    np.random.seed(0)
-
-    # Creating anndata object.
-    adata = anndata.AnnData(X=np.random.rand(15, 7))
-    adata.obs = pd.DataFrame.from_dict({
-        'celltype': np.random.choice(['B', 'C', 'DC', 'T'], size=15),
-        'batch': np.random.choice(['batch1', 'batch2'], size=15),
-        'env': np.random.choice(['env1', 'env2', 'env3'], size=15)
-    })
-    adata.obs.index = adata.obs.index.astype('O')
+    # Generating dummy anndata.
+    adata = generate_dummy_anndata(n_samples=15, n_features=7)
 
     # Generating mappings for anndata obs columns.
     mappings = {}
