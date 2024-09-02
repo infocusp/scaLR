@@ -13,6 +13,7 @@ from scalr.feature.scoring import ScoringBase
 from scalr.nn.dataloader import build_dataloader
 from scalr.nn.model import CustomShapModel
 from scalr.utils import data_utils
+from scalr.utils import EventLogger
 
 
 class ShapScorer(ScoringBase):
@@ -21,53 +22,78 @@ class ShapScorer(ScoringBase):
     def __init__(self,
                  early_stop: dict,
                  dataloader: dict,
-                 dirpath: str = ".",
                  device: str = 'cpu',
                  top_n_genes: int = 100,
                  background_tensor: int = 200,
+                 samples_abs_mean: bool = True,
                  *args,
                  **kwargs):
+        """Initialize class with shap arguments.
+
+        Args:
+            early_stop: Contains early stopping related configuration.
+            dataloader: dataloader related config.
+            device: Where data is process/load.
+            top_n_genes: Top N genes for each class/label.
+            background_tensor: Number of training data used for SHAP explainer.
+            samples_abs_mean: Apply abs before taking mean across samples.
+        """
+
         self.early_stop_config = early_stop
-        self.dirpath = dirpath
         self.device = device
         self.top_n_genes = top_n_genes
         self.background_tensor = background_tensor
         self.dataloader_config = dataloader
+        self.samples_abs_mean = samples_abs_mean
+
+        self.event_logger = EventLogger('SHAP analysis')
 
     def generate_scores(self, model: nn.Module,
                         train_data: Union[AnnData, AnnCollection],
                         val_data: Union[AnnData, AnnCollection], target: str,
                         mappings: dict, *args, **kwargs) -> np.ndarray:
-        """Return the weights of model as score"""
+        """Return the weights of model as score.
+
+        Args:
+            model: Trained model that used for SHAP.
+            train_data: Data that used as referece data for SHAP.
+            val_data: On which SHAP will generate the score.
+            mappings: Contains target related mappings.
+
+        Returns:
+            class * genes abs weights matrix
+        """
 
         val_dl, _ = build_dataloader(self.dataloader_config, val_data, target,
                                      mappings)
 
-        abs_mean_shap_values, _ = self.get_top_n_genes_weights(
+        shap_values = self.get_top_n_genes_weights(
             model,
             train_data,
             val_dl,
         )
 
-        return abs_mean_shap_values
+        return shap_values
 
     def get_top_n_genes_weights(
         self,
         model: nn.Module,
         train_data: Union[AnnData, AnnCollection],
         test_dl: Union[AnnData, AnnCollection],
-    ) -> None:
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Function to get top n genes of each class and its weights.
 
         Args:
-            model: trained model to extract weights from
+            model: trained model to extract weights from.
             train_data: train data.
             test_dl: test dataloader that used for shap values.
 
         Returns:
-            class wise top n genes, genes * class weights matrix
+            (class * genes abs weights matrix, class * genes weights matrix)
         """
+
+        self.event_logger.heading2("Genes analysis using SHAP.")
 
         model.to(self.device)
         shap_model = CustomShapModel(model)
@@ -76,6 +102,9 @@ class ShapScorer(ScoringBase):
             train_data,
             self.background_tensor,
         )
+
+        self.event_logger.info(
+            f"Selected random background data: {random_background_data.shape}")
 
         padding = self.dataloader_config['params']['padding']
         if padding and random_background_data.shape[1] < padding:
@@ -87,49 +116,45 @@ class ShapScorer(ScoringBase):
         explainer = shap.DeepExplainer(shap_model,
                                        random_background_data.to(self.device))
 
-        abs_prev_top_genes_batch_wise = {}
+        prev_top_genes_batch_wise = {}
         count_patience = 0
         total_samples = 0
 
         for batch_id, batch in enumerate(test_dl):
+            self.event_logger.info(f"Running on batch: {batch_id}")
             total_samples += batch[0].shape[0]
 
             batch_shap_values = explainer.shap_values(batch[0].to(self.device))
+            if self.samples_abs_mean:
+                sum_shap_values = np.abs(batch_shap_values).sum(axis=0)
+            else:
+                # calcluating 2 mean with abs values and non-abs values.
+                # Non-abs values required for heatmap.
+                sum_shap_values = batch_shap_values.sum(axis=0)
 
-            abs_sum_shap_values = np.abs(batch_shap_values).sum(axis=0)
-            # calcluating 2 mean with abs values and non-abs values.
-            # Non-abs values required for heatmap.
-            sum_shap_values = batch_shap_values.sum(axis=0)
             if batch_id >= 1:
-                abs_sum_shap_values = np.sum(
-                    [abs_sum_shap_values, abs_prev_batches_sum_shap_values],
-                    axis=0)
                 sum_shap_values = np.sum(
                     [sum_shap_values, prev_batches_sum_shap_values], axis=0)
 
-            abs_mean_shap_values = abs_sum_shap_values / total_samples
+            mean_shap_values = sum_shap_values / total_samples
 
-            abs_genes_class_shap_df = pd.DataFrame(
-                abs_mean_shap_values[:len(test_dl.dataset.var_names)],
+            genes_class_shap_df = pd.DataFrame(
+                mean_shap_values[:len(test_dl.dataset.var_names)],
                 index=test_dl.dataset.var_names)
 
-            abs_prev_batches_sum_shap_values = abs_sum_shap_values
             prev_batches_sum_shap_values = sum_shap_values
 
-            early_stop, abs_prev_top_genes_batch_wise = self._is_shap_early_stop(
-                batch_id, abs_genes_class_shap_df,
-                abs_prev_top_genes_batch_wise, self.top_n_genes,
-                self.early_stop_config['threshold'])
+            early_stop, prev_top_genes_batch_wise = self._is_shap_early_stop(
+                batch_id, genes_class_shap_df, prev_top_genes_batch_wise,
+                self.top_n_genes, self.early_stop_config['threshold'])
 
             count_patience = count_patience + 1 if early_stop else 0
 
             if count_patience == self.early_stop_config['patience']:
-                print(f"Early stopping at batch: {batch_id}")
+                self.event_logger.info(f"Early stopping at batch: {batch_id}")
                 break
 
-        mean_shap_values = sum_shap_values / total_samples
-
-        return abs_mean_shap_values.T, mean_shap_values.T
+        return mean_shap_values.T
 
     def _is_shap_early_stop(
         self,
@@ -180,8 +205,9 @@ class ShapScorer(ScoringBase):
         return {
             "top_n_genes": 100,
             "background_tensor": 200,
+            "samples_abs_mean": True,
             "early_stop": {
                 "patience": 5,
-                "threshold": 95,
+                "threshold": 95
             }
         }

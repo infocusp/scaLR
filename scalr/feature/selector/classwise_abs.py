@@ -5,7 +5,7 @@ from scalr.feature.selector import SelectorBase
 
 
 class ClasswiseAbs(SelectorBase):
-    """Classwise scorer returns a dict for each class, containing top 
+    """Classwise scorer returns a dict for each class, containing top
     absolute scores of genes"""
 
     def __init__(self, k: int = 1e6) -> dict:
