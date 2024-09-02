@@ -37,7 +37,7 @@ class ShapScorer(ScoringBase):
     def generate_scores(self, model: nn.Module,
                         train_data: Union[AnnData, AnnCollection],
                         val_data: Union[AnnData, AnnCollection], target: str,
-                        *args, **kwargs) -> np.ndarray:
+                        mappings: dict, *args, **kwargs) -> np.ndarray:
         """Return the weights of model as score"""
 
         val_dl, _ = build_dataloader(self.dataloader_config, val_data, target,
@@ -49,14 +49,13 @@ class ShapScorer(ScoringBase):
             val_dl,
         )
 
-        return abs_mean_shap_values.T
+        return abs_mean_shap_values
 
     def get_top_n_genes_weights(
         self,
         model: nn.Module,
         train_data: Union[AnnData, AnnCollection],
         test_dl: Union[AnnData, AnnCollection],
-        batch_onehotencoder: OneHotEncoder = None,
     ) -> None:
         """
         Function to get top n genes of each class and its weights.
@@ -76,8 +75,6 @@ class ShapScorer(ScoringBase):
         random_background_data = data_utils.get_random_samples(
             train_data,
             self.background_tensor,
-            self.device,
-            batch_onehotencoder,
         )
 
         padding = self.dataloader_config['params']['padding']
@@ -87,7 +84,8 @@ class ShapScorer(ScoringBase):
                 random_background_data,
                 (0, padding - random_background_data.shape[1]), 'constant', 0.0)
 
-        explainer = shap.DeepExplainer(shap_model, random_background_data)
+        explainer = shap.DeepExplainer(shap_model,
+                                       random_background_data.to(self.device))
 
         abs_prev_top_genes_batch_wise = {}
         count_patience = 0
@@ -111,11 +109,6 @@ class ShapScorer(ScoringBase):
 
             abs_mean_shap_values = abs_sum_shap_values / total_samples
 
-            # Handle batch correction. Remove batch features from analysis.
-            if batch_onehotencoder:
-                abs_mean_shap_values = abs_mean_shap_values[:-len(
-                    batch_onehotencoder.categories_[0]), :]
-
             abs_genes_class_shap_df = pd.DataFrame(
                 abs_mean_shap_values[:len(test_dl.dataset.var_names)],
                 index=test_dl.dataset.var_names)
@@ -136,35 +129,7 @@ class ShapScorer(ScoringBase):
 
         mean_shap_values = sum_shap_values / total_samples
 
-        # Handle batch correction. Remove batch features from analysis.
-        if batch_onehotencoder:
-            mean_shap_values = mean_shap_values[:-len(batch_onehotencoder.
-                                                      categories_[0]), :]
-
-        return abs_mean_shap_values, mean_shap_values
-
-    def save_data():
-        genes_class_shap_df = DataFrame(mean_shap_values,
-                                        index=test_dl.dataset.var_names,
-                                        columns=classes)
-
-        abs_genes_class_shap_df = DataFrame(abs_mean_shap_values,
-                                            index=test_dl.dataset.var_names,
-                                            columns=classes)
-
-        abs_genes_class_shap_df.T.to_csv(
-            path.join(dirpath, "genes_class_weights.csv"))
-
-        genes_class_shap_df.T.to_csv(
-            path.join(dirpath, "raw_genes_class_weights.csv"))
-
-        # Extract only top N genes
-        class_top_genes = {
-            class_label: genes[:top_n]
-            for class_label, genes in abs_prev_top_genes_batch_wise.items()
-        }
-
-        return class_top_genes, genes_class_shap_df
+        return abs_mean_shap_values.T, mean_shap_values.T
 
     def _is_shap_early_stop(
         self,

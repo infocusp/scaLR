@@ -104,6 +104,9 @@ class FeatureExtractionPipeline:
         self.feature_selection_config['scoring_config'] = scorer_config
 
         all_scores = []
+        if not getattr(self, 'feature_chunksize', None):
+            self.feature_chunksize = self.train_data.shape[1]
+
         for i, (model) in enumerate(self.chunked_models):
             subset_train_data = self.train_data[:, i *
                                                 self.feature_chunksize:(i + 1) *
@@ -114,7 +117,6 @@ class FeatureExtractionPipeline:
             score = scorer.generate_scores(model, subset_train_data,
                                            subset_val_data, self.target,
                                            self.mappings)
-            print(score.shape)
 
             all_scores.append(score)
 
