@@ -113,6 +113,7 @@ class TrainerBase:
             val_dl: validation dataloader
         """
         best_val_acc = 0
+        best_model = deepcopy(self.model)
 
         for epoch in range(epochs):
             ep_start = time()

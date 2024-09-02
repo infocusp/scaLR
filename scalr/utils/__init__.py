@@ -1,3 +1,4 @@
+from .data_utils import generate_dummy_anndata
 from .file_utils import load_test_data_from_config
 from .file_utils import load_train_val_data_from_config
 from .file_utils import read_data

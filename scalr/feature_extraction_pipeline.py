@@ -118,7 +118,7 @@ class FeatureExtractionPipeline:
                                            subset_val_data, self.target,
                                            self.mappings)
 
-            all_scores.append(score)
+            all_scores.append(score[:self.feature_chunksize])
 
         columns = self.train_data.var_names
         columns.name = "index"

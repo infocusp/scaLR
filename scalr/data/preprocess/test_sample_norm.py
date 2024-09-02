@@ -1,10 +1,9 @@
 '''This is a test file for sample-norm normalization.'''
 
-import anndata
-import numpy as np
 import scanpy as sc
 
 from scalr.data.preprocess import sample_norm
+from scalr.utils import generate_dummy_anndata
 
 
 def test_transform():
@@ -13,11 +12,8 @@ def test_transform():
     There is no fit() involved in sample-norm normalization.
     '''
 
-    # Setting seed for reproducibility
-    np.random.seed(0)
-
-    # Anndata object is required for using pipeline normalization functions.
-    adata = anndata.AnnData(X=np.random.rand(100, 25))
+    # Creating annadata object.
+    adata = generate_dummy_anndata(n_samples=100, n_features=25)
 
     # sample-norm required parameter
     target_sum = 5
