@@ -209,11 +209,3 @@ This section performs downstream analysis tasks like Gene recall curve, SHAP ana
                 params: {}
 
 - Currently pipeline supports `GeneRecallCurve`, `DgePseudoBulk` and `DgeLMEM` for downstream analysis.
-
-
-## Tutorials
-Detailed tutorials have been made on how to use some functionalities as a scaLR library. Find links below.
-
-- Normalization - `tutorials/preprocessing/normalization.ipynb`
-- Batch correction - `tutorials/preprocessing/batchc_correction.ipynb`
-- Gene recall curve - `tutorials/analysis/gene_recall_curve.ipynb`
