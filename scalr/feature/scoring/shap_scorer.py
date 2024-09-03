@@ -6,13 +6,12 @@ import numpy as np
 import pandas as pd
 import shap
 from sklearn.preprocessing import OneHotEncoder
+import torch
 from torch import nn
-from torch.nn.functional import pad
 
 from scalr.feature.scoring import ScoringBase
 from scalr.nn.dataloader import build_dataloader
 from scalr.nn.model import CustomShapModel
-from scalr.utils import data_utils
 from scalr.utils import EventLogger
 
 
@@ -64,30 +63,24 @@ class ShapScorer(ScoringBase):
             class * genes abs weights matrix
         """
 
-        val_dl, _ = build_dataloader(self.dataloader_config, val_data, target,
-                                     mappings)
-
-        shap_values = self.get_top_n_genes_weights(
-            model,
-            train_data,
-            val_dl,
-        )
+        shap_values = self.get_top_n_genes_weights(model, train_data, val_data,
+                                                   target, mappings)
 
         return shap_values
 
     def get_top_n_genes_weights(
-        self,
-        model: nn.Module,
-        train_data: Union[AnnData, AnnCollection],
-        test_dl: Union[AnnData, AnnCollection],
-    ) -> Tuple[np.ndarray, np.ndarray]:
+            self, model: nn.Module, train_data: Union[AnnData, AnnCollection],
+            test_data: Union[AnnData, AnnCollection], target: str,
+            mappings: dict) -> Tuple[np.ndarray, np.ndarray]:
         """
         Function to get top n genes of each class and its weights.
 
         Args:
             model: trained model to extract weights from.
             train_data: train data.
-            test_dl: test dataloader that used for shap values.
+            test_data: test data that used for shap values.
+            target: target name.
+            mappings: Contains target related mappings.
 
         Returns:
             (class * genes abs weights matrix, class * genes weights matrix)
@@ -98,20 +91,18 @@ class ShapScorer(ScoringBase):
         model.to(self.device)
         shap_model = CustomShapModel(model)
 
-        random_background_data = data_utils.get_random_samples(
-            train_data,
-            self.background_tensor,
-        )
+        random_indices = np.random.randint(0, train_data.shape[0],
+                                           self.background_tensor)
+        train_dl, _ = build_dataloader(self.dataloader_config,
+                                       train_data[random_indices], target,
+                                       mappings)
+        random_background_data = torch.cat([batch[0] for batch in train_dl])
 
         self.event_logger.info(
             f"Selected random background data: {random_background_data.shape}")
 
-        padding = self.dataloader_config['params']['padding']
-        if padding and random_background_data.shape[1] < padding:
-            # Add padding(features) to data.
-            random_background_data = pad(
-                random_background_data,
-                (0, padding - random_background_data.shape[1]), 'constant', 0.0)
+        test_dl, _ = build_dataloader(self.dataloader_config, test_data, target,
+                                      mappings)
 
         explainer = shap.DeepExplainer(shap_model,
                                        random_background_data.to(self.device))
