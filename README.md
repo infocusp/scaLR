@@ -1,6 +1,9 @@
-# scaLR: a low-resource deep neural network pipeline for cell types annotation and biomarker discovery
 
-Single cell analysis using Low Resource (scaLR) is a comprehensive end-to-end pipeline that is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. The major steps of the pipeline are:
+<p align="center"><img src="scaLR_logo.png" width="125" height="70"></p>
+
+# scaLR: a low-resource deep neural network platform for cell types analysis and biomarker discovery
+
+Single cell analysis using Low Resource (scaLR) is a comprehensive end-to-end pipeline that is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. The major steps of the platform are:
 
 1. Data processing: Large datasets undergo preprocessing and normalization (if the user opts to) and are segmented into training, testing, and validation sets. 
 
@@ -10,7 +13,7 @@ Single cell analysis using Low Resource (scaLR) is a comprehensive end-to-end pi
 
 4. Evaluation: The trained model is evaluated using the test dataset through calculating metrics such as precision, recall, f1-score, and accuracy. Various visualizations such as ROC curve of class annotation, feature rank plots, heatmap of top genes per class, DGE analysis, gene recall curves are generated.
 
-The following flowchart explains the major steps of the scaLR pipeline.
+The following flowchart explains the major steps of the scaLR platform.
 
 ![image.jpg](Schematic-of-scPipeline.jpg)
 
@@ -36,7 +39,7 @@ OR
 ```
 pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
 
-If `torch not found` error pops-up if running the pipeline when installed using option 1 above, consider installing it using option 2.
+If `torch not found` error pops-up if running the platform when installed using option 1 above, consider installing it using option 2.
 ```
 
 
@@ -58,7 +61,7 @@ pip install -r requirements.txt
 - `adata.var` contains all gene_names as Index.
 
 
-## Pipeline Scripts (Output Structure)
+## Platform Scripts (Output Structure)
 **pipeline.py**:
 Main script to run the entire pipeline.  
     - `exp_dir`: root experiment directory for storage of all phases of the pipeline. Specified from the config.  
@@ -97,20 +100,14 @@ Performs evaluation of best model trained on user defined metrics on the test se
    - `exp_dir`
         - `analysis`
             - `classification_report.csv`: Contains classification report showing Precision, Recall, F1, and accuracy metric for each class, on the test set.
-            - `gene_recall_curve.png`: Contains gene recall curve plots.
+            - `gene_recall_curve.svg`: Contains gene recall curve plots.
             - `gene_recall_curve_info.json`: Contains reference genes list which are present in top_K ranked genes per class for each model.
             - `gene_analysis`
                 - `score_matrix.csv`: score of final model, for each feature and class. shape: n_classes X n_features
                 - `top_features.json`: file containing list of top features selected / biomarkers
-            <!--
-            - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.png`: Volcano plot for DEG analysis
-            - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.csv`: Differential expression values for each gene.
-            - `roc_auc.png`: ROC-AUC curve plot.
-            - `shap_heatmap`
-                - `heatmap.png`: heatmap of all genes from each class wise genes.
-                - `shap_analysis.csv`: class/label wise top genes.
-                - `raw_gene_class_weights.csv`: original values mean of SHAP values per class/label. It contain negtive as well.
-                - `genes_class_weights.csv`: abs values of genes per class/label. -->
+            -  `heatmaps`
+                - `class_name.svg`: Contains heatmaps for each class type. E.g. B.svg
+            - `roc_auc.svg`: Contains ROC-AUC plot
 
 
 ## How to run
@@ -121,13 +118,14 @@ Performs evaluation of best model trained on user defined metrics on the test se
 4. `python pipeline.py --config /path/to/config -c config.yaml -l` to run the scaLR. 
 
 
-## Tutorials
+## Interactive tutorials
 Detailed tutorials have been made on how to use some functionalities as a scaLR library. Find links below.
 
 - Normalization - `tutorials/preprocessing/normalization.ipynb`
 - Batch correction - `tutorials/preprocessing/batchc_correction.ipynb`
-- Gene recall curve - `tutorials/analysis/gene_recall_curve.ipynb`
-- Differential gene expression analysis - `tutorials/analysis/dge.ipynb`
+- Gene recall curve - `tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb`
+- Differential gene expression analysis - `tutorials/analysis/differential_gene_expression/dge.ipynb`
+- SHAP analysis - `tutorials/analysis/shap_analysis.ipynb`
 
 
 ## Citation

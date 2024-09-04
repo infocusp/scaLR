@@ -208,12 +208,12 @@ class GeneRecallCurve(AnalysisBase):
 
         plt.tight_layout()
         if self.save_plots:
-            plt.savefig(path.join(dirpath, 'gene_recall_curve.png'))
+            plt.savefig(path.join(dirpath, 'gene_recall_curve.svg'))
             with open(path.join(dirpath, 'gene_recall_curve_info.json'),
                       'w') as f:
                 json.dump(gene_recall_dict, f, indent=6)
             self.event_logger.info(
-                f'\nGene recall curves stored at path : `{path.join(dirpath, "gene_recall_curve.png")}`'
+                f'\nGene recall curves stored at path : `{path.join(dirpath, "gene_recall_curve.svg")}`'
             )
         else:
             plt.show()
