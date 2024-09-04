@@ -97,10 +97,12 @@ Performs evaluation of best model trained on user defined metrics on the test se
    - `exp_dir`
         - `analysis`
             - `classification_report.csv`: Contains classification report showing Precision, Recall, F1, and accuracy metric for each class, on the test set.
+            - `gene_recall_curve.png`: Contains gene recall curve plots.
+            - `gene_recall_curve_info.json`: Contains reference genes list which are present in top_K ranked genes per class for each model.
             - `gene_analysis`
                 - `score_matrix.csv`: score of final model, for each feature and class. shape: n_classes X n_features
                 - `top_features.json`: file containing list of top features selected / biomarkers
-            <!-- - `gene_recall_curves_{plot_type}.png`: Gene recall curve plots for `per_category` or `aggregated_across_all_categories` plot_type - whichever applicable or opted by user
+            <!--
             - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.png`: Volcano plot for DEG analysis
             - `DEG_plot_{fixed_condition}_{factor_1}_vs_{factor_2}.csv`: Differential expression values for each gene.
             - `roc_auc.png`: ROC-AUC curve plot.
