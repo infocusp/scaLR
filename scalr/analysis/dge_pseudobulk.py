@@ -1,6 +1,3 @@
-import argparse
-import yaml
-
 import os
 from os import path
 from typing import Optional, Union, Tuple
@@ -43,17 +40,18 @@ class DgePseudoBulk(AnalysisBase):
         '''DgePseudoBulk parameters initialization
         
         Args: 
-            celltype_column: column name in `anndata.obs` containing all the cell types
-            design_factor: column name in `anndata.obs` containing different factor levels or categories for
-                           differential gene expression analysis           
-            factor_categories: list of conditions in `design_factor` to make design matrix for
-            sum_column: column name to sum values across samples
-            cell_subsets: selcted list of cells in 'celltype_column' to subset the anndata
-            min_cell_threshold: minimum number of cells with nonzero values for a gene.
-            fold_change: fold change to filter the differentially expressed genes for volcano plot
-            p_val: p_val to filter the differentially expressed genes for volcano plot
-            y_lim_tuple: values to adjust the Y-axis limits of the plot
-            save_plot: Boolean value to save plot
+            celltype_column: Column name in `anndata.obs` containing all the cell types.
+            design_factor: Column name in `anndata.obs` containing different factor levels or categories for
+                           differential gene expression analysis.         
+            factor_categories: List of conditions in `design_factor` to make design matrix for.
+            sum_column: Column name to sum values across samples.
+            cell_subsets: Selcted list of cells in 'celltype_column' to subset the anndata.
+            min_cell_threshold: Minimum number of cells with nonzero values for a gene. Used for filtering noisy genes.
+            fold_change: Fold change to filter the differentially expressed genes for volcano plot.
+            p_val: p_val to filter the differentially expressed genes for volcano plot.
+            y_lim_tuple: Values to adjust the Y-axis limits of the plot.
+            save_plot: Boolean value to save plot.
+            logger : Logging type.
 
         '''        
         
@@ -74,7 +72,7 @@ class DgePseudoBulk(AnalysisBase):
     def _make_design_matrix(self,
                             adata: AnnData,
                             cell_type: str):
-        '''Function to subset an anndata as per a cell type and 
+        '''Method to subset an anndata as per a cell type and 
         make design matrix based upon the factor levels in design_factor.
     
         Args:
@@ -110,7 +108,7 @@ class DgePseudoBulk(AnalysisBase):
                                             design_matrix: AnnData,
                                             cell_type: str,
                                             dirpath: str):
-        '''Function to get differential gene expression analysis results
+        '''Method to get differential gene expression analysis results
     
         Args:
             design_matrix: AnnData generated using '_make_design_matrix' 
@@ -153,7 +151,7 @@ class DgePseudoBulk(AnalysisBase):
                      dge_results_df: DataFrame,
                      cell_type: str,
                      dirpath: str):
-        '''Function to generate volcano plot of differential gene expression results 
+        '''Method to generate volcano plot of differential gene expression results 
         and store it to disk
     
         Args:
@@ -245,7 +243,7 @@ class DgePseudoBulk(AnalysisBase):
                           **kwargs):
                           
 
-        '''This function call functions to perform differential gene expression analysis on data
+        '''This method calls methods to perform differential gene expression analysis on data
         Args:
             test_data: AnnData
             dirpath: path to save the result    

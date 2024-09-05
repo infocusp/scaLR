@@ -1,13 +1,13 @@
 import argparse
 import multiprocessing
+import os
+from os import path
 import pickle
 import resource
 import string
 import sys
 from typing import Optional, Union, Tuple
 import traceback
-import os
-from os import path
 import warnings
 import yaml
 
@@ -28,7 +28,6 @@ from statsmodels.stats.multitest import multipletests
 from statsmodels.tools.sm_exceptions import HessianInversionWarning, ConvergenceWarning
 
 sys.path.append('/path_to_scaLR/')
-sys.path.append('/home/amit.samal/scaLR_run/pipeline_latest/single_cell_classification/')
 from scalr.analysis import DgeLMEM
 
 def main(config):

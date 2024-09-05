@@ -1,28 +1,28 @@
 # EXPERIMENT
 full_datapath: '/path_to_scaLR/tutorials/analysis/differential_gene_expression/test_data.h5ad'
 #Path to save the results
-dirpath: '/path_to_scaLR/tutorials/analysis/differential_gene_expression'
-dge_type: DgePseudoBulk
-# dge_type: DgeLMEM
-psedobulk_params: 
+dirpath: '/path_to_scaLR/tutorials/analysis/differential_gene_expression/'
+# dge_type: DgePseudoBulk
+dge_type: DgeLMEM
+# psedobulk_params: 
+#         celltype_column: 'cell_type'
+#         design_factor: 'disease'
+#         factor_categories: ['COVID-19', 'normal']
+#         sum_column: 'donor_id'
+#         cell_subsets: ['non-classical monocyte','natural killer cell']
+#         min_cell_threshold: 10
+#         fold_change: 1.5
+#         p_val: 0.05
+#         save_plot: True
+lmem_params: 
+        fixed_effect_column: 'disease'
+        fixed_effect_factors: ['COVID-19', 'normal']
+        group: 'donor_id'
         celltype_column: 'cell_type'
-        design_factor: 'disease'
-        factor_categories: ['COVID-19', 'normal']
-        sum_column: 'donor_id'
         cell_subsets: ['non-classical monocyte','natural killer cell']
         min_cell_threshold: 10
-        fold_change: 1.5
+        n_cpu: 4
+        gene_batch_size: 1000
+        coef_threshold: 0
         p_val: 0.05
         save_plot: True
-# lmem_params: 
-        # fixed_effect_column: 'disease'
-        # fixed_effect_factors: ['COVID-19', 'normal']
-        # group: 'donor_id'
-        # celltype_column: 'cell_type'
-        # cell_subsets: ['non-classical monocyte','natural killer cell']
-        # min_cell_threshold: 10
-        # n_cpu: 6
-        # gene_batch_size: 1000
-        # coef_threshold: 0
-        # p_val: 0.05
-        # save_plot: True

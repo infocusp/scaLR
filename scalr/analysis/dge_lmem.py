@@ -1,14 +1,12 @@
-# import argparse
 import multiprocessing
+import os
+from os import path
 import pickle
 import resource
 import string
 from typing import Optional, Union, Tuple
 import traceback
-import os
-from os import path
 import warnings
-# import yaml
 
 from anndata import AnnData
 from anndata import ImplicitModificationWarning
@@ -54,19 +52,20 @@ class DgeLMEM(AnalysisBase):
         '''DgeLMEM parameters initialization
         
         Args: 
-            fixed_effect_column: column name in `anndata.obs` containing different factor levels or categories for
+            fixed_effect_column: Column name in `anndata.obs` containing different factor levels or categories for
                            differential gene expression analysis. This acts as a fixed_effect parameter.           
-            fixed_effect_factors: list of conditions in `fixed_effect_column` to make design matrix for
-            group: column name to act as a random_effect parameter for mixed effect model
-            celltype_column: column name in `anndata.obs` containing all the cell types
-            cell_subsets: selcted list of cell types in 'celltype_column' to subset the anndata
-            min_cell_threshold: minimum number of cells with nonzero values for a gene.
-            n_cpu: number cpus for parallelization
-            gene_batch_size: number of genes in a batch of process
-            coef_threshold: threshold to filter up and down regulated genes in volcano plot.
-            p_val: p_val to filter the differentially expressed genes for volcano plot
-            y_lim_tuple: values to adjust the Y-axis limits of the plot
-            save_plot: Boolean value to save plot
+            fixed_effect_factors: List of conditions in `fixed_effect_column` to make design matrix for.
+            group: Column name to act as a random_effect parameter for mixed effect model.
+            celltype_column: Column name in `anndata.obs` containing all the cell types.
+            cell_subsets: Selcted list of cell types in 'celltype_column' to subset the anndata.
+            min_cell_threshold: Minimum number of cells with nonzero values for a gene. Used for filtering noisy genes.
+            n_cpu: Number of cpus for parallelization.
+            gene_batch_size: Number of genes in a batch of process.
+            coef_threshold: Threshold to filter up and down regulated genes in volcano plot.
+            p_val: p_val to filter the differentially expressed genes for volcano plot.
+            y_lim_tuple: Values to adjust the Y-axis limits of the plot.
+            save_plot: Boolean value to save plot.
+            logger: Logging type.
 
         '''          
         self.fixed_effect_column = fixed_effect_column
@@ -88,7 +87,7 @@ class DgeLMEM(AnalysisBase):
         
     def replace_spec_char_get_dict(self, 
                                    var_names: pd.core.indexes.base.Index):
-        ''' This function replacs ay special character in genes
+        ''' This method replacs ay special character in genes
 
         Args:
             var_names: var_names in the Anndata.
@@ -112,7 +111,7 @@ class DgeLMEM(AnalysisBase):
     def get_genes_n_fixed_val_subset_df(self,
                                         batch_adata: AnnData,
                                         cell_type: str = None):
-        '''This function converts Anndata into a pandas DataFrame with gene expression data,
+        '''This method converts Anndata into a pandas DataFrame with gene expression data,
         'fixed_effect_column', and 'group' params
         
         Args:
@@ -152,7 +151,7 @@ class DgeLMEM(AnalysisBase):
     def get_result_mxmodel_per_gene(self,
                                     gene: str,
                                     ad_subset_to_df: DataFrame):  
-        '''This function produces the Linear mixed effects model statistics for a single gene
+        '''This method produces the Linear mixed effects model statistics for a single gene
         
         Args:
             gene: Gene name
@@ -190,7 +189,7 @@ class DgeLMEM(AnalysisBase):
     def get_multiproc_mxeffect_model_batch_res(self,
                                                gene_names: list[str],
                                                ad_subset_to_df: DataFrame):
-        '''This function parallelizes the Linear mixed effects models for a list
+        '''This method parallelizes the Linear mixed effects models for a list
         of genes.
         
         Args:
@@ -219,7 +218,7 @@ class DgeLMEM(AnalysisBase):
                              lmem_res_df: DataFrame,
                              dirpath: str,
                              cell_type: str = None):
-        '''This function produces a volcano plot for the model results for data subset 
+        '''This method produces a volcano plot for the model results for data subset 
         with a fixed value or with whole dataset.
         
         Args:
@@ -283,7 +282,7 @@ class DgeLMEM(AnalysisBase):
                           test_data: Union[AnnData, AnnCollection],
                           dirpath: str,
                           **kwargs):
-        '''This function calls functions to run multiple linear mixed effects models and  
+        '''This method calls methods to run multiple linear mixed effects models and  
         generate volcano plots.
         
         Args:
