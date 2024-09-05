@@ -27,7 +27,7 @@ import statsmodels.formula.api as smf
 from statsmodels.stats.multitest import multipletests
 from statsmodels.tools.sm_exceptions import HessianInversionWarning, ConvergenceWarning
 
-
+sys.path.append('/path_to_scaLR/')
 sys.path.append('/home/amit.samal/scaLR_run/pipeline_latest/single_cell_classification/')
 from scalr.analysis import DgeLMEM
 
@@ -51,7 +51,9 @@ def main(config):
         coef_threshold = lmem_params.get('coef_threshold',0),
         p_val = lmem_params.get('p_val',0.05),
         y_lim_tuple = lmem_params.get('y_lim_tuple',None),
-        save_plot = lmem_params.get('save_plot',True))
+        save_plot = lmem_params.get('save_plot',True),
+        logger = lmem_params.get('logger','FlowLogger'))
+        
 
     dge.generate_analysis(test_data,dirpath)
 

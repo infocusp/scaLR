@@ -16,6 +16,7 @@ from pydeseq2.dds import DeseqDataSet
 from pydeseq2.ds import DeseqStats
 import scanpy as sc
 
+sys.path.append('/path_to_scaLR/')
 sys.path.append('/home/amit.samal/scaLR_run/pipeline_latest/single_cell_classification/')
 from scalr.analysis import DgePseudoBulk
 
@@ -37,7 +38,8 @@ def main(config):
         fold_change = psedobulk_params.get('fold_change',1.5),
         p_val = psedobulk_params.get('p_val',0.05),
         y_lim_tuple = psedobulk_params.get('y_lim_tuple',None),
-        save_plot = psedobulk_params.get('save_plot',True))
+        save_plot = psedobulk_params.get('save_plot',True),
+        logger = lmem_params.get('logger','FlowLogger'))
 
     dge.generate_analysis(test_data,dirpath)
 

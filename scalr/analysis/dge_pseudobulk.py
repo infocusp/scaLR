@@ -16,8 +16,13 @@ from pydeseq2.dds import DeseqDataSet
 from pydeseq2.ds import DeseqStats
 import scanpy as sc
 
+from scalr.analysis import AnalysisBase
+from scalr.feature.selector import build_selector
+from scalr.utils import EventLogger
+from scalr.utils import read_data
+from scalr import utils
 
-class DgePseudoBulk:            
+class DgePseudoBulk(AnalysisBase):        
     '''Class to perform differential gene expression analysis using Pseudobulk approach'''
     
     def __init__(self,
@@ -32,7 +37,9 @@ class DgePseudoBulk:
                  p_val: Union[float, int] = 0.05,
                  y_lim_tuple: Optional[Tuple[
                      float, ...]] = None,
-                 save_plot: bool = True):
+                 save_plot: bool = True,
+                 logger: str = 'EventLogger'):
+        
         '''DgePseudoBulk parameters initialization
         
         Args: 
@@ -62,6 +69,7 @@ class DgePseudoBulk:
         self.p_val = p_val
         self.y_lim_tuple = y_lim_tuple
         self.save_plot = save_plot
+        self.logger = logger
     
     def _make_design_matrix(self,
                             adata: AnnData,
@@ -223,14 +231,19 @@ class DgePseudoBulk:
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         if self.y_lim_tuple:
             plt.ylim(bottom=self.y_lim_tuple[0], top=self.y_lim_tuple[1])
+        _cell_type = cell_type.replace(" ","")
+        factor_0 = (self.factor_categories[0]).replace(" ","")
+        factor_1 = (self.factor_categories[1]).replace(" ","")        
         plt.savefig(path.join(
             dirpath,
-            f'pbkDGE_{cell_type}_{self.factor_categories[0]}_vs_{self.factor_categories[1]}.png'
+            f'pbkDGE_{_cell_type}_{factor_0}_vs_{factor_1}.svg'
         ),bbox_inches='tight')
 
     def generate_analysis(self,
-                         test_data: Union[AnnData, AnnCollection],
-                         dirpath: str):
+                          test_data: Union[AnnData, AnnCollection],
+                          dirpath: str,
+                          **kwargs):
+                          
 
         '''This function call functions to perform differential gene expression analysis on data
         Args:
@@ -239,7 +252,10 @@ class DgePseudoBulk:
         Returns:
             pandas DataFrame object containing differential gene expression stats
         '''
-        print('\n\n::::: Starting DGE analysis using Pseudobulk :::::\n')
+        logger = getattr(utils, self.logger)('Differential Gene expression analysis')
+        if isinstance(logger, utils.EventLogger):
+            logger.heading2("DGE analysis using Pseudobulk")        
+        logger.info('\n\n::::: Starting DGE analysis using Pseudobulk :::::\n')
         dirpath = os.path.join(dirpath,'pseudobulk_dge_result')
         os.makedirs(dirpath, exist_ok=True)        
         assert self.celltype_column in test_data.obs.columns, f"{self.celltype_column} must be a column name in `adata.obs`"
@@ -258,7 +274,7 @@ class DgePseudoBulk:
         for cell_type in cell_type_list:
             assert cell_type in test_data.obs[self.celltype_column].unique(    
             ), f"{cell_type} must belong to '{self.celltype_column}' column"
-            print(f'\nProcessing for "{cell_type}" ...')
+            logger.info(f'\n\nProcessing for "{cell_type}" ...')
             design_matrix = self._make_design_matrix(test_data,cell_type)
             dge_results_df = self.get_differential_expression_results(design_matrix, 
                                                                       cell_type,
@@ -268,7 +284,7 @@ class DgePseudoBulk:
                                       cell_type,
                                       dirpath)
             plt.close(plot)
-        print('\n\n::::: DGE analysis completed :::::\n\n')
+        logger.info('\n\n::::: DGE analysis completed :::::\n\n')
         # return dge_results_df
  
 
@@ -284,5 +300,6 @@ class DgePseudoBulk:
                     fold_change = 1.5,
                     p_val = 0.05,
                     y_lim_tuple = None,
-                    save_plot = True)
+                    save_plot = True,
+                    logger = 'EventLogger')
     

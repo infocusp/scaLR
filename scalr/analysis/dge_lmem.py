@@ -26,8 +26,14 @@ import statsmodels.formula.api as smf
 from statsmodels.stats.multitest import multipletests
 from statsmodels.tools.sm_exceptions import HessianInversionWarning, ConvergenceWarning
 
+from scalr.analysis import AnalysisBase
+from scalr.feature.selector import build_selector
+from scalr.utils import EventLogger
+from scalr.utils import FlowLogger
+from scalr.utils import read_data
+from scalr import utils
 
-class DgeLMEM:
+class DgeLMEM(AnalysisBase):
     '''Class to perform differential gene expression analysis 
     using Linear mixed effects model'''
     def __init__(self,
@@ -43,7 +49,8 @@ class DgeLMEM:
                  p_val: Union[float, int] = 0.05,
                  y_lim_tuple: Optional[Tuple[
                      float, ...]] = None,
-                 save_plot: bool = True):
+                 save_plot: bool = True,
+                 logger: str = 'EventLogger'):
         '''DgeLMEM parameters initialization
         
         Args: 
@@ -74,6 +81,7 @@ class DgeLMEM:
         self.p_val = p_val
         self.y_lim_tuple = y_lim_tuple
         self.save_plot = save_plot
+        self.logger=logger
 
         if self.n_cpu > multiprocessing.cpu_count():
                 self.n_cpu = multiprocessing.cpu_count()
@@ -174,8 +182,8 @@ class DgeLMEM:
                 pickle.dumps(result_dict_per_gene)
                 return result_dict_per_gene
         except Exception as e:
-            print(f"Error found in gene {gene}: {e}")
-            print(traceback.format_exc())     
+            logger.info(f"Error found in gene {gene}: {e}")
+            logger.info(traceback.format_exc())     
             return None 
 
     
@@ -200,8 +208,8 @@ class DgeLMEM:
             mxmodel_results_list = Parallel(n_jobs=self.n_cpu)(delayed(self.get_result_mxmodel_per_gene)(gene, 
                                                                                                         ad_subset_to_df) for gene in gene_names)
         except Exception as e:
-            print(f"Error occurred during parallel execution: {e}")
-            print(traceback.format_exc())
+            logger.info(f"Error occurred during parallel execution: {e}")
+            logger.info(traceback.format_exc())
         finally:
             mxmodel_results_list = [per_gene_result for per_gene_result in mxmodel_results_list if per_gene_result is not None]
             return mxmodel_results_list        
@@ -254,24 +262,27 @@ class DgeLMEM:
                 
                 plt.xlabel('Coefficient',fontweight='bold')
                 plt.ylabel('-Log10(p-value)',fontweight='bold')
+                _category = category.replace(' ' ,'')
                 if cell_type is not None:
+                    _cell_type = cell_type.replace(' ','')
                     plt.title(f'lmem_DGE of "{cell_type}" in "{category}" vs "{self.fixed_effect_factors[0]}"',fontweight='bold')
                     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
                     plt.savefig(path.join( 
                         dirpath,
-                        f'lmem_DGE_{cell_type}_{category}.png'
+                        f'lmem_DGE_{_cell_type}_{_category}.svg'
                     ),bbox_inches='tight')
                 else:
                     plt.title(f'lmem_DGE in "{category}" vs "{self.fixed_effect_factors[0]}"',fontweight='bold')
                     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
                     plt.savefig(path.join(
                         dirpath,
-                        f'lmem_DGE_{category}.png'
+                        f'lmem_DGE_{_category}.svg'
                     ),bbox_inches='tight')                  
                     
     def generate_analysis(self,
                           test_data: Union[AnnData, AnnCollection],
-                          dirpath: str):
+                          dirpath: str,
+                          **kwargs):
         '''This function calls functions to run multiple linear mixed effects models and  
         generate volcano plots.
         
@@ -282,22 +293,25 @@ class DgeLMEM:
         '''         
         if isinstance(test_data, AnnData):
                 test_data = AnnCollection([test_data])
-        print('\n\n:::::Starting DGE analysis using LMEM :::::')
+        logger = getattr(utils, self.logger)('Differential Gene expression analysis')
+        if isinstance(logger, utils.EventLogger):
+            logger.heading2("DGE analysis using LMEM")
+        logger.info('\n\n:::::Starting DGE analysis using LMEM :::::')
         dirpath = os.path.join(dirpath,'lmem_dge_result')
         os.makedirs(dirpath, exist_ok=True)
         new_var_names,varname_map_dict = self.replace_spec_char_get_dict(test_data.var_names)
         test_data.var_names = new_var_names
         if self.celltype_column is not None:
-            print("\nPerforming DGE analysis with subset anndata")
+            logger.info("\n\nPerforming DGE analysis with subset anndata")
             fixed_val_list = list(test_data.obs[self.celltype_column].unique())
             if self.cell_subsets is not None:
                 fixed_val_list = self.cell_subsets    
             for cell_type in fixed_val_list:
                 assert cell_type in test_data.obs[self.celltype_column].values, f"{cell_type} must be in the '{self.celltype_column}' column in 'adata.obs'"
-                print(f'\nProcessing for "{cell_type}" ...')
+                logger.info(f'\n\nProcessing for "{cell_type}" ...')
                 fixed_val_lmem_result_list = []
                 for batch in range(0, len(test_data.var_names), self.gene_batch_size):
-                    # print(f'\nProcessing gene | {batch+1}-{batch+self.gene_batch_size}')
+                    # logger.info(f'\nProcessing gene | {batch+1}-{batch+self.gene_batch_size}')
                     batch_adata = test_data[:, batch:batch + self.gene_batch_size].to_adata()
                     with warnings.catch_warnings():
                         warnings.filterwarnings("ignore", category=ImplicitModificationWarning)
@@ -330,10 +344,10 @@ class DgeLMEM:
                         plot = self.plot_lmem_dge_result(fixed_val_lmem_result_df,dirpath,cell_type)
                         plt.close('all')
         else:
-            print("\nPerforming DGE analysis with whole anndata ...")
+            logger.info("\n\nPerforming DGE analysis with whole anndata ...")
             whole_data_lmem_result_list = []
             for batch in range(0, len(test_data.var_names), self.gene_batch_size):
-                # print(f'\nProcessing gene | {batch+1}-{batch+self.gene_batch_size}')
+                # logger.info(f'\nProcessing gene | {batch+1}-{batch+self.gene_batch_size}')
                 batch_adata = test_data[:, batch:batch + self.gene_batch_size].to_adata()
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", category=ImplicitModificationWarning)                
@@ -364,7 +378,7 @@ class DgeLMEM:
                 if self.save_plot:
                     plot = self.plot_lmem_dge_result(whole_data_lmem_result_df,dirpath) 
                     plt.close(plot)
-        print('\n\n::::: DGE analysis completed :::::\n\n')
+        logger.info('\n\n::::: DGE analysis completed :::::\n\n')
 
 
     @classmethod
@@ -381,5 +395,6 @@ class DgeLMEM:
                     coef_threshold = 0,
                     p_val = 0.05,
                     y_lim_tuple = None,
-                    save_plot = True)
+                    save_plot = True,
+                    logger = 'EventLogger')
 
