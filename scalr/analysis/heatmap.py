@@ -12,7 +12,11 @@ from scalr.utils import EventLogger
 class Heatmap(AnalysisBase):
     '''Class to generate Heatmap of top genes classwise.'''
 
-    def __init__(self, top_n_genes: int = 100, *args, **kwargs):
+    def __init__(self,
+                 top_n_genes: int = 100,
+                 save_plot: bool = True,
+                 *args,
+                 **kwargs):
         """Initialize class with shap arguments.
 
         Args:
@@ -20,6 +24,7 @@ class Heatmap(AnalysisBase):
         """
 
         self.top_n_genes = top_n_genes
+        self.save_plot = save_plot
 
         self.event_logger = EventLogger('Heatmap')
 
@@ -43,7 +48,7 @@ class Heatmap(AnalysisBase):
 
         for class_name, genes in top_features.items():
             self.plot_heatmap(score_matrix[genes[:self.top_n_genes]].T,
-                              f"{dirpath}/heatmaps", f"{class_name}.svg")
+                              f"{dirpath}/heatmaps", class_name)
 
         self.event_logger.info(f"Heatmaps stored at: {dirpath}/heatmaps")
 
@@ -65,6 +70,10 @@ class Heatmap(AnalysisBase):
         sns.heatmap(class_genes_weights, vmin=-1e-2, vmax=1e-2)
 
         plt.tight_layout()
+        plt.title(filename)
 
-        plt.savefig(os.path.join(dirpath, filename))
+        if self.save_plot:
+            plt.savefig(os.path.join(dirpath, f"{filename}".svg))
+        else:
+            plt.show()
         plt.clf()

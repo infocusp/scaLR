@@ -9,10 +9,10 @@ from sklearn.preprocessing import OneHotEncoder
 import torch
 from torch import nn
 
+from scalr import utils
 from scalr.feature.scoring import ScoringBase
 from scalr.nn.dataloader import build_dataloader
 from scalr.nn.model import CustomShapModel
-from scalr.utils import EventLogger
 
 
 class ShapScorer(ScoringBase):
@@ -25,6 +25,7 @@ class ShapScorer(ScoringBase):
                  top_n_genes: int = 100,
                  background_tensor: int = 200,
                  samples_abs_mean: bool = True,
+                 logger: str = 'EventLogger',
                  *args,
                  **kwargs):
         """Initialize class with shap arguments.
@@ -45,7 +46,7 @@ class ShapScorer(ScoringBase):
         self.dataloader_config = dataloader
         self.samples_abs_mean = samples_abs_mean
 
-        self.event_logger = EventLogger('SHAP analysis')
+        self.logger = getattr(utils, logger)('SHAP analysis')
 
     def generate_scores(self, model: nn.Module,
                         train_data: Union[AnnData, AnnCollection],
@@ -86,7 +87,8 @@ class ShapScorer(ScoringBase):
             (class * genes abs weights matrix, class * genes weights matrix)
         """
 
-        self.event_logger.heading2("Genes analysis using SHAP.")
+        if isinstance(self.logger, utils.EventLogger):
+            self.logger.heading2("Genes analysis using SHAP.")
 
         model.to(self.device)
         shap_model = CustomShapModel(model)
@@ -98,7 +100,7 @@ class ShapScorer(ScoringBase):
                                        mappings)
         random_background_data = torch.cat([batch[0] for batch in train_dl])
 
-        self.event_logger.info(
+        self.logger.info(
             f"Selected random background data: {random_background_data.shape}")
 
         test_dl, _ = build_dataloader(self.dataloader_config, test_data, target,
@@ -112,7 +114,7 @@ class ShapScorer(ScoringBase):
         total_samples = 0
 
         for batch_id, batch in enumerate(test_dl):
-            self.event_logger.info(f"Running on batch: {batch_id}")
+            self.logger.info(f"Running on batch: {batch_id}")
             total_samples += batch[0].shape[0]
 
             batch_shap_values = explainer.shap_values(batch[0].to(self.device))
@@ -142,7 +144,7 @@ class ShapScorer(ScoringBase):
             count_patience = count_patience + 1 if early_stop else 0
 
             if count_patience == self.early_stop_config['patience']:
-                self.event_logger.info(f"Early stopping at batch: {batch_id}")
+                self.logger.info(f"Early stopping at batch: {batch_id}")
                 break
 
         return mean_shap_values.T
@@ -200,5 +202,12 @@ class ShapScorer(ScoringBase):
             "early_stop": {
                 "patience": 5,
                 "threshold": 95
+            },
+            "dataloader": {
+                "name": "SimpleDataLoader",
+                "params": {
+                    "batch_size": 5000,
+                    "padding": 5000
+                }
             }
         }

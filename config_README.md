@@ -40,7 +40,7 @@ Useful for low resources utilization. This will ensure all data is stored in mul
 This section splits the data using mentioned splitting technique mentioned in `splitter_config` & required params like `split_ratio` and `straitify` option. Example below.
 
     splitter_config:
-        name: StratifiedSplitter
+        name: GroupSplitter
         params:
             split_ratio: [7, 1, 2.5]
             stratify: 'donor_id'

@@ -1,0 +1,296 @@
+{
+  "Cell_Type": {
+    "id2label": [
+      "B",
+      "DC",
+      "Megakaryocyte",
+      "Mono",
+      "NK",
+      "T"
+    ],
+    "label2id": {
+      "B": 0,
+      "DC": 1,
+      "Megakaryocyte": 2,
+      "Mono": 3,
+      "NK": 4,
+      "T": 5
+    }
+  },
+  "Cell_State": {
+    "id2label": [
+      "BS1",
+      "BS2",
+      "BS3",
+      "DS1",
+      "DS2",
+      "DS3",
+      "MK",
+      "MS1",
+      "MS2",
+      "MS3",
+      "MS4",
+      "NS1",
+      "NS2",
+      "TS1",
+      "TS2",
+      "TS3"
+    ],
+    "label2id": {
+      "BS1": 0,
+      "BS2": 1,
+      "BS3": 2,
+      "DS1": 3,
+      "DS2": 4,
+      "DS3": 5,
+      "MK": 6,
+      "MS1": 7,
+      "MS2": 8,
+      "MS3": 9,
+      "MS4": 10,
+      "NS1": 11,
+      "NS2": 12,
+      "TS1": 13,
+      "TS2": 14,
+      "TS3": 15
+    }
+  },
+  "Cohort": {
+    "id2label": [
+      "Bac-SEP",
+      "Control",
+      "ICU-NoSEP",
+      "ICU-SEP",
+      "Int-URO",
+      "Leuk-UTI",
+      "URO"
+    ],
+    "label2id": {
+      "Bac-SEP": 0,
+      "Control": 1,
+      "ICU-NoSEP": 2,
+      "ICU-SEP": 3,
+      "Int-URO": 4,
+      "Leuk-UTI": 5,
+      "URO": 6
+    }
+  },
+  "biosample_id": {
+    "id2label": [
+      "CD45",
+      "DC"
+    ],
+    "label2id": {
+      "CD45": 0,
+      "DC": 1
+    }
+  },
+  "donor_id": {
+    "id2label": [
+      "C2P01",
+      "C2P01H",
+      "C2P02",
+      "C2P05",
+      "C2P05F",
+      "C2P07H",
+      "C2P09",
+      "C2P10",
+      "C2P10H",
+      "C2P11",
+      "C2P12",
+      "C2P13",
+      "C2P13F",
+      "C2P15",
+      "C2P15H",
+      "C2P16",
+      "C2P16H",
+      "C2P18",
+      "C2P19",
+      "C2P19H",
+      "C2P21",
+      "E1",
+      "E12",
+      "E16",
+      "E25",
+      "P02",
+      "P02H",
+      "P03",
+      "P04",
+      "P04H",
+      "P05",
+      "P06",
+      "P06F",
+      "P07",
+      "P07H",
+      "P08",
+      "P08H",
+      "P09",
+      "P09H",
+      "P13",
+      "P13H",
+      "P15F",
+      "P17",
+      "P17H",
+      "P18",
+      "P18F",
+      "P19",
+      "P20",
+      "P20H",
+      "P21",
+      "P633",
+      "P634",
+      "P635",
+      "P636",
+      "P639",
+      "P640",
+      "P650",
+      "P657",
+      "P662",
+      "P667",
+      "P668",
+      "P669",
+      "P670",
+      "P671",
+      "P672"
+    ],
+    "label2id": {
+      "C2P01": 0,
+      "C2P01H": 1,
+      "C2P02": 2,
+      "C2P05": 3,
+      "C2P05F": 4,
+      "C2P07H": 5,
+      "C2P09": 6,
+      "C2P10": 7,
+      "C2P10H": 8,
+      "C2P11": 9,
+      "C2P12": 10,
+      "C2P13": 11,
+      "C2P13F": 12,
+      "C2P15": 13,
+      "C2P15H": 14,
+      "C2P16": 15,
+      "C2P16H": 16,
+      "C2P18": 17,
+      "C2P19": 18,
+      "C2P19H": 19,
+      "C2P21": 20,
+      "E1": 21,
+      "E12": 22,
+      "E16": 23,
+      "E25": 24,
+      "P02": 25,
+      "P02H": 26,
+      "P03": 27,
+      "P04": 28,
+      "P04H": 29,
+      "P05": 30,
+      "P06": 31,
+      "P06F": 32,
+      "P07": 33,
+      "P07H": 34,
+      "P08": 35,
+      "P08H": 36,
+      "P09": 37,
+      "P09H": 38,
+      "P13": 39,
+      "P13H": 40,
+      "P15F": 41,
+      "P17": 42,
+      "P17H": 43,
+      "P18": 44,
+      "P18F": 45,
+      "P19": 46,
+      "P20": 47,
+      "P20H": 48,
+      "P21": 49,
+      "P633": 50,
+      "P634": 51,
+      "P635": 52,
+      "P636": 53,
+      "P639": 54,
+      "P640": 55,
+      "P650": 56,
+      "P657": 57,
+      "P662": 58,
+      "P667": 59,
+      "P668": 60,
+      "P669": 61,
+      "P670": 62,
+      "P671": 63,
+      "P672": 64
+    }
+  },
+  "species": {
+    "id2label": [
+      "NCBITaxon_9606"
+    ],
+    "label2id": {
+      "NCBITaxon_9606": 0
+    }
+  },
+  "species__ontology_label": {
+    "id2label": [
+      "Homo sapiens"
+    ],
+    "label2id": {
+      "Homo sapiens": 0
+    }
+  },
+  "disease": {
+    "id2label": [
+      "PATO_0000461"
+    ],
+    "label2id": {
+      "PATO_0000461": 0
+    }
+  },
+  "disease__ontology_label": {
+    "id2label": [
+      "normal"
+    ],
+    "label2id": {
+      "normal": 0
+    }
+  },
+  "organ": {
+    "id2label": [
+      "UBERON_0000178"
+    ],
+    "label2id": {
+      "UBERON_0000178": 0
+    }
+  },
+  "organ__ontology_label": {
+    "id2label": [
+      "blood"
+    ],
+    "label2id": {
+      "blood": 0
+    }
+  },
+  "library_preparation_protocol": {
+    "id2label": [
+      "EFO_0009899"
+    ],
+    "label2id": {
+      "EFO_0009899": 0
+    }
+  },
+  "library_preparation_protocol__ontology_label": {
+    "id2label": [
+      "10x 3' v2"
+    ],
+    "label2id": {
+      "10x 3' v2": 0
+    }
+  },
+  "sex": {
+    "id2label": [
+      "unknown"
+    ],
+    "label2id": {
+      "unknown": 0
+    }
+  }
+}

@@ -1,0 +1,8 @@
+name: SequentialModel
+params:
+  activation: ReLU
+  dropout: 0
+  layers:
+  - 5000
+  - 6
+  weights_init_zero: false

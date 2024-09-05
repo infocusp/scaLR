@@ -1,11 +1,10 @@
-
 <p align="center"><img src="scaLR_logo.png" width="125" height="70"></p>
 
 # scaLR: a low-resource deep neural network platform for cell types analysis and biomarker discovery
 
 Single cell analysis using Low Resource (scaLR) is a comprehensive end-to-end pipeline that is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. The major steps of the platform are:
 
-1. Data processing: Large datasets undergo preprocessing and normalization (if the user opts to) and are segmented into training, testing, and validation sets. 
+1. Data processing: Large datasets undergo preprocessing and normalization (if the user opts to) and are segmented into training, testing, and validation sets.
 
 2. Features extraction: A model is trained on feature subsets in a batch-wise process, so all features and samples are utilised in the feature selection process. Then, the top-k features are selected to train the final model, using a feature score based on the model's coefficients/weights.
 
@@ -20,7 +19,7 @@ The following flowchart explains the major steps of the scaLR platform.
 ## Pre-requisites and installation scaLR
 
 
-- ScalR can be installed using Conda or pip. It is tested for Python 3.9 at this moment. 
+- ScalR can be installed using Conda or pip. It is tested for Python 3.9 at this moment.
 
 ```
 conda create -n scaLR_env python=3.9
@@ -63,8 +62,8 @@ pip install -r requirements.txt
 
 ## Platform Scripts (Output Structure)
 **pipeline.py**:
-Main script to run the entire pipeline.  
-    - `exp_dir`: root experiment directory for storage of all phases of the pipeline. Specified from the config.  
+Main script to run the entire pipeline.
+    - `exp_dir`: root experiment directory for storage of all phases of the pipeline. Specified from the config.
     - `config.yml`: copy of config file to reproduce the experiment
 
 - **data_ingestion**:
@@ -115,7 +114,7 @@ Performs evaluation of best model trained on user defined metrics on the test se
 1. It is necessary that the user must modify the configuration file and for each stage of the pipeline is the available inside the config folder [config.yml] or [full_config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
 2. Refer config.yml & it's detailed config [README](config_README.md) file on how to use different parameters and files.
 3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), and an optional flag to log all parts of the pipelines (`-l | --log`).
-4. `python pipeline.py --config /path/to/config -c config.yaml -l` to run the scaLR. 
+4. `python pipeline.py --config /path/to/config -c config.yaml -l` to run the scaLR.
 
 
 ## Interactive tutorials
@@ -125,7 +124,7 @@ Detailed tutorials have been made on how to use some functionalities as a scaLR 
 - Batch correction - `tutorials/preprocessing/batchc_correction.ipynb`
 - Gene recall curve - `tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb`
 - Differential gene expression analysis - `tutorials/analysis/differential_gene_expression/dge.ipynb`
-- SHAP analysis - `tutorials/analysis/shap_analysis.ipynb`
+- SHAP analysis - `tutorials/analysis/shap_analysis/shap_heatmap.ipynb`
 
 
 ## Citation
