@@ -55,5 +55,5 @@ class RocAucCurve(AnalysisBase):
         self.event_logger.info("Saving plot and clear axis & figure.")
 
         plt.axline((0, 0), (1, 1), linestyle='--', color='black')
-        fig.savefig(path.join(dirpath, f'roc_auc.png'))
+        fig.savefig(path.join(dirpath, f'roc_auc.svg'))
         plt.clf()    # clear axis & figure so it does not affect the next plot.
