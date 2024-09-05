@@ -39,11 +39,13 @@ class Heatmap(AnalysisBase):
             dirpath: path to store the heatmap image.
         """
 
-        self.event_logger.heading2("Heatmap generates.")
+        self.event_logger.heading2("Generating Heatmaps.")
 
         if isinstance(top_features, list):
             self.event_logger.info(
-                "Heatmap generate for top genes across all classes.")
+                "Generating heatmap for the same top genes across all classes as provided"
+                " `top_features` is a single list and not top genes per class dict."
+            )
             top_features = {"all_class_common": top_features}
 
         for class_name, genes in top_features.items():

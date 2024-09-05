@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from torch import nn
 
-from scalr.feature import FeatureChunking
+from scalr.feature import FeatureSubsetting
 from scalr.feature.scoring import build_scorer
 from scalr.feature.selector import build_selector
 from scalr.utils import FlowLogger
@@ -48,7 +48,7 @@ class FeatureExtractionPipeline:
                              val_data: Union[AnnData, AnnCollection],
                              target: Union[str, list[str]], mappings: dict):
         """Useful when you don't use data directly from config, but rather by other
-        sources like feature chunking, etc.
+        sources like feature subsetting, etc.
 
         Args:
             train_data (Union[AnnData, AnnCollection]): training data
@@ -63,19 +63,19 @@ class FeatureExtractionPipeline:
         self.mappings = mappings
 
     def feature_chunked_model_training(self) -> list[nn.Module]:
-        """Train models on subsetted data containing `feature_chunksize` genes"""
+        """Train models on subsetted data containing `feature_subsetsize` genes"""
 
-        self.flow_logger.info('Feature chunked models training')
+        self.flow_logger.info('Feature subset models training')
 
-        self.feature_chunksize = self.feature_selection_config.get(
-            'feature_chunksize', len(self.val_data.var_names))
+        self.feature_subsetsize = self.feature_selection_config.get(
+            'feature_subsetsize', len(self.val_data.var_names))
 
         chunk_model_config = self.feature_selection_config.get('model')
         chunk_model_train_config = self.feature_selection_config.get(
             'model_train_config')
 
-        chunked_features_model_trainer = FeatureChunking(
-            self.feature_chunksize, chunk_model_config,
+        chunked_features_model_trainer = FeatureSubsetting(
+            self.feature_subsetsize, chunk_model_config,
             chunk_model_train_config, self.train_data, self.val_data,
             self.target, self.mappings, self.dirpath, self.device)
 
@@ -104,21 +104,22 @@ class FeatureExtractionPipeline:
         self.feature_selection_config['scoring_config'] = scorer_config
 
         all_scores = []
-        if not getattr(self, 'feature_chunksize', None):
-            self.feature_chunksize = self.train_data.shape[1]
+        if not getattr(self, 'feature_subsetsize', None):
+            self.feature_subsetsize = self.train_data.shape[1]
 
         for i, (model) in enumerate(self.chunked_models):
             subset_train_data = self.train_data[:, i *
-                                                self.feature_chunksize:(i + 1) *
-                                                self.feature_chunksize]
-            subset_val_data = self.val_data[:,
-                                            i * self.feature_chunksize:(i + 1) *
-                                            self.feature_chunksize]
+                                                self.feature_subsetsize:(i +
+                                                                         1) *
+                                                self.feature_subsetsize]
+            subset_val_data = self.val_data[:, i *
+                                            self.feature_subsetsize:(i + 1) *
+                                            self.feature_subsetsize]
             score = scorer.generate_scores(model, subset_train_data,
                                            subset_val_data, self.target,
                                            self.mappings)
 
-            all_scores.append(score[:self.feature_chunksize])
+            all_scores.append(score[:self.feature_subsetsize])
 
         columns = self.train_data.var_names
         columns.name = "index"

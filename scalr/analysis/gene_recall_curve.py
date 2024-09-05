@@ -25,11 +25,11 @@ class GeneRecallCurve(AnalysisBase):
 
         Args:
             reference_genes_path: Reference genes csv path
-            ranked_genes_path: List of ranked genes csv's we want to check recall against. List is used to support
+            ranked_genes_path: List of ranked genes csvs we want to check recall against. List is used to support
                                plotting gene recall for multiple models at once
             top_K: Top K genes to consider from ranked genes to check gene recall
             plots_per_row: Number of categories to plot gene recall per row
-            save_plots: Whether to store gene recall curves
+            save_plots: Flag indicating whether to store gene recall curves or not
             feature_selector: Feature selection config containing aggregation strategy for `score_matrix`.
         '''
         self.ranked_genes_path_dict = ranked_genes_path_dict
@@ -48,7 +48,7 @@ class GeneRecallCurve(AnalysisBase):
                           score_matrix: pd.DataFrame = None,
                           dirpath: str = '.',
                           **kwargs):
-        '''This function calls function to generate gene recall after setting few parameters.
+        '''This function calls function to generate gene recall after setting a few parameters.
 
         Args:
             score_matrix: Matrix that contains score of each gene for each category
@@ -133,14 +133,12 @@ class GeneRecallCurve(AnalysisBase):
             if k < len(ref_genes):
                 k = len(ref_genes)
 
-            if len(ranked_genes) == 0 or len(ref_genes) == 0:
+            if not len(ranked_genes) or not len(ref_genes):
                 raise Exception(
                     'Ranked genes or ref genes list cannot be empty.')
 
             # Adjusting k if expected k > number of ranked genes.
             k = min(k, len(ranked_genes))
-            if k > len(ranked_genes):
-                k = len(ranked_genes)
 
             # Building baseline curve
             step = k // len(ref_genes)
@@ -173,12 +171,11 @@ class GeneRecallCurve(AnalysisBase):
                         f' top_K= #reference_genes({len(ref_genes)})')
                     k = len(ref_genes)
 
-                if len(ranked_genes) == 0 or len(ref_genes) == 0:
+                if not len(ranked_genes) or not len(ref_genes):
                     raise Exception(
                         'Ranked genes or ref genes list cannot be empty.')
 
                 # Adjusting k if expected k > number of ranked genes.
-                k = min(k, len(ranked_genes))
                 if k > len(ranked_genes):
                     self.event_logger.info(
                         f'-- Setting k={len(ranked_genes)} as #ranked_genes < {k}'

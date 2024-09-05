@@ -78,7 +78,7 @@ Reads the data, and splits it into Train/Validation/Test sets for the pipeline. 
 Performs feature selection and extraction of new datasets containing subset features
     - `exp_dir`
         - `feature_extraction`
-            - `chunked_models`: contains weights of each individual models trained on feature chunked data (refer to feature chunking algorithm)
+            - `chunked_models`: contains weights of each individual models trained on feature subset data (refer to feature subsetting algorithm)
             - `feature_subset_data`: directory containing the new feature-subsetted train, val and test samples anndatas
             - `score_matrix.csv`: combined scores of all individual models, for each feature and class. shape: n_classes X n_features
             - `top_features.json`: file containing list of top features selected / to be subsetted from total features.
@@ -105,8 +105,8 @@ Performs evaluation of best model trained on user defined metrics on the test se
                 - `score_matrix.csv`: score of final model, for each feature and class. shape: n_classes X n_features
                 - `top_features.json`: file containing list of top features selected / biomarkers
             -  `heatmaps`
-                - `class_name.svg`: Contains heatmaps for each class type. E.g. B.svg
-            - `roc_auc.svg`: Contains ROC-AUC plot
+                - `class_name.svg`: Heatmap for top genes of particular class w.r.t those genes association in other classes. E.g. B.svg, C.svg etc.
+            - `roc_auc.svg`: Contains ROC-AUC plot for all classes.
 
 
 ## How to run

@@ -12,13 +12,13 @@ from scalr.utils import EventLogger
 from scalr.utils import FlowLogger
 
 
-class FeatureChunking:
-    """FeatureChunking trains a model for each subsetted datasets,
-    each containing `feature_chunksize` genes as features
+class FeatureSubsetting:
+    """FeatureSubsetting trains a model for each subsetted datasets,
+    each containing `feature_subsetsize` genes as features
     """
 
     def __init__(self,
-                 feature_chunksize: int,
+                 feature_subsetsize: int,
                  chunk_model_config: dict,
                  chunk_model_train_config: dict,
                  train_data: Union[AnnData, AnnCollection],
@@ -29,7 +29,7 @@ class FeatureChunking:
                  device: str = 'cpu'):
         """
         Args:
-            feature_chunksize (int): number of features in one subset
+            feature_subsetsize (int): number of features in one subset
             chunk_model_config (dict): chunked model config
             chunk_model_train_config (dict): chunked model training config
             train_data (Union[AnnData, AnnCollection]): train dataset
@@ -39,9 +39,9 @@ class FeatureChunking:
             dirpath (str, optional): dirpath to store chunked model weights. Defaults to None.
             device (str, optional): device to train models on. Defaults to 'cpu'.
         """
-        self.event_logger = EventLogger('FeatureChunking')
+        self.event_logger = EventLogger('FeatureSubsetting')
 
-        self.feature_chunksize = feature_chunksize
+        self.feature_subsetsize = feature_subsetsize
         self.chunk_model_config = chunk_model_config
         self.chunk_model_train_config = chunk_model_train_config
         self.train_data = train_data
@@ -57,23 +57,23 @@ class FeatureChunking:
         Returns:
             list[nn.Module]: list of models for each subset
         """
-        self.event_logger.info('Feature chunked models training')
+        self.event_logger.info('Feature subset models training')
         models = []
         chunked_models_dirpath = path.join(self.dirpath, 'chunked_models')
         os.makedirs(chunked_models_dirpath, exist_ok=True)
 
         i = 0
         for start in range(0, len(self.train_data.var_names),
-                           self.feature_chunksize):
+                           self.feature_subsetsize):
             self.event_logger.info(f'\nChunk {i}')
             chunk_dirpath = path.join(chunked_models_dirpath, str(i))
             os.makedirs(chunk_dirpath, exist_ok=True)
             i += 1
 
             train_features_subset = self.train_data[:, start:start +
-                                                    self.feature_chunksize]
+                                                    self.feature_subsetsize]
             val_features_subset = self.val_data[:, start:start +
-                                                self.feature_chunksize]
+                                                self.feature_subsetsize]
 
             chunk_model_config = deepcopy(self.chunk_model_config)
 

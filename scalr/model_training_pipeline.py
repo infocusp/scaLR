@@ -52,7 +52,7 @@ class ModelTrainingPipeline:
                              val_data: Union[AnnData, AnnCollection],
                              target: Union[str, list[str]], mappings: dict):
         """Useful when you don't use data directly from config, but rather by other
-        sources like feature chunking, etc.
+        sources like feature subsetting, etc.
 
         Args:
             train_data (Union[AnnData, AnnCollection]): training data
@@ -89,20 +89,15 @@ class ModelTrainingPipeline:
         self.callbacks = CallbackExecutor(
             self.dirpath, self.train_config.get('callbacks', list()))
 
-        # Resuming from checkpoint
-        # QUESTION:
-        # Do we want to make model according to checkpoint?
-        # OR
-        # Only load weights from a checkpoint?
-        if self.train_config.get('resume_from_model_weights'):
-            self.flow_logger_logger.info('Resuming model from checkpoint')
-            self.model.load_weights(
-                path.join(self.train_config['resume_from_model_weights'],
-                          'model.pt'))
+        # Resuming from checkpoint using model weights.
+        if self.train_config.get('resume_from_checkpoint'):
+            self.flow_logger.info('Resuming model from checkpoint')
+            self.flow_logger.info('Loading model weights...')
+            self.model.load_weights(self.train_config['resume_from_checkpoint'])
+            self.flow_logger.info('Loading optimizer state dict...')
             self.opt.load_state_dict(
-                torch.load(
-                    path.join(self.train_config['resume_from_model_weights'],
-                              'model.pt'))['optimizer_state_dict'])
+                torch.load(self.train_config['resume_from_checkpoint'])
+                ['optimizer_state_dict'])
 
     def build_optimizer(self, opt_config: dict = None):
         """Function to build optimizer"""
