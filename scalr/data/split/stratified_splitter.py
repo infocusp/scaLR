@@ -1,5 +1,4 @@
 from pandas import DataFrame
-from sklearn.model_selection import GroupShuffleSplit
 from sklearn.model_selection import StratifiedShuffleSplit
 
 from scalr.data.split import SplitterBase
@@ -15,7 +14,6 @@ class StratifiedSplitter(SplitterBase):
         """
         Args:
             split_ratio (list[float]): ratio to split number of samples in
-            stratify (str): column name to metadata the split upon in `obs`
         """
         super().__init__()
         self.split_ratio = split_ratio
