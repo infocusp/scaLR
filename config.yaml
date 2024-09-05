@@ -13,7 +13,7 @@ data:
         full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
 
         splitter_config:
-            name: StratifiedSplitter
+            name: GroupSplitter
             params:
                 split_ratio: [7, 1, 2.5]
                 stratify: 'donor_id'
