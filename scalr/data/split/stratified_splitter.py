@@ -1,5 +1,4 @@
 from pandas import DataFrame
-from sklearn.model_selection import GroupShuffleSplit
 from sklearn.model_selection import StratifiedShuffleSplit
 
 from scalr.data.split import SplitterBase
@@ -8,18 +7,15 @@ from scalr.utils import read_data
 
 class StratifiedSplitter(SplitterBase):
     """Generate Stratified split of data into train, validation and test
-    sets. Stratification ensures samples having same value for `stratify`
-    column, can not belong to different sets.
+    sets. Stratification ensures the percentage of samples for each class.
     """
 
-    def __init__(self, split_ratio: list[float], stratify: str):
+    def __init__(self, split_ratio: list[float]):
         """
         Args:
             split_ratio (list[float]): ratio to split number of samples in
-            stratify (str): column name to metadata the split upon in `obs`
         """
         super().__init__()
-        self.stratify = stratify
         self.split_ratio = split_ratio
 
     def _split_data_with_stratification(
@@ -35,14 +31,11 @@ class StratifiedSplitter(SplitterBase):
         Returns:
             (list(int), list(int)): two lists consisting train and test indices
         """
-        splitter = GroupShuffleSplit(test_size=test_ratio,
-                                     n_splits=1,
-                                     random_state=42)
+        splitter = StratifiedShuffleSplit(test_size=test_ratio,
+                                          n_splits=1,
+                                          random_state=42)
 
-        train_inds, test_inds = next(
-            splitter.split(metadata,
-                           metadata[target],
-                           groups=metadata[self.stratify]))
+        train_inds, test_inds = next(splitter.split(metadata, metadata[target]))
 
         return train_inds, test_inds
 
@@ -99,4 +92,4 @@ class StratifiedSplitter(SplitterBase):
     @classmethod
     def get_default_params(cls) -> dict:
         """Class method to get default params for model_config"""
-        return dict(split_ratio=[7, 1, 2], stratify='donor_id')
+        return dict(split_ratio=[7, 1, 2])

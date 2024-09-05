@@ -8,7 +8,7 @@ from scalr.utils import generate_dummy_anndata
 
 def test_transform():
     '''This function tests transform function of sample-norm normalization.
-    
+
     There is no fit() involved in sample-norm normalization.
     '''
 
