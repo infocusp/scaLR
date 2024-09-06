@@ -232,6 +232,8 @@ This section performs gene analysis task such as generating classification repor
         - name: Heatmap
           params:
               top_n_genes: 100
+              score_matrix_path: /path/to/score_matrix.csv
+              top_features_path: /path/to/top_features.json
 
         - name: RocAucCurve
 

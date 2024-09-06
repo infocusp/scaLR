@@ -7,6 +7,7 @@ import seaborn as sns
 
 from scalr.analysis import AnalysisBase
 from scalr.utils import EventLogger
+from scalr.utils import read_data
 
 
 class Heatmap(AnalysisBase):
@@ -15,21 +16,30 @@ class Heatmap(AnalysisBase):
     def __init__(self,
                  top_n_genes: int = 100,
                  save_plot: bool = True,
+                 score_matrix_path: str = None,
+                 top_features_path: str = None,
                  *args,
                  **kwargs):
         """Initialize class with shap arguments.
 
         Args:
             top_n_genes: top N genes for each class/label.
+            save_plot: Where to save plot or show plot.
+            score_matrix_path: path to score matrix.
+            top_features_path: path to top features.
         """
 
         self.top_n_genes = top_n_genes
         self.save_plot = save_plot
+        self.score_matrix_path = score_matrix_path
+        self.top_features_path = top_features_path
 
         self.event_logger = EventLogger('Heatmap')
 
-    def generate_analysis(self, score_matrix: pd.DataFrame,
-                          top_features: Union[dict, list], dirpath: str,
+    def generate_analysis(self,
+                          dirpath: str,
+                          score_matrix: pd.DataFrame = None,
+                          top_features: Union[dict, list] = None,
                           **kwargs) -> None:
         """Generate heatmap for top features.
 
@@ -47,6 +57,17 @@ class Heatmap(AnalysisBase):
                 " `top_features` is a single list and not top genes per class dict."
             )
             top_features = {"all_class_common": top_features}
+
+        if (score_matrix is None) and (top_features is None):
+
+            if not self.score_matrix_path:
+                raise ValueError("score_matrix_path required.")
+
+            if not self.top_features_path:
+                raise ValueError("top_features_path required.")
+
+            score_matrix = read_data(self.score_matrix_path)
+            top_features = read_data(self.top_features_path)
 
         for class_name, genes in top_features.items():
             self.plot_heatmap(score_matrix[genes[:self.top_n_genes]].T,

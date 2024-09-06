@@ -148,22 +148,25 @@ class EvalAndAnalysisPipeline:
             self.flow_logger.info('Performing Downstream Analysis')
 
         for i, (analysis_config) in enumerate(downstream_analysis):
-            self.flow_logger.info(f'Performing {analysis_config["name"]}')
+            try:
+                self.flow_logger.info(f'Performing {analysis_config["name"]}')
 
-            analysis_config = deepcopy(analysis_config)
-            analyser, analysis_config = build_analyser(analysis_config)
-            downstream_analysis[i] = analysis_config
+                analysis_config = deepcopy(analysis_config)
+                analyser, analysis_config = build_analyser(analysis_config)
+                downstream_analysis[i] = analysis_config
 
-            analysis = analyser.generate_analysis(model=self.model,
-                                                  test_data=self.test_data,
-                                                  test_dl=self.test_dl,
-                                                  dirpath=self.dirpath,
-                                                  **self.primary_analysis)
+                analysis = analyser.generate_analysis(model=self.model,
+                                                      test_data=self.test_data,
+                                                      test_dl=self.test_dl,
+                                                      dirpath=self.dirpath,
+                                                      **self.primary_analysis)
 
-            # To be able to use any above analyses in other downstream
-            # Analysis
-            if analysis:
-                self.primary_analysis[analysis_config['name']] = analysis
+                # To be able to use any above analyses in other downstream
+                # Analysis
+                if analysis:
+                    self.primary_analysis[analysis_config['name']] = analysis
+            except Exception as e:
+                self.flow_logger.exception(e)
 
         if downstream_analysis:
             self.analysis_config['downstream_analysis'] = downstream_analysis
