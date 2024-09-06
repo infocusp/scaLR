@@ -41,7 +41,7 @@ data:
 feature_selection:
 
     # scores: '/path/to/matrix'
-    feature_chunksize: 6000
+    feature_subsetsize: 6000
 
     model:
         name: SequentialModel
