@@ -27,7 +27,6 @@ import statsmodels.formula.api as smf
 from statsmodels.stats.multitest import multipletests
 from statsmodels.tools.sm_exceptions import HessianInversionWarning, ConvergenceWarning
 
-sys.path.append('/path_to_scaLR/')
 from scalr.analysis import DgeLMEM
 
 def main(config):

@@ -16,7 +16,6 @@ from pydeseq2.dds import DeseqDataSet
 from pydeseq2.ds import DeseqStats
 import scanpy as sc
 
-sys.path.append('/path_to_scaLR/')
 from scalr.analysis import DgePseudoBulk
 
 def main(config):

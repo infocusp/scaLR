@@ -34,6 +34,7 @@ from scalr import utils
 class DgeLMEM(AnalysisBase):
     '''Class to perform differential gene expression analysis 
     using Linear mixed effects model'''
+    
     def __init__(self,
                  fixed_effect_column: str,
                  fixed_effect_factors: list[str],
@@ -66,8 +67,8 @@ class DgeLMEM(AnalysisBase):
             y_lim_tuple: Values to adjust the Y-axis limits of the plot.
             save_plot: Boolean value to save plot.
             logger: Logging type.
-
-        '''          
+        '''     
+        
         self.fixed_effect_column = fixed_effect_column
         self.fixed_effect_factors = fixed_effect_factors[::-1]
         self.group = group
@@ -120,9 +121,9 @@ class DgeLMEM(AnalysisBase):
                        whole anndata will be processed if 'cell_type' is None.
             
         Returns:
-            A list of gene names in the anndata, and a pandas Dataframe with count matrix.        
-        
+            A list of gene names in the anndata, and a pandas Dataframe with count matrix.
         '''
+        
         if cell_type is not None:
             mask = pd.Series([True] * batch_adata.shape[0], index=batch_adata.obs_names)
             mask &= (batch_adata.obs[self.celltype_column] == cell_type)
@@ -159,9 +160,9 @@ class DgeLMEM(AnalysisBase):
                              and 'group' params 
             
         Returns:
-            A Dictionary with model statistics        
+            A Dictionary with model statistics
+        '''     
         
-        '''        
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", RuntimeWarning)
@@ -183,7 +184,6 @@ class DgeLMEM(AnalysisBase):
         except Exception as e:
             logger.info(f"Error found in gene {gene}: {e}")
             logger.info(traceback.format_exc())     
-            return None 
 
     
     def get_multiproc_mxeffect_model_batch_res(self,
@@ -199,7 +199,6 @@ class DgeLMEM(AnalysisBase):
             
         Returns:
             A List of dictionaries with model stats for 'gene_names'       
-        
         '''        
     
         mxmodel_results_list = []
@@ -225,7 +224,8 @@ class DgeLMEM(AnalysisBase):
             lmem_res_df: a pandas DataFrame with Model results (p-value, co-efficients, Standard error..)
             dirpath: path to save the plot     
             cell_type: cell type used to subset input anndata
-        '''          
+        '''
+        
         neg_log10_pval = -np.log10(self.p_val)
         for category in self.fixed_effect_factors:
             coef_col = next((col for col in lmem_res_df.columns if col.startswith('coef') and category in col), None)
@@ -287,9 +287,9 @@ class DgeLMEM(AnalysisBase):
         
         Args:
             test_data: a Anndata
-            dirpath: path to save results     
+            dirpath: path to save results
+        '''
         
-        '''         
         if isinstance(test_data, AnnData):
                 test_data = AnnCollection([test_data])
         logger = getattr(utils, self.logger)('Differential Gene expression analysis')

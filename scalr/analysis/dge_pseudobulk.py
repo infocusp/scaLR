@@ -53,7 +53,6 @@ class DgePseudoBulk(AnalysisBase):
             y_lim_tuple: Values to adjust the Y-axis limits of the plot.
             save_plot: Boolean value to save plot.
             logger : Logging type.
-
         '''        
         
         self.celltype_column = celltype_column
@@ -83,6 +82,7 @@ class DgePseudoBulk(AnalysisBase):
         Returns:
             AnnData oject of design matrix
         '''
+        
         if isinstance(adata, AnnData):
             adata = AnnCollection([adata])
     
@@ -119,6 +119,7 @@ class DgePseudoBulk(AnalysisBase):
         Returns:
             pandas DataFrame object containing differential gene expression results
         '''
+        
         count_matrix = design_matrix.to_df()
         count_matrix_int = count_matrix.round().astype(int)
         metadata_ad = design_matrix.obs
@@ -245,12 +246,15 @@ class DgePseudoBulk(AnalysisBase):
                           
 
         '''This method calls methods to perform differential gene expression analysis on data
+        
         Args:
             test_data: AnnData
-            dirpath: path to save the result    
+            dirpath: path to save the result
+    
         Returns:
             pandas DataFrame object containing differential gene expression stats
         '''
+        
         logger = getattr(utils, self.logger)('Differential Gene expression analysis')
         if isinstance(logger, utils.EventLogger):
             logger.heading2("DGE analysis using Pseudobulk")        
@@ -284,7 +288,6 @@ class DgePseudoBulk(AnalysisBase):
                                       dirpath)
             plt.close(plot)
         logger.info('\n\n::::: DGE analysis completed :::::\n\n')
-        # return dge_results_df
  
 
     @classmethod
