@@ -1,6 +1,6 @@
 <p align="center"><img src="ScaLR_logo.png" width="250" height="85"></p>
 
-# scaLR: a low-resource deep neural network platform for cell types analysis and biomarker discovery
+# Single-cell analysis using Low Resource (scaLR) 
 
 Single-cell analysis using Low Resource (scaLR) is a comprehensive end-to-end pipeline that is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. The major steps of the platform are:
 
@@ -107,6 +107,13 @@ Performs evaluation of best model trained on user-defined metrics on the test se
             -  `heatmaps`
                 - `class_name.svg`: Heatmap for top genes of particular class w.r.t those genes association in other classes. E.g. B.svg, C.svg etc.
             - `roc_auc.svg`: Contains ROC-AUC plot for all classes.
+            - `pseudobulk_dge_result`
+                - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.csv`
+                - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.svg`
+            - `lmem_dge_result`
+                - `lmem_DGE_celltype.csv`
+                - `lmem_DGE_fixed_effect_factor_X.svg`
+               
 
 
 ## How to run
