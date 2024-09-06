@@ -1,3 +1,5 @@
+"""This file is a class for data ingestion into the pipeline."""
+
 from copy import deepcopy
 import os
 from os import path
@@ -13,10 +15,10 @@ class DataIngestionPipeline:
     """Class for Data Ingestion into the pipeline"""
 
     def __init__(self, data_config: dict, dirpath: str = '.'):
-        """Load data config and create a `data` directory
+        """Load data config and create a `data` directory.
 
         Args:
-            data_config (dict): Data processing configuration and paths
+            data_config (dict): Data processing configuration and paths.
             dirpath (str): Experiment data directory. Defaults to '.'.
         """
 
@@ -26,7 +28,7 @@ class DataIngestionPipeline:
         self.target = self.data_config.get('target')
         self.sample_chunksize = self.data_config.get('sample_chunksize')
 
-        # Make some necessary checks and logs
+        # Make some necessary checks and logs.
         if not self.target:
             self.flow_logger.warning('Target not given')
 
@@ -38,8 +40,7 @@ class DataIngestionPipeline:
         self.datadir = dirpath
 
     def generate_train_val_test_split(self):
-        """Function to split data into train, validation and test sets.
-        """
+        """A function to split data into train, validation and test sets."""
 
         if self.data_config['train_val_test'].get('full_datapath'):
             self.flow_logger.info('Generating Train, Validation and Test sets')
@@ -56,19 +57,19 @@ class DataIngestionPipeline:
             self.data_config['train_val_test'][
                 'splitter_config'] = splitter_config
 
-            # Make data splits
+            # Make data splits.
             train_val_test_split_indices = splitter.generate_train_val_test_split_indices(
                 full_datapath, self.target)
 
             write_data(train_val_test_split_indices,
                        path.join(self.datadir, 'train_val_test_split.json'))
 
-            # Check data splits
+            # Check data splits.
             if self.target:
                 splitter.check_splits(full_datapath,
                                       train_val_test_split_indices, self.target)
 
-            # Write data splits
+            # Write data splits.
             train_val_test_split_dirpath = path.join(self.datadir,
                                                      'train_val_test_split')
             os.makedirs(train_val_test_split_dirpath, exist_ok=True)
@@ -90,7 +91,7 @@ class DataIngestionPipeline:
             )
 
     def preprocess_data(self):
-        """Apply preprocesssing on data splits"""
+        """A function to apply preprocesssing on data splits."""
 
         self.data_config['train_val_test']['final_datapaths'] = deepcopy(
             self.data_config['train_val_test']['split_datapaths'])
@@ -111,10 +112,10 @@ class DataIngestionPipeline:
             preprocessor, preprocessor_config = build_preprocessor(
                 deepcopy(preprocess))
             self.data_config['preprocess'][i] = preprocessor_config
-            # Fit on train data
+            # Fit on train data.
             preprocessor.fit(read_data(path.join(datapath, 'train')),
                              self.sample_chunksize)
-            # Transform on train, val & test split
+            # Transform on train, val & test split.
             for split in ['train', 'val', 'test']:
                 preprocessor.process_data(path.join(datapath, split),
                                           self.sample_chunksize,
@@ -126,7 +127,7 @@ class DataIngestionPipeline:
             'final_datapaths'] = processed_datapath
 
     def generate_mappings(self):
-        """Generate an Integer mapping to and from target columns"""
+        """A function to generate an Integer mapping to and from target columns."""
 
         self.flow_logger.info(
             'Generate label mappings for all columns in metadata')
@@ -162,6 +163,5 @@ class DataIngestionPipeline:
                                                        'label_mappings.json')
 
     def get_updated_config(self):
-        """Returns updated configs
-        """
+        """This function returns updated configs."""
         return self.data_config

@@ -1,3 +1,5 @@
+"""This file is a base class for Model trainer."""
+
 from copy import deepcopy
 import os
 from os import path
@@ -14,9 +16,7 @@ from scalr.utils import EventLogger
 
 
 class TrainerBase:
-    """
-    Trainer class to train and validate a model
-    """
+    """ Class for model trainer. It trains and validates a model."""
 
     def __init__(self,
                  model: Module,
@@ -24,13 +24,14 @@ class TrainerBase:
                  loss_fn: Module,
                  callbacks: CallbackExecutor,
                  device: str = 'cpu'):
-        """
+        """Initialize required parameters for model trainer.
+
         Args:
-            model (Module): model to train
-            opt (Optimizer): optimizer used for learning
-            loss_fn (Module): loss function used for training
-            callbacks (CallbackExecutor): callback executor object to carry out callbacks
-            device (str, optional): device to train the data on (cuda/cpu). Defaults to 'cpu'.
+            model (Module): Model to train.
+            opt (Optimizer): Optimizer used for learning.
+            loss_fn (Module): Loss function used for training.
+            callbacks (CallbackExecutor): Callback executor object to carry out callbacks.
+            device (str, optional): Device to train the data on (cuda/cpu). Defaults to 'cpu'.
         """
         self.event_logger = EventLogger('ModelTrainer')
 
@@ -41,13 +42,13 @@ class TrainerBase:
         self.device = device
 
     def train_one_epoch(self, dl: DataLoader) -> tuple[float, float]:
-        """Trains one epoch
+        """This function trains the model for one epoch.
 
         Args:
-            dl: training dataloader
+            dl: Training dataloader.
 
         Returns:
-            Train Loss, Train Accuracy
+            Train Loss, Train Accuracy.
         """
         self.model.train()
         total_loss = 0
@@ -75,13 +76,13 @@ class TrainerBase:
         return total_loss, accuracy
 
     def validation(self, dl: DataLoader) -> tuple[float, float]:
-        """ Validation of data
+        """This function performs validation of the data.
 
         Args:
-            dl: validation dataloader
+            dl: Validation dataloader.
 
         Returns:
-            Validation Loss, Validation Accuracy
+            Validation Loss, Validation Accuracy.
         """
         self.model.eval()
         total_loss = 0
@@ -105,12 +106,12 @@ class TrainerBase:
         return total_loss, accuracy
 
     def train(self, epochs: int, train_dl: DataLoader, val_dl: DataLoader):
-        """Trains the model
+        """This function trains the model, execute callbacks.
 
         Args:
-            epochs: max number of epochs to train model on
-            train_dl: training dataloader
-            val_dl: validation dataloader
+            epochs: Max number of epochs to train model on.
+            train_dl: Training dataloader.
+            val_dl: Validation dataloader.
         """
         best_val_acc = 0
         best_model = deepcopy(self.model)

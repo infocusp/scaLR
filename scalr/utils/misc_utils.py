@@ -1,3 +1,5 @@
+"""This file contains functions related miscellaneous utilities."""
+
 import os
 import random
 
@@ -6,7 +8,7 @@ import torch
 
 
 def set_seed(seed: int):
-    """To set seed for reproducibility"""
+    """A function to set seed for reproducibility."""
     os.environ['PYTHONHASHSEED'] = str(seed)
     random.seed(seed)
     np.random.seed(seed)
@@ -16,7 +18,7 @@ def set_seed(seed: int):
 
 def overwrite_default(user_config: dict, default_config: dict) -> dict:
     """The function recursively overwrites information from user_config
-    onto the default_config
+    onto the default_config.
     """
 
     for key in user_config.keys():
@@ -31,13 +33,13 @@ def overwrite_default(user_config: dict, default_config: dict) -> dict:
 
 
 def build_object(module, config: dict):
-    """Builder function to build a object from its config
+    """A builder function to build a object from its config.
 
     Args:
-        module: module containing the class
-        config: contains name of class and params to initialize object
+        module: Module containing the class.
+        config: Contains name of class and params to initialize object.
 
-    Returns: object, updated config
+    Returns: Object, updated config.
     """
     name = config.get('name')
     if not name:

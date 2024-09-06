@@ -1,13 +1,18 @@
-# EXPERIMENT
+# Config file for pipeline run.
+
+# DEVICE SETUP.
 device: 'cuda'
-dirpath: 'revamped_scalr_experiments'
-exp_name: 'final'
-exp_run: 1
+
+# EXPERIMENT.
+experiment:
+    dirpath: 'revamped_scalr_experiments'
+    exp_name: 'final'
+    exp_run: 1
 
 
-# DATA_CONFIG
+# DATA CONFIG.
 data:
-    sample_chunksize: 10000
+    sample_chunksize: 20000
 
     train_val_test:
         full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
@@ -31,6 +36,8 @@ data:
 
     target: Cell_Type    
 
+
+# FEATURE SELECTION.
 feature_selection:
 
     # scores: '/path/to/matrix'
@@ -71,6 +78,7 @@ feature_selection:
             k: 5000
 
 
+# FINAL MODEL TRAINING.
 final_training:
 
     model:
@@ -111,6 +119,8 @@ final_training:
               params:
                 interval: 5
 
+
+# EVALUATION & DOWNSTREAM ANALYSIS.
 analysis:
 
     model_checkpoint: ''
@@ -129,18 +139,17 @@ analysis:
             params:
                 k: 100
 
-    downstream_analysis:
-        # - name: Heatmap
-        #   params:
-        #       top_n_genes: 100
-
-        # - name: RocAucCurve
-
-        # - name: GeneRecallCurve
-        #   params:
-        #     reference_genes_path: '/home/anand/bioc_repo/single_cell_classification/tutorials/analysis/gene_recall_curve/reference_genes.csv'
-        #     top_K: 300
-        #     plots_per_row: 3
-        #     features_selector:
-        #         name: ClasswiseAbs
-        #         params: {}
+    # downstream_analysis:
+    #     - name: GeneRecallCurve
+    #       params:
+    #         reference_genes_path: '/home/anand/bioc_repo/single_cell_classification/tutorials/analysis/gene_recall_curve/reference_genes.csv'
+    #         top_K: 300
+    #         plots_per_row: 3
+    #         features_selector:
+    #             name: ClasswiseAbs
+    #             params: {}
+    #     - name: Heatmap
+    #       params:
+    #         top_n_genes: 100
+    #     - name: RocAucCurve
+    #       params: {}

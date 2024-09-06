@@ -16,14 +16,14 @@ def test_fit():
     # Creating annadata object.
     adata = generate_dummy_anndata(n_samples=100, n_features=25)
 
-    # standard scaler parameters
+    # Standard scaler required parameters.
     with_mean = False
     with_std = True
 
-    # scalr standard-scale normalization
+    # scalr standard-scale normalization.
     scalr_std_scaler = standard_scale.StandardScaler(with_mean=with_mean,
                                                      with_std=with_std)
-    # Required parameter - sample_chunksize to process data in chunks
+    # Required parameter - sample_chunksize to process data in chunks.
     sample_chunksize = 4
     scalr_std_scaler.fit(adata, sample_chunksize=sample_chunksize)
 
@@ -32,7 +32,7 @@ def test_fit():
                                                       with_std=with_std)
     sklearn_std_scaler.fit(adata.X)
 
-    # asserts to check calculated mean and standard deviation, the error should be less than 1e-15
+    # asserts to check calculated mean and standard deviation, the error should be less than 1e-15.
     assert sum(
         abs(scalr_std_scaler.train_mean -
             sklearn_std_scaler.mean_).flatten() < 1e-15

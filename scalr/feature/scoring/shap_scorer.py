@@ -1,3 +1,5 @@
+"""This file is a implementation of SHAP scorer."""
+
 from typing import Tuple, Union
 
 from anndata import AnnData
@@ -16,7 +18,7 @@ from scalr.nn.model import CustomShapModel
 
 
 class ShapScorer(ScoringBase):
-    """This scorer is SHAP based. It can be used for any model."""
+    """Class for SHAP scorer. It can be used for any model."""
 
     def __init__(self,
                  early_stop: dict,
@@ -32,7 +34,7 @@ class ShapScorer(ScoringBase):
 
         Args:
             early_stop: Contains early stopping related configuration.
-            dataloader: dataloader related config.
+            dataloader: Dataloader related config.
             device: Where data is process/load.
             top_n_genes: Top N genes for each class/label.
             background_tensor: Number of training data used for SHAP explainer.
@@ -52,7 +54,7 @@ class ShapScorer(ScoringBase):
                         train_data: Union[AnnData, AnnCollection],
                         val_data: Union[AnnData, AnnCollection], target: str,
                         mappings: dict, *args, **kwargs) -> np.ndarray:
-        """Return the weights of model as score.
+        """This function return the weights of model as a score.
 
         Args:
             model: Trained model that used for SHAP.
@@ -61,7 +63,7 @@ class ShapScorer(ScoringBase):
             mappings: Contains target related mappings.
 
         Returns:
-            class * genes abs weights matrix
+            class * genes abs weights matrix.
         """
 
         shap_values = self.get_top_n_genes_weights(model, train_data, val_data,
@@ -73,18 +75,17 @@ class ShapScorer(ScoringBase):
             self, model: nn.Module, train_data: Union[AnnData, AnnCollection],
             test_data: Union[AnnData, AnnCollection], target: str,
             mappings: dict) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Function to get top n genes of each class and its weights.
+        """ A function to get top n genes of each class and its weights.
 
         Args:
-            model: trained model to extract weights from.
-            train_data: train data.
-            test_data: test data that used for shap values.
-            target: target name.
+            model: Trained model to extract weights from.
+            train_data: Train data.
+            test_data: Test data that used for shap values.
+            target: Target name.
             mappings: Contains target related mappings.
 
         Returns:
-            (class * genes abs weights matrix, class * genes weights matrix)
+            (class * genes abs weights matrix, class * genes weights matrix).
         """
 
         if isinstance(self.logger, utils.EventLogger):
@@ -121,7 +122,7 @@ class ShapScorer(ScoringBase):
             if self.samples_abs_mean:
                 sum_shap_values = np.abs(batch_shap_values).sum(axis=0)
             else:
-                # calcluating 2 mean with abs values and non-abs values.
+                # Calcluating 2 mean with abs values and non-abs values.
                 # Non-abs values required for heatmap.
                 sum_shap_values = batch_shap_values.sum(axis=0)
 
@@ -157,19 +158,19 @@ class ShapScorer(ScoringBase):
         top_n_genes: int,
         threshold: int,
     ) -> Tuple[bool, dict]:
-        """Function to check whether previous and current batches' common genes are
+        """A function to check whether previous and current batches' common genes are
             are greater than or equal to the threshold and return top genes
             batch wise.
 
         Args:
             batch_id: Current batch number.
             genes_class_shap_df: label/class wise genes shap values(mean across samples).
-            prev_top_genes_batch_wise: dict where prev batch's per labels top genes are stored.
+            prev_top_genes_batch_wise: Dictionary where prev batch's per labels top genes are stored.
             top_n_genes: Number of top genes check.
             threshold: early stop if common genes is higher than this.
 
         Returns:
-            early stop value, top genes batch wise.
+            Early stop value, top genes batch wise.
         """
 
         early_stop = True
@@ -194,7 +195,7 @@ class ShapScorer(ScoringBase):
 
     @classmethod
     def get_default_params(cls) -> dict:
-        """Class method to get default params"""
+        """Class method to get default params."""
         return {
             "top_n_genes": 100,
             "background_tensor": 200,

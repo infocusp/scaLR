@@ -1,3 +1,5 @@
+"""This file is a base class for model."""
+
 from typing import Union
 
 from anndata import AnnData
@@ -12,32 +14,37 @@ from scalr.utils import build_object
 
 
 class ModelBase(nn.Module):
+    """Class for model.
+    
+    Contains different methods to make a forward() call, load, save weights
+    and predict on the data provided.
+    """
 
     def __init__(self):
         super().__init__()
 
     def forward(self, x: Tensor) -> Tensor:
-        """method for forward pass of model to generate outputs"""
+        """A function for forward pass of model to generate outputs."""
         pass
 
     def load_weights(self, model_weights_path: str):
-        """method to initialize model weights from previous weights"""
+        """A function to initialize model weights from previous weights."""
         self.load_state_dict(torch.load(model_weights_path)['model_state_dict'])
 
     def save_weights(self, model_weights_path: str):
-        """method to save model weights at path"""
+        """A function to save model weights at path."""
         torch.save({'model_state_dict': self.state_dict()}, model_weights_path)
 
     def get_predictions(self, dl: DataLoader, device: str = 'cpu'):
-        """Method to get predictions from the dataloader"""
+        """A function to get predictions from the dataloader."""
         pass
 
     @classmethod
     def get_default_params(cls) -> dict:
-        """Class method to get default params for model_config"""
+        """Class method to get default params for model_config."""
         return dict()
 
 
 def build_model(model_config: dict) -> tuple[nn.Module, dict]:
-    """Builder object to get Model, updated model_config"""
+    """Builder object to get Model, updated model_config."""
     return build_object(scalr.nn.model, model_config)

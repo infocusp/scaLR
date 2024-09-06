@@ -1,3 +1,5 @@
+"""This file contains implementation of end to end pipeline execution."""
+
 import argparse
 import logging
 import os
@@ -23,7 +25,7 @@ from scalr.utils import write_data
 
 
 def get_args():
-    """To get the command line arguments"""
+    """A function to get the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument('-c',
                         '--config',
@@ -54,7 +56,16 @@ def get_args():
 # Uncomment `@profile` to get line-by-line memory analysis
 # @profile
 def pipeline(config, dirpath, device, flow_logger, event_logger):
+    """A function that configures all components of pipeline for end-to-end execution.
+    
+    Args:
+        config: User config.
+        dirpath: Path of root directory.
+        flow_logger: Object for flow logger.
+        event_logger: Object for event logger.
+    """
     if config.get('data'):
+        # Data ingestion.
         flow_logger.info('Data Ingestion pipeline running')
         event_logger.heading1('Data Ingestion')
 
@@ -70,6 +81,7 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
         write_data(config, path.join(dirpath, 'config.yaml'))
 
     if config.get('feature_selection'):
+        # Feature selection.
         flow_logger.info('Feature Extraction pipeline running')
         event_logger.heading1('Feature Selection')
 
@@ -81,7 +93,7 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
         extract_features.load_data_and_targets_from_config(config['data'])
 
         if not config['feature_selection'].get('score_matrix'):
-            extract_features.feature_chunked_model_training()
+            extract_features.feature_subsetted_model_training()
             extract_features.feature_scoring()
         else:
             extract_features.set_score_matrix(
@@ -95,6 +107,7 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
         write_data(config, path.join(dirpath, 'config.yaml'))
 
     if config.get('final_training'):
+        # Final model training.
         flow_logger.info('Final Model Training pipeline running')
         event_logger.heading1('Final Model Training')
 
@@ -116,6 +129,7 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
         write_data(config, path.join(dirpath, 'config.yaml'))
 
     if config.get('analysis'):
+        # Analysis on trained model.
         flow_logger.info('Analysis pipeline running')
         event_logger.heading1('Analysis')
 
@@ -150,15 +164,17 @@ if __name__ == '__main__':
 
     start_time = time()
 
+    # Parsing config.
     config = read_data(args.config)
 
-    dirpath = config['dirpath']
-    exp_name = config['exp_name']
-    exp_run = config['exp_run']
+    # Setting experiment information form config.
+    dirpath = config['experiment']['dirpath']
+    exp_name = config['experiment']['exp_name']
+    exp_run = config['experiment']['exp_run']
     dirpath = os.path.join(dirpath, f'{exp_name}_{exp_run}')
     device = config['device']
 
-    # Logging
+    # Logging.
     log = args.log
     if log:
         level = getattr(logging, args.level)

@@ -1,3 +1,5 @@
+"""This file contains implementation of model evaluation and performs dowstream analysis tasks."""
+
 from copy import deepcopy
 import os
 from os import path
@@ -19,9 +21,15 @@ from scalr.utils import read_data
 
 
 class EvalAndAnalysisPipeline:
-    """Evaluation and Analysis of trained model"""
+    """Class for evaluation and analysis of the trained model."""
 
     def __init__(self, analysis_config, dirpath, device):
+        """Initialize required parameters for analysis.
+        
+        Args:
+            analysis_config: Analysis config.
+            dirpath: Path to store analysis outputs.
+        """
         self.flow_logger = FlowLogger('Eval&Analysis')
 
         self.analysis_config = deepcopy(analysis_config)
@@ -42,10 +50,11 @@ class EvalAndAnalysisPipeline:
             )
             self.model = None
 
-        # dict to transfer information between analyses
+        # Dict to transfer information between analyses.
         self.primary_analysis = dict()
 
     def build_dataloaders(self):
+        """A function to build dataloader for train, validation and test data."""
         dataloader_config = deepcopy(self.analysis_config.get('dataloader'))
 
         if not dataloader_config:
@@ -67,7 +76,11 @@ class EvalAndAnalysisPipeline:
         self.analysis_config['dataloader'] = dataloader_config
 
     def load_data_and_targets_from_config(self, data_config: dict):
-        """load data and targets from data config"""
+        """A function to load data and targets from data config.
+
+        Args:
+            data_config: Data config.
+        """
         self.train_data, self.val_data = load_train_val_data_from_config(
             data_config)
         self.test_data = load_test_data_from_config(data_config)
@@ -80,15 +93,15 @@ class EvalAndAnalysisPipeline:
                              val_data: Union[AnnData, AnnCollection],
                              test_data: Union[AnnData, AnnCollection],
                              target: Union[str, list[str]], mappings: dict):
-        """Useful when you don't use data directly from config, but rather by other
-        sources like feature subsetting, etc.
+        """A function to set data when you don't use data directly from config,
+        but rather by other sources like feature subsetting, etc.
 
         Args:
-            train_data (Union[AnnData, AnnCollection]): training data
-            val_data (Union[AnnData, AnnCollection]): validation data
-            target (Union[str, list[str]]): target columns name(s)
-            mappings (dict): mapping of column value to ids
-                            eg. mappings[column_name][label2id] = {A: 1, B:2, ...}
+            train_data (Union[AnnData, AnnCollection]): Training data.
+            val_data (Union[AnnData, AnnCollection]): Validation data.
+            target (Union[str, list[str]]): Target columns name(s).
+            mappings (dict): Mapping of column value to ids
+                            eg. mappings[column_name][label2id] = {A: 1, B:2, ...}.
         """
         self.train_data = train_data
         self.val_data = val_data
@@ -98,8 +111,7 @@ class EvalAndAnalysisPipeline:
         self.build_dataloaders()
 
     def evaluation_and_classification_report(self):
-        """Evaluate the trained model and generate classification report
-        on test data"""
+        """A function to evaluate the trained model and generate classification report on test data."""
         self.flow_logger.info(
             'Calculating accuracy and generating classification report on test set'
         )
@@ -115,6 +127,7 @@ class EvalAndAnalysisPipeline:
 
         accuracy = get_accuracy(test_labels, pred_labels)
 
+        # Generate classification report.
         generate_and_save_classification_report(
             test_labels,
             pred_labels,
@@ -122,8 +135,7 @@ class EvalAndAnalysisPipeline:
             mapping=self.mappings[self.target]['id2label'])
 
     def gene_analysis(self):
-        """Method to perform anlaysis on trained model to get top genes
-        and biomarkers"""
+        """A function to perform anlaysis on trained model to get top genes and biomarkers."""
 
         self.flow_logger.info('Performing gene analysis')
         gene_analysis_path = path.join(self.dirpath, 'gene_analysis')
@@ -141,7 +153,7 @@ class EvalAndAnalysisPipeline:
         self.primary_analysis['top_features'] = top_features
 
     def perform_downstream_anlaysis(self):
-        """Perform Downstream analysis on model and data"""
+        """A function to perform all downstream analysis tasks on model and data."""
         downstream_analysis = self.analysis_config.get('downstream_analysis',
                                                        list())
         if downstream_analysis:
@@ -161,8 +173,7 @@ class EvalAndAnalysisPipeline:
                                                       dirpath=self.dirpath,
                                                       **self.primary_analysis)
 
-                # To be able to use any above analyses in other downstream
-                # Analysis
+                # To be able to use any above analyses in other downstream analysis.
                 if analysis:
                     self.primary_analysis[analysis_config['name']] = analysis
             except Exception as e:
@@ -172,5 +183,5 @@ class EvalAndAnalysisPipeline:
             self.analysis_config['downstream_analysis'] = downstream_analysis
 
     def get_updated_config(self) -> dict:
-        """Get updated configs"""
+        """A function to return updated configs."""
         return self.analysis_config

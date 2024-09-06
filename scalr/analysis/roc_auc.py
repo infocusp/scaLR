@@ -1,3 +1,5 @@
+"""This file generates ROC-AUC plot and stores it."""
+
 from os import path
 
 import matplotlib.pyplot as plt
@@ -17,13 +19,13 @@ class RocAucCurve(AnalysisBase):
     def generate_analysis(self, test_labels: list[int],
                           pred_probabilities: list[list[float]], dirpath: str,
                           mapping: list, **kwargs) -> None:
-        """Calculate ROC-AUC and save plot.
+        """A function to calculate ROC-AUC and save plot.
 
         Args:
-            test_labels: true labels from the test dataset.
-            pred_probabilities: predictions probabities of each sample for all the classes.
+            test_labels: True labels from the test dataset.
+            pred_probabilities: Predictions probabities of each sample for all the classes.
             dirpath: Path to store gene recall curve if applicable.
-            mapping: list of class names.
+            mapping: List of class names.
         """
 
         logger_name = "ROC-AUC Analysis"
