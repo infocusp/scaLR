@@ -75,7 +75,7 @@ class Heatmap(AnalysisBase):
         plt.title(filename)
 
         if self.save_plot:
-            plt.savefig(os.path.join(dirpath, f"{filename}".svg))
+            plt.savefig(os.path.join(dirpath, f"{filename}.svg"))
         else:
             plt.show()
         plt.clf()
