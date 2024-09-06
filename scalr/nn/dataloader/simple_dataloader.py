@@ -1,4 +1,4 @@
-"""This file is implementation of simmple dataloader."""
+"""This file is the implementation of simpledataloader."""
 
 from typing import Union
 
@@ -14,7 +14,7 @@ from scalr.nn.dataloader import DataLoaderBase
 class SimpleDataLoader(DataLoaderBase):
     """Class for simple dataloader.
     
-    Simple DataLoader converts all adata values to inputs, and target column in metadata
+    Simple DataLoader converts all adata values to inputs, and target columns in metadata
     to output labels.
 
     Returns:
@@ -32,7 +32,7 @@ class SimpleDataLoader(DataLoaderBase):
             target (str): Corresponding metadata name to be treated as training
                           objective in classification. Must be present as a column_name in `adata.obs`.
             mappings (dict): Mapping the target name to respective ids.
-            padding (int): Padding size incase of #features < model input size.
+            padding (int): Padding size in case of #features < model input size.
         """
         super().__init__(batch_size, target, mappings)
         self.padding = padding

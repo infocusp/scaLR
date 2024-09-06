@@ -1,4 +1,4 @@
-"""This file is a base class for analysis module."""
+"""This file is a base class for the analysis module."""
 
 import os
 from typing import Union
@@ -16,7 +16,7 @@ class AnalysisBase:
     """A base class for downstream analysis tasks.
     
     This class provides common attributes and methods for all the analysis tasks.
-    It is intended to be subclassed to create task specific analysis.
+    It is intended to be subclassed to create task-specific analysis.
     """
 
     def __init__(self):

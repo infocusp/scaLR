@@ -14,7 +14,7 @@ def test_overwrite_default():
     # Default config key-values dictionary.
     default_config = {'a': '5', 'b': 7, 'c': 2}
 
-    # Getting updated dafault config using the overwrite function.
+    # Getting updated default config using the overwrite function.
     updated_default_params = overwrite_default(
         user_config=user_config, default_config=deepcopy(default_config))
 

@@ -19,11 +19,11 @@ class RocAucCurve(AnalysisBase):
     def generate_analysis(self, test_labels: list[int],
                           pred_probabilities: list[list[float]], dirpath: str,
                           mapping: list, **kwargs) -> None:
-        """A function to calculate ROC-AUC and save plot.
+        """A function to calculate ROC-AUC and save the plot.
 
         Args:
             test_labels: True labels from the test dataset.
-            pred_probabilities: Predictions probabities of each sample for all the classes.
+            pred_probabilities: Predictions probabilities of each sample for all the classes.
             dirpath: Path to store gene recall curve if applicable.
             mapping: List of class names.
         """
@@ -33,15 +33,15 @@ class RocAucCurve(AnalysisBase):
         self.event_logger.heading2(logger_name)
         self.event_logger.info("Generating one hot matrix of test labels.")
 
-        # convert label predictions list to one-hot matrix.
+        # convert label predictions list to the one-hot matrix.
         test_labels_onehot = data_utils.get_one_hot_matrix(
             np.array(test_labels))
         fig, ax = plt.subplots(1, 1, figsize=(16, 8))
 
         self.event_logger.info(
-            "Calculating ROC-AUC for each label and creating plot for that.")
+            "Calculating ROC-AUC for each label and creating a plot for that.")
 
-        # test labels starts with 0 so we need to add 1 in max.
+        # test labels start with 0 so we need to add 1 in max.
         for class_label in range(max(test_labels) + 1):
 
             # fpr: False Positive Rate | tpr: True Positive Rate

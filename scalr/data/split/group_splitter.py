@@ -1,4 +1,4 @@
-"""This file is a implementation of group splitter."""
+"""This file is an implementation of group splitter."""
 
 from pandas import DataFrame
 from sklearn.model_selection import GroupShuffleSplit
@@ -9,8 +9,8 @@ from scalr.data.split import StratifiedSplitter
 class GroupSplitter(StratifiedSplitter):
     """Class for splitting data based on the provided group.
     
-    Generate Stratified split of data into train, validation and test
-    sets. Stratification ensures samples having same value for `stratify`
+    Generate a stratified split of data into train, validation, and test
+    sets. Stratification ensures samples have the same value for `stratify`
     column, can not belong to different sets.
     """
 
@@ -35,7 +35,7 @@ class GroupSplitter(StratifiedSplitter):
             test_ratio (float): Ratio of samples belonging to the test split.
 
         Returns:
-            (list(int), list(int)): Two lists consisting train and test indices.
+            (list(int), list(int)): Two lists consisting of train and test indices.
         """
         splitter = GroupShuffleSplit(test_size=test_ratio,
                                      n_splits=1,

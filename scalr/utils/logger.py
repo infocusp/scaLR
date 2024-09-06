@@ -1,4 +1,4 @@
-"""This file contains implementation of logger in pipeline."""
+"""This file contains an implementation of the logger in the pipeline."""
 
 import logging
 
@@ -6,7 +6,7 @@ import logging
 class FlowLogger(logging.Logger):
     """Class for flow logger.
     
-    It logs high level overview of pipeline execution in the terminal.
+    It logs high-level overview of pipeline execution in the terminal.
     """
     level = logging.NOTSET
 
@@ -29,7 +29,7 @@ class FlowLogger(logging.Logger):
 
 
 class EventLogger(logging.Logger):
-    """Class for event logger. It logs detailed file level logs during pipeline execution.
+    """Class for event logger. It logs detailed file-level logs during pipeline execution.
     """
     level = logging.NOTSET
     filepath = None

@@ -38,20 +38,20 @@ class PreprocessorBase:
     ) -> None:
         """A function to calculate attributes for transformation.
         
-        It is required only when you need to see entire train data and
+        It is required only when you need to see the entire train data and
         calculate attributes, as required in StdScaler, etc. This method
         should not return anything, it should be used to store attributes
-        which will be used by `transform` method.
+        that will be used by the `transform` method.
 
         Args:
             data (Union[AnnData, AnnCollection]): train_data in backed mode.
-            sample_chunksize (int): number of samples of data that can at most
+            sample_chunksize (int): several samples of data that can at most
                                     be loaded in memory.
         """
         pass
 
     def process_data(self, datapath: dict, sample_chunksize: int, dirpath: str):
-        """A functin to process the entire data chunkwise and write the processed data
+        """A function to process the entire data chunkwise and write the processed data
         to disk.
 
         Args:
@@ -62,7 +62,7 @@ class PreprocessorBase:
         if not sample_chunksize:
             # TODO
             raise NotImplementedError(
-                'Preprocessing does not work without sample chunksize')
+                'Preprocessing does not work without sample chunk size')
 
         write_chunkwise_data(datapath,
                              sample_chunksize,
@@ -72,5 +72,5 @@ class PreprocessorBase:
 
 def build_preprocessor(
         preprocessing_config: dict) -> tuple[PreprocessorBase, dict]:
-    """Builder object to get processor, updated preprocessing_config."""
+    """Builder object to get a processor, updated preprocessing_config."""
     return build_object(scalr.data.preprocess, preprocessing_config)

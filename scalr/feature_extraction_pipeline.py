@@ -1,4 +1,4 @@
-"""This file contains implementation of feature subsetting, model training followed by top feature extraction."""
+"""This file contains the implementation of feature subsetting, model training followed by top feature extraction."""
 
 from copy import deepcopy
 import os
@@ -65,7 +65,7 @@ class FeatureExtractionPipeline:
             train_data (Union[AnnData, AnnCollection]): Training data.
             val_data (Union[AnnData, AnnCollection]): Validation data.
             target (Union[str, list[str]]): Target columns name(s).
-            mappings (dict): Mapping of column value to ids
+            mappings (dict): Mapping of a column value to ids
                             eg. mappings[column_name][label2id] = {A: 1, B:2, ...}.
         """
         self.train_data = train_data
@@ -101,7 +101,7 @@ class FeatureExtractionPipeline:
         return self.chunked_models
 
     def set_model(self, models: list[nn.Module]):
-        """A function to set trained model for downstream feature tasks."""
+        """A function to set the trained model for downstream feature tasks."""
         self.chunked_models = models
 
     def feature_scoring(self) -> pd.DataFrame:
@@ -196,5 +196,5 @@ class FeatureExtractionPipeline:
         return data_config
 
     def get_updated_config(self) -> dict:
-        """This function return updated configs."""
+        """This function returns updated configs."""
         return self.feature_selection_config

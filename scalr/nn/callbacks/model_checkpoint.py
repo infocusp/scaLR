@@ -1,4 +1,4 @@
-"""This file is a implementation of model checkpoint callback."""
+"""This file is an implementation of model checkpoint callback."""
 
 import os
 from os import path
@@ -13,7 +13,7 @@ class ModelCheckpoint(CallbackBase):
 
     Attributes:
         epoch: An interger count of epochs trained.
-        max_validation_acc: Keeps the track of the maximum validation accuracy across all epochs.
+        max_validation_acc: Keeps track of the maximum validation accuracy across all epochs.
         interval: Regular interval of model checkpointing.
     """
 
@@ -34,7 +34,7 @@ class ModelCheckpoint(CallbackBase):
 
     def save_checkpoint(self, model_state_dict: dict, opt_state_dict: dict,
                         path: str):
-        """A function to save model & optimizer state dict to given path.
+        """A function to save model & optimizer state dict to the given path.
         
         Args:
             model_state_dict: Model's state dict.
@@ -49,7 +49,7 @@ class ModelCheckpoint(CallbackBase):
             }, path)
 
     def __call__(self, model_state_dict: dict, opt_state_dict: dict, **kwargs):
-        """A function that evaluates when to save checkpoint.
+        """A function that evaluates when to save a checkpoint.
 
         Args:
             model_state_dict: Model's state dict.

@@ -1,12 +1,12 @@
-'''This is a test file for simpledataloader.'''
+"""This is a test file for simpledataloader."""
 
 from scalr.nn.dataloader import build_dataloader
 from scalr.utils import generate_dummy_anndata
 
 
 def test_metadataloader():
-    """This function tests features shape returned by simpledataloader for below 2 cases.
-        1. #features are consistent with feature_subsetsize. No padding required.
+    """This function tests features shape returned by simpledataloader for the below 2 cases.
+        1. #features are consistent with feature_subsetsize. No padding is required.
         2. #features are less than feature_subsetsize. This case needs padding.
     """
 
@@ -30,7 +30,7 @@ def test_metadataloader():
 
     #                         Test case 1
     # Expected features shape after dataloading is (batch_size, 13).
-    # So no padding is reqquired as adata n_features=13. But we can pass
+    # So no padding is required as adata n_features=13. But we can pass
     # `padding=feature_subsetsize` in dataloader_config.
 
     ## Defining required parameters for simpledataloader.
@@ -52,12 +52,12 @@ def test_metadataloader():
         assert feature.shape[
             1] == feature_subsetsize, f"There is some issue in simpledataloader."\
         f" Expected #features({n_features}) != Observed #features({feature.shape[1]}). Please check!"
-        # Breaking, as checking only first batch is enough.
+        # Breaking, as checking only the first batch is enough.
         break
 
     #                         Test case 2
     # Expected features shape after dataloading is (batch_size, 20).
-    # So paddig is required as adata n_features=13. Hence 7 columns should be padded in dataloader.
+    # So padding is required as adata n_features=13. Hence 7 columns should be padded in dataloader.
 
     ## Defining required parameters for simpledataloader.
     feature_subsetsize = 20
@@ -73,10 +73,10 @@ def test_metadataloader():
                                      target='celltype',
                                      mappings=mappings)
 
-    ## Comparing expecting features shape after using metadatloader.
+    ## Comparing expected features shape after using metadatloader.
     for feature, _ in dataloader:
         assert feature.shape[
             1] == feature_subsetsize, f"There is some issue in simpledataloader."\
         f" Expected #features({feature_subsetsize}) != Observed #features({feature.shape[1]}). Please check!"
-        # Breaking, as checking only first batch is enough.
+        # Breaking, as checking only the first batch is enough.
         break

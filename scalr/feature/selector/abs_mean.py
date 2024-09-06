@@ -1,4 +1,4 @@
-"""This file is a implementation of Absolute mean feature selector strategy."""
+"""This file is an implementation of the Absolute mean feature selector strategy."""
 
 from pandas import DataFrame
 
@@ -12,7 +12,7 @@ class AbsMean(SelectorBase):
     """
 
     def __init__(self, k: int = 1e6):
-        """Initialize required parameters for selector."""
+        """Initialize required parameters for the selector."""
         self.k = k
 
     def get_feature_list(self, score_matrix: DataFrame) -> list[str]:

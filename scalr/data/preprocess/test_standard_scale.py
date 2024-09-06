@@ -13,7 +13,7 @@ def test_fit():
     sklean standard-scaler object params.
     '''
 
-    # Creating annadata object.
+    # Creating an annadata object.
     adata = generate_dummy_anndata(n_samples=100, n_features=25)
 
     # Standard scaler required parameters.
@@ -32,7 +32,7 @@ def test_fit():
                                                       with_std=with_std)
     sklearn_std_scaler.fit(adata.X)
 
-    # asserts to check calculated mean and standard deviation, the error should be less than 1e-15.
+    # asserts to check the calculated mean and standard deviation, the error should be less than 1e-15.
     assert sum(
         abs(scalr_std_scaler.train_mean -
             sklearn_std_scaler.mean_).flatten() < 1e-15

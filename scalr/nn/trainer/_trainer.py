@@ -1,4 +1,4 @@
-"""This file is a base class for Model trainer."""
+"""This file is a base class for a model trainer."""
 
 from copy import deepcopy
 import os
@@ -16,7 +16,7 @@ from scalr.utils import EventLogger
 
 
 class TrainerBase:
-    """ Class for model trainer. It trains and validates a model."""
+    """ Class for a model trainer. It trains and validates a model."""
 
     def __init__(self,
                  model: Module,
@@ -24,7 +24,7 @@ class TrainerBase:
                  loss_fn: Module,
                  callbacks: CallbackExecutor,
                  device: str = 'cpu'):
-        """Initialize required parameters for model trainer.
+        """Initialize required parameters for a model trainer.
 
         Args:
             model (Module): Model to train.
@@ -106,7 +106,7 @@ class TrainerBase:
         return total_loss, accuracy
 
     def train(self, epochs: int, train_dl: DataLoader, val_dl: DataLoader):
-        """This function trains the model, execute callbacks.
+        """This function trains the model, and executes callbacks.
 
         Args:
             epochs: Max number of epochs to train model on.

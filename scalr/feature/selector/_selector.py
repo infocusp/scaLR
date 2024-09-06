@@ -1,4 +1,4 @@
-"""This file is a base class for top feature selector."""
+"""This file is a base class for the top feature selector."""
 
 from typing import Union
 

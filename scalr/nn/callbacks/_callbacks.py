@@ -15,7 +15,7 @@ class CallbackBase:
     """Base class to build callbacks."""
 
     def __init__(self, dirpath='.'):
-        """Use to generate nessecary arguments or create directories."""
+        """Use to generate necessary arguments or create directories."""
         pass
 
     def __call__(self):
@@ -59,7 +59,7 @@ class CallbackExecutor:
 
         early_stop = False
         for callback in self.callbacks:
-            # Below `| False` is to handle cases when callbacks returns None.
+            # Below `| False` is to handle cases when callbacks return None.
             # And we want to return true when early stopping is achieved.
             early_stop |= callback(**kwargs) or False
 

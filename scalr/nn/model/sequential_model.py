@@ -1,4 +1,4 @@
-"""This file is a implementation of sequential model."""
+"""This file is an implementation of a sequential model."""
 
 from typing import Tuple
 
@@ -18,7 +18,7 @@ class SequentialModel(ModelBase):
                  dropout: float = 0,
                  activation: str = 'ReLU',
                  weights_init_zero: bool = False):
-        """Initialize requried paramaters for linear model.
+        """Initialize required parameters for the linear model.
 
         Args:
             layers (list[int]): List of layers' feature size going from
@@ -28,7 +28,7 @@ class SequentialModel(ModelBase):
                                        Defaults to 0.
             activation (str, optional): Activation function class after each layer.
                                         Defaults to 'ReLU'.
-            weights_init_zero (bool, optional): [Bool] to initialize weights of model to zero.
+            weights_init_zero (bool, optional): [Bool] to initialize weights of the model to zero.
                                                 Defaults to False.
         """
         super().__init__()
@@ -83,7 +83,7 @@ class SequentialModel(ModelBase):
             dl: DataLoader,
             device: str = 'cpu'
     ) -> Tuple[list[int], list[int], list[list[int]]]:
-        """A function to get predictions from a model, from the dataLoader.
+        """A function to get predictions from a model, from the dataloader.
 
         Args:
             dl (DataLoader): DataLoader object containing samples.
@@ -91,7 +91,7 @@ class SequentialModel(ModelBase):
 
         Returns:
             True labels, Predicted labels, Predicted probabilities of all samples
-            in the dataLoader.
+            in the dataloader.
         """
         self.eval()
         test_labels, pred_labels, pred_probabilities = [], [], []

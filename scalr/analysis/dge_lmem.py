@@ -1,3 +1,4 @@
+"""This file generates differential gene expression analysis using Linear mixed-effects model approach stores the results."""
 import multiprocessing
 import os
 from os import path
@@ -60,10 +61,10 @@ class DgeLMEM(AnalysisBase):
             celltype_column: Column name in `anndata.obs` containing all the cell types.
             cell_subsets: Selcted list of cell types in 'celltype_column' to subset the anndata.
             min_cell_threshold: Minimum number of cells with nonzero values for a gene. Used for filtering noisy genes.
-            n_cpu: Number of cpus for parallelization.
+            n_cpu: Number of CPUs for parallelization.
             gene_batch_size: Number of genes in a batch of process.
-            coef_threshold: Threshold to filter up and down regulated genes in volcano plot.
-            p_val: p value, to filter the differentially expressed genes for volcano plot.
+            coef_threshold: Threshold to filter up and down-regulated genes in volcano plot.
+            p_val: p value, to filter the differentially expressed genes for the volcano plot.
             y_lim_tuple: Values to adjust the Y-axis limits of the plot.
             save_plot: Boolean value to save plot.
             logger: Logging type.
@@ -118,10 +119,10 @@ class DgeLMEM(AnalysisBase):
         Args:
             batch_adata: Anndata
             cell_type: cell type in the 'celltype_column' to subset the anndata, 
-                       whole anndata will be processed if 'cell_type' is None.
+                       the whole anndata will be processed if 'cell_type' is None.
             
         Returns:
-            A list of gene names in the anndata, and a pandas Dataframe with count matrix.
+            A list of gene names in the anndata, and a pandas dataframe with count matrix.
         '''
         
         if cell_type is not None:
@@ -152,11 +153,11 @@ class DgeLMEM(AnalysisBase):
     def get_result_mxmodel_per_gene(self,
                                     gene: str,
                                     ad_subset_to_df: DataFrame):  
-        '''This method produces the Linear mixed effects model statistics for a single gene
+        '''This method produces the Linear mixed-effects model statistics for a single gene
         
         Args:
             gene: Gene name
-            ad_subset_to_df: a pandas Dataframe with gene expression, 'fixed_effect_column', 
+            ad_subset_to_df: a pandas dataframe with gene expression, 'fixed_effect_column', 
                              and 'group' params 
             
         Returns:
@@ -194,7 +195,7 @@ class DgeLMEM(AnalysisBase):
         
         Args:
             gene_names: List of gene names
-            ad_subset_to_df: a pandas Dataframe with gene expression, 'fixed_effect_column', 
+            ad_subset_to_df: a pandas dataframe with gene expression, 'fixed_effect_column', 
             and 'group' params 
             
         Returns:
@@ -286,7 +287,7 @@ class DgeLMEM(AnalysisBase):
         generate volcano plots.
         
         Args:
-            test_data: a Anndata
+            test_data: an Anndata
             dirpath: path to save results
         '''
         

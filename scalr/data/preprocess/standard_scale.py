@@ -1,4 +1,4 @@
-"""This file performs Standar scaler normalization on the data."""
+"""This file performs standard scaler normalization on the data."""
 
 from typing import Union
 

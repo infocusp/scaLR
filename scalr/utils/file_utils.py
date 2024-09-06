@@ -18,7 +18,7 @@ from scalr.utils.logger import FlowLogger
 def read_data(filepath: str,
               backed: str = 'r',
               index_col: int = 0) -> Union[dict, AnnData, AnnCollection]:
-    """This function reads a json, yaml, csv or AnnData object file if filepath contains it.
+    """This function reads a json, yaml, csv or AnnData object file if the file path contains it.
     
     Returns an AnnCollection in case of a directory with chunked anndatas.
 
@@ -28,7 +28,7 @@ def read_data(filepath: str,
         backed (str, optional): To load AnnData / AnnCollection in backed mode. Defaults to 'r'.
 
     Raises:
-        ValueError: In case of wrong filepath provided.
+        ValueError: In case of the wrong file path provided.
 
     Returns:
         Union[dict, AnnData, AnnCollection].
@@ -75,7 +75,7 @@ def write_chunkwise_data(datapath: str,
                          sample_inds: Union[list[int], int] = -1,
                          feature_inds: Union[list[int], int] = -1,
                          transform=None):
-    """This function write data subsets iteratively in a chunkwise manner, to ensure
+    """This function writes data subsets iteratively in a chunkwise manner, to ensure
     only at most `sample_chunksize` samples are loaded at a time.
 
     This function can also apply transformation on each chunk.
@@ -90,7 +90,7 @@ def write_chunkwise_data(datapath: str,
         feature_inds (Union[list[int], int], optional): To be used in case of writing
                                                         only a subset of features.
                                                         Defaults to all features.
-        transform (function): a function to apply transformation on chunked numpy array.
+        transform (function): a function to apply a transformation on a chunked numpy array.
     """
     if not path.exists(dirpath):
         os.makedirs(dirpath)

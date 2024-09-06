@@ -1,4 +1,4 @@
-"""This file contains implementation of end to end pipeline execution."""
+"""This file contains an implementation of end-to-end pipeline execution."""
 
 import argparse
 import logging
@@ -56,7 +56,7 @@ def get_args():
 # Uncomment `@profile` to get line-by-line memory analysis
 # @profile
 def pipeline(config, dirpath, device, flow_logger, event_logger):
-    """A function that configures all components of pipeline for end-to-end execution.
+    """A function that configures all components of the pipeline for end-to-end execution.
     
     Args:
         config: User config.
@@ -129,7 +129,7 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
         write_data(config, path.join(dirpath, 'config.yaml'))
 
     if config.get('analysis'):
-        # Analysis on trained model.
+        # Analysis of trained model.
         flow_logger.info('Analysis pipeline running')
         event_logger.heading1('Analysis')
 

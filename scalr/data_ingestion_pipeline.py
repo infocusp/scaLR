@@ -34,7 +34,7 @@ class DataIngestionPipeline:
 
         if not self.sample_chunksize:
             self.flow_logger.warning(
-                '''Sample chunksize not given. Will default to not using chunking.
+                '''Sample chunk size not given. Will default to not using chunking.
                    Might results in excessive use of memory.''')
 
         self.datadir = dirpath
@@ -91,7 +91,7 @@ class DataIngestionPipeline:
             )
 
     def preprocess_data(self):
-        """A function to apply preprocesssing on data splits."""
+        """A function to apply preprocessing on data splits."""
 
         self.data_config['train_val_test']['final_datapaths'] = deepcopy(
             self.data_config['train_val_test']['split_datapaths'])

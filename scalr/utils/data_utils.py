@@ -11,7 +11,7 @@ import torch
 
 
 def get_one_hot_matrix(data: np.array):
-    """This function returns one-hot matrix of given labels.
+    """This function returns a one-hot matrix of given labels.
 
     Args:
         data: Categorical data of dim 1D or 2D array.
@@ -56,14 +56,14 @@ def get_random_samples(
 def generate_dummy_anndata(n_samples, n_features, target_name='celltype'):
     """This function returns anndata object of shape (n_samples, n_features).
     
-    It generate random values for target, batch & env from below mentioned choices.
-    If you require more columns, you can add in below adata.obs without editing
+    It generates random values for target, batch & env from below mentioned choices.
+    If you require more columns, you can add them in the below adata.obs without editing
     already existing columns.
 
     Args:
         n_samples: Number of samples in anndata.
         n_features: Number of features in anndata.
-        target_name: Any prefered target name. Default is `celltype`.
+        target_name: Any preferred target name. Default is `celltype`.
 
     Returns:
         Anndata object.

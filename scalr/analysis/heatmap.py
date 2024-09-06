@@ -13,7 +13,7 @@ from scalr.utils import read_data
 
 
 class Heatmap(AnalysisBase):
-    '''Class to generate heatmap of top genes classwise.'''
+    '''Class to generate a heatmap of top genes classwise.'''
 
     def __init__(self,
                  top_n_genes: int = 100,
@@ -46,7 +46,7 @@ class Heatmap(AnalysisBase):
         """A function to generate heatmap for top features.
 
         Args:
-            score_matrix: Matrix(class * genes) that contains score of each gene per class.
+            score_matrix: Matrix(class * genes) that contains a score of each gene per class.
             top_features: Class-wise top genes or list of top features.
             dirpath: Path to store the heatmap image.
         """

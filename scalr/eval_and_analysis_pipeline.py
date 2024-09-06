@@ -1,4 +1,4 @@
-"""This file contains implementation of model evaluation and performs dowstream analysis tasks."""
+"""This file contains an implementation of model evaluation and performs downstream analysis tasks."""
 
 from copy import deepcopy
 import os
@@ -46,7 +46,7 @@ class EvalAndAnalysisPipeline:
             self.model.load_weights(model_weights)
         else:
             self.flow_logger.warning(
-                'Model path not provided. Unable to perform model based analysis!'
+                'Model path not provided. Unable to perform model-based analysis!'
             )
             self.model = None
 
@@ -54,7 +54,7 @@ class EvalAndAnalysisPipeline:
         self.primary_analysis = dict()
 
     def build_dataloaders(self):
-        """A function to build dataloader for train, validation and test data."""
+        """A function to build dataloader for train, validation, and test data."""
         dataloader_config = deepcopy(self.analysis_config.get('dataloader'))
 
         if not dataloader_config:
@@ -100,7 +100,7 @@ class EvalAndAnalysisPipeline:
             train_data (Union[AnnData, AnnCollection]): Training data.
             val_data (Union[AnnData, AnnCollection]): Validation data.
             target (Union[str, list[str]]): Target columns name(s).
-            mappings (dict): Mapping of column value to ids
+            mappings (dict): Mapping of a column value to ids
                             eg. mappings[column_name][label2id] = {A: 1, B:2, ...}.
         """
         self.train_data = train_data
@@ -135,7 +135,7 @@ class EvalAndAnalysisPipeline:
             mapping=self.mappings[self.target]['id2label'])
 
     def gene_analysis(self):
-        """A function to perform anlaysis on trained model to get top genes and biomarkers."""
+        """A function to perform analysis on trained model to get top genes and biomarkers."""
 
         self.flow_logger.info('Performing gene analysis')
         gene_analysis_path = path.join(self.dirpath, 'gene_analysis')

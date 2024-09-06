@@ -12,7 +12,7 @@ from scalr.utils import build_object
 
 
 class ScoringBase:
-    """Base class for scorer."""
+    """Base class for the scorer."""
 
     def __init__(self):
         pass
@@ -22,7 +22,7 @@ class ScoringBase:
                         train_data: Union[AnnData, AnnCollection],
                         val_data: Union[AnnData, AnnCollection], target: str,
                         mappings: dict) -> np.ndarray:
-        """A function to return score of each feature for each class.
+        """A function to return the score of each feature for each class.
 
         Args:
             model (nn.Module): Trained model to generate scores from.

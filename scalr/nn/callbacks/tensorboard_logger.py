@@ -1,4 +1,4 @@
-"""This file is a implementation of Tensorboard logging callback."""
+"""This file is an implementation of Tensorboard logging callback."""
 
 import os
 from os import path
@@ -11,7 +11,7 @@ from scalr.nn.callbacks import CallbackBase
 
 class TensorboardLogger(CallbackBase):
     """
-    Tensorboard logging of training process.
+    Tensorboard logging of the training process.
 
     Attributes:
         epoch: An interger count of epochs trained.

@@ -1,3 +1,5 @@
+"""This file generates differential gene expression analysis using Pseudobulk approach stores the results."""
+
 import os
 from os import path
 from typing import Optional, Union, Tuple
@@ -48,8 +50,8 @@ class DgePseudoBulk(AnalysisBase):
             cell_subsets: Selcted list of cells in 'celltype_column' to subset the anndata.
             min_cell_threshold: Minimum number of subjects with aggregated nonzero gene expression values for a gene.
                                 Used for filtering noisy genes.
-            fold_change: Fold change to filter the differentially expressed genes for volcano plot.
-            p_val: p value, to filter the differentially expressed genes for volcano plot.
+            fold_change: Fold change to filter the differentially expressed genes for the volcano plot.
+            p_val: p value, to filter the differentially expressed genes for the volcano plot.
             y_lim_tuple: Values to adjust the Y-axis limits of the plot.
             save_plot: Boolean value to save plot.
             logger : Logging type.
@@ -154,10 +156,10 @@ class DgePseudoBulk(AnalysisBase):
                      cell_type: str,
                      dirpath: str):
         '''Method to generate volcano plot of differential gene expression results 
-        and store it to disk
+        and store it on disk
     
         Args:
-            dge_results_df: differential gene expression results dataframe
+            dge_results_df: differential gene expression results in dataframe
             cell_type: cell type used to subset the input anndata
             dirpath: path to save the result
         '''
@@ -304,4 +306,3 @@ class DgePseudoBulk(AnalysisBase):
                     y_lim_tuple = None,
                     save_plot = True,
                     logger = 'EventLogger')
-    

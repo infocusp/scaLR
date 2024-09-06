@@ -1,4 +1,4 @@
-"""This file is a implementation of early stopping callback."""
+"""This file is an implementation of early stopping callback."""
 
 import os
 from os import path
@@ -29,7 +29,7 @@ class EarlyStopping(CallbackBase):
             min_delta: Minimum change in the monitored quantity to qualify as an improvement,
                             i.e. an absolute change of less than min_delta, will count as no improvement.
             epoch: An interger count of epochs trained.
-            min_validation_loss: Keeps the track of the minimum validation loss across all epochs.
+            min_validation_loss: Keeps track of the minimum validation loss across all epochs.
         """
         self.patience = int(patience)
         self.min_delta = float(min_delta)

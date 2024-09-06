@@ -1,16 +1,16 @@
-"""This file is a implementation of Custom SHAP model."""
+"""This file is an implementation of the custom SHAP model."""
 
 from torch import nn
 
 
 class CustomShapModel(nn.Module):
-    """Class for custom model for SHAP."""
+    """Class for a custom model for SHAP."""
 
     def __init__(self, model, key='cls_output'):
         """Initialize required parameters for SHAP model.
 
         Args:
-            model: Trained model which used for shap calculation.
+            model: Trained model used for SHAP calculation.
             key: key from model output dict.
         """
         super().__init__()

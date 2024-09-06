@@ -23,11 +23,11 @@ class GeneRecallCurve(AnalysisBase):
                  plots_per_row: int = 3,
                  save_plots: bool = True,
                  features_selector: dict = None):
-        '''Load required paramters for gene recall curve.
+        '''Load required parameters for gene recall curve.
 
         Args:
             reference_genes_path: Reference genes csv path.
-            ranked_genes_path: List of ranked genes csvs we want to check recall against. List is used to support
+            ranked_genes_path: List of ranked genes csvs we want to check recall against. The list is used to support
                                plotting gene recall for multiple models at once.
             top_K: Top K genes to consider from ranked genes to check gene recall.
             plots_per_row: Number of categories to plot gene recall per row.
@@ -53,7 +53,7 @@ class GeneRecallCurve(AnalysisBase):
         '''This function calls function to generate gene recall after setting a few parameters.
 
         Args:
-            score_matrix: Matrix that contains score of each gene for each category.
+            score_matrix: Matrix that contains a score of each gene for each category.
             dirpath: Path to store gene recall curve if applicable.
         '''
 
@@ -77,7 +77,7 @@ class GeneRecallCurve(AnalysisBase):
                 }
             except:
                 raise ValueError(
-                    'There is some issue in `score_matrix` that is generated during pipeline run. Please check!'
+                    'There is some issue in `score_matrix` that is generated during the pipeline run. Please check!'
                 )
         else:
             ranked_genes_df_dict = {}
@@ -98,12 +98,12 @@ class GeneRecallCurve(AnalysisBase):
         """This function plots & stores the gene recall curve for reference genes in provided ranked genes.
 
         It also stores the reference genes along with their ranks for each model in a json file for further
-        analysis to user.
+        analysis to the user.
 
         Args:
             ranked_genes_df_dict: Pipeline generated ranked genes dataframe.
             reference_genes_df: Reference genes dataframe.
-            top_K: The top K ranked genes in which reference genes are to be looked for.
+            top_K: The top K-ranked genes in which reference genes are to be looked for.
             dirpath: Path to store gene recall plot and json.
             plot_type: Type of gene recall - per category or aggregated across all categories.
         """
@@ -160,7 +160,7 @@ class GeneRecallCurve(AnalysisBase):
                 k = self.top_K
 
                 self.event_logger.info(f'\nCategory - {category}')
-                # Removing reference genes which are not available in ranked genes list.
+                # Removing reference genes that are not available in the list of the ranked genes.
                 self.event_logger.info(
                     f'-- Number of reference genes provided : {len(ref_genes)}')
                 ref_genes = list(set(ref_genes).intersection(ranked_genes))
@@ -213,7 +213,7 @@ class GeneRecallCurve(AnalysisBase):
                       'w') as f:
                 json.dump(gene_recall_dict, f, indent=6)
             self.event_logger.info(
-                f'\nGene recall curves stored at path : `{path.join(dirpath, "gene_recall_curve.svg")}`'
+                f'\nGene recall curves stored at path: `{path.join(dirpath, "gene_recall_curve.svg")}`'
             )
         else:
             plt.show()

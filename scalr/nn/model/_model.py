@@ -1,4 +1,4 @@
-"""This file is a base class for model."""
+"""This file is a base class for the model."""
 
 from typing import Union
 
@@ -14,17 +14,17 @@ from scalr.utils import build_object
 
 
 class ModelBase(nn.Module):
-    """Class for model.
+    """Class for the model.
     
     Contains different methods to make a forward() call, load, save weights
-    and predict on the data provided.
+    and predict the data provided.
     """
 
     def __init__(self):
         super().__init__()
 
     def forward(self, x: Tensor) -> Tensor:
-        """A function for forward pass of model to generate outputs."""
+        """A function for forward pass of the model to generate outputs."""
         pass
 
     def load_weights(self, model_weights_path: str):
@@ -32,7 +32,7 @@ class ModelBase(nn.Module):
         self.load_state_dict(torch.load(model_weights_path)['model_state_dict'])
 
     def save_weights(self, model_weights_path: str):
-        """A function to save model weights at path."""
+        """A function to save model weights at the path."""
         torch.save({'model_state_dict': self.state_dict()}, model_weights_path)
 
     def get_predictions(self, dl: DataLoader, device: str = 'cpu'):

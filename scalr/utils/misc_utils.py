@@ -1,4 +1,4 @@
-"""This file contains functions related miscellaneous utilities."""
+"""This file contains functions related to miscellaneous utilities."""
 
 import os
 import random
@@ -33,11 +33,11 @@ def overwrite_default(user_config: dict, default_config: dict) -> dict:
 
 
 def build_object(module, config: dict):
-    """A builder function to build a object from its config.
+    """A builder function to build an object from its config.
 
     Args:
         module: Module containing the class.
-        config: Contains name of class and params to initialize object.
+        config: Contains the name of the class and params to initialize the object.
 
     Returns: Object, updated config.
     """

@@ -22,7 +22,7 @@ def test_write_chunkwise_data():
     fulldata_path = '/tmp/fulldata.h5ad'
     write_data(adata, fulldata_path)
 
-    # sample_chunksize to store fulldata in chunks.
+    # sample_chunksize to store full data in chunks.
     sample_chunksize = 5
 
     # Path to store chunked data.
@@ -46,6 +46,6 @@ def test_write_chunkwise_data():
         else:
             break
 
-    # Checking number of chunks stored.
+    # Checking the number of chunks stored.
     expected_n_chunks = np.ceil(adata.shape[0] / sample_chunksize).astype(int)
     assert observed_n_chunks == expected_n_chunks, f"There is mismatch of observed_n_chunks - {observed_n_chunks} with expected_n_chunks - {expected_n_chunks}."

@@ -1,4 +1,4 @@
-"""This file is a implementation of SHAP scorer."""
+"""This file is an implementation of SHAP scorer."""
 
 from typing import Tuple, Union
 
@@ -30,15 +30,15 @@ class ShapScorer(ScoringBase):
                  logger: str = 'EventLogger',
                  *args,
                  **kwargs):
-        """Initialize class with shap arguments.
+        """Initialize class with SHAP arguments.
 
         Args:
-            early_stop: Contains early stopping related configuration.
+            early_stop: Contains early stopping-related configuration.
             dataloader: Dataloader related config.
-            device: Where data is process/load.
+            device: Where data is processed/loaded.
             top_n_genes: Top N genes for each class/label.
             background_tensor: Number of training data used for SHAP explainer.
-            samples_abs_mean: Apply abs before taking mean across samples.
+            samples_abs_mean: Apply abs before taking the mean across samples.
         """
 
         self.early_stop_config = early_stop
@@ -54,13 +54,13 @@ class ShapScorer(ScoringBase):
                         train_data: Union[AnnData, AnnCollection],
                         val_data: Union[AnnData, AnnCollection], target: str,
                         mappings: dict, *args, **kwargs) -> np.ndarray:
-        """This function return the weights of model as a score.
+        """This function returns the weights of the model as a score.
 
         Args:
-            model: Trained model that used for SHAP.
-            train_data: Data that used as referece data for SHAP.
+            model: Trained model that is used for SHAP.
+            train_data: Data that is used as reference data for SHAP.
             val_data: On which SHAP will generate the score.
-            mappings: Contains target related mappings.
+            mappings: Contains target-related mappings.
 
         Returns:
             class * genes abs weights matrix.
@@ -80,9 +80,9 @@ class ShapScorer(ScoringBase):
         Args:
             model: Trained model to extract weights from.
             train_data: Train data.
-            test_data: Test data that used for shap values.
+            test_data: Test data that is used for SHAP values.
             target: Target name.
-            mappings: Contains target related mappings.
+            mappings: Contains target-related mappings.
 
         Returns:
             (class * genes abs weights matrix, class * genes weights matrix).
@@ -164,10 +164,10 @@ class ShapScorer(ScoringBase):
 
         Args:
             batch_id: Current batch number.
-            genes_class_shap_df: label/class wise genes shap values(mean across samples).
-            prev_top_genes_batch_wise: Dictionary where prev batch's per labels top genes are stored.
+            genes_class_shap_df: label/class wise genes SHAP values(mean across samples).
+            prev_top_genes_batch_wise: Dictionary where prev batches per labels top genes are stored.
             top_n_genes: Number of top genes check.
-            threshold: early stop if common genes is higher than this.
+            threshold: early stop if common genes are higher than this.
 
         Returns:
             Early stop value, top genes batch wise.

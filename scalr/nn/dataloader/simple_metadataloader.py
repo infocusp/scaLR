@@ -1,4 +1,4 @@
-"""This file is implementation of simmple metadataloader."""
+"""This file is the implementation of simple metadataloader."""
 
 from typing import Union
 
@@ -15,7 +15,7 @@ class SimpleMetaDataLoader(SimpleDataLoader):
     """Class for simple metadataloader.
     
     Simple MetaDataLoader converts all adata values to inputs, concat specified metadata columns as onehotencoded vector
-    to features data and map target column in metadata to output labels.
+    to feature data and map target columns in metadata to output labels.
 
     Returns:
         PyTorch DataLoader object with (X: Tensor [batch_size, features], y: Tensor [batch_size, ]).

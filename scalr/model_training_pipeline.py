@@ -1,4 +1,4 @@
-"""This file contains a implementation for model training pipeline."""
+"""This file contains an implementation for the model training pipeline."""
 
 from copy import deepcopy
 import os
@@ -34,7 +34,7 @@ class ModelTrainingPipeline:
         Class to get trained model from given configs
 
         Args:
-            dirpath (str): Path to store checkpoints and logs of model.
+            dirpath (str): Path to store checkpoints and logs of the model.
             model_config (dict): Model config.
             train_config (dict): Model training config.
             device (str, optional): Device to run model on. Defaults to 'cpu'.
@@ -67,7 +67,7 @@ class ModelTrainingPipeline:
             train_data (Union[AnnData, AnnCollection]): Training data.
             val_data (Union[AnnData, AnnCollection]): Validation data.
             target (Union[str, list[str]]): Target columns name(s).
-            mappings (dict): Mapping of column value to ids
+            mappings (dict): Mapping of a column value to ids
                             eg. mappings[column_name][label2id] = {A: 1, B:2, ...}.
         """
         self.train_data = train_data
@@ -76,7 +76,7 @@ class ModelTrainingPipeline:
         self.mappings = mappings
 
     def build_model_training_artifacts(self):
-        """This function configures model, optimizer and loss function required
+        """This function configures the model, optimizer, and loss function required
         for model training.
         """
         self.flow_logger.info('Building model training artifacts')

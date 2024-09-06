@@ -1,4 +1,4 @@
-'''This is a test file for Sample-wise normalization.'''
+"""This is a test file for Sample-wise normalization."""
 
 import scanpy as sc
 
@@ -7,12 +7,12 @@ from scalr.utils import generate_dummy_anndata
 
 
 def test_transform():
-    '''This function tests transform function of Sample-wise normalization.
+    '''This function tests the transform function of Sample-wise normalization.
 
     There is no fit() involved in Sample-wise normalization.
     '''
 
-    # Creating annadata object.
+    # Creating an annadata object.
     adata = generate_dummy_anndata(n_samples=100, n_features=25)
 
     # Sample-wise norm required parameter.
@@ -28,7 +28,7 @@ def test_transform():
                                                target_sum=target_sum,
                                                inplace=False)['X']
 
-    # asserts to check transformed data is having error less than 1e-15 compared to scanpy's transformed data.
+    # asserts to check transformed data having errors less than 1e-15 compared to scanpy's transformed data.
     assert sum(
         abs(scanpy_scaled_data.flatten() -
             scalr_scaled_data.flatten()).flatten() < 1e-15

@@ -8,12 +8,12 @@ from scalr.feature.selector import SelectorBase
 class ClasswiseAbs(SelectorBase):
     """Class for class-wise absolute feature selector strategy.
     
-    Classwise scorer returns a dict for each class, containing top
+    Classwise scorer returns a dict for each class, containing the top
     absolute scores of genes.
     """
 
     def __init__(self, k: int = 1e6) -> dict:
-        """Initialize required parameters for selector."""
+        """Initialize required parameters for the selector."""
         self.k = k
 
     def get_feature_list(self, score_matrix: DataFrame):
