@@ -1,3 +1,5 @@
+"""This file performs Standar scaler normalization on the data."""
+
 from typing import Union
 
 from anndata import AnnData
@@ -9,27 +11,27 @@ from scalr.utils import EventLogger
 
 
 class StandardScaler(PreprocessorBase):
-    """Standard Normalization"""
+    """Class for Standard Normalization"""
 
     def __init__(self, with_mean: bool = True, with_std: bool = True):
-        """
+        """Initialize parameters for standard scaler normalization.
+
         Args:
-            with_mean: Mean for standard scaling
-            with_std: Standard deviation for standard scaling
+            with_mean: Mean for standard scaling.
+            with_std: Standard deviation for standard scaling.
         """
 
         self.with_mean = with_mean
         self.with_std = with_std
 
-        # Parameters for standard scaler
+        # Parameters for standard scaler.
         self.train_mean = None
         self.train_std = None
 
         self.event_logger = EventLogger('Standard Scaler Normalization')
 
     def transform(self, data: np.ndarray) -> np.ndarray:
-        """The method called by the pipeline to process a chunk of
-        samples.
+        """A function to transform provided input data.
 
         Args:
             data (np.ndarray): raw data
@@ -48,7 +50,13 @@ class StandardScaler(PreprocessorBase):
 
     def fit(self, data: Union[AnnData, AnnCollection],
             sample_chunksize: int) -> None:
-        """Calculate parameters for standard scaler from the train data"""
+        """This function calculate parameters for standard scaler object from the train data.
+        
+        Args:
+            data: Data to calculate the required parameters of.
+            sample_chunksize: Chunks of data that can be loaded into memory at once.
+        
+        """
 
         self.event_logger.info('\n\nStarting standardscaler normalization')
         self.event_logger.info('\nFitting standard scaler object on train data')
@@ -61,8 +69,8 @@ class StandardScaler(PreprocessorBase):
         """Function to calculate mean for each feature in the train data
         
         Args:
-            data: Training data to calculate the mean of
-            sample_chunksize: Chunks of data that can be loaded into memory at once
+            data: Data to calculate the mean of.
+            sample_chunksize: Chunks of data that can be loaded into memory at once.
             
         Returns:
             Nothing, stores mean per feature of the train data.
@@ -84,11 +92,11 @@ class StandardScaler(PreprocessorBase):
 
     def calculate_std(self, data: Union[AnnData, AnnCollection],
                       sample_chunksize: int) -> None:
-        """Function to calculate standard deviation for each feature in the train data
+        """A function to calculate standard deviation for each feature in the train data.
         
         Args:
-            data: Training data to calculate the standard deviation of
-            sample_chunksize: Chunks of data that can be loaded into memory at once
+            data: Data to calculate the standard deviation of
+            sample_chunksize: Chunks of data that can be loaded into memory at once.
             
         Returns:
             Nothing, stores standard deviation per feature of the train data.
@@ -117,5 +125,5 @@ class StandardScaler(PreprocessorBase):
 
     @classmethod
     def get_default_params(cls) -> dict:
-        """Class method to get default params for preprocess_config"""
+        """Class method to get default params for preprocess_config."""
         return dict(with_mean=True, with_std=True)

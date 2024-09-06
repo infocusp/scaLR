@@ -1,3 +1,5 @@
+"""This file contains implementation of feature subsetting, model training followed by top feature extraction."""
+
 from copy import deepcopy
 import os
 from os import path
@@ -22,13 +24,18 @@ from scalr.utils import write_data
 class FeatureExtractionPipeline:
 
     def __init__(self, feature_selection_config, dirpath, device):
-        '''
+        """Initialize required parameters for feature selection.
+
         Feature extraction is done in 4 steps:
         1. Model(s) training on chunked/all features
         2. Class X Feature scoring
         3. Top features extraction
         4. Feature subset data writing
-        '''
+
+        Args:
+            feature_selection_config: Feature selection config.
+            dirpath: Path to load data from.
+        """
         self.flow_logger = FlowLogger('FeatureExtraction')
 
         self.feature_selection_config = deepcopy(feature_selection_config)
@@ -38,7 +45,11 @@ class FeatureExtractionPipeline:
         os.makedirs(dirpath, exist_ok=True)
 
     def load_data_and_targets_from_config(self, data_config: dict):
-        """load data and targets from data config"""
+        """A function to load data and targets from data config.
+
+        Args:
+            data_config: Data config.
+        """
         self.train_data, self.val_data = load_train_val_data_from_config(
             data_config)
         self.target = data_config.get('target')
@@ -47,23 +58,23 @@ class FeatureExtractionPipeline:
     def set_data_and_targets(self, train_data: Union[AnnData, AnnCollection],
                              val_data: Union[AnnData, AnnCollection],
                              target: Union[str, list[str]], mappings: dict):
-        """Useful when you don't use data directly from config, but rather by other
-        sources like feature subsetting, etc.
+        """A function to set data when you don't use data directly from config,
+        but rather by other sources like feature subsetting, etc.
 
         Args:
-            train_data (Union[AnnData, AnnCollection]): training data
-            val_data (Union[AnnData, AnnCollection]): validation data
-            target (Union[str, list[str]]): target columns name(s)
-            mappings (dict): mapping of column value to ids
-                            eg. mappings[column_name][label2id] = {A: 1, B:2, ...}
+            train_data (Union[AnnData, AnnCollection]): Training data.
+            val_data (Union[AnnData, AnnCollection]): Validation data.
+            target (Union[str, list[str]]): Target columns name(s).
+            mappings (dict): Mapping of column value to ids
+                            eg. mappings[column_name][label2id] = {A: 1, B:2, ...}.
         """
         self.train_data = train_data
         self.val_data = val_data
         self.target = target
         self.mappings = mappings
 
-    def feature_chunked_model_training(self) -> list[nn.Module]:
-        """Train models on subsetted data containing `feature_subsetsize` genes"""
+    def feature_subsetted_model_training(self) -> list[nn.Module]:
+        """This function train models on subsetted data containing `feature_subsetsize` genes."""
 
         self.flow_logger.info('Feature subset models training')
 
@@ -90,12 +101,12 @@ class FeatureExtractionPipeline:
         return self.chunked_models
 
     def set_model(self, models: list[nn.Module]):
-        """Method to set trained model for downstream feature tasks"""
+        """A function to set trained model for downstream feature tasks."""
         self.chunked_models = models
 
     def feature_scoring(self) -> pd.DataFrame:
-        """To generate scores of each feature for each class using a scorer
-        and chunked models
+        """A function to generate scores of each feature for each class using a scorer
+        and chunked models.
         """
         self.flow_logger.info('Feature scoring')
 
@@ -135,11 +146,11 @@ class FeatureExtractionPipeline:
         return self.score_matrix
 
     def set_score_matrix(self, score_matrix: pd.DataFrame):
-        """Method to set score_matrix for feature extraction"""
+        """A function to set score_matrix for feature extraction."""
         self.score_matrix = score_matrix
 
     def top_feature_extraction(self) -> Union[list[str], dict]:
-        """Get top features using `Selector`"""
+        """A function to get top features using `Selector`."""
 
         self.flow_logger.info('Top features extraction')
 
@@ -155,8 +166,12 @@ class FeatureExtractionPipeline:
         return self.top_features
 
     def write_top_features_subset_data(self, data_config: dict) -> dict:
-        """Writing top features subset data onto disk,
-        returns updated data_config"""
+        """A function to write top features subset data onto disk
+        and return updated data_config.
+        
+        Args:
+            data_config: Data config.
+        """
 
         self.flow_logger.info('Writing feature-subset data onto disk')
 
@@ -181,5 +196,5 @@ class FeatureExtractionPipeline:
         return data_config
 
     def get_updated_config(self) -> dict:
-        """Return updated configs"""
+        """This function return updated configs."""
         return self.feature_selection_config

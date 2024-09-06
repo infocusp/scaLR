@@ -1,3 +1,5 @@
+"""This file is implementation of simmple dataloader."""
+
 from typing import Union
 
 from anndata import AnnData
@@ -10,11 +12,13 @@ from scalr.nn.dataloader import DataLoaderBase
 
 
 class SimpleDataLoader(DataLoaderBase):
-    """Simple DataLoader which converts all adata values to inputs, and target column in metadata
-    to output labels
+    """Class for simple dataloader.
+    
+    Simple DataLoader converts all adata values to inputs, and target column in metadata
+    to output labels.
 
     Returns:
-        PyTorch DataLoader object with (X: Tensor [batch_size, features], y: Tensor [batch_size, ])
+        PyTorch DataLoader object with (X: Tensor [batch_size, features], y: Tensor [batch_size, ]).
     """
 
     def __init__(self,
@@ -24,12 +28,11 @@ class SimpleDataLoader(DataLoaderBase):
                  padding: int = None):
         """
         Args:
-            batch_size (int): number of samples to be loaded in each batch
-            target (str): corresponding metadata name to be treated as
-                          training objective in classification.
-                          Must be present as a column_name in adata.obs
-            mappings (dict): mapping the target name to respective ids
-            padding (int): padding size incase of #features < model input size
+            batch_size (int): Number of samples to be loaded in each batch.
+            target (str): Corresponding metadata name to be treated as training
+                          objective in classification. Must be present as a column_name in `adata.obs`.
+            mappings (dict): Mapping the target name to respective ids.
+            padding (int): Padding size incase of #features < model input size.
         """
         super().__init__(batch_size, target, mappings)
         self.padding = padding
@@ -38,14 +41,13 @@ class SimpleDataLoader(DataLoaderBase):
         self,
         adata_batch: Union[AnnData, AnnCollection],
     ) -> tuple[Tensor, Tensor]:
-        """Given an input anndata of batch_size,
-        the collate function creates inputs and outputs
+        """Given an input anndata of batch_size, the collate function creates inputs and outputs.
 
         Args:
-            adata_batch (Union[AnnData, AnnCollection]): anndata view object with batch_size samples
+            adata_batch (Union[AnnData, AnnCollection]): Anndata view object with batch_size samples.
 
         Returns:
-            Tuple(x, y): input to model, output from data
+            Tuple(x, y): Input to model, output from data.
         """
 
         x = adata_batch.X.float()
@@ -59,5 +61,5 @@ class SimpleDataLoader(DataLoaderBase):
 
     @classmethod
     def get_default_params(cls) -> dict:
-        """Class method to get default params for model_config"""
+        """Class method to get default params for model_config."""
         return dict(batch_size=1, target=None, mappings=dict())

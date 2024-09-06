@@ -1,3 +1,5 @@
+"""This file contains implementation for model training on feature subsets."""
+
 from copy import deepcopy
 import os
 from os import path
@@ -13,8 +15,10 @@ from scalr.utils import FlowLogger
 
 
 class FeatureSubsetting:
-    """FeatureSubsetting trains a model for each subsetted datasets,
-    each containing `feature_subsetsize` genes as features
+    """Class for FeatureSubsetting.
+    
+    It trains a model for each subsetted datasets, each
+    containing `feature_subsetsize` genes as features.
     """
 
     def __init__(self,
@@ -27,17 +31,18 @@ class FeatureSubsetting:
                  mappings: dict,
                  dirpath: str = None,
                  device: str = 'cpu'):
-        """
+        """Initialize required parameters for feature subset training.
+
         Args:
-            feature_subsetsize (int): number of features in one subset
-            chunk_model_config (dict): chunked model config
-            chunk_model_train_config (dict): chunked model training config
-            train_data (Union[AnnData, AnnCollection]): train dataset
-            val_data (Union[AnnData, AnnCollection]): validation dataset
-            target (str): target to train model
-            mappings (dict): mapping of target to labels
-            dirpath (str, optional): dirpath to store chunked model weights. Defaults to None.
-            device (str, optional): device to train models on. Defaults to 'cpu'.
+            feature_subsetsize (int): Number of features in one subset.
+            chunk_model_config (dict): Chunked model config.
+            chunk_model_train_config (dict): Chunked model training config.
+            train_data (Union[AnnData, AnnCollection]): Train dataset.
+            val_data (Union[AnnData, AnnCollection]): Validation dataset.
+            target (str): Target to train model.
+            mappings (dict): mapping of target to labels.
+            dirpath (str, optional): Dirpath to store chunked model weights. Defaults to None.
+            device (str, optional): Device to train models on. Defaults to 'cpu'.
         """
         self.event_logger = EventLogger('FeatureSubsetting')
 
@@ -52,10 +57,10 @@ class FeatureSubsetting:
         self.device = device
 
     def train_chunked_models(self) -> list[nn.Module]:
-        """Trains a model for each subset data
+        """Trains a model for each subset data.
 
         Returns:
-            list[nn.Module]: list of models for each subset
+            list[nn.Module]: List of models for each subset.
         """
         self.event_logger.info('Feature subset models training')
         models = []
@@ -95,5 +100,5 @@ class FeatureSubsetting:
         return models
 
     def get_updated_configs(self):
-        """Returns updated configs"""
+        """Returns updated configs."""
         return self.chunk_model_config, self.chunk_model_train_config

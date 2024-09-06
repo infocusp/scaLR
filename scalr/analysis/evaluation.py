@@ -1,3 +1,5 @@
+"""This file generates accuracy, classification report and stores it."""
+
 from os import path
 
 from pandas import DataFrame
@@ -12,11 +14,11 @@ from scalr.utils import write_data
 
 
 def get_accuracy(test_labels: list[int], pred_labels: list[int]) -> float:
-    """Function to get accuracy of predictions
+    """A function to get accuracy for the predicted labels.
 
     Args:
-        test_labels (list[int]): true labels from test sete
-        pred_labels (list[int]): predicted labels from trained model
+        test_labels (list[int]): True labels from the test set.
+        pred_labels (list[int]): Predicted labels from the trained model.
 
     Returns:
         float: accuracy score
@@ -31,18 +33,17 @@ def generate_and_save_classification_report(test_labels: list[int],
                                             pred_labels: list[int],
                                             dirpath: str,
                                             mapping: dict = None) -> DataFrame:
-    """
-    Function to generate a classificaton report from the predicted data
-    at dirpath as classification_report.csv
+    """A function to generate a classificaton report from the actual and predicted data
+    and store at `dirpath`.
 
     Args:
-        test_labels: true labels from test set
-        pred_labels: predicted labels from trained model
-        dirpath: path to store classification_report.csv
-        mapping[optional]: mapping of label_id to true label_names (id2label)
+        test_labels: True labels from the test set.
+        pred_labels: Predicted labels from the trained model.
+        dirpath: Path to store classification_report.
+        mapping[optional]: Mapping of label_id to true label_names (id2label).
 
     Returns:
-        a Pandas DataFrame with the classification report
+        A Pandas DataFrame with the classification report.
     """
     event_logger = EventLogger('ClassReport')
 

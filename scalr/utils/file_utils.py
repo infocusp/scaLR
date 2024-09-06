@@ -1,3 +1,5 @@
+"""This file contains functions related to file read-write."""
+
 import json
 import os
 from os import path
@@ -16,7 +18,8 @@ from scalr.utils.logger import FlowLogger
 def read_data(filepath: str,
               backed: str = 'r',
               index_col: int = 0) -> Union[dict, AnnData, AnnCollection]:
-    """Reads a json, yaml, csv or AnnData object file if filepath contains it.
+    """This function reads a json, yaml, csv or AnnData object file if filepath contains it.
+    
     Returns an AnnCollection in case of a directory with chunked anndatas.
 
     Args:
@@ -25,10 +28,10 @@ def read_data(filepath: str,
         backed (str, optional): To load AnnData / AnnCollection in backed mode. Defaults to 'r'.
 
     Raises:
-        ValueError: In case of wrong filepath provided
+        ValueError: In case of wrong filepath provided.
 
     Returns:
-        Union[dict, AnnData, AnnCollection]
+        Union[dict, AnnData, AnnCollection].
     """
     if filepath.endswith('.json'):
         data = read_json(filepath)
@@ -49,7 +52,7 @@ def read_data(filepath: str,
 
 
 def write_data(data: Union[dict, AnnData, pd.DataFrame], filepath: str):
-    """Writes data to `json`, `yaml`, `csv` or `h5ad` file"""
+    """This function writes data to `json`, `yaml`, `csv` or `h5ad` file."""
     if filepath.endswith('.json'):
         dump_json(data, filepath)
     elif filepath.endswith('.yaml'):
@@ -72,22 +75,22 @@ def write_chunkwise_data(datapath: str,
                          sample_inds: Union[list[int], int] = -1,
                          feature_inds: Union[list[int], int] = -1,
                          transform=None):
-    """Write data subsets iteratively in a chunkwise manner, to ensure
+    """This function write data subsets iteratively in a chunkwise manner, to ensure
     only at most `sample_chunksize` samples are loaded at a time.
 
-    This function can also applies transformation on each chunk.
+    This function can also apply transformation on each chunk.
 
     Args:
-        datapath (str): path/to/data to be written in chunks
-        sample_chunksize (int): number of samples to be loaded at a time
-        dirpath (str): path/to/directory to write the chunks of data
+        datapath (str): path/to/data to be written in chunks.
+        sample_chunksize (int): number of samples to be loaded at a time.
+        dirpath (str): path/to/directory to write the chunks of data.
         sample_inds (Union[list[int], int], optional): To be used in case of chunking
                                                        only a subset of samples.
                                                        Defaults to all samples.
         feature_inds (Union[list[int], int], optional): To be used in case of writing
                                                         only a subset of features.
                                                         Defaults to all features.
-        transform (function): a function to apply transformation on chunked numpy array
+        transform (function): a function to apply transformation on chunked numpy array.
     """
     if not path.exists(dirpath):
         os.makedirs(dirpath)
@@ -99,7 +102,7 @@ def write_chunkwise_data(datapath: str,
     if feature_inds == -1:
         feature_inds = list(range(len(data.var_names)))
 
-    # Hacky fix for an AnnCollection working/bug
+    # Hacky fix for an AnnCollection working/bug.
     if sample_chunksize >= len(sample_inds):
         sample_chunksize = len(sample_inds) - 1
 
@@ -122,6 +125,12 @@ def write_chunkwise_data(datapath: str,
 
 
 def load_train_val_data_from_config(data_config):
+    """This function returns train & validation data from the data config.
+
+    Args:
+        data_config: Data config.
+    """
+
     flow_logger = FlowLogger('File Utils')
 
     train_val_test_paths = data_config.get('train_val_test')
@@ -157,6 +166,11 @@ def load_train_val_data_from_config(data_config):
 
 
 def load_test_data_from_config(data_config):
+    """This function returns test data from the data config.
+
+    Args:
+        data_config: Data config.
+    """
     flow_logger = FlowLogger('File Utils')
 
     train_val_test_paths = data_config.get('train_val_test')
@@ -186,33 +200,33 @@ def load_test_data_from_config(data_config):
 
 # Readers
 def read_yaml(filepath: str) -> dict:
-    """Returns the config file loaded from yaml."""
+    """This function returns the config file loaded from yaml."""
     with open(filepath, 'r') as fh:
         config = yaml.safe_load(fh)
     return config
 
 
 def read_json(filepath: str) -> dict:
-    """Returns the json file object"""
+    """This file returns the json file object."""
     with open(filepath, 'r') as fh:
         config = json.load(fh)
     return config
 
 
 def read_csv(filepath: str, index_col: int = 0) -> pd.DataFrame:
-    """Returns the DataFrame file object"""
+    """This file returns the DataFrame file object."""
     return pd.read_csv(filepath, index_col=index_col)
 
 
 def read_anndata(filepath: str, backed: str = 'r') -> AnnData:
-    """Returns the Anndata object from filepath"""
+    """This file returns the Anndata object from filepath."""
     data = ad.read_h5ad(filepath, backed=backed)
     return data
 
 
 def read_chunked_anndatas(dirpath: str, backed: str = 'r') -> AnnCollection:
-    """Returns an AnnCollection object from multiple anndatas
-    in dirpath directory
+    """This file returns an AnnCollection object from multiple anndatas
+    in dirpath directory.
     """
     datas = []
     for i in range(len(os.listdir(dirpath))):
@@ -227,25 +241,25 @@ def read_chunked_anndatas(dirpath: str, backed: str = 'r') -> AnnCollection:
 
 # Writers
 def dump_json(config: dict, filepath: str):
-    """Stores the json file to filepath"""
+    """This function stores the json file to filepath."""
     with open(filepath, 'w') as fh:
         config = json.dump(config, fh, indent=2)
     return
 
 
 def dump_yaml(config: dict, filepath: str):
-    """Stores the config file to filepath"""
+    """This function stores the config file to filepath."""
     with open(filepath, 'w') as fh:
         config = yaml.dump(config, fh)
     return
 
 
 def dump_csv(df: pd.DataFrame, filepath: str):
-    """Stores the config file to filepath"""
+    """This function stores the config file to filepath."""
     df.to_csv(filepath)
     return
 
 
 def dump_anndata(adata: AnnData, filepath: str):
-    """Writes the AnnData to filepath."""
+    """This function writes the AnnData to filepath."""
     adata.write(filepath, compression="gzip")

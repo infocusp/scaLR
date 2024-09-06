@@ -4,12 +4,12 @@ This README explains different parameters used to run scaLR using config file wi
 
 **NOTE**: Majority of parameters defined below follow name-params declaration i.e. you just need to mention class name in `name` that has to be defined in codebase & its parameters under `params` dict.
 
-
-## Experiment
+## Device
 **device** {str}: `cuda | cpu`  
 default: `cuda`  
 Device to run the deep learning models on
 
+## Experiment
 **dirpath** {str}: `/path/to/dir`  
 default: `.`  
 Base directory path for all experiments

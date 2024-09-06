@@ -1,3 +1,5 @@
+"""This file contains a implementation for model training pipeline."""
+
 from copy import deepcopy
 import os
 from os import path
@@ -20,19 +22,22 @@ from scalr.utils import write_data
 
 
 class ModelTrainingPipeline:
+    """Class for Model training pipeline."""
 
     def __init__(self,
                  model_config: dict,
                  train_config: dict,
                  dirpath: str = None,
                  device: str = 'cpu'):
-        """Class to get trained model from given configs
+        """Initialize required parameters for model training pipeline.
+
+        Class to get trained model from given configs
 
         Args:
-            dirpath (str): path to store checkpoints and logs of model
-            model_config (dict): model config
-            train_config (dict): model training config
-            device (str, optional): device to run model on. Defaults to 'cpu'.
+            dirpath (str): Path to store checkpoints and logs of model.
+            model_config (dict): Model config.
+            train_config (dict): Model training config.
+            device (str, optional): Device to run model on. Defaults to 'cpu'.
         """
         self.flow_logger = FlowLogger('ModelTraining')
 
@@ -42,7 +47,11 @@ class ModelTrainingPipeline:
         self.dirpath = dirpath
 
     def load_data_and_targets_from_config(self, data_config: dict):
-        """load data and targets from data config"""
+        """A function to load data and targets from data config.
+
+        Args:
+            data_config: Data config.
+        """
         self.train_data, self.val_data = load_train_val_data_from_config(
             data_config)
         self.target = data_config.get('target')
@@ -51,15 +60,15 @@ class ModelTrainingPipeline:
     def set_data_and_targets(self, train_data: Union[AnnData, AnnCollection],
                              val_data: Union[AnnData, AnnCollection],
                              target: Union[str, list[str]], mappings: dict):
-        """Useful when you don't use data directly from config, but rather by other
-        sources like feature subsetting, etc.
+        """A function to set data when you don't use data directly from config,
+        but rather by other sources like feature subsetting, etc.
 
         Args:
-            train_data (Union[AnnData, AnnCollection]): training data
-            val_data (Union[AnnData, AnnCollection]): validation data
-            target (Union[str, list[str]]): target columns name(s)
-            mappings (dict): mapping of column value to ids
-                            eg. mappings[column_name][label2id] = {A: 1, B:2, ...}
+            train_data (Union[AnnData, AnnCollection]): Training data.
+            val_data (Union[AnnData, AnnCollection]): Validation data.
+            target (Union[str, list[str]]): Target columns name(s).
+            mappings (dict): Mapping of column value to ids
+                            eg. mappings[column_name][label2id] = {A: 1, B:2, ...}.
         """
         self.train_data = train_data
         self.val_data = val_data
@@ -67,25 +76,28 @@ class ModelTrainingPipeline:
         self.mappings = mappings
 
     def build_model_training_artifacts(self):
+        """This function configures model, optimizer and loss function required
+        for model training.
+        """
         self.flow_logger.info('Building model training artifacts')
 
-        # Model Building
+        # Building model.
         self.model, self.model_config = build_model(self.model_config)
         self.model.to(self.device)
 
-        # Optimizer Building
+        # Building optimizer.
         opt_config = deepcopy(self.train_config.get('optimizer'))
         self.opt, opt_config = self.build_optimizer(
             self.train_config.get('optimizer'))
         self.train_config['optimizer'] = opt_config
 
-        # Build Loss Function
+        # Building Loss Function.
         self.loss_fn, loss_config = build_loss_fn(
             deepcopy(self.train_config.get('loss', dict())))
         self.train_config['loss'] = loss_config
         self.loss_fn.to(self.device)
 
-        # Build Callbacks executor
+        # Building Callbacks executor.
         self.callbacks = CallbackExecutor(
             self.dirpath, self.train_config.get('callbacks', list()))
 
@@ -100,7 +112,11 @@ class ModelTrainingPipeline:
                 ['optimizer_state_dict'])
 
     def build_optimizer(self, opt_config: dict = None):
-        """Function to build optimizer"""
+        """A function to build optimizer.
+
+        Args:
+            opt_config (dict): Optimizer config.        
+        """
         if not opt_config:
             opt_config = dict()
         name = opt_config.get('name', 'Adam')
@@ -112,9 +128,9 @@ class ModelTrainingPipeline:
         return opt, opt_config
 
     def train(self):
-        """Trains the model"""
+        """This function trains the model."""
         self.flow_logger.info('Training the model')
-        # Build Trainer
+        # Building Trainer.
         trainer_name = self.train_config.get('trainer', 'SimpleModelTrainer')
         self.train_config['trainer'] = trainer_name
 
@@ -122,7 +138,7 @@ class ModelTrainingPipeline:
         trainer = Trainer(self.model, self.opt, self.loss_fn, self.callbacks,
                           self.device)
 
-        # Build DataLoaders
+        # Building DataLoaders.
         dataloader_config = self.train_config.get('dataloader')
         train_dl, dataloader_config = build_dataloader(dataloader_config,
                                                        self.train_data,
@@ -136,7 +152,7 @@ class ModelTrainingPipeline:
         epochs = self.train_config.get('epochs', 1)
         self.train_config['epochs'] = epochs
 
-        # Train and store the best model
+        # Train and store the best model.
         best_model = trainer.train(epochs, train_dl, val_dl)
         if self.dirpath:
             best_model_dir = path.join(self.dirpath, 'best_model')
@@ -150,6 +166,5 @@ class ModelTrainingPipeline:
         return best_model
 
     def get_updated_config(self):
-        """Returns updated configs
-        """
+        """This function returns updated configs."""
         return self.model_config, self.train_config

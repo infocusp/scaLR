@@ -1,3 +1,5 @@
+"""This file generates heatmaps for top genes of particular class w.r.t same top genes in other classes."""
+
 import os
 from typing import Tuple, Union
 
@@ -10,7 +12,7 @@ from scalr.utils import EventLogger
 
 
 class Heatmap(AnalysisBase):
-    '''Class to generate Heatmap of top genes classwise.'''
+    '''Class to generate heatmap of top genes classwise.'''
 
     def __init__(self,
                  top_n_genes: int = 100,
@@ -20,7 +22,7 @@ class Heatmap(AnalysisBase):
         """Initialize class with shap arguments.
 
         Args:
-            top_n_genes: top N genes for each class/label.
+            top_n_genes: Top N genes for each class/label.
         """
 
         self.top_n_genes = top_n_genes
@@ -31,12 +33,12 @@ class Heatmap(AnalysisBase):
     def generate_analysis(self, score_matrix: pd.DataFrame,
                           top_features: Union[dict, list], dirpath: str,
                           **kwargs) -> None:
-        """Generate heatmap for top features.
+        """A function to generate heatmap for top features.
 
         Args:
-            score_matrix: class * genes weights metrix.
-            top_features: class wise top genes or list of top features.
-            dirpath: path to store the heatmap image.
+            score_matrix: Matrix(class * genes) that contains score of each gene per class.
+            top_features: Class-wise top genes or list of top features.
+            dirpath: Path to store the heatmap image.
         """
 
         self.event_logger.heading2("Generating Heatmaps.")
@@ -56,14 +58,13 @@ class Heatmap(AnalysisBase):
 
     def plot_heatmap(self, class_genes_weights: pd.DataFrame, dirpath: str,
                      filename: str) -> None:
-        """
-        Generate a heatmap for top n genes across all classes.
+        """A function to plot a heatmap for top n genes across all classes.
 
         Args:
-            class_genes_weights: genes * classes matrix which contains
+            class_genes_weights: Matrix(genes * classes) which contains
                                  shap_value/weights of each gene to class.
-            dirpath: path to store the heatmap image.
-            filename: heatmap image name.
+            dirpath: Path to store the heatmap image.
+            filename: Heatmap image name.
         """
 
         os.makedirs(dirpath, exist_ok=True)
@@ -75,7 +76,7 @@ class Heatmap(AnalysisBase):
         plt.title(filename)
 
         if self.save_plot:
-            plt.savefig(os.path.join(dirpath, f"{filename}".svg))
+            plt.savefig(os.path.join(dirpath, f"{filename}.svg"))
         else:
             plt.show()
         plt.clf()

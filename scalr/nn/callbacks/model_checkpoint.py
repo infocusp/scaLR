@@ -1,3 +1,5 @@
+"""This file is a implementation of model checkpoint callback."""
+
 import os
 from os import path
 
@@ -7,20 +9,20 @@ from scalr.nn.callbacks import CallbackBase
 
 
 class ModelCheckpoint(CallbackBase):
-    """
-    Model checkpointing to save model weights at regular intervals
+    """Model checkpointing to save model weights at regular intervals.
 
     Attributes:
         epoch: An interger count of epochs trained.
-        max_validation_acc: keeps the track of the maximum validation accuracy across all epochs.
-        interval: regular interval of model checkpointing.
+        max_validation_acc: Keeps the track of the maximum validation accuracy across all epochs.
+        interval: Regular interval of model checkpointing.
     """
 
     def __init__(self, dirpath: str, interval: int = 5):
-        """
+        """Intialize required parameters for model checkpoint callback.
+
         Args:
-            dirpath: to store the respective model checkpoints
-            interval: regular interval of model checkpointing
+            dirpath: To store the respective model checkpoints.
+            interval: Regular interval of model checkpointing.
         """
 
         self.epoch = 0
@@ -32,6 +34,13 @@ class ModelCheckpoint(CallbackBase):
 
     def save_checkpoint(self, model_state_dict: dict, opt_state_dict: dict,
                         path: str):
+        """A function to save model & optimizer state dict to given path.
+        
+        Args:
+            model_state_dict: Model's state dict.
+            opt_state_dict: Optimizer's state dict.
+            path: Path to store checkpoint to.
+        """
         torch.save(
             {
                 'epoch': self.epoch,
@@ -40,6 +49,12 @@ class ModelCheckpoint(CallbackBase):
             }, path)
 
     def __call__(self, model_state_dict: dict, opt_state_dict: dict, **kwargs):
+        """A function that evaluates when to save checkpoint.
+
+        Args:
+            model_state_dict: Model's state dict.
+            opt_state_dict: Optimizer's state dict.
+        """
         self.epoch += 1
         if self.interval and self.epoch % self.interval == 0:
             self.save_checkpoint(
@@ -49,5 +64,5 @@ class ModelCheckpoint(CallbackBase):
 
     @classmethod
     def get_default_params(cls):
-        """Class method to get default params for model_config"""
+        """Class method to get default params for model_config."""
         return dict(dirpath='.', interval=5)

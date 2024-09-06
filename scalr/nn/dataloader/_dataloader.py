@@ -1,3 +1,5 @@
+"""This file is a base class for dataloader."""
+
 from typing import Union
 
 from anndata import AnnData
@@ -18,12 +20,12 @@ class DataLoaderBase:
         target: Union[str, list[str]] = None,
         mappings: dict = None,
     ):
-        """
+        """Initilize required parameters for dataloader.
+
         Args:
             batch_size (int, optional): _description_. Defaults to 1.
-            target ([str, list[str]]): list of target. Defaults to None.
-            mappings (dict): list of label mappings of each target to .
-                              Defaults to None.
+            target ([str, list[str]]): List of target. Defaults to None.
+            mappings (dict): List of label mappings of each target to. Defaults to None.
         """
         self.batch_size = batch_size
         self.target = target
@@ -31,20 +33,19 @@ class DataLoaderBase:
 
     # Abstract
     def collate_fn(self, batch):
-        """Given an input anndata of batch_size,
-        the collate function creates inputs and outputs.
-        It can also be used to perform batch-wise
-        operations.
+        """Collate function for dataloader. Should be implemented in child classes.
+        
+        Given an input anndata of batch_size, the collate function creates inputs and outputs.
+        It can also be used to perform batch-wise operations.
         """
         pass
 
     def get_targets_ids_from_mappings(
             self, adata: Union[AnnData, AnnCollection]) -> list[Tensor]:
-        """Helper function to generate target ids from label mappings
+        """Helper function to generate target ids from label mappings.
 
         Args:
-            adata (Union[AnnData, AnnCollection]): anndata object containing
-                                                   targets in `obs`
+            adata (Union[AnnData, AnnCollection]): Anndata object containing targets in `obs`.
         """
         target_ids = []
         if isinstance(self.target, str):
@@ -62,27 +63,27 @@ class DataLoaderBase:
         return target_ids
 
     def __call__(self, adata):
-        """Returns a Torch DataLoader object"""
+        """Returns a Torch DataLoader object."""
         return AnnLoader(adata,
                          batch_size=self.batch_size,
                          collate_fn=lambda batch: self.collate_fn(batch))
 
     @classmethod
     def get_default_params(cls) -> dict:
-        """Class method to get default params for model_config"""
+        """Class method to get default params for model_config."""
         return dict()
 
 
 def build_dataloader(dataloader_config: dict,
                      adata: Union[AnnData, AnnCollection], target: str,
                      mappings: dict) -> tuple[DataLoaderBase, dict]:
-    """Builder object to get DataLoader, updated dataloader_config
+    """Builder object to get DataLoader, updated dataloader_config.
 
     Args:
-        dataloader_config (dict): config to build dataloader
-        adata (Union[AnnData, AnnCollection]): data
-        target (str): target column in data.obs
-        mappings (dict): mappings of column labels to ids
+        dataloader_config (dict): Config to build dataloader.
+        adata (Union[AnnData, AnnCollection]): Data to load.
+        target (str): Target column in data.obs.
+        mappings (dict): Mappings of column labels to ids.
     """
     if not dataloader_config.get('name'):
         raise ValueError('DataLoader name is required!')

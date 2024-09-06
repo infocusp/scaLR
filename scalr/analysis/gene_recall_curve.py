@@ -1,3 +1,5 @@
+"""This file generates gene recall curves for reference genes in provided models ranked genes"""
+
 import json
 from os import path
 
@@ -24,12 +26,12 @@ class GeneRecallCurve(AnalysisBase):
         '''Load required paramters for gene recall curve.
 
         Args:
-            reference_genes_path: Reference genes csv path
+            reference_genes_path: Reference genes csv path.
             ranked_genes_path: List of ranked genes csvs we want to check recall against. List is used to support
-                               plotting gene recall for multiple models at once
-            top_K: Top K genes to consider from ranked genes to check gene recall
-            plots_per_row: Number of categories to plot gene recall per row
-            save_plots: Flag indicating whether to store gene recall curves or not
+                               plotting gene recall for multiple models at once.
+            top_K: Top K genes to consider from ranked genes to check gene recall.
+            plots_per_row: Number of categories to plot gene recall per row.
+            save_plots: Flag indicating whether to store gene recall curves or not.
             feature_selector: Feature selection config containing aggregation strategy for `score_matrix`.
         '''
         self.ranked_genes_path_dict = ranked_genes_path_dict
@@ -51,8 +53,8 @@ class GeneRecallCurve(AnalysisBase):
         '''This function calls function to generate gene recall after setting a few parameters.
 
         Args:
-            score_matrix: Matrix that contains score of each gene for each category
-            dirpath: Path to store gene recall curve if applicable
+            score_matrix: Matrix that contains score of each gene for each category.
+            dirpath: Path to store gene recall curve if applicable.
         '''
 
         self.event_logger.heading2("Gene Recall Curve analysis")
@@ -93,7 +95,8 @@ class GeneRecallCurve(AnalysisBase):
                          reference_genes_df: pd.DataFrame,
                          dirpath: str = '.',
                          title: str = ''):
-        """This function plots & stores the gene recall curve for provided ranked genes & reference genes.
+        """This function plots & stores the gene recall curve for reference genes in provided ranked genes.
+
         It also stores the reference genes along with their ranks for each model in a json file for further
         analysis to user.
 
@@ -140,7 +143,7 @@ class GeneRecallCurve(AnalysisBase):
             # Adjusting k if expected k > number of ranked genes.
             k = min(k, len(ranked_genes))
 
-            # Building baseline curve
+            # Building baseline curve.
             step = k // len(ref_genes)
             baseline = [i // step for i in range(1, 1 + k)]
 
@@ -157,7 +160,7 @@ class GeneRecallCurve(AnalysisBase):
                 k = self.top_K
 
                 self.event_logger.info(f'\nCategory - {category}')
-                # Removing reference genes which are not available in ranked genes list
+                # Removing reference genes which are not available in ranked genes list.
                 self.event_logger.info(
                     f'-- Number of reference genes provided : {len(ref_genes)}')
                 ref_genes = list(set(ref_genes).intersection(ranked_genes))
@@ -219,7 +222,7 @@ class GeneRecallCurve(AnalysisBase):
 
     @classmethod
     def get_default_params(cls) -> dict:
-        """Class method to get default params for preprocess_config"""
+        """Class method to get default params for preprocess_config."""
         return dict(ranked_genes_path_dict={},
                     top_K=150,
                     plots_per_row=3,
