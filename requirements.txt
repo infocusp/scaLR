@@ -104,3 +104,5 @@ Werkzeug==3.0.2
 wheel==0.41.2
 yapf==0.40.2
 zipp==3.17.0
+joblib==1.4.0
+statsmodels==0.14.1
