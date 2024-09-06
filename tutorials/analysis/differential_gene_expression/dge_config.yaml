@@ -13,7 +13,7 @@ psedobulk_params:
         factor_categories: ['COVID-19', 'normal']
         sum_column: 'donor_id'
         cell_subsets: ['non-classical monocyte','natural killer cell']
-        min_cell_threshold: 10
+        min_cell_threshold: 1
         fold_change: 1.5
         p_val: 0.05
         save_plot: True

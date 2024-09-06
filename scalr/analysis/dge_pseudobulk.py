@@ -28,7 +28,7 @@ class DgePseudoBulk(AnalysisBase):
                  factor_categories: list[str],
                  sum_column: str,
                  cell_subsets: list[str] = None,
-                 min_cell_threshold : int = 10,
+                 min_cell_threshold : int = 1,
                  fold_change: Union[float,
                                     int] = 1.5,
                  p_val: Union[float, int] = 0.05,
@@ -46,9 +46,10 @@ class DgePseudoBulk(AnalysisBase):
             factor_categories: List of conditions in `design_factor` to make design matrix for.
             sum_column: Column name to sum values across samples.
             cell_subsets: Selcted list of cells in 'celltype_column' to subset the anndata.
-            min_cell_threshold: Minimum number of cells with nonzero values for a gene. Used for filtering noisy genes.
+            min_cell_threshold: Minimum number of subjects with aggregated nonzero gene expression values for a gene.
+                                Used for filtering noisy genes.
             fold_change: Fold change to filter the differentially expressed genes for volcano plot.
-            p_val: p_val to filter the differentially expressed genes for volcano plot.
+            p_val: p value, to filter the differentially expressed genes for volcano plot.
             y_lim_tuple: Values to adjust the Y-axis limits of the plot.
             save_plot: Boolean value to save plot.
             logger : Logging type.
@@ -288,13 +289,13 @@ class DgePseudoBulk(AnalysisBase):
 
     @classmethod
     def get_default_params(cls) -> dict:
-        """Class method to get default params for preprocess_config"""
+        """Class method to get default params for DgePseudoBulk_config"""
         return dict(celltype_column='celltype_column',
                     design_factor='design_factor',
                     factor_categories='factor_categories',
                     sum_column='sum_column',
                     cell_subsets=None,
-                    min_cell_threshold = 10,
+                    min_cell_threshold = 1,
                     fold_change = 1.5,
                     p_val = 0.05,
                     y_lim_tuple = None,

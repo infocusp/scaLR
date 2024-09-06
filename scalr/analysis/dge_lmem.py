@@ -62,7 +62,7 @@ class DgeLMEM(AnalysisBase):
             n_cpu: Number of cpus for parallelization.
             gene_batch_size: Number of genes in a batch of process.
             coef_threshold: Threshold to filter up and down regulated genes in volcano plot.
-            p_val: p_val to filter the differentially expressed genes for volcano plot.
+            p_val: p value, to filter the differentially expressed genes for volcano plot.
             y_lim_tuple: Values to adjust the Y-axis limits of the plot.
             save_plot: Boolean value to save plot.
             logger: Logging type.
@@ -87,13 +87,13 @@ class DgeLMEM(AnalysisBase):
         
     def replace_spec_char_get_dict(self, 
                                    var_names: pd.core.indexes.base.Index):
-        ''' This method replacs ay special character in genes
+        ''' This method replaces any special character in gene names
 
         Args:
             var_names: var_names in the Anndata.
             
         Returns:
-            var_names with special charactersreplaced with '_', and a dictionary mapping of old and new names
+            var_names with special characters replaced with '_', and a dictionary mapping of old and new names
         '''    
         
         old_new_name_map_dict = dict()
@@ -218,12 +218,12 @@ class DgeLMEM(AnalysisBase):
                              lmem_res_df: DataFrame,
                              dirpath: str,
                              cell_type: str = None):
-        '''This method produces a volcano plot for the model results for data subset 
-        with a fixed value or with whole dataset.
+        '''This method produces a volcano plot for the model results for a data subset 
+        with a cell type, or for the whole dataset.
         
         Args:
-            lmem_res_df: a pandas DataFrame with Model results (p-value, cooeficients, Standard error..)
-            dirpath: path to save the plots     
+            lmem_res_df: a pandas DataFrame with Model results (p-value, co-efficients, Standard error..)
+            dirpath: path to save the plot     
             cell_type: cell type used to subset input anndata
         '''          
         neg_log10_pval = -np.log10(self.p_val)
@@ -376,13 +376,13 @@ class DgeLMEM(AnalysisBase):
                 whole_data_lmem_result_df.to_csv(full_file_path,index=False)
                 if self.save_plot:
                     plot = self.plot_lmem_dge_result(whole_data_lmem_result_df,dirpath) 
-                    plt.close(plot)
+                    plt.close('all')
         logger.info('\n\n::::: DGE analysis completed :::::\n\n')
 
 
     @classmethod
     def get_default_params(cls) -> dict:
-        """Class method to get default params for preprocess_config"""
+        """Class method to get default params for DgeLMEM_config"""
         return dict(fixed_effect_column = 'fixed_effect_column',
                     fixed_effect_factors = 'fixed_effect_factors',
                     group = 'group',
