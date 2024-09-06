@@ -1,4 +1,5 @@
 from pandas import DataFrame
+from sklearn.model_selection import GroupShuffleSplit
 
 from scalr.data.split import StratifiedSplitter
 

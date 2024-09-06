@@ -75,13 +75,13 @@ Target to perform classification on. Must be present as a column_name in `adata.
 
 
 ## Feature Selection
-This section(`feature_selection` in config) focuses on feature chunking, training on each chunk and feature selection at the end.
+This section(`feature_selection` in config) focuses on feature subsetting, training on each subset and feature selection at the end.
 
 
 **scores**: `/path/to/score_matrix`. [Optional]  
-If mentioned, the feature chunking process will be skipped and this matrix will be used to extract top features based on `feature_selector` config.
+If mentioned, the feature subsetting process will be skipped and this matrix will be used to extract top features based on `feature_selector` config.
 
-**feature_chunksize** {int}: `int | null`  
+**feature_subsetsize** {int}: `int | null`  
 default: `5000`  
 - Chunks of features to subset data for training the model iteratively.
 
@@ -226,7 +226,7 @@ This section consists of scparametersorers and feature selectors information, as
 
 
 **downstream_analysis** {list}:  
-This section performs downstream analysis tasks like Heatmap of k genes across different cell types, generate classification ROC AUC curve, Gene recall curve and Differential gene expression analysis. You can mention list of name-params for tasks you want perform. Example below
+This section performs gene analysis task such as generating classification reports, extracting biomarkers for each class and downstream analysis tasks like Heatmap of k genes across different cell types, generate ROC AUC curve, Gene recall curve and Differential gene expression analysis. You can mention list of name-params for tasks you want perform. Example below
     
     downstream_analysis
         - name: Heatmap

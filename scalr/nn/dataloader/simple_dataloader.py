@@ -49,6 +49,8 @@ class SimpleDataLoader(DataLoaderBase):
         """
 
         x = adata_batch.X.float()
+        # Handle the case when observed #features are less than expected #features by the model.
+        # Features(0s) are padded after actual features in that case to make it consistent for model training.
         if self.padding and x.shape[1] < self.padding:
             x = pad(x, (0, self.padding - x.shape[1]), 'constant', 0.0)
         y = self.get_targets_ids_from_mappings(adata_batch)[0]

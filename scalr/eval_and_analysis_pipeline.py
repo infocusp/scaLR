@@ -81,7 +81,7 @@ class EvalAndAnalysisPipeline:
                              test_data: Union[AnnData, AnnCollection],
                              target: Union[str, list[str]], mappings: dict):
         """Useful when you don't use data directly from config, but rather by other
-        sources like feature chunking, etc.
+        sources like feature subsetting, etc.
 
         Args:
             train_data (Union[AnnData, AnnCollection]): training data

@@ -6,8 +6,8 @@ from scalr.utils import generate_dummy_anndata
 
 def test_metadataloader():
     """This function tests features shape returned by simpledataloader for below 2 cases.
-        1. #features are consistent with feature_chunksize. No padding required.
-        2. #features are less than feature_chunksize. This case needs padding.
+        1. #features are consistent with feature_subsetsize. No padding required.
+        2. #features are less than feature_subsetsize. This case needs padding.
     """
 
     # Generating dummy anndata.
@@ -31,15 +31,15 @@ def test_metadataloader():
     #                         Test case 1
     # Expected features shape after dataloading is (batch_size, 13).
     # So no padding is reqquired as adata n_features=13. But we can pass
-    # `padding=feature_chunksize` in dataloader_config.
+    # `padding=feature_subsetsize` in dataloader_config.
 
     ## Defining required parameters for simpledataloader.
-    feature_chunksize = 13
+    feature_subsetsize = 13
     dataloader_config = {
         'name': 'SimpleDataLoader',
         'params': {
             'batch_size': 10,
-            'padding': feature_chunksize,
+            'padding': feature_subsetsize,
         }
     }
     dataloader, _ = build_dataloader(dataloader_config=dataloader_config,
@@ -50,7 +50,7 @@ def test_metadataloader():
     ## Comparing expecting features shape after using metadatloader.
     for feature, _ in dataloader:
         assert feature.shape[
-            1] == feature_chunksize, f"There is some issue in simpledataloader."\
+            1] == feature_subsetsize, f"There is some issue in simpledataloader."\
         f" Expected #features({n_features}) != Observed #features({feature.shape[1]}). Please check!"
         # Breaking, as checking only first batch is enough.
         break
@@ -60,12 +60,12 @@ def test_metadataloader():
     # So paddig is required as adata n_features=13. Hence 7 columns should be padded in dataloader.
 
     ## Defining required parameters for simpledataloader.
-    feature_chunksize = 20
+    feature_subsetsize = 20
     dataloader_config = {
         'name': 'SimpleDataLoader',
         'params': {
             'batch_size': 10,
-            'padding': feature_chunksize,
+            'padding': feature_subsetsize,
         }
     }
     dataloader, _ = build_dataloader(dataloader_config=dataloader_config,
@@ -76,7 +76,7 @@ def test_metadataloader():
     ## Comparing expecting features shape after using metadatloader.
     for feature, _ in dataloader:
         assert feature.shape[
-            1] == feature_chunksize, f"There is some issue in simpledataloader."\
-        f" Expected #features({feature_chunksize}) != Observed #features({feature.shape[1]}). Please check!"
+            1] == feature_subsetsize, f"There is some issue in simpledataloader."\
+        f" Expected #features({feature_subsetsize}) != Observed #features({feature.shape[1]}). Please check!"
         # Breaking, as checking only first batch is enough.
         break

@@ -36,7 +36,7 @@ class PreprocessorBase:
     ) -> None:
         """Applicable only when you need to see entire train data and
         calculate attributes, as required in StdScaler, etc.
-        This method should not return anything only used to store
+        This method should not return anything, it should be used to store
         attributes which will be used by `transform` method
         IMPORTANT to ensure data is read in chunks only
 

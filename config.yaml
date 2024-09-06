@@ -129,13 +129,18 @@ analysis:
             params:
                 k: 100
 
-    # downstream_analysis:
-    #     - name: GeneRecallCurve
-    #       params:
-    #         reference_genes_path: '/home/anand/bioc_repo/single_cell_classification/tutorials/analysis/gene_recall_curve/reference_genes.csv'
-    #         top_K: 300
-    #         plots_per_row: 3
-    #         features_selector:
-    #             name: ClasswiseAbs
-    #             params: {}
+    downstream_analysis:
+        # - name: Heatmap
+        #   params:
+        #       top_n_genes: 100
 
+        # - name: RocAucCurve
+
+        # - name: GeneRecallCurve
+        #   params:
+        #     reference_genes_path: '/home/anand/bioc_repo/single_cell_classification/tutorials/analysis/gene_recall_curve/reference_genes.csv'
+        #     top_K: 300
+        #     plots_per_row: 3
+        #     features_selector:
+        #         name: ClasswiseAbs
+        #         params: {}

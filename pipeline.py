@@ -28,7 +28,7 @@ def get_args():
     parser.add_argument('-c',
                         '--config',
                         type=str,
-                        help='config.yml file path',
+                        help='config.yaml file path',
                         required=True)
     parser.add_argument('-l',
                         '--log',
