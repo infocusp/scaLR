@@ -259,8 +259,9 @@ class DgePseudoBulk(AnalysisBase):
         
         logger = getattr(utils, self.logger)('Differential Gene expression analysis')
         if isinstance(logger, utils.EventLogger):
-            logger.heading2("DGE analysis using Pseudobulk")        
-        logger.info('\n\n::::: Starting DGE analysis using Pseudobulk :::::\n')
+            logger.heading2("DGE analysis using Pseudobulk")
+        if isinstance(logger, utils.FlowLogger):
+            logger.info("\nDGE analysis using Pseudobulk")
         dirpath = os.path.join(dirpath,'pseudobulk_dge_result')
         os.makedirs(dirpath, exist_ok=True)        
         assert self.celltype_column in test_data.obs.columns, f"{self.celltype_column} must be a column name in `adata.obs`"
@@ -279,7 +280,7 @@ class DgePseudoBulk(AnalysisBase):
         for cell_type in cell_type_list:
             assert cell_type in test_data.obs[self.celltype_column].unique(    
             ), f"{cell_type} must belong to '{self.celltype_column}' column"
-            logger.info(f'\n\nProcessing for "{cell_type}" ...')
+            logger.info(f'\nProcessing for "{cell_type}" ...')
             design_matrix = self._make_design_matrix(test_data,cell_type)
             dge_results_df = self.get_differential_expression_results(design_matrix, 
                                                                       cell_type,
@@ -289,7 +290,9 @@ class DgePseudoBulk(AnalysisBase):
                                       cell_type,
                                       dirpath)
             plt.close(plot)
-        logger.info('\n\n::::: DGE analysis completed :::::\n\n')
+        logger.info(f"\nPseudobulk-DGE results stored at: {dirpath}")
+        if isinstance(logger, utils.FlowLogger):
+            logger.info("\n\n::::: DGE analysis completed :::::\n\n")
  
 
     @classmethod

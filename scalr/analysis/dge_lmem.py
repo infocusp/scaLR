@@ -296,13 +296,14 @@ class DgeLMEM(AnalysisBase):
         logger = getattr(utils, self.logger)('Differential Gene expression analysis')
         if isinstance(logger, utils.EventLogger):
             logger.heading2("DGE analysis using LMEM")
-        logger.info('\n\n:::::Starting DGE analysis using LMEM :::::')
+        if isinstance(logger, utils.FlowLogger):
+            logger.info("\nDGE analysis using LMEM")
         dirpath = os.path.join(dirpath,'lmem_dge_result')
         os.makedirs(dirpath, exist_ok=True)
         new_var_names,varname_map_dict = self.replace_spec_char_get_dict(test_data.var_names)
         test_data.var_names = new_var_names
         if self.celltype_column is not None:
-            logger.info("\n\nPerforming DGE analysis with subset anndata")
+            logger.info("\nPerforming DGE analysis with subset anndata")
             fixed_val_list = list(test_data.obs[self.celltype_column].unique())
             if self.cell_subsets is not None:
                 fixed_val_list = self.cell_subsets    
@@ -344,7 +345,7 @@ class DgeLMEM(AnalysisBase):
                         plot = self.plot_lmem_dge_result(fixed_val_lmem_result_df,dirpath,cell_type)
                         plt.close('all')
         else:
-            logger.info("\n\nPerforming DGE analysis with whole anndata ...")
+            logger.info("\nPerforming DGE analysis with whole anndata ...")
             whole_data_lmem_result_list = []
             for batch in range(0, len(test_data.var_names), self.gene_batch_size):
                 # logger.info(f'\nProcessing gene | {batch+1}-{batch+self.gene_batch_size}')
@@ -378,9 +379,10 @@ class DgeLMEM(AnalysisBase):
                 if self.save_plot:
                     plot = self.plot_lmem_dge_result(whole_data_lmem_result_df,dirpath) 
                     plt.close('all')
-        logger.info('\n\n::::: DGE analysis completed :::::\n\n')
-
-
+        logger.info(f"\nLMEM-DGE results stored at: {dirpath}")
+        if isinstance(logger, utils.FlowLogger):
+            logger.info("\n\n::::: DGE analysis completed :::::\n\n")
+            
     @classmethod
     def get_default_params(cls) -> dict:
         """Class method to get default params for DgeLMEM_config"""
