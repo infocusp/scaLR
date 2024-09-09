@@ -1,4 +1,4 @@
-<p align="centre"><img src="ScaLR_logo1.png" width="150" height="75"></p>
+<center><img src="ScaLR_logo1.png" width="150" height="75"></center>
 
 # Single-cell analysis using Low Resource (scaLR) 
 
@@ -19,29 +19,14 @@ The following flowchart explains the major steps of the scaLR platform.
 ## Pre-requisites and installation scaLR
 
 
-- ScalR can be installed using Conda or pip. It is tested for Python 3.9 at this moment.
+- ScalR can be installed using Conda or pip. It is tested in Python 3.9 and recommended to use that environment.
 
 ```
 conda create -n scaLR_env python=3.9
 
 ```
 
-- install pytorch using the below command
-
-```
-conda install pytorch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 pytorch-cuda=11.8 -c pytorch -c nvidia
-
-```
-
-OR
-
-```
-pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
-
-If `torch not found` error pops-up if running the platform when installed using option 1 above, consider installing it using option 2.
-```
-The last step is to clone the git repository and install the required packages by activating the conda env
-
+-Clone the git repository and install the required packages by activating the conda env
 
 ```
 conda activate scaLR_env
@@ -129,7 +114,10 @@ Detailed tutorials have been made on how to use some functionalities as a scaLR 
 - Differential gene expression analysis - `tutorials/analysis/differential_gene_expression/dge.ipynb`
 - SHAP analysis - `tutorials/analysis/shap_analysis/shap_heatmap.ipynb`
 
-<b>scaLR © 2024 Infocusp Innovations</b>
+<center >
+  <b>scaLR © 2024 Infocusp Innovations</b>
+</center>
+
 <!-- ## Citation
 Will update soon. -->
 
