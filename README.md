@@ -4,13 +4,13 @@
 
 <b>scaLR</b> is a comprehensive end-to-end pipeline that is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. The major steps of the platform are:
 
-1. Data processing: Large datasets undergo preprocessing and normalization (if the user opts to) and are segmented into training, testing, and validation sets.
+1. <b>Data Processing</b>: Large datasets undergo preprocessing and normalization (if the user opts to) and are segmented into training, testing, and validation sets.
 
-2. Features extraction: A model is trained on feature subsets in a batch-wise process, so all features and samples are utilized in the feature selection process. Then, the top-k features are selected to train the final model, using a feature score based on the model's coefficients/weights.
+2. <b>Features Extraction</b>: A model is trained on feature subsets in a batch-wise process, so all features and samples are utilized in the feature selection process. Then, the top-k features are selected to train the final model, using a feature score based on the model's coefficients/weights.
 
-3. Training: A Deep Neural Network (DNN) is trained on the training dataset. The validation dataset is used to validate the model at each epoch and early stopping is performed if applicable. Also, a batch correction method is available to correct batch effects during training in the pipeline.
+3. <b>Training</b>: A Deep Neural Network (DNN) is trained on the training dataset. The validation dataset is used to validate the model at each epoch and early stopping is performed if applicable. Also, a batch correction method is available to correct batch effects during training in the pipeline.
 
-4. Evaluation & Downstream analysis: The trained model is evaluated using the test dataset by calculating metrics such as precision, recall, f1-score, and accuracy. Various visualizations such as ROC curve of class annotation, feature rank plots, heatmap of top genes per class, DGE analysis, and gene recall curves are generated.
+4. <b>Evaluation & Downstream Analysis</b>: The trained model is evaluated using the test dataset by calculating metrics such as precision, recall, f1-score, and accuracy. Various visualizations such as ROC curve of class annotation, feature rank plots, heatmap of top genes per class, DGE analysis, and gene recall curves are generated.
 
 The following flowchart explains the major steps of the scaLR platform.
 
@@ -26,7 +26,7 @@ conda create -n scaLR_env python=3.9
 
 ```
 
--Clone the git repository and install the required packages by activating the conda env
+- Clone the git repository and install the required packages by activating the conda env
 
 ```
 conda activate scaLR_env
