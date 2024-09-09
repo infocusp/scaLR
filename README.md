@@ -1,8 +1,8 @@
-<p align="center"><img src="ScaLR_logo.png" width="250" height="85"></p>
+<p align="centre"><img src="ScaLR_logo1.png" width="150" height="75"></p>
 
 # Single-cell analysis using Low Resource (scaLR) 
 
-Single-cell analysis using Low Resource (scaLR) is a comprehensive end-to-end pipeline that is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. The major steps of the platform are:
+<b>scaLR</b> is a comprehensive end-to-end pipeline that is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. The major steps of the platform are:
 
 1. Data processing: Large datasets undergo preprocessing and normalization (if the user opts to) and are segmented into training, testing, and validation sets.
 
@@ -40,8 +40,6 @@ pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https
 
 If `torch not found` error pops-up if running the platform when installed using option 1 above, consider installing it using option 2.
 ```
-
-
 The last step is to clone the git repository and install the required packages by activating the conda env
 
 
@@ -114,8 +112,6 @@ Performs evaluation of best model trained on user-defined metrics on the test se
                 - `lmem_DGE_celltype.csv`
                 - `lmem_DGE_fixed_effect_factor_X.svg`
                
-
-
 ## How to run
 
 1. It is necessary that the user modify the configuration file and each stage of the pipeline is available inside the config folder [config.yml] or [full_config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
@@ -133,6 +129,7 @@ Detailed tutorials have been made on how to use some functionalities as a scaLR 
 - Differential gene expression analysis - `tutorials/analysis/differential_gene_expression/dge.ipynb`
 - SHAP analysis - `tutorials/analysis/shap_analysis/shap_heatmap.ipynb`
 
-
+<b>scaLR © 2024 Infocusp Innovations</b>
 <!-- ## Citation
 Will update soon. -->
+

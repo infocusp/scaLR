@@ -1,6 +1,6 @@
 # Config Parameters
 
-This README explains different parameters used to run scaLR using a config file with an explanation of different subsections.
+This README explains different parameters used to run scaLR using a config file explaining different subsections.
 
 **NOTE**: The majority of parameters defined below follow name-params declaration i.e. you just need to mention the class name in `name` that has to be defined in the codebase & its parameters under `params` dict.
 
@@ -25,7 +25,7 @@ The n-th run for `exp_name`
 
 *Notes*:  
 The final experiment directory would be: `dirpath/{exp_name}_{exp_run}/`  
-This will be considered as the root directory for this experiment run, and all subsequent I/O operations like logging, storing of files, configs, and results will be saved inside this folder.
+This will be considered as the root directory for this experiment run, and all subsequent I/O operations like logging, storing files, configs, and results will be saved inside this folder.
 
 
 ## Data
