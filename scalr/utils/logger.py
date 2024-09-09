@@ -34,7 +34,7 @@ class EventLogger(logging.Logger):
     level = logging.NOTSET
     filepath = None
 
-    def __init__(self, name, level=None, filepath=None):
+    def __init__(self, name, level=None, filepath=None, stdout=False):
         """Initialize required parameters for event logger."""
         if level:
             EventLogger.level = level
@@ -57,6 +57,13 @@ class EventLogger(logging.Logger):
         handler.setLevel(EventLogger.level)
         handler.setFormatter(formatter)
         self.addHandler(handler)
+
+        # If user wants to print logs to stdout
+        if stdout:
+            handler = logging.StreamHandler()
+            handler.setLevel(EventLogger.level)
+            handler.setFormatter(formatter)
+            self.addHandler(handler)
 
     def heading(self, msg, prefix, suffix, count):
         """A function to configure setting for heading."""
