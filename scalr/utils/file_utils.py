@@ -72,8 +72,8 @@ def write_data(data: Union[dict, AnnData, pd.DataFrame], filepath: str):
 def write_chunkwise_data(datapath: str,
                          sample_chunksize: int,
                          dirpath: str,
-                         sample_inds: Union[list[int], int] = -1,
-                         feature_inds: Union[list[int], int] = -1,
+                         sample_inds: list[int] = None,
+                         feature_inds: list[int] = None,
                          transform=None):
     """This function writes data subsets iteratively in a chunkwise manner, to ensure
     only at most `sample_chunksize` samples are loaded at a time.
@@ -84,11 +84,11 @@ def write_chunkwise_data(datapath: str,
         datapath (str): path/to/data to be written in chunks.
         sample_chunksize (int): number of samples to be loaded at a time.
         dirpath (str): path/to/directory to write the chunks of data.
-        sample_inds (Union[list[int], int], optional): To be used in case of chunking
+        sample_inds (list[int], optional): To be used in case of chunking
                                                        only a subset of samples.
                                                        Defaults to all samples.
-        feature_inds (Union[list[int], int], optional): To be used in case of writing
-                                                        only a subset of features.
+        feature_inds (list[int], optional): To be used in case of writing
+                                                        only a subset of features.dataframe.
                                                         Defaults to all features.
         transform (function): a function to apply a transformation on a chunked numpy array.
     """
@@ -97,10 +97,8 @@ def write_chunkwise_data(datapath: str,
 
     data = read_data(datapath)
 
-    if sample_inds == -1:
+    if not sample_inds:
         sample_inds = list(range(len(data)))
-    if feature_inds == -1:
-        feature_inds = list(range(len(data.var_names)))
 
     # Hacky fix for an AnnCollection working/bug.
     if sample_chunksize >= len(sample_inds):
@@ -108,11 +106,11 @@ def write_chunkwise_data(datapath: str,
 
     for i, (start) in enumerate(range(0, len(sample_inds), sample_chunksize)):
         data = read_data(datapath)
-        if isinstance(data, AnnData):
-            data = AnnCollection([data])
-        data = data[sample_inds]
-        data = data[start:start + sample_chunksize, feature_inds]
-        data = data.to_adata()
+        data = data[sample_inds[start:start + sample_chunksize]]
+        if not isinstance(data, AnnData):
+            data = data.to_adata()
+        if feature_inds:
+            data = data[:, feature_inds]
         data = data.to_memory()
 
         # Transformation

@@ -75,7 +75,8 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
         ingest_data = DataIngestionPipeline(config['data'], data_dirpath)
         ingest_data.generate_train_val_test_split()
         ingest_data.preprocess_data()
-        ingest_data.generate_mappings()
+        if not config['data'].get('label_mappings'):
+            ingest_data.generate_mappings()
 
         config['data'] = ingest_data.get_updated_config()
         write_data(config, path.join(dirpath, 'config.yaml'))
