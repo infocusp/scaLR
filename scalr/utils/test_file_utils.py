@@ -2,6 +2,7 @@
 
 import os
 from os import path
+import shutil
 
 import numpy as np
 
@@ -14,19 +15,20 @@ from scalr.utils import write_data
 def test_write_chunkwise_data():
     """This function tests `write_chunkwise()`, `write_data()` & `read_data()` functions
     of file_utils."""
+    os.makedirs('./tmp', exist_ok=True)
 
     # Generating dummy anndata.
     adata = generate_dummy_anndata(n_samples=25, n_features=5)
 
     # Path to write full data.
-    fulldata_path = '/tmp/fulldata.h5ad'
+    fulldata_path = './tmp/fulldata.h5ad'
     write_data(adata, fulldata_path)
 
     # sample_chunksize to store full data in chunks.
     sample_chunksize = 5
 
     # Path to store chunked data.
-    dirpath = '/tmp/chunked_data/'
+    dirpath = './tmp/chunked_data/'
 
     # Writing fulldata in chunks.
     write_chunkwise_data(fulldata_path,
@@ -49,3 +51,5 @@ def test_write_chunkwise_data():
     # Checking the number of chunks stored.
     expected_n_chunks = np.ceil(adata.shape[0] / sample_chunksize).astype(int)
     assert observed_n_chunks == expected_n_chunks, f"There is mismatch of observed_n_chunks - {observed_n_chunks} with expected_n_chunks - {expected_n_chunks}."
+
+    shutil.rmtree('./tmp', ignore_errors=True)

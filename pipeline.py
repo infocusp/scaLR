@@ -80,6 +80,7 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
 
         config['data'] = ingest_data.get_updated_config()
         write_data(config, path.join(dirpath, 'config.yaml'))
+        del ingest_data
 
     if config.get('feature_selection'):
         # Feature selection.
@@ -106,6 +107,7 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
 
         config['feature_selection'] = extract_features.get_updated_config()
         write_data(config, path.join(dirpath, 'config.yaml'))
+        del extract_features
 
     if config.get('final_training'):
         # Final model training.
@@ -128,6 +130,7 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
         config['final_training']['model'] = model_config
         config['final_training']['model_train_config'] = model_train_config
         write_data(config, path.join(dirpath, 'config.yaml'))
+        del model_trainer
 
     if config.get('analysis'):
         # Analysis of trained model.
@@ -155,6 +158,7 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
 
         config['analysis'] = analyser.get_updated_config()
         write_data(config, path.join(dirpath, 'config.yaml'))
+        del analyser
 
     return config
 

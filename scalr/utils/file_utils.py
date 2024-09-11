@@ -96,6 +96,10 @@ def write_chunkwise_data(datapath: str,
         os.makedirs(dirpath)
 
     data = read_data(datapath)
+    if isinstance(data, AnnData) and feature_inds:
+        raise ValueError(
+            'TrainValTestSplit data for FeatureSubsetting must be AnnCollection'
+        )
 
     if not sample_inds:
         sample_inds = list(range(len(data)))
