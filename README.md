@@ -1,4 +1,4 @@
-<center><img src="ScaLR_logo1.png" width="150" height="75"></center>
+<left><img src="ScaLR_logo1.png" width="150" height="180"></left>
 
 # Single-cell analysis using Low Resource (scaLR) 
 
