@@ -4,6 +4,7 @@ from typing import Union
 
 from anndata import AnnData
 from anndata.experimental import AnnCollection
+from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
@@ -47,6 +48,15 @@ def get_random_samples(
     if not isinstance(random_background_data, np.ndarray):
         random_background_data = random_background_data.A
 
+    # Handle batch correction when selecing random samples.
+    ## Add batch field from obs to features data.
+    if batch_onehotencoder:
+        random_background_data = torch.cat(
+            (torch.as_tensor(random_background_data),
+             torch.as_tensor(batch_onehotencoder.transform(
+                 data[random_indices].obs['batch'].values.reshape(-1, 1)).A,
+                             dtype=torch.float32)),
+            dim=1)
     random_background_data = torch.as_tensor(random_background_data,
                                              dtype=torch.float32)
 
