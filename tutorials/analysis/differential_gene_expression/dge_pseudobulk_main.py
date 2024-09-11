@@ -37,7 +37,7 @@ def main(config):
         p_val = psedobulk_params.get('p_val',0.05),
         y_lim_tuple = psedobulk_params.get('y_lim_tuple',None),
         save_plot = psedobulk_params.get('save_plot',True),
-        logger = psedobulk_params.get('logger','FlowLogger'))
+        stdout = True)
 
     dge.generate_analysis(test_data,dirpath)
 

@@ -50,9 +50,8 @@ def main(config):
         p_val = lmem_params.get('p_val',0.05),
         y_lim_tuple = lmem_params.get('y_lim_tuple',None),
         save_plot = lmem_params.get('save_plot',True),
-        logger = lmem_params.get('logger','FlowLogger'))
+        stdout = True)
         
-
     dge.generate_analysis(test_data,dirpath)
 
 if __name__ == "__main__":

@@ -272,14 +272,14 @@ class DgePseudoBulk(AnalysisBase):
         for cell_type in cell_type_list:
             assert cell_type in test_data.obs[self.celltype_column].unique(
             ), f"{cell_type} must belong to '{self.celltype_column}' column"
-            logger.info(f'\nProcessing for "{cell_type}" ...')
+            logger.info(f'\nProcessing for "{cell_type}" ...\n')
             design_matrix = self._make_design_matrix(test_data, cell_type)
             dge_results_df = self.get_differential_expression_results(
                 design_matrix, cell_type, dirpath)
 
             plot = self.plot_volcano(dge_results_df, cell_type, dirpath)
             plt.close(plot)
-        logger.info(f"\nPseudobulk-DGE results stored at: {dirpath}")
+        logger.info(f"\nPseudobulk-DGE results stored at: {dirpath}\n")
 
     @classmethod
     def get_default_params(cls) -> dict:
