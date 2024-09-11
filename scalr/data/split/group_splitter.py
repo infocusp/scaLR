@@ -8,7 +8,7 @@ from scalr.data.split import StratifiedSplitter
 
 class GroupSplitter(StratifiedSplitter):
     """Class for splitting data based on the provided group.
-    
+
     Generate a stratified split of data into train, validation, and test
     sets. Stratification ensures samples have the same value for `stratify`
     column, can not belong to different sets.

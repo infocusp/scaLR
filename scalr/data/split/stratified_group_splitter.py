@@ -9,7 +9,7 @@ from scalr.utils import read_data
 
 class StratifiedGroupSplitter(SplitterBase):
     """Class for stratified group splitter.
-     
+
     Generates split of data into train, validation, and test
     sets. Stratification ensures samples have the same value for `stratify`
     column, can not belong to different sets. Also, it ensures every split

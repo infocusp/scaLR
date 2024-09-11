@@ -168,7 +168,7 @@ class FeatureExtractionPipeline:
     def write_top_features_subset_data(self, data_config: dict) -> dict:
         """A function to write top features subset data onto disk
         and return updated data_config.
-        
+
         Args:
             data_config: Data config.
         """

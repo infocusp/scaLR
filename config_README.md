@@ -45,7 +45,10 @@ This section splits the data using the mentioned splitting technique mentioned i
             split_ratio: [7, 1, 2.5]
             stratify: 'donor_id'
 
-- Currently, the platform supports `StratifiedSplitter` and `GroupSplitter` for splitting the data.
+- Here are the supported splitters in the platform.
+- `StratifiedSplitter`: It ensures every split contains samples from each class available in the data.
+- `GroupSplitter`: Stratification ensures samples have the same value for `stratify` column, can not belong to different sets.
+- `StratifiedGroupSplitter`: It is the combination of the above 2 spliters. It will be used for the binary classsification(like as disease classification).
 
 
 **split_datapaths** {str}:  

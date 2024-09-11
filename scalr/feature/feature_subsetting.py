@@ -16,7 +16,7 @@ from scalr.utils import FlowLogger
 
 class FeatureSubsetting:
     """Class for FeatureSubsetting.
-    
+
     It trains a model for each subsetted datasets, each
     containing `feature_subsetsize` genes as features.
     """
