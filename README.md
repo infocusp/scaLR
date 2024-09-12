@@ -23,79 +23,77 @@ The following flowchart explains the major steps of the scaLR platform.
 
 ```
 conda create -n scaLR_env python=3.9
-
 ```
 
-- Clone the git repository and install the required packages by activating the conda env
+- Clone the git repository and install the required packages by activating the conda environment.
 
 ```
 conda activate scaLR_env
 
 pip install -r requirements.txt
-
 ```
 
 ## Input Data
-- Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only)
+- Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only).
 - The anndata object should contain cell samples as `obs` and genes as `var`.
-- `adata.X` contains all gene counts/expression values.
-- `adata.obs` contains any metadata regarding cells, including a column for `target` which will be used for classification. The index of `adata.obs` is cell_barcodes.
-- `adata.var` contains all gene_names as Index.
+- `adata.X`: contains all gene counts/expression values.
+- `adata.obs`: contains any metadata regarding cells, including a column for `target` which will be used for classification. The index of `adata.obs` is cell_barcodes.
+- `adata.var`: contains all gene_names as Index.
 
 
-## Platform Scripts (Output Structure)
-**pipeline.py**:
-Main script to run the entire pipeline.
-    - `exp_dir`: root experiment directory for storage of all phases of the pipeline. Specified from the config.
-    - `config.yml`: copy of config file to reproduce the experiment
+## Output Structure
+- **pipeline.py**:
+The main script that perform end to end run.
+    - `exp_dir`: root experiment directory for the storage of all step outputs of the platform specified in the config.
+    - `config.yml`: copy of config file to reproduce the user defined experiment.
 
 - **data_ingestion**:
-Reads the data, and splits it into Train/Validation/Test sets for the pipeline. Then performs sample-wise normalization on the data
+Reads the data, and splits it into Train/Validation/Test sets for the pipeline. Then performs sample-wise normalization on the data.
     - `exp_dir`
         - `data`
-            - `train_val_test_split.json`: contains sample indices for train/validation/test splits
-            - `label_mappings.json`: contains mappings of all metadata columns between labels and IDs
+            - `train_val_test_split.json`: contains sample indices for train/validation/test splits.
+            - `label_mappings.json`: contains mappings of all metadata columns between labels and IDs.
             - `train_val_test_split`: directory containing the train, validation, and test samples and data files.
 
 - **feature_extraction**:
-Performs feature selection and extraction of new datasets containing subset features
+Performs feature selection and extraction of new datasets containing subset of features.
     - `exp_dir`
         - `feature_extraction`
-            - `chunked_models`: contains weights of each model trained on feature subset data (refer to feature subsetting algorithm)
-            - `feature_subset_data`: directory containing the new feature-subsetted train, val, and test samples anndatas
-            - `score_matrix.csv`: combined scores of all individual models, for each feature and class. shape: n_classes X n_features
+            - `chunked_models`: contains weights of each model trained on feature subset data (refer to feature subsetting algorithm).
+            - `feature_subset_data`: directory containing the new feature-subsetted train, val, and test samples anndatas.
+            - `score_matrix.csv`: combined scores of all individual models, for each feature and class. shape: n_classes X n_features.
             - `top_features.json`: a file containing a list of top features selected / to be subsetted from total features.
 
 - **final_model_training**:
 Trains a final model based on `train_datapath` and `val_datapath` in config.
     - `exp_dir`
         - `model`
-            - `logs`: directory containing Tensorboard Logs for the training of the model
+            - `logs`: directory containing Tensorboard Logs for the training of the model.
             - `checkpoints`: directory containing model weights checkpointed at every interval specified in config.
-            - `best_model`: The best model checkpoint contains information to use model for inference/resume training.
-                - `config.yml`: config file containing model parameters
-                - `label_mappings.json`: contains mapping of class_names to class_ids used by model during training
-                - `model.pt`: contains model weights
+            - `best_model`: the best model checkpoint contains information to use model for inference/resume training.
+                - `model_config.yaml`: config file containing model parameters.
+                - `mappings.json`: contains mapping of class_names to class_ids used by model during training.
+                - `model.pt`: contains model weights.
 
 - **eval_and_analysis**:
-Performs evaluation of best model trained on user-defined metrics on the test set. Also performs various downstream tasks
+Performs evaluation of best model trained on user-defined metrics on the test set. Also performs various downstream tasks.
    - `exp_dir`
         - `analysis`
-            - `classification_report.csv`: Contains classification report showing Precision, Recall, F1, and accuracy metrics for each class, on the test set.
-            - `gene_recall_curve.svg`: Contains gene recall curve plots.
-            - `gene_recall_curve_info.json`: Contains reference genes list which are present in top_K ranked genes per class for each model.
+            - `classification_report.csv`: contains classification report showing Precision, Recall, F1, and accuracy metrics for each class, on the test set.
+            - `gene_recall_curve.svg`: contains gene recall curve plots.
+            - `gene_recall_curve_info.json`: contains reference genes list which are present in top_K ranked genes per class for each model.
             - `gene_analysis`
-                - `score_matrix.csv`: score of the final model, for each feature and class. shape: n_classes X n_features
-                - `top_features.json`: a file containing a list of selected top features/biomarkers
+                - `score_matrix.csv`: score of the final model, for each feature and class. shape: n_classes X n_features.
+                - `top_features.json`: a file containing a list of selected top features/biomarkers.
             -  `heatmaps`
-                - `class_name.svg`: Heatmap for top genes of particular class w.r.t those genes association in other classes. E.g. B.svg, C.svg etc.
-            - `roc_auc.svg`: Contains ROC-AUC plot for all classes.
+                - `class_name.svg`: heatmap for top genes of particular class w.r.t those genes association in other classes. E.g. B.svg, C.svg etc.
+            - `roc_auc.svg`: contains ROC-AUC plot for all classes.
             - `pseudobulk_dge_result`
-                - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.csv`
-                - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.svg`
+                - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.csv`: contains Pseudobulk DGE results between selected factor categories for a celltype.
+                - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.svg`: volcano plot of Log2Foldchange vs -log10(p-value) of genes.
             - `lmem_dge_result`
-                - `lmem_DGE_celltype.csv`
-                - `lmem_DGE_fixed_effect_factor_X.svg`
+                - `lmem_DGE_celltype.csv`: contains LMEM DGE results between selected factor categories for a celltype.
+                - `lmem_DGE_fixed_effect_factor_X.svg`: volcano plot of coefficient vs -log10(p-value) of genes.
                
 ## How to run
 
