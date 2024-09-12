@@ -110,11 +110,15 @@ def write_chunkwise_data(datapath: str,
 
     for i, (start) in enumerate(range(0, len(sample_inds), sample_chunksize)):
         data = read_data(datapath)
-        data = data[sample_inds[start:start + sample_chunksize]]
+
+        if feature_inds:
+            data = data[sample_inds[start:start + sample_chunksize],
+                        feature_inds]
+        else:
+            data = data[sample_inds[start:start + sample_chunksize]]
+
         if not isinstance(data, AnnData):
             data = data.to_adata()
-        if feature_inds:
-            data = data[:, feature_inds]
         data = data.to_memory()
 
         # Transformation
