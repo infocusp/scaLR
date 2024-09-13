@@ -179,13 +179,19 @@ class FeatureExtractionPipeline:
         feature_subset_datapath = path.join(self.dirpath, 'feature_subset_data')
         os.makedirs(feature_subset_datapath, exist_ok=True)
 
-        for split in ['train', 'val', 'test']:
+        test_data = read_data(path.join(datapath, 'test'))
+        splits = {
+            'train': self.train_data,
+            'val': self.val_data,
+            'test': test_data
+        }
 
-            split_datapath = path.join(datapath, split)
+        for split, split_data in splits.items():
+
             split_feature_subset_datapath = path.join(feature_subset_datapath,
                                                       split)
             sample_chunksize = data_config.get('sample_chunksize')
-            write_chunkwise_data(split_datapath,
+            write_chunkwise_data(split_data,
                                  sample_chunksize,
                                  split_feature_subset_datapath,
                                  feature_inds=self.top_features)

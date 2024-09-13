@@ -4,6 +4,8 @@ from copy import deepcopy
 import os
 from os import path
 
+import pandas as pd
+
 from scalr.data.preprocess import build_preprocessor
 from scalr.data.split import build_splitter
 from scalr.utils import FlowLogger
@@ -51,6 +53,7 @@ class DataIngestionPipeline:
                     ''')
 
             full_datapath = self.data_config['train_val_test']['full_datapath']
+            self.full_data = read_data(full_datapath)
             splitter_config = deepcopy(
                 self.data_config['train_val_test']['splitter_config'])
             splitter, splitter_config = build_splitter(splitter_config)
@@ -74,9 +77,12 @@ class DataIngestionPipeline:
                                                      'train_val_test_split')
             os.makedirs(train_val_test_split_dirpath, exist_ok=True)
 
-            splitter.write_splits(full_datapath, train_val_test_split_indices,
+            splitter.write_splits(self.full_data, train_val_test_split_indices,
                                   self.sample_chunksize,
                                   train_val_test_split_dirpath)
+
+            # Garbage collection
+            del self.full_data
 
             self.data_config['train_val_test'][
                 'split_datapaths'] = train_val_test_split_dirpath
@@ -117,7 +123,7 @@ class DataIngestionPipeline:
                              self.sample_chunksize)
             # Transform on train, val & test split.
             for split in ['train', 'val', 'test']:
-                preprocessor.process_data(path.join(datapath, split),
+                preprocessor.process_data(read_data(path.join(datapath, split)),
                                           self.sample_chunksize,
                                           path.join(processed_datapath, split))
 
@@ -140,21 +146,23 @@ class DataIngestionPipeline:
         for split in ['train', 'val', 'test']:
             datapath = path.join(
                 self.data_config['train_val_test']['final_datapaths'], split)
-            datas.append(read_data(datapath))
+            datas.append(read_data(datapath).obs)
+        data = pd.concat(datas)
 
         label_mappings = {}
         for column_name in column_names:
             label_mappings[column_name] = {}
 
-            id2label = []
-            for data in datas:
-                id2label += data.obs[column_name].astype(
-                    'category').cat.categories.tolist()
+            id2label = sorted(
+                data[column_name].astype('category').cat.categories.tolist())
 
-            id2label = sorted(list(set(id2label)))
             label2id = {id2label[i]: i for i in range(len(id2label))}
             label_mappings[column_name]['id2label'] = id2label
             label_mappings[column_name]['label2id'] = label2id
+
+        # Garbage collection
+        del datas
+        del data
 
         write_data(label_mappings, path.join(self.datadir,
                                              'label_mappings.json'))

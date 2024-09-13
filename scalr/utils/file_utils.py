@@ -69,7 +69,7 @@ def write_data(data: Union[dict, AnnData, pd.DataFrame], filepath: str):
             '`filepath` does not contain `json`, `yaml`, or `h5ad` file')
 
 
-def write_chunkwise_data(datapath: str,
+def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
                          sample_chunksize: int,
                          dirpath: str,
                          sample_inds: list[int] = None,
@@ -81,7 +81,7 @@ def write_chunkwise_data(datapath: str,
     This function can also apply transformation on each chunk.
 
     Args:
-        datapath (str): path/to/data to be written in chunks.
+        full_data (Union[AnnData, AnnCollection]): data to be written in chunks.
         sample_chunksize (int): number of samples to be loaded at a time.
         dirpath (str): path/to/directory to write the chunks of data.
         sample_inds (list[int], optional): To be used in case of chunking
@@ -95,27 +95,22 @@ def write_chunkwise_data(datapath: str,
     if not path.exists(dirpath):
         os.makedirs(dirpath)
 
-    data = read_data(datapath)
-    if isinstance(data, AnnData) and feature_inds:
-        raise ValueError(
-            'TrainValTestSplit data for FeatureSubsetting must be AnnCollection'
-        )
-
     if not sample_inds:
-        sample_inds = list(range(len(data)))
+        sample_inds = list(range(len(full_data)))
 
-    # Hacky fix for an AnnCollection working/bug.
+    # Hacky fixes for an AnnCollection working/bug.
     if sample_chunksize >= len(sample_inds):
         sample_chunksize = len(sample_inds) - 1
 
-    for i, (start) in enumerate(range(0, len(sample_inds), sample_chunksize)):
-        data = read_data(datapath)
+    for col in full_data.obs.columns:
+        full_data.obs[col] = full_data.obs[col].astype('category')
 
+    for i, (start) in enumerate(range(0, len(sample_inds), sample_chunksize)):
         if feature_inds:
-            data = data[sample_inds[start:start + sample_chunksize],
-                        feature_inds]
+            data = full_data[sample_inds[start:start + sample_chunksize],
+                             feature_inds]
         else:
-            data = data[sample_inds[start:start + sample_chunksize]]
+            data = full_data[sample_inds[start:start + sample_chunksize]]
 
         if not isinstance(data, AnnData):
             data = data.to_adata()

@@ -31,7 +31,7 @@ def test_write_chunkwise_data():
     dirpath = './tmp/chunked_data/'
 
     # Writing fulldata in chunks.
-    write_chunkwise_data(fulldata_path,
+    write_chunkwise_data(read_data(fulldata_path),
                          sample_chunksize=sample_chunksize,
                          dirpath=dirpath)
 

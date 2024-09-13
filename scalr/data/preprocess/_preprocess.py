@@ -50,12 +50,13 @@ class PreprocessorBase:
         """
         pass
 
-    def process_data(self, datapath: dict, sample_chunksize: int, dirpath: str):
+    def process_data(self, full_data: Union[AnnData, AnnCollection],
+                     sample_chunksize: int, dirpath: str):
         """A function to process the entire data chunkwise and write the processed data
         to disk.
 
         Args:
-            datapath (str): Path to read the data from for transformation.
+            full_data (Union[AnnData, AnnCollection]): Full data for transformation.
             sample_chunksize (int): Number of samples in one chunk.
             dirpath (str): Path to write the data to.
         """
@@ -64,7 +65,7 @@ class PreprocessorBase:
             raise NotImplementedError(
                 'Preprocessing does not work without sample chunk size')
 
-        write_chunkwise_data(datapath,
+        write_chunkwise_data(full_data,
                              sample_chunksize,
                              dirpath,
                              transform=self.transform)

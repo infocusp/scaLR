@@ -2,6 +2,10 @@
 
 import os
 from os import path
+from typing import Union
+
+from anndata import AnnData
+from anndata.experimental import AnnCollection
 
 import scalr
 from scalr.utils import build_object
@@ -88,12 +92,13 @@ class SplitterBase:
         self.event_logger.info(
             f'{metadata[target].iloc[test_inds].value_counts()}\n')
 
-    def write_splits(self, full_datapath: str, data_split_indices: dict,
-                     sample_chunksize: int, dirpath: int):
+    def write_splits(self, full_data: Union[AnnData, AnnCollection],
+                     data_split_indices: dict, sample_chunksize: int,
+                     dirpath: int):
         """THis function writes the train validation and test splits to the disk.
 
         Args:
-            full_datapath (str): Full datapath of data to be split.
+            full_data (Union[AnnData, AnnCollection]): Full data to be split.
             data_split_indices (dict): Indices of each split.
             sample_chunksize (int): Number of samples to be written in one file.
             dirpath (int): Path to write data into.
@@ -106,10 +111,9 @@ class SplitterBase:
             if sample_chunksize:
                 split_dirpath = path.join(dirpath, split)
                 os.makedirs(split_dirpath, exist_ok=True)
-                write_chunkwise_data(full_datapath, sample_chunksize,
-                                     split_dirpath, data_split_indices[split])
+                write_chunkwise_data(full_data, sample_chunksize, split_dirpath,
+                                     data_split_indices[split])
             else:
-                full_data = read_data(full_datapath)
                 filepath = path.join(dirpath, f'{split}.h5ad')
                 write_data(full_data[data_split_indices[split]], filepath)
 
