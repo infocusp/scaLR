@@ -2,6 +2,11 @@
 
 # Single-cell analysis using Low Resource (scaLR) 
 
+<!-- [![Paper](https://img.shields.io/badge/Paper-insert_paper_id_here-white)]() -->
+[![GitHub](https://img.shields.io/github/license/InFoCusp/scaLR)](https://github.com/infocusp/scaLR?tab=GPL-3.0-1-ov-file#)
+
+## 📖 Overview 
+
 <b>scaLR</b> is a comprehensive end-to-end pipeline that is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. The major steps of the platform are:
 
 1. <b>Data Processing</b>: Large datasets undergo preprocessing and normalization (if the user opts to) and are segmented into training, testing, and validation sets.
@@ -40,8 +45,25 @@ pip install -r requirements.txt
 - `adata.obs`: contains any metadata regarding cells, including a column for `target` which will be used for classification. The index of `adata.obs` is cell_barcodes.
 - `adata.var`: contains all gene_names as Index.
 
+             
+## How to run
 
-## Output Structure
+1. It is necessary that the user modify the configuration file and each stage of the pipeline is available inside the config folder [config.yml] or [full_config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
+2. Refer config.yml & it's detailed config [README](config_README.md) file on how to use different parameters and files.
+3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), and an optional flag to log all parts of the pipelines (`-l | --log`).
+4. `python pipeline.py --config /path/to/config -c config.yaml -l` to run the scaLR.
+
+
+## Interactive tutorials
+Detailed tutorials have been made on how to use some functionalities as a scaLR library. Find the links below.
+
+- [Normalization](tutorials/preprocessing/normalization.ipynb)
+- [Batch correction](tutorials/preprocessing/batchc_correction.ipynb)
+- [Gene recall curve](tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb)
+- [Differential gene expression analysis](tutorials/analysis/differential_gene_expression/dge.ipynb)
+- [SHAP analysis](tutorials/analysis/shap_analysis/shap_heatmap.ipynb)
+
+## Experiment Output Structure
 - **pipeline.py**:
 The main script that perform end to end run.
     - `exp_dir`: root experiment directory for the storage of all step outputs of the platform specified in the config.
@@ -94,23 +116,7 @@ Performs evaluation of best model trained on user-defined metrics on the test se
             - `lmem_dge_result`
                 - `lmem_DGE_celltype.csv`: contains LMEM DGE results between selected factor categories for a celltype.
                 - `lmem_DGE_fixed_effect_factor_X.svg`: volcano plot of coefficient vs -log10(p-value) of genes.
-               
-## How to run
-
-1. It is necessary that the user modify the configuration file and each stage of the pipeline is available inside the config folder [config.yml] or [full_config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
-2. Refer config.yml & it's detailed config [README](config_README.md) file on how to use different parameters and files.
-3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), and an optional flag to log all parts of the pipelines (`-l | --log`).
-4. `python pipeline.py --config /path/to/config -c config.yaml -l` to run the scaLR.
-
-
-## Interactive tutorials
-Detailed tutorials have been made on how to use some functionalities as a scaLR library. Find the links below.
-
-- Normalization - `tutorials/preprocessing/normalization.ipynb`
-- Batch correction - `tutorials/preprocessing/batchc_correction.ipynb`
-- Gene recall curve - `tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb`
-- Differential gene expression analysis - `tutorials/analysis/differential_gene_expression/dge.ipynb`
-- SHAP analysis - `tutorials/analysis/shap_analysis/shap_heatmap.ipynb`
+  
 
 <center >
   <b>scaLR © 2024 Infocusp Innovations</b>
