@@ -123,8 +123,8 @@ class DataIngestionPipeline:
                              self.sample_chunksize)
             # Transform on train, val & test split.
             for split in ['train', 'val', 'test']:
-                preprocessor.process_data(read_data(path.join(datapath, split)),
-                                          self.sample_chunksize,
+                split_data = read_data(path.join(datapath, split))
+                preprocessor.process_data(split_data, self.sample_chunksize,
                                           path.join(processed_datapath, split))
 
             datapath = processed_datapath
@@ -142,27 +142,28 @@ class DataIngestionPipeline:
             path.join(self.data_config['train_val_test']['final_datapaths'],
                       'val')).obs.columns
 
-        datas = []
+        data_obs = []
         for split in ['train', 'val', 'test']:
             datapath = path.join(
                 self.data_config['train_val_test']['final_datapaths'], split)
-            datas.append(read_data(datapath).obs)
-        data = pd.concat(datas)
+            split_data_obs = read_data(datapath).obs
+            data_obs.append(split_data_obs)
+        full_data_obs = pd.concat(data_obs)
 
         label_mappings = {}
         for column_name in column_names:
             label_mappings[column_name] = {}
 
-            id2label = sorted(
-                data[column_name].astype('category').cat.categories.tolist())
+            id2label = sorted(full_data_obs[column_name].astype(
+                'category').cat.categories.tolist())
 
             label2id = {id2label[i]: i for i in range(len(id2label))}
             label_mappings[column_name]['id2label'] = id2label
             label_mappings[column_name]['label2id'] = label2id
 
         # Garbage collection
-        del datas
-        del data
+        del data_obs
+        del full_data_obs
 
         write_data(label_mappings, path.join(self.datadir,
                                              'label_mappings.json'))
