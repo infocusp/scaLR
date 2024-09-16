@@ -5,9 +5,9 @@ device: 'cuda'
 
 # EXPERIMENT.
 experiment:
-    dirpath: 'revamped_scalr_experiments'
-    exp_name: 'final'
-    exp_run: 1
+    dirpath: 'scalr_experiments'
+    exp_name: 'final_5000_6'
+    exp_run: 0
 
 
 # DATA CONFIG.
@@ -40,13 +40,13 @@ data:
 # FEATURE SELECTION.
 feature_selection:
 
-    # scores: '/path/to/matrix'
-    feature_subsetsize: 6000
+    # score_matrix: '/path/to/matrix'
+    feature_subsetsize: 5000
 
     model:
         name: SequentialModel
         params:
-            layers: [6000, 6]
+            layers: [5000, 6]
             weights_init_zero: True
 
     model_train_config:
@@ -56,7 +56,7 @@ feature_selection:
             name: SimpleDataLoader
             params:
                 batch_size: 25000
-                padding: 6000
+                padding: 5000
         
         optimizer:
             name: SGD
@@ -139,39 +139,20 @@ analysis:
             params:
                 k: 100
 
-    downstream_analysis:
-        - name: GeneRecallCurve
-          params:
-            reference_genes_path: '/path/to/reference_genes.csv'
-            top_K: 300
-            plots_per_row: 3
-            features_selector:
-                name: ClasswiseAbs
-                params: {}
-        - name: Heatmap
-          params:
-            top_n_genes: 100
-        - name: RocAucCurve
-          params: {}
-        - name: DgePseudoBulk
-          params:
-              celltype_column: 'cell_type'
-              design_factor: 'disease'
-              factor_categories: ['Alzheimer disease', 'normal']
-              sum_column: 'donor_id'
-              cell_subsets: ['excitatory neuron', 'inhibitory interneuron', 'oligodendrocyte']
-              min_cell_threshold: 1
-              fold_change: 1.5
-              p_val: 0.05
-              save_plot: True
-        - name: DgeLMEM
-          params:
-             fixed_effect_column: 'disease'
-             fixed_effect_factors: ['Alzheimer disease', 'normal']
-             group: 'donor_id'
-             min_cell_threshold: 10
-             n_cpu: 4
-             gene_batch_size: 1000
-             coef_threshold: 0
-             p_val: 0.05
-             save_plot: True    
+    # downstream_analysis:
+    #     - name: GeneRecallCurve
+    #       params:
+    #         reference_genes_path: '/path/to/reference_genes.csv'
+    #         top_K: 300
+    #         plots_per_row: 3
+    #         features_selector:
+    #             name: ClasswiseAbs
+    #             params: {}
+    #     - name: Heatmap
+    #       params: **kwargs
+    #     - name: RocAucCurve
+    #       params: **kwargs
+    #     - name: DgePseudoBulk
+    #       params: **kwargs
+    #     - name: DgeLMEM
+    #       params: **kwargs  
