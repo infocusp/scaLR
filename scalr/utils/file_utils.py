@@ -116,6 +116,9 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
             data = data.to_adata()
         data = data.to_memory()
 
+        for col in data.obs.columns:
+            data.obs[col] = data.obs[col].astype('category')
+
         # Transformation
         if transform:
             if not isinstance(data.X, np.ndarray):
