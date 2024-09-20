@@ -2,24 +2,24 @@
 
 import os
 from os import path
-from typing import Optional, Union, Tuple
+from typing import Optional, Tuple, Union
 
-import anndata as ad
 from anndata import AnnData
+import anndata as ad
 from anndata.experimental import AnnCollection
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from pandas import DataFrame
+import pandas as pd
 from pydeseq2.dds import DeseqDataSet
 from pydeseq2.ds import DeseqStats
 import scanpy as sc
 
+from scalr import utils
 from scalr.analysis import AnalysisBase
 from scalr.feature.selector import build_selector
 from scalr.utils import EventLogger
 from scalr.utils import read_data
-from scalr import utils
 
 
 class DgePseudoBulk(AnalysisBase):
@@ -162,11 +162,12 @@ class DgePseudoBulk(AnalysisBase):
         dge_results_df['-log10(pvalue)'] = -np.log10(dge_results_df['pvalue'])
 
         upregulated_gene = (dge_results_df['log2FoldChange'] >= log2_fold_chnage
-                           ) & (dge_results_df['-log10(pvalue)']
-                                >= (neg_log10_pval))
-        downregulated_gene = (dge_results_df['log2FoldChange'] <= (
-            -log2_fold_chnage)) & (dge_results_df['-log10(pvalue)']
-                                   >= (neg_log10_pval))
+                           ) & (dge_results_df['-log10(pvalue)'] >=
+                                (neg_log10_pval))
+        downregulated_gene = (dge_results_df['log2FoldChange'] <=
+                              (-log2_fold_chnage)) & (
+                                  dge_results_df['-log10(pvalue)'] >=
+                                  (neg_log10_pval))
 
         unsignificant_gene = dge_results_df['-log10(pvalue)'] <= (
             neg_log10_pval)
@@ -272,7 +273,7 @@ class DgePseudoBulk(AnalysisBase):
         for cell_type in cell_type_list:
             assert cell_type in test_data.obs[self.celltype_column].unique(
             ), f"{cell_type} must belong to '{self.celltype_column}' column"
-            logger.info(f'\nProcessing for "{cell_type}" ...\n')
+            logger.info(f'\nProcessing for "{cell_type}" ...')
             design_matrix = self._make_design_matrix(test_data, cell_type)
             dge_results_df = self.get_differential_expression_results(
                 design_matrix, cell_type, dirpath)
