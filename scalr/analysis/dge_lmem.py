@@ -1,4 +1,4 @@
-"""This file generates differential gene expression analysis using Linear mixed-effects model approach stores the results."""
+"""This file generates differential gene expression analysis using Linear mixed-effects model approach and stores the results."""
 import multiprocessing
 import os
 from os import path
@@ -34,7 +34,7 @@ from scalr import utils
 
 class DgeLMEM(AnalysisBase):
     '''Class to perform differential gene expression analysis 
-    using Linear mixed effects model'''
+    using Linear mixed effects model.'''
 
     def __init__(self,
                  fixed_effect_column: str,
@@ -50,7 +50,7 @@ class DgeLMEM(AnalysisBase):
                  y_lim_tuple: Optional[Tuple[float, ...]] = None,
                  save_plot: bool = True,
                  stdout: bool = False):
-        '''DgeLMEM parameters initialization
+        '''DgeLMEM parameters initialization.
         
         Args: 
             fixed_effect_column: Column name in `anndata.obs` containing different factor levels or categories for
@@ -66,7 +66,7 @@ class DgeLMEM(AnalysisBase):
             p_val: p value, to filter the differentially expressed genes for the volcano plot.
             y_lim_tuple: Values to adjust the Y-axis limits of the plot.
             save_plot: Boolean value to save plot.
-            stdout : flag to print logs to stdout.
+            stdout : Flag to print logs to stdout.
         '''
 
         self.fixed_effect_column = fixed_effect_column
@@ -87,13 +87,13 @@ class DgeLMEM(AnalysisBase):
             self.n_cpu = multiprocessing.cpu_count()
 
     def replace_spec_char_get_dict(self, var_names: pd.core.indexes.base.Index):
-        ''' This method replaces any special character in gene names
+        ''' This method replaces any special character in gene names.
 
         Args:
             var_names: var_names in the Anndata.
             
         Returns:
-            var_names with special characters replaced with '_', and a dictionary mapping of old and new names
+            var_names with special characters replaced with '_', and a dictionary mapping of old and new names.
         '''
 
         old_new_name_map_dict = dict()
@@ -112,11 +112,11 @@ class DgeLMEM(AnalysisBase):
                                         batch_adata: AnnData,
                                         cell_type: str = None):
         '''This method converts Anndata into a pandas DataFrame with gene expression data,
-        'fixed_effect_column', and 'group' params
+        'fixed_effect_column', and 'group' params.
         
         Args:
-            batch_adata: Anndata
-            cell_type: cell type in the 'celltype_column' to subset the anndata, 
+            batch_adata: Anndata.
+            cell_type: Cell type in the 'celltype_column' to subset the anndata, 
                        the whole anndata will be processed if 'cell_type' is None.
             
         Returns:
@@ -158,15 +158,15 @@ class DgeLMEM(AnalysisBase):
 
     def get_result_mxmodel_per_gene(self, gene: str,
                                     ad_subset_to_df: DataFrame):
-        '''This method produces the Linear mixed-effects model statistics for a single gene
+        '''This method produces the Linear mixed-effects model statistics for a single gene.
         
         Args:
-            gene: Gene name
-            ad_subset_to_df: a pandas dataframe with gene expression, 'fixed_effect_column', 
-                             and 'group' params 
+            gene: Gene name.
+            ad_subset_to_df: A pandas dataframe with gene expression, 'fixed_effect_column', 
+                             and 'group' params.
             
         Returns:
-            A Dictionary with model statistics
+            A dictionary with model statistics.
         '''
 
         try:
@@ -205,12 +205,12 @@ class DgeLMEM(AnalysisBase):
         of genes.
         
         Args:
-            gene_names: List of gene names
-            ad_subset_to_df: a pandas dataframe with gene expression, 'fixed_effect_column', 
-            and 'group' params 
+            gene_names: List of gene names.
+            ad_subset_to_df: A pandas dataframe with gene expression, 'fixed_effect_column', 
+            and 'group' params.
             
         Returns:
-            A List of dictionaries with model stats for 'gene_names'       
+            A list of dictionaries with model stats for 'gene_names'.    
         '''
 
         mxmodel_results_list = []
@@ -236,9 +236,9 @@ class DgeLMEM(AnalysisBase):
         with a cell type, or for the whole dataset.
         
         Args:
-            lmem_res_df: a pandas DataFrame with Model results (p-value, co-efficients, Standard error..)
-            dirpath: path to save the plot     
-            cell_type: cell type used to subset input anndata
+            lmem_res_df: A pandas DataFrame with Model results (p-value, co-efficients, Standard error..).
+            dirpath: Path to save the plot.
+            cell_type: Cell type used to subset input anndata.
         '''
 
         neg_log10_pval = -np.log10(self.p_val)
@@ -336,11 +336,11 @@ class DgeLMEM(AnalysisBase):
     def generate_analysis(self, test_data: Union[AnnData, AnnCollection],
                           dirpath: str, **kwargs):
         '''This method calls methods to run multiple linear mixed effects models and  
-        generate volcano plots.
+        generate DGE results and plots.
         
         Args:
-            test_data: an Anndata
-            dirpath: path to save results
+            test_data: Anndata.
+            dirpath: Path to save results.
         '''
 
         if isinstance(test_data, AnnData):
@@ -478,7 +478,7 @@ class DgeLMEM(AnalysisBase):
 
     @classmethod
     def get_default_params(cls) -> dict:
-        """Class method to get default params for DgeLMEM_config"""
+        """Class method to get default params for DgeLMEM_config."""
         return dict(fixed_effect_column='fixed_effect_column',
                     fixed_effect_factors='fixed_effect_factors',
                     group='group',

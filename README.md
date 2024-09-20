@@ -1,9 +1,11 @@
-<left><img src="ScaLR_logo1.png" width="150" height="180"></left>
+<left><img src="scaLR_logo.png" width="150" height="180"></left>
 
 # Single-cell analysis using Low Resource (scaLR) 
 
 <!-- [![Paper](https://img.shields.io/badge/Paper-insert_paper_id_here-white)]() -->
 [![GitHub](https://img.shields.io/github/license/InFoCusp/scaLR)](https://github.com/infocusp/scaLR?tab=GPL-3.0-1-ov-file#)
+<!-- [![Python Versions](https://img.shields.io/badge/python-3.9+-brightgreen.svg)](https://pypi.org/project/celltypist)  -->
+<!-- [![Documentation Status](https://readthedocs.org/projects/celltypist/badge/?version=latest)](https://celltypist.readthedocs.io/en/latest/?badge=latest) -->
 
 ## 📖 Overview 
 
@@ -50,18 +52,18 @@ pip install -r requirements.txt
 
 1. It is necessary that the user modify the configuration file and each stage of the pipeline is available inside the config folder [config.yml] or [full_config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
 2. Refer config.yml & it's detailed config [README](config_README.md) file on how to use different parameters and files.
-3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), and an optional flag to log all parts of the pipelines (`-l | --log`).
-4. `python pipeline.py --config /path/to/config -c config.yaml -l` to run the scaLR.
+3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), along with optional flags to log all parts of the pipelines (`-l | --log`) and to analyze memory usage (`-m | --memoryprofiler`).
+4. `python pipeline.py --config /path/to/config -c config.yaml -l -m` to run the scaLR.
 
 
 ## Interactive tutorials
 Detailed tutorials have been made on how to use some functionalities as a scaLR library. Find the links below.
 
-- [Normalization](tutorials/preprocessing/normalization.ipynb)
-- [Batch correction](tutorials/preprocessing/batchc_correction.ipynb)
-- [Gene recall curve](tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb)
-- [Differential gene expression analysis](tutorials/analysis/differential_gene_expression/dge.ipynb)
-- [SHAP analysis](tutorials/analysis/shap_analysis/shap_heatmap.ipynb)
+- [Normalization](https://github.com/infocusp/scaLR/blob/main/tutorials/preprocessing/normalization.ipynb)
+- [Batch correction](https://github.com/infocusp/scaLR/blob/main/tutorials/preprocessing/batch_correction.ipynb)
+- [Gene recall curve](https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb)
+- [Differential gene expression analysis](https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/differential_gene_expression/dge.ipynb)
+- [SHAP analysis](https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/shap_analysis/shap_heatmap.ipynb)
 
 ## Experiment Output Structure
 - **pipeline.py**:

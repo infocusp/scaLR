@@ -1,4 +1,4 @@
-"""This file generates differential gene expression analysis using Pseudobulk approach stores the results."""
+"""This file generates differential gene expression analysis using Pseudobulk approach and stores the results."""
 
 import os
 from os import path
@@ -23,7 +23,7 @@ from scalr import utils
 
 
 class DgePseudoBulk(AnalysisBase):
-    '''Class to perform differential gene expression analysis using Pseudobulk approach'''
+    '''Class to perform differential gene expression analysis using Pseudobulk approach.'''
 
     def __init__(self,
                  celltype_column: str,
@@ -37,7 +37,7 @@ class DgePseudoBulk(AnalysisBase):
                  y_lim_tuple: Optional[Tuple[float, ...]] = None,
                  save_plot: bool = True,
                  stdout: bool = False):
-        '''DgePseudoBulk parameters initialization
+        '''DgePseudoBulk parameters initialization.
         
         Args: 
             celltype_column: Column name in `anndata.obs` containing all the cell types.
@@ -52,7 +52,7 @@ class DgePseudoBulk(AnalysisBase):
             p_val: p value, to filter the differentially expressed genes for the volcano plot.
             y_lim_tuple: Values to adjust the Y-axis limits of the plot.
             save_plot: Boolean value to save plot.
-            stdout : flag to print logs to stdout
+            stdout : Flag to print logs to stdout.
         '''
 
         self.celltype_column = celltype_column
@@ -74,11 +74,11 @@ class DgePseudoBulk(AnalysisBase):
         make design matrix based upon the factor levels in design_factor.
     
         Args:
-            adata: AnnData
-            cell_type: cell type to subset data on, belonging to `celltype_column`
+            adata: AnnData.
+            cell_type: Cell type to subset data on, belonging to `celltype_column`.
     
         Returns:
-            AnnData oject of design matrix
+            AnnData oject of design matrix.
         '''
 
         if isinstance(adata, AnnData):
@@ -106,15 +106,15 @@ class DgePseudoBulk(AnalysisBase):
 
     def get_differential_expression_results(self, design_matrix: AnnData,
                                             cell_type: str, dirpath: str):
-        '''Method to get differential gene expression analysis results
+        '''Method to get differential gene expression analysis results.
     
         Args:
-            design_matrix: AnnData generated using '_make_design_matrix' 
-            cell_type: cell type used to subset the input anndata
-            dirpath: path to save the result
+            design_matrix: AnnData generated using '_make_design_matrix'.
+            cell_type: Cell type used to subset the input anndata.
+            dirpath: Path to save the result.
     
         Returns:
-            pandas DataFrame object containing differential gene expression results
+            A pandas DataFrame object containing differential gene expression results.
         '''
 
         count_matrix = design_matrix.to_df()
@@ -149,12 +149,12 @@ class DgePseudoBulk(AnalysisBase):
     def plot_volcano(self, dge_results_df: DataFrame, cell_type: str,
                      dirpath: str):
         '''Method to generate volcano plot of differential gene expression results 
-        and store it on disk
+        and store it on disk.
     
         Args:
-            dge_results_df: differential gene expression results in dataframe
-            cell_type: cell type used to subset the input anndata
-            dirpath: path to save the result
+            dge_results_df: Differential gene expression results in dataframe.
+            cell_type: Cell type used to subset the input anndata.
+            dirpath: Path to save the result.
         '''
 
         log2_fold_chnage = np.log2(self.fold_change)
@@ -236,14 +236,14 @@ class DgePseudoBulk(AnalysisBase):
 
     def generate_analysis(self, test_data: Union[AnnData, AnnCollection],
                           dirpath: str, **kwargs):
-        '''This method calls methods to perform differential gene expression analysis on data
+        '''This method calls methods to perform differential gene expression analysis on data.
         
         Args:
-            test_data: AnnData
-            dirpath: path to save the result
+            test_data: AnnData.
+            dirpath: Path to save the result.
     
         Returns:
-            pandas DataFrame object containing differential gene expression stats
+            Pandas DataFrame object containing differential gene expression stats.
         '''
 
         logger = EventLogger('Differential Gene expression analysis',
@@ -283,7 +283,7 @@ class DgePseudoBulk(AnalysisBase):
 
     @classmethod
     def get_default_params(cls) -> dict:
-        """Class method to get default params for DgePseudoBulk_config"""
+        """Class method to get default params for DgePseudoBulk_config."""
         return dict(celltype_column='celltype_column',
                     design_factor='design_factor',
                     factor_categories='factor_categories',
