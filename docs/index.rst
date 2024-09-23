@@ -13,18 +13,26 @@ scaLR Documentation
 .. include:: ../README.md
    :parser: myst_parser.sphinx_
    :start-line: 25
-   :end-line: 129
+   :end-line: 128
 
 .. toctree::
    :maxdepth: 10
-   :caption: scaLR structure
+   :caption: scaLR
    :hidden:
 
-   modules
+   scalr.analysis
+   scalr.data
+   scalr.feature
+   scalr.nn
+   scalr.utils
 
 .. toctree::
    :maxdepth: 10
    :caption: scaLR Pipelines
    :hidden:
-
+   
    pipeline
+   scalr.data_ingestion_pipeline
+   scalr.feature_extraction_pipeline
+   scalr.model_training_pipeline
+   scalr.eval_and_analysis_pipeline

@@ -120,10 +120,10 @@ Performs evaluation of best model trained on user-defined metrics on the test se
                 - `lmem_DGE_fixed_effect_factor_X.svg`: volcano plot of coefficient vs -log10(p-value) of genes.
   
 
-<center >
-  <b>scaLR © 2024 Infocusp Innovations</b>
-</center>
 
-<!-- ## Citation
-Will update soon. -->
+## Citation
+
+Jogani Saiyam, Anand Santosh Pol , Mayur Prajapati, Amit Samal, Kriti Bhatia, Jayendra Parmar, Urvik Patel, Falak Shah, Nisarg Vyas, and Saurabh Gupta. "scaLR: a low-resource deep neural network-based platform for single cell analysis and biomarker discovery." bioRxiv (2024): 2024-09.
+
+doi: https://doi.org/10.1101/2024.09.19.613226
 

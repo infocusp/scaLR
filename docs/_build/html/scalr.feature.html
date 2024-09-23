@@ -4,9 +4,10 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>feature &mdash; scaLR v1.0.0 documentation</title>
+  <title>Feature &mdash; scaLR v1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
 
   
     <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
@@ -46,28 +47,32 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">scaLR structure</span></p>
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">scaLR</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="scalr.html">scalr</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html">analysis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.data.html">data</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">feature</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="scalr.feature.scoring.html">scoring</a></li>
-<li class="toctree-l4"><a class="reference internal" href="scalr.feature.selector.html">selector</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.feature.feature_subsetting">feature_subsetting</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.nn.html">nn</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html">utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.data.html">Data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Feature</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scalr.feature.scoring.html">scoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.feature.selector.html">selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.feature.feature_subsetting">feature_subsetting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature.feature_subsetting.FeatureSubsetting"><code class="docutils literal notranslate"><span class="pre">FeatureSubsetting</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.feature.feature_subsetting.FeatureSubsetting.get_updated_configs"><code class="docutils literal notranslate"><span class="pre">FeatureSubsetting.get_updated_configs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.feature.feature_subsetting.FeatureSubsetting.train_chunked_models"><code class="docutils literal notranslate"><span class="pre">FeatureSubsetting.train_chunked_models()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
 </ul>
 
         </div>
@@ -84,9 +89,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">scaLR</a></li>
-          <li class="breadcrumb-item"><a href="scalr.html">scalr</a></li>
-      <li class="breadcrumb-item active">feature</li>
+      <li class="breadcrumb-item active">Feature</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/scalr.feature.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -97,7 +100,7 @@
            <div itemprop="articleBody">
              
   <section id="feature">
-<h1>feature<a class="headerlink" href="#feature" title="Link to this heading"></a></h1>
+<h1>Feature<a class="headerlink" href="#feature" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="scalr.feature.scoring.html">scoring</a><ul>

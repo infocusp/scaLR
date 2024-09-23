@@ -1,8 +1,5 @@
-Pipelines
-=========
-
-data\_ingestion\_pipeline
--------------------------
+Data ingestion
+---------------
 
 .. automodule:: scalr.data_ingestion_pipeline
    :members:
@@ -10,8 +7,8 @@ data\_ingestion\_pipeline
    :show-inheritance:
    :private-members:
 
-eval\_and\_analysis\_pipeline
------------------------------
+Eval and analysis
+-------------------
 
 .. automodule:: scalr.eval_and_analysis_pipeline
    :members:
@@ -19,8 +16,8 @@ eval\_and\_analysis\_pipeline
    :show-inheritance:
    :private-members:
 
-feature\_extraction\_pipeline
------------------------------
+Feature extraction
+-------------------
 
 .. automodule:: scalr.feature_extraction_pipeline
    :members:
@@ -28,8 +25,8 @@ feature\_extraction\_pipeline
    :show-inheritance:
    :private-members:
 
-model\_training\_pipeline
--------------------------
+Model training
+---------------
 
 .. automodule:: scalr.model_training_pipeline
    :members:

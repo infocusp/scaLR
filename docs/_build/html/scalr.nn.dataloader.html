@@ -7,6 +7,7 @@
   <title>dataloader &mdash; scaLR v1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
 
   
     <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
@@ -46,30 +47,50 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">scaLR structure</span></p>
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">scaLR</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="scalr.html">scalr</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html">analysis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.data.html">data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.feature.html">feature</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="scalr.nn.html">nn</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="scalr.nn.callbacks.html">callbacks</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">dataloader</a></li>
-<li class="toctree-l4"><a class="reference internal" href="scalr.nn.loss.html">loss</a></li>
-<li class="toctree-l4"><a class="reference internal" href="scalr.nn.model.html">model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="scalr.nn.trainer.html">trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="scalr.nn.html">NN</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.callbacks.html">callbacks</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">dataloader</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.nn.dataloader._dataloader">_dataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.nn.dataloader._dataloader.DataLoaderBase"><code class="docutils literal notranslate"><span class="pre">DataLoaderBase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.nn.dataloader._dataloader.build_dataloader"><code class="docutils literal notranslate"><span class="pre">build_dataloader()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.nn.dataloader.simple_dataloader">simple_dataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.nn.dataloader.simple_dataloader.SimpleDataLoader"><code class="docutils literal notranslate"><span class="pre">SimpleDataLoader</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.nn.dataloader.simple_metadataloader">simple_metadataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.nn.dataloader.simple_metadataloader.SimpleMetaDataLoader"><code class="docutils literal notranslate"><span class="pre">SimpleMetaDataLoader</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.nn.dataloader.test_simple_dataloader">test_simple_dataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.nn.dataloader.test_simple_dataloader.test_metadataloader"><code class="docutils literal notranslate"><span class="pre">test_metadataloader()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.nn.dataloader.test_simple_metadataloader">test_simple_metadataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.nn.dataloader.test_simple_metadataloader.test_metadataloader"><code class="docutils literal notranslate"><span class="pre">test_metadataloader()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.loss.html">loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.model.html">model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.trainer.html">trainer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
 </ul>
 
         </div>
@@ -86,9 +107,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">scaLR</a></li>
-          <li class="breadcrumb-item"><a href="scalr.html">scalr</a></li>
-          <li class="breadcrumb-item"><a href="scalr.nn.html">nn</a></li>
+          <li class="breadcrumb-item"><a href="scalr.nn.html">NN</a></li>
       <li class="breadcrumb-item active">dataloader</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/scalr.nn.dataloader.rst.txt" rel="nofollow"> View page source</a>

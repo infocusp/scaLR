@@ -4,9 +4,10 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pipelines &mdash; scaLR v1.0.0 documentation</title>
+  <title>Data ingestion &mdash; scaLR v1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
 
   
     <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
@@ -22,7 +23,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="utils" href="scalr.utils.html" /> 
+    <link rel="prev" title="Utils" href="scalr.utils.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,61 +46,62 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">scaLR structure</span></p>
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">scaLR</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Pipelines</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-scalr.data_ingestion_pipeline">data_ingestion_pipeline</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.generate_mappings"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline.generate_mappings()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.generate_train_val_test_split"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline.generate_train_val_test_split()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.get_updated_config"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline.get_updated_config()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.preprocess_data"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline.preprocess_data()</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data ingestion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.generate_mappings"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline.generate_mappings()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.generate_train_val_test_split"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline.generate_train_val_test_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.get_updated_config"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline.get_updated_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.preprocess_data"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline.preprocess_data()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-scalr.eval_and_analysis_pipeline">eval_and_analysis_pipeline</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.build_dataloaders"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.build_dataloaders()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.evaluation_and_classification_report"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.evaluation_and_classification_report()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.gene_analysis"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.gene_analysis()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.get_updated_config"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.get_updated_config()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.load_data_and_targets_from_config"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.load_data_and_targets_from_config()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.perform_downstream_anlaysis"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.perform_downstream_anlaysis()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.set_data_and_targets"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.set_data_and_targets()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.build_dataloaders"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.build_dataloaders()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.evaluation_and_classification_report"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.evaluation_and_classification_report()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.gene_analysis"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.gene_analysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.get_updated_config"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.get_updated_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.load_data_and_targets_from_config"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.load_data_and_targets_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.perform_downstream_anlaysis"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.perform_downstream_anlaysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.set_data_and_targets"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.set_data_and_targets()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-scalr.feature_extraction_pipeline">feature_extraction_pipeline</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.feature_scoring"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.feature_scoring()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.feature_subsetted_model_training"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.feature_subsetted_model_training()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.get_updated_config"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.get_updated_config()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.load_data_and_targets_from_config"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.load_data_and_targets_from_config()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_data_and_targets"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.set_data_and_targets()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_model"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.set_model()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_score_matrix"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.set_score_matrix()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.top_feature_extraction"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.top_feature_extraction()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.write_top_features_subset_data"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.write_top_features_subset_data()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="#module-scalr.feature_extraction_pipeline">Feature extraction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.feature_scoring"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.feature_scoring()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.feature_subsetted_model_training"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.feature_subsetted_model_training()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.get_updated_config"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.get_updated_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.load_data_and_targets_from_config"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.load_data_and_targets_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_data_and_targets"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.set_data_and_targets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_model"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.set_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_score_matrix"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.set_score_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.top_feature_extraction"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.top_feature_extraction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.write_top_features_subset_data"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.write_top_features_subset_data()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-scalr.model_training_pipeline">model_training_pipeline</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.build_model_training_artifacts"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.build_model_training_artifacts()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.build_optimizer"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.build_optimizer()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.get_updated_config"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.get_updated_config()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.load_data_and_targets_from_config"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.load_data_and_targets_from_config()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.set_data_and_targets"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.set_data_and_targets()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.train"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.train()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-scalr.model_training_pipeline">Model training</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.build_model_training_artifacts"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.build_model_training_artifacts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.build_optimizer"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.build_optimizer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.get_updated_config"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.get_updated_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.load_data_and_targets_from_config"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.load_data_and_targets_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.set_data_and_targets"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.set_data_and_targets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.train"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.train()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -120,7 +122,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Pipelines</li>
+      <li class="breadcrumb-item active">Data ingestion</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/pipeline.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -130,10 +132,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="pipelines">
-<h1>Pipelines<a class="headerlink" href="#pipelines" title="Link to this heading"></a></h1>
-<section id="module-scalr.data_ingestion_pipeline">
-<span id="data-ingestion-pipeline"></span><h2>data_ingestion_pipeline<a class="headerlink" href="#module-scalr.data_ingestion_pipeline" title="Link to this heading"></a></h2>
+  <section id="module-scalr.data_ingestion_pipeline">
+<span id="data-ingestion"></span><h1>Data ingestion<a class="headerlink" href="#module-scalr.data_ingestion_pipeline" title="Link to this heading"></a></h1>
 <p>This file is a class for data ingestion into the pipeline.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scalr.data_ingestion_pipeline.DataIngestionPipeline">
@@ -168,7 +168,7 @@
 
 </section>
 <section id="module-scalr.eval_and_analysis_pipeline">
-<span id="eval-and-analysis-pipeline"></span><h2>eval_and_analysis_pipeline<a class="headerlink" href="#module-scalr.eval_and_analysis_pipeline" title="Link to this heading"></a></h2>
+<span id="eval-and-analysis"></span><h1>Eval and analysis<a class="headerlink" href="#module-scalr.eval_and_analysis_pipeline" title="Link to this heading"></a></h1>
 <p>This file contains an implementation of model evaluation and performs downstream analysis tasks.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline">
@@ -238,7 +238,7 @@ eg. mappings[column_name][label2id] = {A: 1, B:2, …}.</p></li>
 
 </section>
 <section id="module-scalr.feature_extraction_pipeline">
-<span id="feature-extraction-pipeline"></span><h2>feature_extraction_pipeline<a class="headerlink" href="#module-scalr.feature_extraction_pipeline" title="Link to this heading"></a></h2>
+<span id="feature-extraction"></span><h1>Feature extraction<a class="headerlink" href="#module-scalr.feature_extraction_pipeline" title="Link to this heading"></a></h1>
 <p>This file contains the implementation of feature subsetting, model training followed by top feature extraction.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scalr.feature_extraction_pipeline.FeatureExtractionPipeline">
@@ -326,7 +326,7 @@ and return updated data_config.</p>
 
 </section>
 <section id="module-scalr.model_training_pipeline">
-<span id="model-training-pipeline"></span><h2>model_training_pipeline<a class="headerlink" href="#module-scalr.model_training_pipeline" title="Link to this heading"></a></h2>
+<span id="model-training"></span><h1>Model training<a class="headerlink" href="#module-scalr.model_training_pipeline" title="Link to this heading"></a></h1>
 <p>This file contains an implementation for the model training pipeline.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scalr.model_training_pipeline.ModelTrainingPipeline">
@@ -395,13 +395,12 @@ eg. mappings[column_name][label2id] = {A: 1, B:2, …}.</p></li>
 </dd></dl>
 
 </section>
-</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="scalr.utils.html" class="btn btn-neutral float-left" title="utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scalr.utils.html" class="btn btn-neutral float-left" title="Utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

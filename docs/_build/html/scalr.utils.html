@@ -4,9 +4,10 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>utils &mdash; scaLR v1.0.0 documentation</title>
+  <title>Utils &mdash; scaLR v1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
 
   
     <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
@@ -22,7 +23,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Pipelines" href="pipeline.html" />
+    <link rel="next" title="Data ingestion" href="pipeline.html" />
     <link rel="prev" title="trainer" href="scalr.nn.trainer.html" /> 
 </head>
 
@@ -46,23 +47,63 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">scaLR structure</span></p>
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">scaLR</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="scalr.html">scalr</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html">analysis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.data.html">data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.feature.html">feature</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.nn.html">nn</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">utils</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.utils.data_utils">data_utils</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.utils.file_utils">file_utils</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.utils.logger">logger</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.utils.misc_utils">misc_utils</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.utils.test_file_utils">test_file_utils</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.utils.test_misc_utils">test_misc_utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.nn.html">NN</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.utils.data_utils">data_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.data_utils.generate_dummy_anndata"><code class="docutils literal notranslate"><span class="pre">generate_dummy_anndata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.data_utils.get_one_hot_matrix"><code class="docutils literal notranslate"><span class="pre">get_one_hot_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.data_utils.get_random_samples"><code class="docutils literal notranslate"><span class="pre">get_random_samples()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.utils.file_utils">file_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.dump_anndata"><code class="docutils literal notranslate"><span class="pre">dump_anndata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.dump_csv"><code class="docutils literal notranslate"><span class="pre">dump_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.dump_json"><code class="docutils literal notranslate"><span class="pre">dump_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.dump_yaml"><code class="docutils literal notranslate"><span class="pre">dump_yaml()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.load_test_data_from_config"><code class="docutils literal notranslate"><span class="pre">load_test_data_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.load_train_val_data_from_config"><code class="docutils literal notranslate"><span class="pre">load_train_val_data_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.read_anndata"><code class="docutils literal notranslate"><span class="pre">read_anndata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.read_chunked_anndatas"><code class="docutils literal notranslate"><span class="pre">read_chunked_anndatas()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.read_csv"><code class="docutils literal notranslate"><span class="pre">read_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.read_data"><code class="docutils literal notranslate"><span class="pre">read_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.read_json"><code class="docutils literal notranslate"><span class="pre">read_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.read_yaml"><code class="docutils literal notranslate"><span class="pre">read_yaml()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.write_chunkwise_data"><code class="docutils literal notranslate"><span class="pre">write_chunkwise_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.file_utils.write_data"><code class="docutils literal notranslate"><span class="pre">write_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.utils.logger">logger</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.logger.EventLogger"><code class="docutils literal notranslate"><span class="pre">EventLogger</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.utils.logger.EventLogger.filepath"><code class="docutils literal notranslate"><span class="pre">EventLogger.filepath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.utils.logger.EventLogger.heading"><code class="docutils literal notranslate"><span class="pre">EventLogger.heading()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.utils.logger.EventLogger.heading1"><code class="docutils literal notranslate"><span class="pre">EventLogger.heading1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.utils.logger.EventLogger.heading2"><code class="docutils literal notranslate"><span class="pre">EventLogger.heading2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.utils.logger.EventLogger.level"><code class="docutils literal notranslate"><span class="pre">EventLogger.level</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.logger.FlowLogger"><code class="docutils literal notranslate"><span class="pre">FlowLogger</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.utils.logger.FlowLogger.level"><code class="docutils literal notranslate"><span class="pre">FlowLogger.level</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.utils.misc_utils">misc_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.misc_utils.build_object"><code class="docutils literal notranslate"><span class="pre">build_object()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.misc_utils.overwrite_default"><code class="docutils literal notranslate"><span class="pre">overwrite_default()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.misc_utils.set_seed"><code class="docutils literal notranslate"><span class="pre">set_seed()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.utils.test_file_utils">test_file_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.test_file_utils.test_write_chunkwise_data"><code class="docutils literal notranslate"><span class="pre">test_write_chunkwise_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.utils.test_misc_utils">test_misc_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.utils.test_misc_utils.test_overwrite_default"><code class="docutils literal notranslate"><span class="pre">test_overwrite_default()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -70,7 +111,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
 </ul>
 
         </div>
@@ -87,9 +131,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">scaLR</a></li>
-          <li class="breadcrumb-item"><a href="scalr.html">scalr</a></li>
-      <li class="breadcrumb-item active">utils</li>
+      <li class="breadcrumb-item active">Utils</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/scalr.utils.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -100,7 +142,7 @@
            <div itemprop="articleBody">
              
   <section id="utils">
-<h1>utils<a class="headerlink" href="#utils" title="Link to this heading"></a></h1>
+<h1>Utils<a class="headerlink" href="#utils" title="Link to this heading"></a></h1>
 <section id="module-scalr.utils.data_utils">
 <span id="data-utils"></span><h2>data_utils<a class="headerlink" href="#module-scalr.utils.data_utils" title="Link to this heading"></a></h2>
 <p>This file contains functions related to data utility.</p>
@@ -402,7 +444,7 @@ of file_utils.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="scalr.nn.trainer.html" class="btn btn-neutral float-left" title="trainer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="pipeline.html" class="btn btn-neutral float-right" title="Pipelines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pipeline.html" class="btn btn-neutral float-right" title="Data ingestion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

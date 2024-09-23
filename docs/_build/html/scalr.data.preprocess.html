@@ -7,6 +7,7 @@
   <title>preprocess &mdash; scaLR v1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
 
   
     <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
@@ -23,7 +24,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="split" href="scalr.data.split.html" />
-    <link rel="prev" title="data" href="scalr.data.html" /> 
+    <link rel="prev" title="Data" href="scalr.data.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,27 +47,47 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">scaLR structure</span></p>
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">scaLR</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="scalr.html">scalr</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html">analysis</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="scalr.data.html">data</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">preprocess</a></li>
-<li class="toctree-l4"><a class="reference internal" href="scalr.data.split.html">split</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="scalr.data.html">Data</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">preprocess</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.preprocess._preprocess">_preprocess</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.preprocess._preprocess.PreprocessorBase"><code class="docutils literal notranslate"><span class="pre">PreprocessorBase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.preprocess._preprocess.build_preprocessor"><code class="docutils literal notranslate"><span class="pre">build_preprocessor()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.feature.html">feature</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.nn.html">nn</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.preprocess.sample_norm">sample_norm</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.preprocess.sample_norm.SampleNorm"><code class="docutils literal notranslate"><span class="pre">SampleNorm</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.preprocess.standard_scale">standard_scale</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.preprocess.standard_scale.StandardScaler"><code class="docutils literal notranslate"><span class="pre">StandardScaler</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.preprocess.test_sample_norm">test_sample_norm</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.preprocess.test_sample_norm.test_transform"><code class="docutils literal notranslate"><span class="pre">test_transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.preprocess.test_standard_scale">test_standard_scale</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.preprocess.test_standard_scale.test_fit"><code class="docutils literal notranslate"><span class="pre">test_fit()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.data.split.html">split</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
 </ul>
 
         </div>
@@ -83,9 +104,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">scaLR</a></li>
-          <li class="breadcrumb-item"><a href="scalr.html">scalr</a></li>
-          <li class="breadcrumb-item"><a href="scalr.data.html">data</a></li>
+          <li class="breadcrumb-item"><a href="scalr.data.html">Data</a></li>
       <li class="breadcrumb-item active">preprocess</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/scalr.data.preprocess.rst.txt" rel="nofollow"> View page source</a>
@@ -312,7 +331,7 @@ sklean standard-scaler object params.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="scalr.data.html" class="btn btn-neutral float-left" title="data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scalr.data.html" class="btn btn-neutral float-left" title="Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="scalr.data.split.html" class="btn btn-neutral float-right" title="split" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

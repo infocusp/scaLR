@@ -4,9 +4,10 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>analysis &mdash; scaLR v1.0.0 documentation</title>
+  <title>Analysis &mdash; scaLR v1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
 
   
     <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
@@ -22,8 +23,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="data" href="scalr.data.html" />
-    <link rel="prev" title="scalr" href="scalr.html" /> 
+    <link rel="next" title="Data" href="scalr.data.html" />
+    <link rel="prev" title="scaLR Documentation" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,32 +47,84 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">scaLR structure</span></p>
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">scaLR</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="scalr.html">scalr</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">analysis</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.analysis._analyser">_analyser module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.analysis.dge_lmem">dge_lmem</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.analysis.dge_pseudobulk">dge_pseudobulk</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.analysis.evaluation">evaluation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.analysis.gene_recall_curve">gene_recall_curve</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.analysis.heatmap">heatmap</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-scalr.analysis.roc_auc">roc_auc</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis._analyser">_analyser module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis._analyser.AnalysisBase"><code class="docutils literal notranslate"><span class="pre">AnalysisBase</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis._analyser.AnalysisBase.generate_analysis"><code class="docutils literal notranslate"><span class="pre">AnalysisBase.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis._analyser.AnalysisBase.get_default_params"><code class="docutils literal notranslate"><span class="pre">AnalysisBase.get_default_params()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.data.html">data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.feature.html">feature</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.nn.html">nn</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html">utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis._analyser.build_analyser"><code class="docutils literal notranslate"><span class="pre">build_analyser()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis.dge_lmem">dge_lmem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM"><code class="docutils literal notranslate"><span class="pre">DgeLMEM</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.generate_analysis"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.get_default_params"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.get_default_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.get_genes_n_fixed_val_subset_df"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.get_genes_n_fixed_val_subset_df()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.get_multiproc_mxeffect_model_batch_res"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.get_multiproc_mxeffect_model_batch_res()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.get_result_mxmodel_per_gene"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.get_result_mxmodel_per_gene()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.plot_lmem_dge_result"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.plot_lmem_dge_result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.replace_spec_char_get_dict"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.replace_spec_char_get_dict()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis.dge_pseudobulk">dge_pseudobulk</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk._make_design_matrix"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk._make_design_matrix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk.generate_analysis"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk.get_default_params"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk.get_default_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk.get_differential_expression_results"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk.get_differential_expression_results()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk.plot_volcano"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk.plot_volcano()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis.evaluation">evaluation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.evaluation.generate_and_save_classification_report"><code class="docutils literal notranslate"><span class="pre">generate_and_save_classification_report()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.evaluation.get_accuracy"><code class="docutils literal notranslate"><span class="pre">get_accuracy()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis.gene_recall_curve">gene_recall_curve</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.gene_recall_curve.GeneRecallCurve"><code class="docutils literal notranslate"><span class="pre">GeneRecallCurve</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.gene_recall_curve.GeneRecallCurve.generate_analysis"><code class="docutils literal notranslate"><span class="pre">GeneRecallCurve.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.gene_recall_curve.GeneRecallCurve.get_default_params"><code class="docutils literal notranslate"><span class="pre">GeneRecallCurve.get_default_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.gene_recall_curve.GeneRecallCurve.plot_gene_recall"><code class="docutils literal notranslate"><span class="pre">GeneRecallCurve.plot_gene_recall()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis.heatmap">heatmap</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.heatmap.Heatmap"><code class="docutils literal notranslate"><span class="pre">Heatmap</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.heatmap.Heatmap.generate_analysis"><code class="docutils literal notranslate"><span class="pre">Heatmap.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.heatmap.Heatmap.plot_heatmap"><code class="docutils literal notranslate"><span class="pre">Heatmap.plot_heatmap()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis.roc_auc">roc_auc</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.roc_auc.RocAucCurve"><code class="docutils literal notranslate"><span class="pre">RocAucCurve</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.roc_auc.RocAucCurve.generate_analysis"><code class="docutils literal notranslate"><span class="pre">RocAucCurve.generate_analysis()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
 </ul>
 
         </div>
@@ -88,9 +141,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">scaLR</a></li>
-          <li class="breadcrumb-item"><a href="scalr.html">scalr</a></li>
-      <li class="breadcrumb-item active">analysis</li>
+      <li class="breadcrumb-item active">Analysis</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/scalr.analysis.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -101,7 +152,7 @@
            <div itemprop="articleBody">
              
   <section id="analysis">
-<h1>analysis<a class="headerlink" href="#analysis" title="Link to this heading"></a></h1>
+<h1>Analysis<a class="headerlink" href="#analysis" title="Link to this heading"></a></h1>
 <section id="module-scalr.analysis._analyser">
 <span id="analyser-module"></span><h2>_analyser module<a class="headerlink" href="#module-scalr.analysis._analyser" title="Link to this heading"></a></h2>
 <p>This file is a base class for the analysis module.</p>
@@ -518,8 +569,8 @@ shap_value/weights of each gene to class.</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="scalr.html" class="btn btn-neutral float-left" title="scalr" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="scalr.data.html" class="btn btn-neutral float-right" title="data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="scaLR Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scalr.data.html" class="btn btn-neutral float-right" title="Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

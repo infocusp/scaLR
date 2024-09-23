@@ -6,8 +6,10 @@
   <title>scalr.analysis.dge_pseudobulk &mdash; scaLR v1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/logo.css?v=e01f80eb" />
 
   
+    <link rel="shortcut icon" href="../../../_static/scaLR_logo.png"/>
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -32,6 +34,7 @@
           
           <a href="../../../index.html" class="icon icon-home">
             scaLR
+              <img src="../../../_static/scaLR_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -41,13 +44,20 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">scaLR structure</span></p>
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">scaLR</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.utils.html">Utils</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
 </ul>
 
         </div>
@@ -79,24 +89,24 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">anndata</span> <span class="k">as</span> <span class="nn">ad</span>
 <span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">AnnData</span>
+<span class="kn">import</span> <span class="nn">anndata</span> <span class="k">as</span> <span class="nn">ad</span>
 <span class="kn">from</span> <span class="nn">anndata.experimental</span> <span class="kn">import</span> <span class="n">AnnCollection</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">pydeseq2.dds</span> <span class="kn">import</span> <span class="n">DeseqDataSet</span>
 <span class="kn">from</span> <span class="nn">pydeseq2.ds</span> <span class="kn">import</span> <span class="n">DeseqStats</span>
 <span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
 
+<span class="kn">from</span> <span class="nn">scalr</span> <span class="kn">import</span> <span class="n">utils</span>
 <span class="kn">from</span> <span class="nn">scalr.analysis</span> <span class="kn">import</span> <span class="n">AnalysisBase</span>
 <span class="kn">from</span> <span class="nn">scalr.feature.selector</span> <span class="kn">import</span> <span class="n">build_selector</span>
 <span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">EventLogger</span>
 <span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">read_data</span>
-<span class="kn">from</span> <span class="nn">scalr</span> <span class="kn">import</span> <span class="n">utils</span>
 
 
 <div class="viewcode-block" id="DgePseudoBulk">
@@ -249,11 +259,12 @@
         <span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;pvalue&#39;</span><span class="p">])</span>
 
         <span class="n">upregulated_gene</span> <span class="o">=</span> <span class="p">(</span><span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;log2FoldChange&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">log2_fold_chnage</span>
-                           <span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">]</span>
-                                <span class="o">&gt;=</span> <span class="p">(</span><span class="n">neg_log10_pval</span><span class="p">))</span>
-        <span class="n">downregulated_gene</span> <span class="o">=</span> <span class="p">(</span><span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;log2FoldChange&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="p">(</span>
-            <span class="o">-</span><span class="n">log2_fold_chnage</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">]</span>
-                                   <span class="o">&gt;=</span> <span class="p">(</span><span class="n">neg_log10_pval</span><span class="p">))</span>
+                           <span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">]</span> <span class="o">&gt;=</span>
+                                <span class="p">(</span><span class="n">neg_log10_pval</span><span class="p">))</span>
+        <span class="n">downregulated_gene</span> <span class="o">=</span> <span class="p">(</span><span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;log2FoldChange&#39;</span><span class="p">]</span> <span class="o">&lt;=</span>
+                              <span class="p">(</span><span class="o">-</span><span class="n">log2_fold_chnage</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span>
+                                  <span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">]</span> <span class="o">&gt;=</span>
+                                  <span class="p">(</span><span class="n">neg_log10_pval</span><span class="p">))</span>
 
         <span class="n">unsignificant_gene</span> <span class="o">=</span> <span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="p">(</span>
             <span class="n">neg_log10_pval</span><span class="p">)</span>
@@ -362,7 +373,7 @@
         <span class="k">for</span> <span class="n">cell_type</span> <span class="ow">in</span> <span class="n">cell_type_list</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">cell_type</span> <span class="ow">in</span> <span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
             <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s2"> must belong to &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span><span class="si">}</span><span class="s2">&#39; column&quot;</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Processing for &quot;</span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s1">&quot; ...</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Processing for &quot;</span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s1">&quot; ...&#39;</span><span class="p">)</span>
             <span class="n">design_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_design_matrix</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">)</span>
             <span class="n">dge_results_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_differential_expression_results</span><span class="p">(</span>
                 <span class="n">design_matrix</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">,</span> <span class="n">dirpath</span><span class="p">)</span>
