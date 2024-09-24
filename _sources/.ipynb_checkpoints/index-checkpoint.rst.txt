@@ -1,0 +1,24 @@
+scaLR Documentation
+===================
+.. image:: ../ScaLR_logo1.png
+   :scale: 60%
+
+.. include:: ../README.md
+   :parser: myst_parser.sphinx_
+   :start-line: 2
+   :end-line: 21
+
+.. image:: ../Schematic-of-scPipeline.jpg
+
+.. include:: ../README.md
+   :parser: myst_parser.sphinx_
+   :start-line: 23
+   :end-line: 127
+
+.. toctree::
+   :maxdepth: 10
+   :caption: scaLR structure
+   :hidden:
+
+   modules
+
