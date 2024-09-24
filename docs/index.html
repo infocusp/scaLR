@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scaLR Documentation &mdash; scaLR v1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=76e2d817"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Analysis" href="scalr.analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            scaLR
+              <img src="_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">scaLR Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="scalr-documentation">
+<h1>scaLR Documentation<a class="headerlink" href="#scalr-documentation" title="Link to this heading"></a></h1>
+<a class="reference internal image-reference" href="_images/scaLR_logo.png"><img alt="_images/scaLR_logo.png" src="_images/scaLR_logo.png" style="width: 141.0px; height: 175.79999999999998px;" /></a>
+<section id="single-cell-analysis-using-low-resource-scalr">
+<h2>Single-cell analysis using Low Resource (scaLR)<a class="headerlink" href="#single-cell-analysis-using-low-resource-scalr" title="Link to this heading"></a></h2>
+<!-- [![Paper](https://img.shields.io/badge/Paper-insert_paper_id_here-white)]() -->
+<p><a class="reference external" href="https://github.com/infocusp/scaLR?tab=GPL-3.0-1-ov-file#"><img alt="GitHub" src="https://img.shields.io/github/license/InFoCusp/scaLR" /></a></p>
+<!-- [![Python Versions](https://img.shields.io/badge/python-3.9+-brightgreen.svg)](https://pypi.org/project/celltypist)  -->
+<!-- [![Documentation Status](https://readthedocs.org/projects/celltypist/badge/?version=latest)](https://celltypist.readthedocs.io/en/latest/?badge=latest) -->
+<section id="overview">
+<h3>📖 Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h3>
+<p><b>scaLR</b> is a comprehensive end-to-end pipeline that is equipped with a range of advanced features to streamline and enhance the analysis of scRNA-seq data. The major steps of the platform are:</p>
+<ol class="arabic simple">
+<li><p><b>Data Processing</b>: Large datasets undergo preprocessing and normalization (if the user opts to) and are segmented into training, testing, and validation sets.</p></li>
+<li><p><b>Features Extraction</b>: A model is trained on feature subsets in a batch-wise process, so all features and samples are utilized in the feature selection process. Then, the top-k features are selected to train the final model, using a feature score based on the model’s coefficients/weights.</p></li>
+<li><p><b>Training</b>: A Deep Neural Network (DNN) is trained on the training dataset. The validation dataset is used to validate the model at each epoch and early stopping is performed if applicable. Also, a batch correction method is available to correct batch effects during training in the pipeline.</p></li>
+<li><p><b>Evaluation &amp; Downstream Analysis</b>: The trained model is evaluated using the test dataset by calculating metrics such as precision, recall, f1-score, and accuracy. Various visualizations such as ROC curve of class annotation, feature rank plots, heatmap of top genes per class, DGE analysis, and gene recall curves are generated.</p></li>
+</ol>
+<p>The following flowchart explains the major steps of the scaLR platform.</p>
+</section>
+</section>
+<img alt="_images/Schematic-of-scPipeline.jpg" src="_images/Schematic-of-scPipeline.jpg" />
+<section id="pre-requisites-and-installation-scalr">
+<h2>Pre-requisites and installation scaLR<a class="headerlink" href="#pre-requisites-and-installation-scalr" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ScalR can be installed using Conda or pip. It is tested in Python 3.9 and recommended to use that environment.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">scaLR_env</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.9</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Clone the git repository and install the required packages by activating the conda environment.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">scaLR_env</span>
+
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+</section>
+<section id="input-data">
+<h2>Input Data<a class="headerlink" href="#input-data" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Currently the pipeline expects all datasets in <a class="reference external" href="https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html">anndata</a> formats (<code class="docutils literal notranslate"><span class="pre">.h5ad</span></code> files only).</p></li>
+<li><p>The anndata object should contain cell samples as <code class="docutils literal notranslate"><span class="pre">obs</span></code> and genes as <code class="docutils literal notranslate"><span class="pre">var</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">adata.X</span></code>: contains all gene counts/expression values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">adata.obs</span></code>: contains any metadata regarding cells, including a column for <code class="docutils literal notranslate"><span class="pre">target</span></code> which will be used for classification. The index of <code class="docutils literal notranslate"><span class="pre">adata.obs</span></code> is cell_barcodes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">adata.var</span></code>: contains all gene_names as Index.</p></li>
+</ul>
+</section>
+<section id="how-to-run">
+<h2>How to run<a class="headerlink" href="#how-to-run" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>It is necessary that the user modify the configuration file and each stage of the pipeline is available inside the config folder [config.yml] or [full_config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.</p></li>
+<li><p>Refer config.yml &amp; it’s detailed config <a class="reference internal" href="#config_README.md"><span class="xref myst">README</span></a> file on how to use different parameters and files.</p></li>
+<li><p>Then use the <code class="docutils literal notranslate"><span class="pre">pipeline.py</span></code> file to run the entire pipeline according to your configurations. This file takes as argument the path to config (<code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">|</span> <span class="pre">--config</span></code>), along with optional flags to log all parts of the pipelines (<code class="docutils literal notranslate"><span class="pre">-l</span> <span class="pre">|</span> <span class="pre">--log</span></code>) and to analyze memory usage (<code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">|</span> <span class="pre">--memoryprofiler</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">pipeline.py</span> <span class="pre">--config</span> <span class="pre">/path/to/config</span> <span class="pre">-c</span> <span class="pre">config.yaml</span> <span class="pre">-l</span> <span class="pre">-m</span></code> to run the scaLR.</p></li>
+</ol>
+</section>
+<section id="interactive-tutorials">
+<h2>Interactive tutorials<a class="headerlink" href="#interactive-tutorials" title="Link to this heading"></a></h2>
+<p>Detailed tutorials have been made on how to use some functionalities as a scaLR library. Find the links below.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/infocusp/scaLR/blob/main/tutorials/preprocessing/normalization.ipynb">Normalization</a></p></li>
+<li><p><a class="reference external" href="https://github.com/infocusp/scaLR/blob/main/tutorials/preprocessing/batch_correction.ipynb">Batch correction</a></p></li>
+<li><p><a class="reference external" href="https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb">Gene recall curve</a></p></li>
+<li><p><a class="reference external" href="https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/differential_gene_expression/dge.ipynb">Differential gene expression analysis</a></p></li>
+<li><p><a class="reference external" href="https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/shap_analysis/shap_heatmap.ipynb">SHAP analysis</a></p></li>
+</ul>
+</section>
+<section id="experiment-output-structure">
+<h2>Experiment Output Structure<a class="headerlink" href="#experiment-output-structure" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>pipeline.py</strong>:
+The main script that perform end to end run.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">exp_dir</span></code>: root experiment directory for the storage of all step outputs of the platform specified in the config.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">config.yml</span></code>: copy of config file to reproduce the user defined experiment.</p></li>
+</ul>
+</li>
+<li><p><strong>data_ingestion</strong>:
+Reads the data, and splits it into Train/Validation/Test sets for the pipeline. Then performs sample-wise normalization on the data.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">exp_dir</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">data</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">train_val_test_split.json</span></code>: contains sample indices for train/validation/test splits.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">label_mappings.json</span></code>: contains mappings of all metadata columns between labels and IDs.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">train_val_test_split</span></code>: directory containing the train, validation, and test samples and data files.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>feature_extraction</strong>:
+Performs feature selection and extraction of new datasets containing subset of features.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">exp_dir</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">feature_extraction</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">chunked_models</span></code>: contains weights of each model trained on feature subset data (refer to feature subsetting algorithm).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">feature_subset_data</span></code>: directory containing the new feature-subsetted train, val, and test samples anndatas.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">score_matrix.csv</span></code>: combined scores of all individual models, for each feature and class. shape: n_classes X n_features.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">top_features.json</span></code>: a file containing a list of top features selected / to be subsetted from total features.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>final_model_training</strong>:
+Trains a final model based on <code class="docutils literal notranslate"><span class="pre">train_datapath</span></code> and <code class="docutils literal notranslate"><span class="pre">val_datapath</span></code> in config.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">exp_dir</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">logs</span></code>: directory containing Tensorboard Logs for the training of the model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">checkpoints</span></code>: directory containing model weights checkpointed at every interval specified in config.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">best_model</span></code>: the best model checkpoint contains information to use model for inference/resume training.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_config.yaml</span></code>: config file containing model parameters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mappings.json</span></code>: contains mapping of class_names to class_ids used by model during training.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model.pt</span></code>: contains model weights.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>eval_and_analysis</strong>:
+Performs evaluation of best model trained on user-defined metrics on the test set. Also performs various downstream tasks.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">exp_dir</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">analysis</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">classification_report.csv</span></code>: contains classification report showing Precision, Recall, F1, and accuracy metrics for each class, on the test set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gene_recall_curve.svg</span></code>: contains gene recall curve plots.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gene_recall_curve_info.json</span></code>: contains reference genes list which are present in top_K ranked genes per class for each model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gene_analysis</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">score_matrix.csv</span></code>: score of the final model, for each feature and class. shape: n_classes X n_features.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">top_features.json</span></code>: a file containing a list of selected top features/biomarkers.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">heatmaps</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">class_name.svg</span></code>: heatmap for top genes of particular class w.r.t those genes association in other classes. E.g. B.svg, C.svg etc.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">roc_auc.svg</span></code>: contains ROC-AUC plot for all classes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pseudobulk_dge_result</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.csv</span></code>: contains Pseudobulk DGE results between selected factor categories for a celltype.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.svg</span></code>: volcano plot of Log2Foldchange vs -log10(p-value) of genes.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lmem_dge_result</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">lmem_DGE_celltype.csv</span></code>: contains LMEM DGE results between selected factor categories for a celltype.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lmem_DGE_fixed_effect_factor_X.svg</span></code>: volcano plot of coefficient vs -log10(p-value) of genes.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Link to this heading"></a></h2>
+<p>Jogani Saiyam, Anand Santosh Pol , Mayur Prajapati, Amit Samal, Kriti Bhatia, Jayendra Parmar, Urvik Patel, Falak Shah, Nisarg Vyas, and Saurabh Gupta. “scaLR: a low-resource deep neural network-based platform for single cell analysis and biomarker discovery.” bioRxiv (2024): 2024-09.</p>
+<p>doi: https://doi.org/10.1101/2024.09.19.613226</p>
+</section>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="scalr.analysis.html" class="btn btn-neutral float-right" title="Analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
