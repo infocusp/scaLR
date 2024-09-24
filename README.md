@@ -5,7 +5,7 @@
 
 [![GitHub](https://img.shields.io/github/license/InFoCusp/scaLR)](https://github.com/infocusp/scaLR?tab=GPL-3.0-1-ov-file#)
 [![Documentation](https://img.shields.io/badge/docs-v1.0.0-orange)](https://infocusp.github.io/scaLR/)
-<!-- [![Documentation Status](https://readthedocs.org/projects/celltypist/badge/?version=latest)](https://infocusp.github.io/scaLR/) -->
+
 
 ## 📖 Overview 
 
