@@ -102,9 +102,6 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
     if sample_chunksize >= len(sample_inds):
         sample_chunksize = len(sample_inds) - 1
 
-    for col in full_data.obs.columns:
-        full_data.obs[col] = full_data.obs[col].astype('category')
-
     for i, (start) in enumerate(range(0, len(sample_inds), sample_chunksize)):
         if feature_inds:
             data = full_data[sample_inds[start:start + sample_chunksize],
