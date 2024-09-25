@@ -2,11 +2,11 @@ import os
 from os import path
 import shutil
 
-from scalr.analysis import dge_lmem
+from scalr.analysis import dge_pseudobulk
 from scalr.utils import generate_dummy_dge_anndata
 
 
-def test_lmem_generate_analysis():
+def test_pseudobulk_generate_analysis():
 
     os.makedirs('./tmp', exist_ok=True)
 
@@ -15,16 +15,17 @@ def test_lmem_generate_analysis():
 
     # Path to store dge result.
     dirpath = './tmp'
-    dge_lm = dge_lmem.DgeLMEM(fixed_effect_column='disease',
-                              fixed_effect_factors=['disease-1', 'normal'],
-                              group='donor_id',
-                              celltype_column='cell_type',
-                              cell_subsets=['B_cell', 'T_cell'])
+    dge_pbk = dge_pseudobulk.DgePseudoBulk(
+        celltype_column='cell_type',
+        design_factor='disease',
+        factor_categories=['disease-1', 'normal'],
+        sum_column='donor_id',
+        cell_subsets=['B_cell', 'T_cell'])
 
-    dge_lm.generate_analysis(adata, dirpath)
+    dge_pbk.generate_analysis(adata, dirpath)
 
-    lmem_dirpath = dirpath + '/lmem_dge_result'
-    result_files = os.listdir(lmem_dirpath)
+    pbk_dirpath = dirpath + '/pseudobulk_dge_result'
+    result_files = os.listdir(pbk_dirpath)
     csv_files = [file for file in result_files if file.endswith('.csv')]
     svg_files = [file for file in result_files if file.endswith('.svg')]
 
