@@ -91,7 +91,7 @@ def generate_dummy_dge_anndata(n_donors: int = 5, n_vars: int = 10):
     np.random.seed(0)
 
     donor_list = [f'D_{i}' for i in range(1, n_donors + 1)]
-    condition_array = np.random.choice(['disease-1', 'normal'],
+    condition_array = np.random.choice(['disease_x', 'normal'],
                                        size=n_donors,
                                        replace=True)
 
