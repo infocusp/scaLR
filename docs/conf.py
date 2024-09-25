@@ -7,14 +7,15 @@ release = 'v1.0.0'
 # -- General configuration ---------------------------------------------------
 import os
 import sys
-sys.path.insert(0,os.path.abspath(".."))
+
+sys.path.insert(0, os.path.abspath(".."))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.autosummary',
     'sphinx.ext.coverage',
     'sphinx.ext.extlinks',
-    'sphinx.ext.githubpages', 
+    'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
@@ -32,5 +33,6 @@ master_doc = 'index'
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_css_files = ['logo.css']
 html_logo = "_static/scaLR_logo.png"
 html_favicon = "_static/scaLR_logo.png"
