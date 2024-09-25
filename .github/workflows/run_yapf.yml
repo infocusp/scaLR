@@ -1,8 +1,7 @@
-name: YAPF auto formatting
-on:
-  push:
-    paths:
-    - '**.py'
+name: YAPF Formatting Check
+
+on: [push]
+
 jobs:
   autoyapf:
     runs-on: ubuntu-latest
