@@ -3,19 +3,18 @@ requires = ["hatchling", "hatch-requirements-txt"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pyscalr"
-version = "0.0.3"
+name = "scaLR"
+version = "0.0.2"
 requires-python = ">=3.9"
 authors = [
-  { name="Infocusp", email="info@infocusp.com" },
+  { name="Infocusp", email="saurabh@infocusp.com" },
 ]
 description = "scaLR: Single cell analysis using low resource."
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3.9",
     "Operating System :: OS Independent",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Science/Research"
 ]
 
 dynamic = ["dependencies"]
@@ -38,4 +37,3 @@ license = {file = "LICENSE"}
 Repository = "https://github.com/infocusp/scaLR.git"
 Homepage = "https://github.com/infocusp/scaLR"
 Issues = "https://github.com/infocusp/scaLR/issues"
-
