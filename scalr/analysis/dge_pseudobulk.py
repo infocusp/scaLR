@@ -57,7 +57,7 @@ class DgePseudoBulk(AnalysisBase):
 
         self.celltype_column = celltype_column
         self.design_factor = design_factor
-        # Hacky fix since pydeseq2 does not like `_` in column_names
+        # Hacky fix since pydeseq2 does not support `_` in `design_factor` or factor levels.
         self.design_factor_no_undrscr = design_factor.replace('_', '')
         self.factor_categories = [
             factor.replace('_', '-') for factor in factor_categories
