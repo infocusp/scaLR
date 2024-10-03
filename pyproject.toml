@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling", "hatch-requirements-txt"]
+build-backend = "hatchling.build"
+
+[project]
+name = "scaLR"
+version = "0.0.1"
+requires-python = ">=3.9"
+authors = [
+  { name="Infocusp", email="saurabh@infocusp.com" },
+]
+description = "scaLR: Single cell analysis using low resource."
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3.9",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research"
+]
+
+dynamic = ["dependencies"]
+[tool.hatch.build.targets.wheel]
+packages = ["scalr"]
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+
+[tool.hatch.build]
+exclude = [
+  "docs/*",
+  "tutorials/*",
+  "tests/*",
+]
+
+license = {file = "LICENSE"}
+
+[project.urls]
+Repository = "https://github.com/infocusp/scaLR.git"
+Homepage = "https://github.com/infocusp/scaLR"
+Issues = "https://github.com/infocusp/scaLR/issues"

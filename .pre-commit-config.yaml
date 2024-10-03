@@ -9,11 +9,3 @@ repos:
     hooks:
     -   id: isort
         args: ['--settings-path', '.isort.cfg']
--   repo: local
-    hooks:
-      - id: pytest
-        name: Running test cases in pipeline...
-        entry: pytest -s -v
-        language: system
-        pass_filenames: false
-        stages: [commit]
