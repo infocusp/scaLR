@@ -3,7 +3,7 @@ name: Publish package to PyPI
 on:
   push:
     tags:
-      - '*' # Push events to every tag not containing /
+      - 'v*' # Push events to tag which starts with v.
 
 jobs:
   build:
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/scalr  # Replace <package-name> with your PyPI project name
+      url: https://pypi.org/p/pyscalr
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
     steps:
