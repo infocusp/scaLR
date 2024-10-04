@@ -253,14 +253,12 @@ class DgeLMEM(AnalysisBase):
 
                 lmem_res_df[f'-log10_{pval_col}'] = -np.log10(
                     lmem_res_df[pval_col])
-                down_reg_genes_idx = (lmem_res_df[coef_col] <
-                                      (self.coef_threshold)) & (
-                                          lmem_res_df[f'-log10_{pval_col}'] >=
-                                          (neg_log10_pval))
-                up_reg_genes_idx = (lmem_res_df[coef_col] >
-                                    (self.coef_threshold)) & (
-                                        lmem_res_df[f'-log10_{pval_col}'] >=
-                                        (neg_log10_pval))
+                down_reg_genes_idx = (lmem_res_df[coef_col] < (
+                    self.coef_threshold)) & (lmem_res_df[f'-log10_{pval_col}']
+                                             >= (neg_log10_pval))
+                up_reg_genes_idx = (lmem_res_df[coef_col] > (
+                    self.coef_threshold)) & (lmem_res_df[f'-log10_{pval_col}']
+                                             >= (neg_log10_pval))
                 rest_gene_idx = ~(down_reg_genes_idx | up_reg_genes_idx)
                 plt.figure(figsize=(10, 5))
                 plt.grid(False)
