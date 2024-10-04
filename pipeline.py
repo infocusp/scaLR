@@ -213,11 +213,11 @@ if __name__ == '__main__':
         pipeline(**kwargs)
 
     end_time = time()
-    flow_logger.info(f'Total time taken: {end_time - start_time}')
+    flow_logger.info(f'Total time taken: {end_time - start_time} s')
 
     event_logger.heading1('Runtime Analyis')
-    event_logger.info(f'Total time taken: {end_time - start_time}')
+    event_logger.info(f'Total time taken: {end_time - start_time} s')
 
     if args.memoryprofiler:
-        flow_logger.info(f'Maximum memory usage: {max_memory}')
-        event_logger.info(f'Maximum memory usage: {max_memory}')
+        flow_logger.info(f'Maximum memory usage: {max_memory} MB')
+        event_logger.info(f'Maximum memory usage: {max_memory} MB')

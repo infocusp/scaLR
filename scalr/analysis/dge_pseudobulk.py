@@ -164,12 +164,11 @@ class DgePseudoBulk(AnalysisBase):
         dge_results_df['-log10(pvalue)'] = -np.log10(dge_results_df['pvalue'])
 
         upregulated_gene = (dge_results_df['log2FoldChange'] >= log2_fold_chnage
-                           ) & (dge_results_df['-log10(pvalue)'] >=
-                                (neg_log10_pval))
-        downregulated_gene = (dge_results_df['log2FoldChange'] <=
-                              (-log2_fold_chnage)) & (
-                                  dge_results_df['-log10(pvalue)'] >=
-                                  (neg_log10_pval))
+                           ) & (dge_results_df['-log10(pvalue)']
+                                >= (neg_log10_pval))
+        downregulated_gene = (dge_results_df['log2FoldChange'] <= (
+            -log2_fold_chnage)) & (dge_results_df['-log10(pvalue)']
+                                   >= (neg_log10_pval))
 
         unsignificant_gene = dge_results_df['-log10(pvalue)'] <= (
             neg_log10_pval)
