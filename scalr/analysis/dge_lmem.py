@@ -5,31 +5,33 @@ from os import path
 import pickle
 import resource
 import string
-from typing import Optional, Union, Tuple
 import traceback
+from typing import Optional, Tuple, Union
 import warnings
 
 from anndata import AnnData
 from anndata import ImplicitModificationWarning
 import anndata as ad
 from anndata.experimental import AnnCollection
-from joblib import Parallel, delayed
+from joblib import delayed
+from joblib import Parallel
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from pandas import DataFrame
+import pandas as pd
 import scanpy as sc
 from scipy.optimize import OptimizeWarning
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from statsmodels.stats.multitest import multipletests
-from statsmodels.tools.sm_exceptions import HessianInversionWarning, ConvergenceWarning
+from statsmodels.tools.sm_exceptions import ConvergenceWarning
+from statsmodels.tools.sm_exceptions import HessianInversionWarning
 
+from scalr import utils
 from scalr.analysis import AnalysisBase
 from scalr.feature.selector import build_selector
 from scalr.utils import EventLogger
 from scalr.utils import read_data
-from scalr import utils
 
 
 class DgeLMEM(AnalysisBase):
@@ -126,7 +128,6 @@ class DgeLMEM(AnalysisBase):
         if cell_type is not None:
             mask = pd.Series([True] * batch_adata.shape[0],
                              index=batch_adata.obs_names)
-            mask &= (batch_adata.obs[self.celltype_column] == cell_type)
             for factor in self.fixed_effect_factors:
                 assert factor in batch_adata.obs[
                     self.
@@ -215,7 +216,7 @@ class DgeLMEM(AnalysisBase):
 
         mxmodel_results_list = []
         try:
-            mxmodel_results_list = Parallel(n_jobs=self.n_cpu)(
+            mxmodel_results_list = Parallel(n_jobs=self.n_cpu, backend="loky")(
                 delayed(self.get_result_mxmodel_per_gene)(gene, ad_subset_to_df)
                 for gene in gene_names)
         except Exception as e:
@@ -253,12 +254,14 @@ class DgeLMEM(AnalysisBase):
 
                 lmem_res_df[f'-log10_{pval_col}'] = -np.log10(
                     lmem_res_df[pval_col])
-                down_reg_genes_idx = (lmem_res_df[coef_col] < (
-                    self.coef_threshold)) & (lmem_res_df[f'-log10_{pval_col}']
-                                             >= (neg_log10_pval))
-                up_reg_genes_idx = (lmem_res_df[coef_col] > (
-                    self.coef_threshold)) & (lmem_res_df[f'-log10_{pval_col}']
-                                             >= (neg_log10_pval))
+                down_reg_genes_idx = (lmem_res_df[coef_col] <
+                                      (self.coef_threshold)) & (
+                                          lmem_res_df[f'-log10_{pval_col}'] >=
+                                          (neg_log10_pval))
+                up_reg_genes_idx = (lmem_res_df[coef_col] >
+                                    (self.coef_threshold)) & (
+                                        lmem_res_df[f'-log10_{pval_col}'] >=
+                                        (neg_log10_pval))
                 rest_gene_idx = ~(down_reg_genes_idx | up_reg_genes_idx)
                 plt.figure(figsize=(10, 5))
                 plt.grid(False)
@@ -362,19 +365,19 @@ class DgeLMEM(AnalysisBase):
                 assert cell_type in test_data.obs[
                     self.
                     celltype_column].values, f"{cell_type} must be in the '{self.celltype_column}' column in 'adata.obs'"
+                cell_type_test_data = test_data[test_data.obs[
+                    self.celltype_column] == cell_type]
                 logger.info(f'\nProcessing for "{cell_type}" ...')
                 fixed_val_lmem_result_list = []
-                for batch in range(0, len(test_data.var_names),
+                for batch in range(0, len(cell_type_test_data.var_names),
                                    self.gene_batch_size):
-                    batch_adata = test_data[:, batch:batch +
-                                            self.gene_batch_size].to_adata()
                     with warnings.catch_warnings():
                         warnings.filterwarnings(
                             "ignore", category=ImplicitModificationWarning)
                         gene_list, batch_df = self.get_genes_n_fixed_val_subset_df(
-                            test_data[:, batch:batch +
-                                      self.gene_batch_size].to_adata(),
-                            cell_type)
+                            cell_type_test_data[:, batch:batch +
+                                                self.gene_batch_size].to_adata(
+                                                ), cell_type)
                     result_lmem_batch = self.get_multiproc_mxeffect_model_batch_res(
                         gene_list, batch_df)
                     fixed_val_lmem_result_list.extend(result_lmem_batch)
