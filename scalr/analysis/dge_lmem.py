@@ -142,7 +142,6 @@ class DgeLMEM(AnalysisBase):
             ad_subset_to_df[self.group] = ad_subset.obs[self.group].values
             ad_subset_to_df[self.fixed_effect_column] = ad_subset.obs[
                 self.fixed_effect_column].values
-            # del ad_subset
         else:
             sc.pp.filter_genes(batch_adata, min_cells=self.min_cell_threshold)
             ad_subset_to_df = batch_adata.to_df()
