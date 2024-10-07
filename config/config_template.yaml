@@ -139,7 +139,13 @@ analysis:
             params:
                 k: 100
 
-    # downstream_analysis:
+    # full_samples_downstream_analysis:
+    #     - name: DgePseudoBulk
+    #       params: **kwargs
+    #     - name: DgeLMEM
+    #       params: **kwargs      
+
+    # test_samples_downstream_analysis:
     #     - name: GeneRecallCurve
     #       params:
     #         reference_genes_path: '/path/to/reference_genes.csv'
@@ -152,7 +158,5 @@ analysis:
     #       params: **kwargs
     #     - name: RocAucCurve
     #       params: **kwargs
-    #     - name: DgePseudoBulk
-    #       params: **kwargs
-    #     - name: DgeLMEM
-    #       params: **kwargs  
+
+  

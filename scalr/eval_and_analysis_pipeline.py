@@ -15,6 +15,7 @@ from scalr.feature_extraction_pipeline import FeatureExtractionPipeline
 from scalr.nn.dataloader import build_dataloader
 from scalr.nn.model import build_model
 from scalr.utils import FlowLogger
+from scalr.utils import load_full_data_from_config
 from scalr.utils import load_test_data_from_config
 from scalr.utils import load_train_val_data_from_config
 from scalr.utils import read_data
@@ -84,6 +85,7 @@ class EvalAndAnalysisPipeline:
         self.train_data, self.val_data = load_train_val_data_from_config(
             data_config)
         self.test_data = load_test_data_from_config(data_config)
+        self.full_data = load_full_data_from_config(data_config)
 
         self.target = data_config.get('target')
         self.mappings = read_data(data_config['label_mappings'])
@@ -106,6 +108,7 @@ class EvalAndAnalysisPipeline:
         self.train_data = train_data
         self.val_data = val_data
         self.test_data = test_data
+        self.full_data = None
         self.target = target
         self.mappings = mappings
         self.build_dataloaders()
@@ -152,12 +155,48 @@ class EvalAndAnalysisPipeline:
         top_features = gene_analyser.top_feature_extraction()
         self.primary_analysis['top_features'] = top_features
 
-    def perform_downstream_anlaysis(self):
+    def full_samples_downstream_anlaysis(self):
         """A function to perform all downstream analysis tasks on model and data."""
-        downstream_analysis = self.analysis_config.get('downstream_analysis',
-                                                       list())
+        downstream_analysis = self.analysis_config.get(
+            'full_samples_downstream_analysis', list())
         if downstream_analysis:
-            self.flow_logger.info('Performing Downstream Analysis')
+            self.flow_logger.info(
+                'Performing Downstream Analysis on all samples')
+
+        for i, (analysis_config) in enumerate(downstream_analysis):
+            try:
+                self.flow_logger.info(f'Performing {analysis_config["name"]}')
+
+                analysis_config = deepcopy(analysis_config)
+                analyser, analysis_config = build_analyser(analysis_config)
+                downstream_analysis[i] = analysis_config
+
+                # Note: Not passing Model & DataLoader since it is assumed that
+                # model is trained on train data, so analysis by model should be
+                # on test data only
+                analysis = analyser.generate_analysis(model=None,
+                                                      test_data=self.full_data,
+                                                      test_dl=None,
+                                                      dirpath=self.dirpath,
+                                                      **self.primary_analysis)
+
+                # To be able to use any above analyses in other downstream analysis.
+                if analysis:
+                    self.primary_analysis[analysis_config['name']] = analysis
+            except Exception as e:
+                self.flow_logger.exception(e)
+
+        if downstream_analysis:
+            self.analysis_config[
+                'full_samples_downstream_analysis'] = downstream_analysis
+
+    def test_samples_downstream_anlaysis(self):
+        """A function to perform all downstream analysis tasks on model and data."""
+        downstream_analysis = self.analysis_config.get(
+            'test_samples_downstream_analysis', list())
+        if downstream_analysis:
+            self.flow_logger.info(
+                'Performing Downstream Analysis on test samples')
 
         for i, (analysis_config) in enumerate(downstream_analysis):
             try:
@@ -180,7 +219,8 @@ class EvalAndAnalysisPipeline:
                 self.flow_logger.exception(e)
 
         if downstream_analysis:
-            self.analysis_config['downstream_analysis'] = downstream_analysis
+            self.analysis_config[
+                'test_samples_downstream_analysis'] = downstream_analysis
 
     def get_updated_config(self) -> dict:
         """A function to return updated configs."""
