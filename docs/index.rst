@@ -1,6 +1,6 @@
 scaLR Documentation
 ===================
-.. image:: ../scaLR_logo.png
+.. image:: ../img/scaLR_logo.png
    :scale: 60%
 
 .. include:: ../README.md
