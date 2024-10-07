@@ -15,9 +15,12 @@ import yaml
 from scalr.utils.logger import FlowLogger
 
 
-def read_data(filepath: str,
-              backed: str = 'r',
-              index_col: int = 0) -> Union[dict, AnnData, AnnCollection]:
+def read_data(
+        filepath: str,
+        backed: str = 'r',
+        index_col: int = 0,
+        return_anncollection: bool = True
+) -> Union[dict, AnnData, AnnCollection]:
     """This function reads a json, yaml, csv or AnnData object file if the file path contains it.
     
     Returns an AnnCollection in case of a directory with chunked anndatas.
@@ -42,7 +45,9 @@ def read_data(filepath: str,
     elif filepath.endswith('.h5ad'):
         data = read_anndata(filepath, backed=backed)
     elif path.exists(path.join(filepath, '0.h5ad')):
-        data = read_chunked_anndatas(filepath, backed=backed)
+        data = read_chunked_anndatas(filepath,
+                                     backed=backed,
+                                     return_anncollection=return_anncollection)
     else:
         raise ValueError(
             '''`filepath` is not a `json`, `yaml`, `csv` or `h5ad` file,
@@ -125,43 +130,48 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
         write_data(data, path.join(dirpath, f'{i}.h5ad'))
 
 
+def _get_datapath_from_config(data_config):
+    """This function returns the datapath to be used to read from config.
+
+    Args:
+        data_config: Data config.
+    """
+    flow_logger = FlowLogger('File Utils')
+    train_val_test_paths = data_config.get('train_val_test')
+    datapath = None
+
+    if not train_val_test_paths:
+        raise ValueError('Split Datapaths not given')
+
+    if train_val_test_paths.get('feature_subset_datapaths'):
+        datapath = 'feature_subset_datapaths'
+        flow_logger.info('Data Loaded from Feature subset datapaths')
+
+    elif train_val_test_paths.get('final_datapaths'):
+        datapath = 'final_datapaths'
+        flow_logger.info('Data Loaded from Final datapaths')
+
+    elif train_val_test_paths.get('split_datapaths'):
+        datapath = 'split_datapaths'
+        flow_logger.info('Data Loaded from Split datapaths')
+
+    else:
+        raise ValueError('Split Datapaths not given')
+
+    return datapath
+
+
 def load_train_val_data_from_config(data_config):
     """This function returns train & validation data from the data config.
 
     Args:
         data_config: Data config.
     """
-
-    flow_logger = FlowLogger('File Utils')
-
     train_val_test_paths = data_config.get('train_val_test')
-    if not train_val_test_paths:
-        raise ValueError('Split Datapaths not given')
+    datapath = _get_datapath_from_config(data_config)
 
-    if train_val_test_paths.get('feature_subset_datapaths'):
-        train_data = read_data(
-            path.join(train_val_test_paths['feature_subset_datapaths'],
-                      'train'))
-        val_data = read_data(
-            path.join(train_val_test_paths['feature_subset_datapaths'], 'val'))
-        flow_logger.info('Train&Val Data Loaded from Feature subset datapaths')
-
-    elif train_val_test_paths.get('final_datapaths'):
-        train_data = read_data(
-            path.join(train_val_test_paths['final_datapaths'], 'train'))
-        val_data = read_data(
-            path.join(train_val_test_paths['final_datapaths'], 'val'))
-        flow_logger.info('Train&Val Data Loaded from Final datapaths')
-
-    elif train_val_test_paths.get('split_datapaths'):
-        train_data = read_data(
-            path.join(train_val_test_paths['split_datapaths'], 'train'))
-        val_data = read_data(
-            path.join(train_val_test_paths['split_datapaths'], 'val'))
-        flow_logger.info('Train&Val Data Loaded from Split datapaths')
-
-    else:
-        raise ValueError('Split Datapaths not given')
+    train_data = read_data(path.join(train_val_test_paths[datapath], 'train'))
+    val_data = read_data(path.join(train_val_test_paths[datapath], 'val'))
 
     return train_data, val_data
 
@@ -172,31 +182,33 @@ def load_test_data_from_config(data_config):
     Args:
         data_config: Data config.
     """
-    flow_logger = FlowLogger('File Utils')
-
     train_val_test_paths = data_config.get('train_val_test')
-    if not train_val_test_paths:
-        raise ValueError('Split Datapaths not given')
+    datapath = _get_datapath_from_config(data_config)
 
-    if train_val_test_paths.get('feature_subset_datapaths'):
-        test_data = read_data(
-            path.join(train_val_test_paths['feature_subset_datapaths'], 'test'))
-        flow_logger.info('Test Data Loaded from Feature subset datapaths')
-
-    elif train_val_test_paths.get('final_datapaths'):
-        test_data = read_data(
-            path.join(train_val_test_paths['final_datapaths'], 'test'))
-        flow_logger.info('Test Data Loaded from Final datapaths')
-
-    elif train_val_test_paths.get('split_datapaths'):
-        test_data = read_data(
-            path.join(train_val_test_paths['split_datapaths'], 'test'))
-        flow_logger.info('Test Data Loaded from Split datapaths')
-
-    else:
-        raise ValueError('Split Datapaths not given')
+    test_data = read_data(path.join(train_val_test_paths[datapath], 'test'))
 
     return test_data
+
+
+def load_full_data_from_config(data_config):
+    """This function returns full data from the data config.
+
+    Args:
+        data_config: Data config.
+    """
+    train_val_test_paths = data_config.get('train_val_test')
+    datapath = _get_datapath_from_config(data_config)
+
+    full_datas = []
+    full_datas += read_data(path.join(train_val_test_paths[datapath], 'train'),
+                            return_anncollection=False)
+    full_datas += read_data(path.join(train_val_test_paths[datapath], 'val'),
+                            return_anncollection=False)
+    full_datas += read_data(path.join(train_val_test_paths[datapath], 'test'),
+                            return_anncollection=False)
+
+    full_data = AnnCollection(full_datas)
+    return full_data
 
 
 # Readers
@@ -225,7 +237,9 @@ def read_anndata(filepath: str, backed: str = 'r') -> AnnData:
     return data
 
 
-def read_chunked_anndatas(dirpath: str, backed: str = 'r') -> AnnCollection:
+def read_chunked_anndatas(dirpath: str,
+                          backed: str = 'r',
+                          return_anncollection: bool = True) -> AnnCollection:
     """This file returns an AnnCollection object from multiple anndatas
     in dirpath directory.
     """
@@ -237,7 +251,11 @@ def read_chunked_anndatas(dirpath: str, backed: str = 'r') -> AnnCollection:
         else:
             break
     data = AnnCollection(datas)
-    return data
+
+    if return_anncollection:
+        return data
+    else:
+        return datas
 
 
 # Writers
