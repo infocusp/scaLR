@@ -57,9 +57,11 @@ class DgePseudoBulk(AnalysisBase):
 
         self.celltype_column = celltype_column
         self.design_factor = design_factor
-        # Hacky fix since pydeseq2 does not like `_` in column_names
+        # Hacky fix since pydeseq2 does not support `_` in `design_factor` or factor levels.
         self.design_factor_no_undrscr = design_factor.replace('_', '')
-        self.factor_categories = factor_categories
+        self.factor_categories = [
+            factor.replace('_', '-') for factor in factor_categories
+        ]
         self.sum_column = sum_column
         self.cell_subsets = cell_subsets
         self.min_cell_threshold = min_cell_threshold
@@ -251,6 +253,8 @@ class DgePseudoBulk(AnalysisBase):
         logger.heading2("DGE analysis using Pseudobulk")
         dirpath = os.path.join(dirpath, 'pseudobulk_dge_result')
         os.makedirs(dirpath, exist_ok=True)
+        test_data.obs[self.design_factor] = test_data.obs[
+            self.design_factor].str.replace('_', '-')
         assert self.celltype_column in test_data.obs.columns, f"{self.celltype_column} must be a column name in `adata.obs`"
         assert self.design_factor in test_data.obs.columns, f"{self.design_factor} must be a column name in `adata.obs`"
         assert self.sum_column in test_data.obs.columns, f"{self.sum_column} must be a column name in `adata.obs`"

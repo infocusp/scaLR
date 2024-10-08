@@ -142,7 +142,6 @@ class DgeLMEM(AnalysisBase):
             ad_subset_to_df[self.group] = ad_subset.obs[self.group].values
             ad_subset_to_df[self.fixed_effect_column] = ad_subset.obs[
                 self.fixed_effect_column].values
-            # del ad_subset
         else:
             sc.pp.filter_genes(batch_adata, min_cells=self.min_cell_threshold)
             ad_subset_to_df = batch_adata.to_df()
@@ -254,14 +253,12 @@ class DgeLMEM(AnalysisBase):
 
                 lmem_res_df[f'-log10_{pval_col}'] = -np.log10(
                     lmem_res_df[pval_col])
-                down_reg_genes_idx = (lmem_res_df[coef_col] <
-                                      (self.coef_threshold)) & (
-                                          lmem_res_df[f'-log10_{pval_col}'] >=
-                                          (neg_log10_pval))
-                up_reg_genes_idx = (lmem_res_df[coef_col] >
-                                    (self.coef_threshold)) & (
-                                        lmem_res_df[f'-log10_{pval_col}'] >=
-                                        (neg_log10_pval))
+                down_reg_genes_idx = (lmem_res_df[coef_col] < (
+                    self.coef_threshold)) & (lmem_res_df[f'-log10_{pval_col}']
+                                             >= (neg_log10_pval))
+                up_reg_genes_idx = (lmem_res_df[coef_col] > (
+                    self.coef_threshold)) & (lmem_res_df[f'-log10_{pval_col}']
+                                             >= (neg_log10_pval))
                 rest_gene_idx = ~(down_reg_genes_idx | up_reg_genes_idx)
                 plt.figure(figsize=(10, 5))
                 plt.grid(False)
