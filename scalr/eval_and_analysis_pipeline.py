@@ -162,6 +162,8 @@ class EvalAndAnalysisPipeline:
         if downstream_analysis:
             self.flow_logger.info(
                 'Performing Downstream Analysis on all samples')
+            full_samples_analysis_path = path.join(self.dirpath, 'full_samples')
+            os.makedirs(full_samples_analysis_path, exist_ok=True)
 
         for i, (analysis_config) in enumerate(downstream_analysis):
             try:
@@ -174,11 +176,12 @@ class EvalAndAnalysisPipeline:
                 # Note: Not passing Model & DataLoader since it is assumed that
                 # model is trained on train data, so analysis by model should be
                 # on test data only
-                analysis = analyser.generate_analysis(model=None,
-                                                      test_data=self.full_data,
-                                                      test_dl=None,
-                                                      dirpath=self.dirpath,
-                                                      **self.primary_analysis)
+                analysis = analyser.generate_analysis(
+                    model=None,
+                    test_data=self.full_data,
+                    test_dl=None,
+                    dirpath=full_samples_analysis_path,
+                    **self.primary_analysis)
 
                 # To be able to use any above analyses in other downstream analysis.
                 if analysis:
@@ -197,6 +200,8 @@ class EvalAndAnalysisPipeline:
         if downstream_analysis:
             self.flow_logger.info(
                 'Performing Downstream Analysis on test samples')
+            test_samples_analysis_path = path.join(self.dirpath, 'test_samples')
+            os.makedirs(test_samples_analysis_path, exist_ok=True)
 
         for i, (analysis_config) in enumerate(downstream_analysis):
             try:
@@ -206,11 +211,12 @@ class EvalAndAnalysisPipeline:
                 analyser, analysis_config = build_analyser(analysis_config)
                 downstream_analysis[i] = analysis_config
 
-                analysis = analyser.generate_analysis(model=self.model,
-                                                      test_data=self.test_data,
-                                                      test_dl=self.test_dl,
-                                                      dirpath=self.dirpath,
-                                                      **self.primary_analysis)
+                analysis = analyser.generate_analysis(
+                    model=self.model,
+                    test_data=self.test_data,
+                    test_dl=self.test_dl,
+                    dirpath=test_samples_analysis_path,
+                    **self.primary_analysis)
 
                 # To be able to use any above analyses in other downstream analysis.
                 if analysis:
