@@ -116,8 +116,8 @@ Performs evaluation of best model trained on user-defined metrics on the test se
                 - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.csv`: contains Pseudobulk DGE results between selected factor categories for a celltype.
                 - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.svg`: volcano plot of Log2Foldchange vs -log10(p-value) of genes.
             - `lmem_dge_result`
-                - `lmem_DGE_celltype.csv`: contains LMEM DGE results between selected factor categories for a celltype.
-                - `lmem_DGE_fixed_effect_factor_X.svg`: volcano plot of coefficient vs -log10(p-value) of genes.
+                - `lmemDGE_celltype.csv`: contains LMEM DGE results between selected factor categories for a celltype.
+                - `lmemDGE_fixed_effect_factor_X.svg`: volcano plot of coefficient vs -log10(p-value) of genes.
   
 
 
