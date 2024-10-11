@@ -50,10 +50,10 @@ pip install -r requirements.txt
              
 ## How to run
 
-1. It is necessary that the user modify the configuration file and each stage of the pipeline is available inside the config folder [config.yml] or [full_config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
-2. Refer config.yml & it's detailed config [README](config/config_README.md) file on how to use different parameters and files.
+1. It is necessary that the user modify the configuration file and each stage of the pipeline is available inside the config folder [config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
+2. Refer config.yml & it's detailed config [README](config/README.md) file on how to use different parameters and files.
 3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), along with optional flags to log all parts of the pipelines (`-l | --log`) and to analyze memory usage (`-m | --memoryprofiler`).
-4. `python pipeline.py --config /path/to/config -c config.yaml -l -m` to run the scaLR.
+4. `python pipeline.py --config /path/to/config.yaml -l -m` to run the scaLR.
 
 
 ## Interactive tutorials

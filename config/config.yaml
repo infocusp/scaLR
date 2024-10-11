@@ -6,7 +6,7 @@ device: 'cuda'
 # EXPERIMENT.
 experiment:
     dirpath: 'scalr_experiments'
-    exp_name: 'final_5000_6'
+    exp_name: 'exp_name'
     exp_run: 0
 
 
@@ -15,7 +15,7 @@ data:
     sample_chunksize: 20000
 
     train_val_test:
-        full_datapath: '/home/biocusp/data/scp_ad/full.h5ad'
+        full_datapath: '/path/to/anndata.h5ad'
 
         splitter_config:
             name: GroupSplitter
