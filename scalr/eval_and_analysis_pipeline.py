@@ -155,15 +155,21 @@ class EvalAndAnalysisPipeline:
         top_features = gene_analyser.top_feature_extraction()
         self.primary_analysis['top_features'] = top_features
 
-    def full_samples_downstream_anlaysis(self):
-        """A function to perform all downstream analysis tasks on model and data."""
+    def _perform_downstream_analysis(self, samples: str):
+        """A function to perform all downstream analysis tasks on model and data.
+        
+        Args:
+            samples ['test' | 'full']: indicates the samples to perform downstream 
+                                       analysis.
+        """
         downstream_analysis = self.analysis_config.get(
-            'full_samples_downstream_analysis', list())
+            f'{samples}_samples_downstream_analysis', list())
         if downstream_analysis:
             self.flow_logger.info(
-                'Performing Downstream Analysis on all samples')
-            full_samples_analysis_path = path.join(self.dirpath, 'full_samples')
-            os.makedirs(full_samples_analysis_path, exist_ok=True)
+                f'Performing Downstream Analysis on {samples} samples')
+            samples_analysis_path = path.join(self.dirpath,
+                                              f'{samples}_samples')
+            os.makedirs(samples_analysis_path, exist_ok=True)
 
         for i, (analysis_config) in enumerate(downstream_analysis):
             try:
@@ -173,14 +179,15 @@ class EvalAndAnalysisPipeline:
                 analyser, analysis_config = build_analyser(analysis_config)
                 downstream_analysis[i] = analysis_config
 
-                # Note: Not passing Model & DataLoader since it is assumed that
-                # model is trained on train data, so analysis by model should be
-                # on test data only
+                model = self.model if samples == 'test' else None
+                dl = self.test_dl if samples == 'test' else None
+                data = self.test_data if samples == 'test' else self.full_data
+
                 analysis = analyser.generate_analysis(
-                    model=None,
-                    test_data=self.full_data,
-                    test_dl=None,
-                    dirpath=full_samples_analysis_path,
+                    model=model,
+                    test_data=data,
+                    test_dl=dl,
+                    dirpath=samples_analysis_path,
                     **self.primary_analysis)
 
                 # To be able to use any above analyses in other downstream analysis.
@@ -191,42 +198,22 @@ class EvalAndAnalysisPipeline:
 
         if downstream_analysis:
             self.analysis_config[
-                'full_samples_downstream_analysis'] = downstream_analysis
+                f'{samples}_samples_downstream_analysis'] = downstream_analysis
+
+    def full_samples_downstream_anlaysis(self):
+        """A function to perform downstream analysis tasks on all samples data.
+        
+        Note: The Model & DataLoader will not be passsed since it is assumed that
+        a model is trained on the train data, so analysis by model should not
+        be on full samples data.
+        """
+        self._perform_downstream_analysis('full')
 
     def test_samples_downstream_anlaysis(self):
-        """A function to perform all downstream analysis tasks on model and data."""
-        downstream_analysis = self.analysis_config.get(
-            'test_samples_downstream_analysis', list())
-        if downstream_analysis:
-            self.flow_logger.info(
-                'Performing Downstream Analysis on test samples')
-            test_samples_analysis_path = path.join(self.dirpath, 'test_samples')
-            os.makedirs(test_samples_analysis_path, exist_ok=True)
-
-        for i, (analysis_config) in enumerate(downstream_analysis):
-            try:
-                self.flow_logger.info(f'Performing {analysis_config["name"]}')
-
-                analysis_config = deepcopy(analysis_config)
-                analyser, analysis_config = build_analyser(analysis_config)
-                downstream_analysis[i] = analysis_config
-
-                analysis = analyser.generate_analysis(
-                    model=self.model,
-                    test_data=self.test_data,
-                    test_dl=self.test_dl,
-                    dirpath=test_samples_analysis_path,
-                    **self.primary_analysis)
-
-                # To be able to use any above analyses in other downstream analysis.
-                if analysis:
-                    self.primary_analysis[analysis_config['name']] = analysis
-            except Exception as e:
-                self.flow_logger.exception(e)
-
-        if downstream_analysis:
-            self.analysis_config[
-                'test_samples_downstream_analysis'] = downstream_analysis
+        """A function to perform downstream analysis tasks on model and test 
+        samples data.
+        """
+        self._perform_downstream_analysis('test')
 
     def get_updated_config(self) -> dict:
         """A function to return updated configs."""
