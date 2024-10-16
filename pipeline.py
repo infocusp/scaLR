@@ -154,7 +154,8 @@ def pipeline(config, dirpath, device, flow_logger, event_logger):
             if config['analysis'].get('gene_analysis'):
                 analyser.gene_analysis()
 
-        analyser.perform_downstream_anlaysis()
+        analyser.full_samples_downstream_anlaysis()
+        analyser.test_samples_downstream_anlaysis()
 
         config['analysis'] = analyser.get_updated_config()
         write_data(config, path.join(dirpath, 'config.yaml'))

@@ -1,6 +1,6 @@
 scaLR Documentation
 ===================
-.. image:: ../scaLR_logo.png
+.. image:: ../img/scaLR_logo.png
    :scale: 60%
 
 .. include:: ../README.md
@@ -8,12 +8,11 @@ scaLR Documentation
    :start-line: 2
    :end-line: 23
 
-.. image:: ../Schematic-of-scPipeline.jpg
+.. image:: ../img/Schematic-of-scPipeline.jpg
 
 .. include:: ../README.md
    :parser: myst_parser.sphinx_
    :start-line: 25
-   :end-line: 128
 
 .. toctree::
    :maxdepth: 10

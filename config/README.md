@@ -179,7 +179,7 @@ In this section, you can define callbacks as per your requirements.
 - Currently, the platform supports `TensorboardLogger`, `EarlyStopping` & `ModelCheckpoint` for callbacks.
 
 ## Analysis
-This section(`analysis` in config) focuses on gene analysis like biomarker identification and further downstream analysis like SHAP, gene recall, DGE, etc.
+This section(`analysis` in config) focuses on generating classification reports, gene analysis like biomarker identification, and further downstream analysis like SHAP, gene recall, DGE, etc.
 
 **model_checkpoint** {str}:  `/path/to/best_model` [Optional]  
 Path to load the model from. If your model resides under say `best_model/` directory, then you need to mention the path till `best_model/`. During end-to-end platform runs, it is not required. It is required when you are performing analysis independently after model training.
@@ -228,13 +228,18 @@ This section consists of parameters for Linear and SHAP scorer-based ranked feat
                 params:
                     k: 100
 
+**Downstream analysis**:
+This section performs downstream analysis tasks like Heatmap of k genes across different cell types, generating ROC AUC curve, Gene recall curve, and Differential gene expression analysis.
 
+**full_samples_downstream_analysis** {list}:
+This section performs downstream analysis using the full dataset, which contains all samples and the top k features selected by the feature selector. No trained model will be available for this analysis.
 
-**downstream_analysis** {list}:  
-This section performs gene analysis tasks such as generating classification reports, extracting biomarkers for each class, and downstream analysis tasks like Heatmap of k genes across different cell types, generating ROC AUC curve, Gene recall curve, and Differential gene expression analysis. You can mention the list of name-params for tasks you want to perform. Config parameters an example are explained below and for detailed information, explore the 'interactive tutorials' section in the main README.  
+**test_samples_downstream_analysis** {list}:
+This section performs downstream analysis tasks using the test dataset with the top k features selected by the feature selector. A trained model is available for this analysis.
 
-    
-    downstream_analysis
+You can specify the list of name-parameters for the tasks you want to perform. An example of the configuration parameters is explained below. For more detailed information, please explore the `Interactive Tutorials` section in the main README.
+
+    full_samples_downstream_analysis | test_samples_downstream_analysis:
         - name: Heatmap
           params:
               top_n_genes: 100
