@@ -17,7 +17,6 @@ import scanpy as sc
 
 from scalr import utils
 from scalr.analysis import AnalysisBase
-from scalr.feature.selector import build_selector
 from scalr.utils import EventLogger
 from scalr.utils import read_data
 

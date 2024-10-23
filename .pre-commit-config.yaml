@@ -3,7 +3,7 @@ repos:
     rev: v0.32.0
     hooks:
     -   id: yapf
-        args: ['--style', '.style.yapf']
+        args: ['-ir', '--style', '.style.yapf']
         additional_dependencies: [toml]
 -   repo: https://github.com/pre-commit/mirrors-isort
     rev: v5.10.1

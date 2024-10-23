@@ -17,6 +17,7 @@ from joblib import delayed
 from joblib import Parallel
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.linalg import LinAlgError
 from pandas import DataFrame
 import pandas as pd
 import scanpy as sc
@@ -29,7 +30,6 @@ from statsmodels.tools.sm_exceptions import HessianInversionWarning
 
 from scalr import utils
 from scalr.analysis import AnalysisBase
-from scalr.feature.selector import build_selector
 from scalr.utils import EventLogger
 from scalr.utils import read_data
 
@@ -195,9 +195,8 @@ class DgeLMEM(AnalysisBase):
                             f'{self.fixed_effect_column}[T.{category}]']
                 pickle.dumps(result_dict_per_gene)
                 return result_dict_per_gene
-        except Exception as e:
-            logger.warning(f"Error found in gene {gene}: {e}")
-            logger.warning(traceback.format_exc())
+        except LinAlgError as e:
+            pass
 
     def get_multiproc_mxeffect_model_batch_res(self, gene_names: list[str],
                                                ad_subset_to_df: DataFrame):
@@ -213,20 +212,14 @@ class DgeLMEM(AnalysisBase):
             A list of dictionaries with model stats for 'gene_names'.    
         '''
 
-        mxmodel_results_list = []
-        try:
-            mxmodel_results_list = Parallel(n_jobs=self.n_cpu, backend="loky")(
-                delayed(self.get_result_mxmodel_per_gene)(gene, ad_subset_to_df)
-                for gene in gene_names)
-        except Exception as e:
-            logger.warning(f"Error occurred during parallel execution: {e}")
-            logger.warning(traceback.format_exc())
-        finally:
-            mxmodel_results_list = [
-                per_gene_result for per_gene_result in mxmodel_results_list
-                if per_gene_result is not None
-            ]
-            return mxmodel_results_list
+        mxmodel_results_list = Parallel(n_jobs=self.n_cpu, backend="loky")(
+            delayed(self.get_result_mxmodel_per_gene)(gene, ad_subset_to_df)
+            for gene in gene_names)
+        mxmodel_results_list = [
+            per_gene_result for per_gene_result in mxmodel_results_list
+            if per_gene_result is not None
+        ]
+        return mxmodel_results_list
 
     def plot_lmem_dge_result(self,
                              lmem_res_df: DataFrame,
@@ -330,7 +323,7 @@ class DgeLMEM(AnalysisBase):
                         f'lmem_DGE in "{category}" vs "{self.fixed_effect_factors[0]}"',
                         fontweight='bold')
                     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-                    plt.savefig(path.join(dirpath, f'lmem_DGE_{_category}.svg'),
+                    plt.savefig(path.join(dirpath, f'lmemDGE_{_category}.svg'),
                                 bbox_inches='tight')
 
     def generate_analysis(self, test_data: Union[AnnData, AnnCollection],
@@ -353,6 +346,7 @@ class DgeLMEM(AnalysisBase):
         new_var_names, varname_map_dict = self.replace_spec_char_get_dict(
             test_data.var_names)
         test_data.var_names = new_var_names
+        result = False
         if self.celltype_column is not None:
             logger.info("Performing DGE analysis with subset anndata")
             fixed_val_list = list(test_data.obs[self.celltype_column].unique())
@@ -413,14 +407,17 @@ class DgeLMEM(AnalysisBase):
                         fixed_val_lmem_result_df[
                             'gene'] = fixed_val_lmem_result_df['gene'].replace(
                                 {gene_name: varname_map_dict[gene_name]})
-                    file_name = 'lmem_DGE_' + (cell_type.replace(" ",
-                                                                 '')) + '.csv'
+                    file_name = 'lmemDGE_' + (cell_type.replace(" ",
+                                                                '')) + '.csv'
                     full_file_path = path.join(dirpath, file_name)
                     fixed_val_lmem_result_df.to_csv(full_file_path, index=False)
                     if self.save_plot:
                         plot = self.plot_lmem_dge_result(
                             fixed_val_lmem_result_df, dirpath, cell_type)
                         plt.close('all')
+                    result = True
+                else:
+                    logger.info(f'Error in producing result for "{cell_type}"')
         else:
             logger.info("Performing DGE analysis with whole anndata ...")
             whole_data_lmem_result_list = []
@@ -467,14 +464,16 @@ class DgeLMEM(AnalysisBase):
                     whole_data_lmem_result_df[
                         'gene'] = whole_data_lmem_result_df['gene'].replace(
                             {gene_name: varname_map_dict[gene_name]})
-                file_name = 'lmem_DGE_whole' + '.csv'
+                file_name = 'lmemDGE_whole' + '.csv'
                 full_file_path = path.join(dirpath, file_name)
                 whole_data_lmem_result_df.to_csv(full_file_path, index=False)
                 if self.save_plot:
                     plot = self.plot_lmem_dge_result(whole_data_lmem_result_df,
                                                      dirpath)
                     plt.close('all')
-        logger.info(f"\nLMEM-DGE results stored at: {dirpath}\n")
+                result = True
+        if result:
+            logger.info(f"\nLMEM-DGE results stored at: {dirpath}\n")
 
     @classmethod
     def get_default_params(cls) -> dict:

@@ -1,4 +1,4 @@
-<left><img src="scaLR_logo.png" width="150" height="180"></left>
+<left><img src="img/scaLR_logo.png" width="150" height="180"></left>
 
 # Single-cell analysis using Low Resource (scaLR) 
 
@@ -21,48 +21,57 @@
 
 The following flowchart explains the major steps of the scaLR platform.
 
-![image.jpg](Schematic-of-scPipeline.jpg)
+![image.jpg](img/Schematic-of-scPipeline.jpg)
 
 ## Pre-requisites and installation scaLR
 
 
-- ScalR can be installed using Conda or pip. It is tested in Python 3.9 and recommended to use that environment.
+- ScalR can be installed using git or pip. It is tested in Python 3.10 and recommended to use that environment.
+
 
 ```
-conda create -n scaLR_env python=3.9
-```
+conda create -n scaLR_env python=3.10
 
-- Clone the git repository and install the required packages by activating the conda environment.
-
-```
 conda activate scaLR_env
+```
+
+- Using git
+
+```
+git clone https://github.com/infocusp/scaLR.git
 
 pip install -r requirements.txt
 ```
+- Installation using pip
+```
+pip install pyscaLR
+```
+*Note* If user wants to run entire pipeline via installing pip pyscalr, they should clone/download these files(`pipeline.py` and `config.yaml`) from the git repository.
 
 ## Input Data
 - Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only).
 - The anndata object should contain cell samples as `obs` and genes as `var`.
-- `adata.X`: contains all gene counts/expression values.
+- `adata.X`: contains normalized gene counts/expression values (`log1p` normalization with range `0-10` expected).
 - `adata.obs`: contains any metadata regarding cells, including a column for `target` which will be used for classification. The index of `adata.obs` is cell_barcodes.
 - `adata.var`: contains all gene_names as Index.
 
              
 ## How to run
 
-1. It is necessary that the user modify the configuration file and each stage of the pipeline is available inside the config folder [config.yml] or [full_config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
-2. Refer config.yml & it's detailed config [README](config_README.md) file on how to use different parameters and files.
+1. It is necessary that the user modify the configuration file and each stage of the pipeline is available inside the config folder [config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
+2. Refer config.yml & it's detailed config [README](config/README.md) file on how to use different parameters and files.
 3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), along with optional flags to log all parts of the pipelines (`-l | --log`) and to analyze memory usage (`-m | --memoryprofiler`).
-4. `python pipeline.py --config /path/to/config -c config.yaml -l -m` to run the scaLR.
+4. `python pipeline.py --config /path/to/config.yaml -l -m` to run the scaLR.
 
 
 ## Interactive tutorials
 Detailed tutorials have been made on how to use some functionalities as a scaLR library. Find the links below.
 
+- **scaLR pipeline** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/sj/fullntest_samples_analysis/tutorials/pipeline/scalr_pipeline.ipynb)
+- **Differential gene expression analysis**[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/sj/fullntest_samples_analysis/tutorials/analysis/differential_gene_expression/dge.ipynb)
 - [Normalization](https://github.com/infocusp/scaLR/blob/main/tutorials/preprocessing/normalization.ipynb)
 - [Batch correction](https://github.com/infocusp/scaLR/blob/main/tutorials/preprocessing/batch_correction.ipynb)
 - [Gene recall curve](https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb)
-- [Differential gene expression analysis](https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/differential_gene_expression/dge.ipynb)
 - [SHAP analysis](https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/shap_analysis/shap_heatmap.ipynb)
 
 ## Experiment Output Structure
@@ -116,8 +125,8 @@ Performs evaluation of best model trained on user-defined metrics on the test se
                 - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.csv`: contains Pseudobulk DGE results between selected factor categories for a celltype.
                 - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.svg`: volcano plot of Log2Foldchange vs -log10(p-value) of genes.
             - `lmem_dge_result`
-                - `lmem_DGE_celltype.csv`: contains LMEM DGE results between selected factor categories for a celltype.
-                - `lmem_DGE_fixed_effect_factor_X.svg`: volcano plot of coefficient vs -log10(p-value) of genes.
+                - `lmemDGE_celltype.csv`: contains LMEM DGE results between selected factor categories for a celltype.
+                - `lmemDGE_fixed_effect_factor_X.svg`: volcano plot of coefficient vs -log10(p-value) of genes.
   
 
 
