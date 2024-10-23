@@ -3,7 +3,8 @@ requires = ["hatchling", "hatch-requirements-txt"]
 build-backend = "hatchling.build"
 
 [project]
-name = "scaLR"
+
+name = "pyscaLR"
 version = "1.0.1"
 requires-python = ">=3.10"
 authors = [
