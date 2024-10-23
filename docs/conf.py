@@ -10,20 +10,11 @@ import sys
 
 sys.path.insert(0, os.path.abspath(".."))
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosectionlabel',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.coverage',
-    'sphinx.ext.extlinks',
-    'sphinx.ext.githubpages',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.todo',
-    'sphinx.ext.duration',
-    'sphinx.ext.doctest',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.intersphinx',
-    'myst_parser'
+    'sphinx.ext.autodoc', 'sphinx.ext.autosectionlabel',
+    'sphinx.ext.autosummary', 'sphinx.ext.coverage', 'sphinx.ext.extlinks',
+    'sphinx.ext.githubpages', 'sphinx.ext.napoleon', 'sphinx.ext.viewcode',
+    'sphinx.ext.todo', 'sphinx.ext.duration', 'sphinx.ext.doctest',
+    'sphinx.ext.autosummary', 'sphinx.ext.intersphinx', 'myst_parser'
 ]
 source_suffix = ['.rst', '.md']
 templates_path = ['_templates']
