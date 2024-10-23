@@ -1,8 +1,8 @@
 
 # EXPERIMENT
-full_datapath: '/path_to_scaLR/tutorials/analysis/differential_gene_expression/test_data.h5ad'
+full_datapath: '/path/to/anndata.h5ad'
 #Path to save the results
-dirpath: '/path_to_scaLR/tutorials/analysis/differential_gene_expression/'
+dirpath: '/path/to/save/the/result'
 
 dge_type: DgePseudoBulk
 # dge_type: DgeLMEM
@@ -24,7 +24,7 @@ psedobulk_params:
 #         celltype_column: 'cell_type'
 #         cell_subsets: ['non-classical monocyte','natural killer cell']
 #         min_cell_threshold: 10
-#         n_cpu: 4
+#         n_cpu: 6
 #         gene_batch_size: 1000
 #         coef_threshold: 0
 #         p_val: 0.05

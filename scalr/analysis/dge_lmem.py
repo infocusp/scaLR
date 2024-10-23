@@ -30,7 +30,6 @@ from statsmodels.tools.sm_exceptions import HessianInversionWarning
 
 from scalr import utils
 from scalr.analysis import AnalysisBase
-from scalr.feature.selector import build_selector
 from scalr.utils import EventLogger
 from scalr.utils import read_data
 
@@ -197,7 +196,7 @@ class DgeLMEM(AnalysisBase):
                 pickle.dumps(result_dict_per_gene)
                 return result_dict_per_gene
         except LinAlgError as e:
-            return None
+            pass
 
     def get_multiproc_mxeffect_model_batch_res(self, gene_names: list[str],
                                                ad_subset_to_df: DataFrame):

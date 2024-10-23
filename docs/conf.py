@@ -23,8 +23,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
-    'myst_parser',
-    # 'nbsphinx'
+    'myst_parser'
 ]
 source_suffix = ['.rst', '.md']
 templates_path = ['_templates']

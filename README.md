@@ -26,24 +26,32 @@ The following flowchart explains the major steps of the scaLR platform.
 ## Pre-requisites and installation scaLR
 
 
-- ScalR can be installed using Conda or pip. It is tested in Python 3.9 and recommended to use that environment.
+- ScalR can be installed using git or pip. It is tested in Python 3.10 and recommended to use that environment.
+
 
 ```
-conda create -n scaLR_env python=3.9
-```
+conda create -n scaLR_env python=3.10
 
-- Clone the git repository and install the required packages by activating the conda environment.
-
-```
 conda activate scaLR_env
+```
+
+- Using git
+
+```
+git clone https://github.com/infocusp/scaLR.git
 
 pip install -r requirements.txt
 ```
+- Installation using pip
+```
+pip install pyscaLR
+```
+*Note* If user wants to run entire pipeline via installing pip pyscalr, they should clone/download these files(`pipeline.py` and `config.yaml`) from the git repository.
 
 ## Input Data
 - Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only).
 - The anndata object should contain cell samples as `obs` and genes as `var`.
-- `adata.X`: contains all gene counts/expression values.
+- `adata.X`: contains normalized gene counts/expression values (`log1p` normalization with range `0-10` expected).
 - `adata.obs`: contains any metadata regarding cells, including a column for `target` which will be used for classification. The index of `adata.obs` is cell_barcodes.
 - `adata.var`: contains all gene_names as Index.
 
@@ -59,10 +67,11 @@ pip install -r requirements.txt
 ## Interactive tutorials
 Detailed tutorials have been made on how to use some functionalities as a scaLR library. Find the links below.
 
+- **scaLR pipeline** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/sj/fullntest_samples_analysis/tutorials/pipeline/scalr_pipeline.ipynb)
+- **Differential gene expression analysis**[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/sj/fullntest_samples_analysis/tutorials/analysis/differential_gene_expression/dge.ipynb)
 - [Normalization](https://github.com/infocusp/scaLR/blob/main/tutorials/preprocessing/normalization.ipynb)
 - [Batch correction](https://github.com/infocusp/scaLR/blob/main/tutorials/preprocessing/batch_correction.ipynb)
 - [Gene recall curve](https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb)
-- [Differential gene expression analysis](https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/differential_gene_expression/dge.ipynb)
 - [SHAP analysis](https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/shap_analysis/shap_heatmap.ipynb)
 
 ## Experiment Output Structure
