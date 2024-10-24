@@ -50,8 +50,11 @@ class PreprocessorBase:
         """
         pass
 
-    def process_data(self, full_data: Union[AnnData, AnnCollection],
-                     sample_chunksize: int, dirpath: str):
+    def process_data(self,
+                     full_data: Union[AnnData, AnnCollection],
+                     sample_chunksize: int,
+                     dirpath: str,
+                     num_workers: int = None):
         """A function to process the entire data chunkwise and write the processed data
         to disk.
 
@@ -59,6 +62,7 @@ class PreprocessorBase:
             full_data (Union[AnnData, AnnCollection]): Full data for transformation.
             sample_chunksize (int): Number of samples in one chunk.
             dirpath (str): Path to write the data to.
+            num_workers (int): number of jobs to run in parallel for data writing.
         """
         if not sample_chunksize:
             # TODO
@@ -68,7 +72,8 @@ class PreprocessorBase:
         write_chunkwise_data(full_data,
                              sample_chunksize,
                              dirpath,
-                             transform=self.transform)
+                             transform=self.transform,
+                             num_workers=num_workers)
 
 
 def build_preprocessor(
