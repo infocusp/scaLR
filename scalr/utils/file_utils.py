@@ -129,8 +129,10 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
         def transform_and_write_data(data: AnnData, chunk_number: int):
             """Internal function to transform a chunk of data and write 
             it to disk."""
+
             # Transformation
             if transform:
+                data = AnnData(data.X, obs=data.obs, var=data.var)
                 if not isinstance(data.X, np.ndarray):
                     data.X = data.X.A
                 data.X = transform(data.X)
