@@ -59,7 +59,7 @@ pip install pyscaLR
 ## How to run
 
 1. It is necessary that the user modify the configuration file and each stage of the pipeline is available inside the config folder [config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
-2. Refer config.yml & it's detailed config [README](config/README.md) file on how to use different parameters and files.
+2. Refer config.yml & it's detailed config [README](https://github.com/infocusp/scaLR/blob/main/config/README.md) file on how to use different parameters and files.
 3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), along with optional flags to log all parts of the pipelines (`-l | --log`) and to analyze memory usage (`-m | --memoryprofiler`).
 4. `python pipeline.py --config /path/to/config.yaml -l -m` to run the scaLR.
 
@@ -67,11 +67,12 @@ pip install pyscaLR
 ## Interactive tutorials
 Detailed tutorials have been made on how to use some functionalities as a scaLR library. Find the links below.
 
-- **scaLR pipeline** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/sj/fullntest_samples_analysis/tutorials/pipeline/scalr_pipeline.ipynb)
-- **Differential gene expression analysis**[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/sj/fullntest_samples_analysis/tutorials/analysis/differential_gene_expression/dge.ipynb)
+- **scaLR pipeline** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/pipeline/scalr_pipeline.ipynb)
+- **Differential gene expression analysis** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/analysis/differential_gene_expression/dge.ipynb)
+- **Gene recall curve** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb)
+
 - [Normalization](https://github.com/infocusp/scaLR/blob/main/tutorials/preprocessing/normalization.ipynb)
 - [Batch correction](https://github.com/infocusp/scaLR/blob/main/tutorials/preprocessing/batch_correction.ipynb)
-- [Gene recall curve](https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb)
 - [SHAP analysis](https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/shap_analysis/shap_heatmap.ipynb)
 
 ## Experiment Output Structure
@@ -113,20 +114,21 @@ Performs evaluation of best model trained on user-defined metrics on the test se
    - `exp_dir`
         - `analysis`
             - `classification_report.csv`: contains classification report showing Precision, Recall, F1, and accuracy metrics for each class, on the test set.
-            - `gene_recall_curve.svg`: contains gene recall curve plots.
-            - `gene_recall_curve_info.json`: contains reference genes list which are present in top_K ranked genes per class for each model.
             - `gene_analysis`
                 - `score_matrix.csv`: score of the final model, for each feature and class. shape: n_classes X n_features.
                 - `top_features.json`: a file containing a list of selected top features/biomarkers.
-            -  `heatmaps`
-                - `class_name.svg`: heatmap for top genes of particular class w.r.t those genes association in other classes. E.g. B.svg, C.svg etc.
-            - `roc_auc.svg`: contains ROC-AUC plot for all classes.
-            - `pseudobulk_dge_result`
-                - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.csv`: contains Pseudobulk DGE results between selected factor categories for a celltype.
-                - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.svg`: volcano plot of Log2Foldchange vs -log10(p-value) of genes.
-            - `lmem_dge_result`
-                - `lmemDGE_celltype.csv`: contains LMEM DGE results between selected factor categories for a celltype.
-                - `lmemDGE_fixed_effect_factor_X.svg`: volcano plot of coefficient vs -log10(p-value) of genes.
+            - `test_samples/full_samples`
+                -  `heatmaps`
+                    - `class_name.svg`: heatmap for top genes of particular class w.r.t those genes association in other classes. E.g. B.svg, C.svg etc.
+                - `roc_auc.svg`: contains ROC-AUC plot for all classes.
+                - `gene_recall_curve.svg`: contains gene recall curve plots.
+                - `gene_recall_curve_info.json`: contains reference genes list which are present in top_K ranked genes per class for each model.
+                - `pseudobulk_dge_result`
+                    - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.csv`: contains Pseudobulk DGE results between selected factor categories for a celltype.
+                    - `pbkDGE_celltype_factor_categories_0_vs_factor_categories_1.svg`: volcano plot of Log2Foldchange vs -log10(p-value) of genes.
+                - `lmem_dge_result`
+                    - `lmemDGE_celltype.csv`: contains LMEM DGE results between selected factor categories for a celltype.
+                    - `lmemDGE_fixed_effect_factor_X.svg`: volcano plot of coefficient vs -log10(p-value) of genes.
   
 
 
