@@ -26,7 +26,7 @@ The following flowchart explains the major steps of the scaLR platform.
 ## Pre-requisites and installation scaLR
 
 
-- ScalR can be installed using git or pip. It is tested in Python 3.10 and recommended to use that environment.
+- ScaLR can be installed using git or pip. It is tested in Python 3.10 and recommended to use that environment.
 
 
 ```
