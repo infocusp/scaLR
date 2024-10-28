@@ -1,4 +1,4 @@
-# Config file for pipeline run.
+# Config file for pipeline run for clinical condition specific biomarker identification.
 
 # DEVICE SETUP.
 device: 'cuda'
