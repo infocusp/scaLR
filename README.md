@@ -6,6 +6,7 @@
 [![GitHub](https://img.shields.io/github/license/InFoCusp/scaLR)](https://github.com/infocusp/scaLR?tab=GPL-3.0-1-ov-file#)
 [![Documentation](https://img.shields.io/badge/docs-v1.0.0-orange)](https://infocusp.github.io/scaLR/)
 
+[![DOI](https://zenodo.org/badge/852710658.svg)](https://doi.org/10.5281/zenodo.13767942)
 
 ## 📖 Overview 
 
@@ -135,6 +136,4 @@ Performs evaluation of best model trained on user-defined metrics on the test se
 ## Citation
 
 Jogani Saiyam, Anand Santosh Pol , Mayur Prajapati, Amit Samal, Kriti Bhatia, Jayendra Parmar, Urvik Patel, Falak Shah, Nisarg Vyas, and Saurabh Gupta. "scaLR: a low-resource deep neural network-based platform for single cell analysis and biomarker discovery." bioRxiv (2024): 2024-09.
-
-doi: https://doi.org/10.1101/2024.09.19.613226
 
