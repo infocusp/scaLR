@@ -6,13 +6,13 @@ scaLR Documentation
 .. include:: ../README.md
    :parser: myst_parser.sphinx_
    :start-line: 2
-   :end-line: 23
+   :end-line: 24
 
 .. image:: ../img/Schematic-of-scPipeline.jpg
 
 .. include:: ../README.md
    :parser: myst_parser.sphinx_
-   :start-line: 25
+   :start-line: 26
 
 .. toctree::
    :maxdepth: 10
