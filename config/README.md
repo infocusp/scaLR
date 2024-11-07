@@ -36,6 +36,11 @@ default: `50000`
 Useful for low resource utilization. This will ensure all data is stored in multiple chunks of almost `sample_chunksize` samples. This does not hamper any logic in algorithms but simply ensures that the entire dataset is never loaded all at once on the RAM.  
 `null` value will disregard this optimization.
 
+**num_workers** {int}: `int | null`  
+default: `1`  
+This param uses multiple workers in parallel to speed up the data writing to disk. Please use this
+with careful consideration of the number of cores available in the device. *Note that this doesn't increase memory usage of pipeline*. Ideal increment found at `num_workers = 3`.
+
 **train_val_test** {dict}:  
 This section splits the data using the mentioned splitting technique mentioned in `splitter_config` & required params like `split_ratio` and `stratify` options. Example below.
 
