@@ -1,0 +1,162 @@
+# Config file for pipeline run for clinical condition specific biomarker identification.
+
+# DEVICE SETUP.
+device: 'cuda'
+
+# EXPERIMENT.
+experiment:
+    dirpath: 'scalr_experiments'
+    exp_name: 'exp_name'
+    exp_run: 1
+
+
+# DATA CONFIG.
+data:
+    sample_chunksize: 20000
+
+    train_val_test:
+        full_datapath: 'data/modified_adata.h5ad'
+
+        splitter_config:
+            name: GroupSplitter
+            params:
+                split_ratio: [7, 1, 2.5]
+                stratify: 'donor_id'
+
+        # split_datapaths: ''
+
+    # preprocess:
+    #     - name: SampleNorm
+    #       params:
+    #             **args
+
+    #     - name: StandardScaler
+    #       params: 
+    #             **args
+
+    target: disease    
+
+
+# FEATURE SELECTION.
+feature_selection:
+
+    # score_matrix: '/path/to/matrix'
+    feature_subsetsize: 5000
+
+    model:
+        name: SequentialModel
+        params:
+            layers: [5000, 2]
+            weights_init_zero: True
+
+    model_train_config:
+        trainer: SimpleModelTrainer
+
+        dataloader: 
+            name: SimpleDataLoader
+            params:
+                batch_size: 25000
+                padding: 5000
+        
+        optimizer:
+            name: SGD
+            params:
+                lr: 1.0e-3
+                weight_decay: 0.1
+
+        loss:
+            name: CrossEntropyLoss
+        
+        epochs: 10
+
+    scoring_config: 
+        name: LinearScorer
+        
+    features_selector:
+        name: AbsMean
+        params:
+            k: 5000
+
+
+# FINAL MODEL TRAINING.
+final_training:
+
+    model:
+        name: SequentialModel
+        params:
+            layers: [5000, 2]
+            dropout: 0
+            weights_init_zero: False
+
+    model_train_config:
+        resume_from_checkpoint: null
+
+        trainer: SimpleModelTrainer
+
+        dataloader: 
+            name: SimpleDataLoader
+            params:
+                batch_size: 15000
+        
+        optimizer:
+            name: Adam
+            params:
+                lr: 1.0e-3
+                weight_decay: 0
+
+        loss:
+            name: CrossEntropyLoss
+        
+        epochs: 100
+
+        callbacks:
+            - name: TensorboardLogger
+            - name: EarlyStopping
+              params:
+                patience: 3
+                min_delta: 1.0e-4
+            - name: ModelCheckpoint
+              params:
+                interval: 5
+
+
+# EVALUATION & DOWNSTREAM ANALYSIS.
+analysis:
+
+    model_checkpoint: ''
+
+    dataloader:
+        name: SimpleDataLoader
+        params:
+            batch_size: 15000
+
+    gene_analysis:
+        scoring_config:
+            name: LinearScorer
+
+        features_selector:
+            name: ClasswisePromoters
+            params:
+                k: 100
+    full_samples_downstream_analysis:
+        - name: Heatmap
+          params:
+            top_n_genes: 100
+        - name: RocAucCurve
+          params: {}
+        - name: DgePseudoBulk
+          params:
+              celltype_column: 'cell_type'
+              design_factor: 'disease'
+              factor_categories: ['COVID-19', 'normal']
+              sum_column: 'donor_id'
+              cell_subsets: ['conventional dendritic cell', 'natural killer cell']
+        - name: DgeLMEM
+          params:
+            fixed_effect_column: 'disease'
+            fixed_effect_factors: ['COVID-19', 'normal']
+            group: 'donor_id'
+            celltype_column: 'cell_type'
+            cell_subsets: ['conventional dendritic cell']
+            gene_batch_size: 1000
+            coef_threshold: 0.1
