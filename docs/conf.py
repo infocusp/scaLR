@@ -2,7 +2,7 @@
 project = 'scaLR'
 copyright = '2024, Infocusp Innovations'
 author = 'Infocusp Innovations'
-release = 'v1.0.0'
+release = 'v1.0.1'
 
 # -- General configuration ---------------------------------------------------
 import os
