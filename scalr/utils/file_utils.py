@@ -105,6 +105,9 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
     if not path.exists(dirpath):
         os.makedirs(dirpath)
 
+    if not num_workers:
+        num_workers = 1
+
     if not sample_inds:
         sample_inds = list(range(len(full_data)))
 
