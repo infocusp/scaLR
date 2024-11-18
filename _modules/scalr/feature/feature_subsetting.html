@@ -1,0 +1,228 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scalr.feature.feature_subsetting &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/scaLR_logo.png"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            scaLR
+              <img src="../../../_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scalr.feature.feature_subsetting</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scalr.feature.feature_subsetting</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This file contains implementation for model training on feature subsets.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">AnnData</span>
+<span class="kn">from</span> <span class="nn">anndata.experimental</span> <span class="kn">import</span> <span class="n">AnnCollection</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+
+<span class="kn">from</span> <span class="nn">scalr.model_training_pipeline</span> <span class="kn">import</span> <span class="n">ModelTrainingPipeline</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">EventLogger</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">FlowLogger</span>
+
+
+<div class="viewcode-block" id="FeatureSubsetting">
+<a class="viewcode-back" href="../../../scalr.feature.html#scalr.feature.feature_subsetting.FeatureSubsetting">[docs]</a>
+<span class="k">class</span> <span class="nc">FeatureSubsetting</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for FeatureSubsetting.</span>
+
+<span class="sd">    It trains a model for each subsetted datasets, each</span>
+<span class="sd">    containing `feature_subsetsize` genes as features.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">feature_subsetsize</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">chunk_model_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                 <span class="n">chunk_model_train_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                 <span class="n">train_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">AnnCollection</span><span class="p">],</span>
+                 <span class="n">val_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">AnnCollection</span><span class="p">],</span>
+                 <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">mappings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                 <span class="n">dirpath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;cpu&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize required parameters for feature subset training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feature_subsetsize (int): Number of features in one subset.</span>
+<span class="sd">            chunk_model_config (dict): Chunked model config.</span>
+<span class="sd">            chunk_model_train_config (dict): Chunked model training config.</span>
+<span class="sd">            train_data (Union[AnnData, AnnCollection]): Train dataset.</span>
+<span class="sd">            val_data (Union[AnnData, AnnCollection]): Validation dataset.</span>
+<span class="sd">            target (str): Target to train model.</span>
+<span class="sd">            mappings (dict): mapping of target to labels.</span>
+<span class="sd">            dirpath (str, optional): Dirpath to store chunked model weights. Defaults to None.</span>
+<span class="sd">            device (str, optional): Device to train models on. Defaults to &#39;cpu&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_logger</span> <span class="o">=</span> <span class="n">EventLogger</span><span class="p">(</span><span class="s1">&#39;FeatureSubsetting&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_subsetsize</span> <span class="o">=</span> <span class="n">feature_subsetsize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunk_model_config</span> <span class="o">=</span> <span class="n">chunk_model_config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunk_model_train_config</span> <span class="o">=</span> <span class="n">chunk_model_train_config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_data</span> <span class="o">=</span> <span class="n">train_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_data</span> <span class="o">=</span> <span class="n">val_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mappings</span> <span class="o">=</span> <span class="n">mappings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span> <span class="o">=</span> <span class="n">dirpath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+
+<div class="viewcode-block" id="FeatureSubsetting.train_chunked_models">
+<a class="viewcode-back" href="../../../scalr.feature.html#scalr.feature.feature_subsetting.FeatureSubsetting.train_chunked_models">[docs]</a>
+    <span class="k">def</span> <span class="nf">train_chunked_models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Trains a model for each subset data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[nn.Module]: List of models for each subset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Feature subset models training&#39;</span><span class="p">)</span>
+        <span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">chunked_models_dirpath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">,</span> <span class="s1">&#39;chunked_models&#39;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">chunked_models_dirpath</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_data</span><span class="o">.</span><span class="n">var_names</span><span class="p">),</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">feature_subsetsize</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Chunk </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">chunk_dirpath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chunked_models_dirpath</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">chunk_dirpath</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">train_features_subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_data</span><span class="p">[:,</span> <span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span>
+                                                    <span class="bp">self</span><span class="o">.</span><span class="n">feature_subsetsize</span><span class="p">]</span>
+            <span class="n">val_features_subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_data</span><span class="p">[:,</span> <span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">feature_subsetsize</span><span class="p">]</span>
+
+            <span class="n">chunk_model_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunk_model_config</span><span class="p">)</span>
+
+            <span class="n">model_trainer</span> <span class="o">=</span> <span class="n">ModelTrainingPipeline</span><span class="p">(</span><span class="n">chunk_model_config</span><span class="p">,</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">chunk_model_train_config</span><span class="p">,</span>
+                                                  <span class="n">chunk_dirpath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+            <span class="n">model_trainer</span><span class="o">.</span><span class="n">set_data_and_targets</span><span class="p">(</span><span class="n">train_features_subset</span><span class="p">,</span>
+                                               <span class="n">val_features_subset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">mappings</span><span class="p">)</span>
+            <span class="n">model_trainer</span><span class="o">.</span><span class="n">build_model_training_artifacts</span><span class="p">()</span>
+            <span class="n">best_model</span> <span class="o">=</span> <span class="n">model_trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">chunk_model_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_model_train_config</span> <span class="o">=</span> <span class="n">model_trainer</span><span class="o">.</span><span class="n">get_updated_config</span><span class="p">(</span>
+            <span class="p">)</span>
+
+            <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">best_model</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">models</span></div>
+
+
+<div class="viewcode-block" id="FeatureSubsetting.get_updated_configs">
+<a class="viewcode-back" href="../../../scalr.feature.html#scalr.feature.feature_subsetting.FeatureSubsetting.get_updated_configs">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_updated_configs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns updated configs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_model_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_model_train_config</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,344 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scalr.feature.scoring.shap_scorer &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/scaLR_logo.png"/>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            scaLR
+              <img src="../../../../_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scalr.feature.scoring.shap_scorer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scalr.feature.scoring.shap_scorer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This file is an implementation of SHAP scorer.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">AnnData</span>
+<span class="kn">from</span> <span class="nn">anndata.experimental</span> <span class="kn">import</span> <span class="n">AnnCollection</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">shap</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+
+<span class="kn">from</span> <span class="nn">scalr</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">scalr.feature.scoring</span> <span class="kn">import</span> <span class="n">ScoringBase</span>
+<span class="kn">from</span> <span class="nn">scalr.nn.dataloader</span> <span class="kn">import</span> <span class="n">build_dataloader</span>
+<span class="kn">from</span> <span class="nn">scalr.nn.model</span> <span class="kn">import</span> <span class="n">CustomShapModel</span>
+
+
+<div class="viewcode-block" id="ShapScorer">
+<a class="viewcode-back" href="../../../../scalr.feature.scoring.html#scalr.feature.scoring.shap_scorer.ShapScorer">[docs]</a>
+<span class="k">class</span> <span class="nc">ShapScorer</span><span class="p">(</span><span class="n">ScoringBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for SHAP scorer. It can be used for any model.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">early_stop</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                 <span class="n">dataloader</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                 <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;cpu&#39;</span><span class="p">,</span>
+                 <span class="n">top_n_genes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                 <span class="n">background_tensor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+                 <span class="n">samples_abs_mean</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">logger</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;EventLogger&#39;</span><span class="p">,</span>
+                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize class with SHAP arguments.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            early_stop: Contains early stopping-related configuration.</span>
+<span class="sd">            dataloader: Dataloader related config.</span>
+<span class="sd">            device: Where data is processed/loaded.</span>
+<span class="sd">            top_n_genes: Top N genes for each class/label.</span>
+<span class="sd">            background_tensor: Number of training data used for SHAP explainer.</span>
+<span class="sd">            samples_abs_mean: Apply abs before taking the mean across samples.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">early_stop_config</span> <span class="o">=</span> <span class="n">early_stop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">top_n_genes</span> <span class="o">=</span> <span class="n">top_n_genes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">background_tensor</span> <span class="o">=</span> <span class="n">background_tensor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataloader_config</span> <span class="o">=</span> <span class="n">dataloader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_abs_mean</span> <span class="o">=</span> <span class="n">samples_abs_mean</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">utils</span><span class="p">,</span> <span class="n">logger</span><span class="p">)(</span><span class="s1">&#39;SHAP analysis&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ShapScorer.generate_scores">
+<a class="viewcode-back" href="../../../../scalr.feature.scoring.html#scalr.feature.scoring.shap_scorer.ShapScorer.generate_scores">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+                        <span class="n">train_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">AnnCollection</span><span class="p">],</span>
+                        <span class="n">val_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">AnnCollection</span><span class="p">],</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                        <span class="n">mappings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function returns the weights of the model as a score.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model: Trained model that is used for SHAP.</span>
+<span class="sd">            train_data: Data that is used as reference data for SHAP.</span>
+<span class="sd">            val_data: On which SHAP will generate the score.</span>
+<span class="sd">            mappings: Contains target-related mappings.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            class * genes abs weights matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">shap_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_top_n_genes_weights</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span>
+                                                   <span class="n">target</span><span class="p">,</span> <span class="n">mappings</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">shap_values</span></div>
+
+
+<div class="viewcode-block" id="ShapScorer.get_top_n_genes_weights">
+<a class="viewcode-back" href="../../../../scalr.feature.scoring.html#scalr.feature.scoring.shap_scorer.ShapScorer.get_top_n_genes_weights">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_top_n_genes_weights</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">AnnCollection</span><span class="p">],</span>
+            <span class="n">test_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">AnnCollection</span><span class="p">],</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">mappings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; A function to get top n genes of each class and its weights.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model: Trained model to extract weights from.</span>
+<span class="sd">            train_data: Train data.</span>
+<span class="sd">            test_data: Test data that is used for SHAP values.</span>
+<span class="sd">            target: Target name.</span>
+<span class="sd">            mappings: Contains target-related mappings.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (class * genes abs weights matrix, class * genes weights matrix).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">utils</span><span class="o">.</span><span class="n">EventLogger</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">heading2</span><span class="p">(</span><span class="s2">&quot;Genes analysis using SHAP.&quot;</span><span class="p">)</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">shap_model</span> <span class="o">=</span> <span class="n">CustomShapModel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="n">random_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">train_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">background_tensor</span><span class="p">)</span>
+        <span class="n">train_dl</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">build_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataloader_config</span><span class="p">,</span>
+                                       <span class="n">train_data</span><span class="p">[</span><span class="n">random_indices</span><span class="p">],</span> <span class="n">target</span><span class="p">,</span>
+                                       <span class="n">mappings</span><span class="p">)</span>
+        <span class="n">random_background_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">train_dl</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Selected random background data: </span><span class="si">{</span><span class="n">random_background_data</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">test_dl</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">build_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataloader_config</span><span class="p">,</span> <span class="n">test_data</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span>
+                                      <span class="n">mappings</span><span class="p">)</span>
+
+        <span class="n">explainer</span> <span class="o">=</span> <span class="n">shap</span><span class="o">.</span><span class="n">DeepExplainer</span><span class="p">(</span><span class="n">shap_model</span><span class="p">,</span>
+                                       <span class="n">random_background_data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
+
+        <span class="n">prev_top_genes_batch_wise</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">count_patience</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">total_samples</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">batch_id</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">test_dl</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running on batch: </span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">total_samples</span> <span class="o">+=</span> <span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">batch_shap_values</span> <span class="o">=</span> <span class="n">explainer</span><span class="o">.</span><span class="n">shap_values</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples_abs_mean</span><span class="p">:</span>
+                <span class="n">sum_shap_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">batch_shap_values</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Calcluating 2 mean with abs values and non-abs values.</span>
+                <span class="c1"># Non-abs values required for heatmap.</span>
+                <span class="n">sum_shap_values</span> <span class="o">=</span> <span class="n">batch_shap_values</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">batch_id</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">sum_shap_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">sum_shap_values</span><span class="p">,</span> <span class="n">prev_batches_sum_shap_values</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">mean_shap_values</span> <span class="o">=</span> <span class="n">sum_shap_values</span> <span class="o">/</span> <span class="n">total_samples</span>
+
+            <span class="n">genes_class_shap_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="n">mean_shap_values</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">test_dl</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">var_names</span><span class="p">)],</span>
+                <span class="n">index</span><span class="o">=</span><span class="n">test_dl</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span>
+
+            <span class="n">prev_batches_sum_shap_values</span> <span class="o">=</span> <span class="n">sum_shap_values</span>
+
+            <span class="n">early_stop</span><span class="p">,</span> <span class="n">prev_top_genes_batch_wise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_shap_early_stop</span><span class="p">(</span>
+                <span class="n">batch_id</span><span class="p">,</span> <span class="n">genes_class_shap_df</span><span class="p">,</span> <span class="n">prev_top_genes_batch_wise</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">top_n_genes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">early_stop_config</span><span class="p">[</span><span class="s1">&#39;threshold&#39;</span><span class="p">])</span>
+
+            <span class="n">count_patience</span> <span class="o">=</span> <span class="n">count_patience</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">early_stop</span> <span class="k">else</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="n">count_patience</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">early_stop_config</span><span class="p">[</span><span class="s1">&#39;patience&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Early stopping at batch: </span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">break</span>
+
+        <span class="k">return</span> <span class="n">mean_shap_values</span><span class="o">.</span><span class="n">T</span></div>
+
+
+<div class="viewcode-block" id="ShapScorer._is_shap_early_stop">
+<a class="viewcode-back" href="../../../../scalr.feature.scoring.html#scalr.feature.scoring.shap_scorer.ShapScorer._is_shap_early_stop">[docs]</a>
+    <span class="k">def</span> <span class="nf">_is_shap_early_stop</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">genes_class_shap_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">prev_top_genes_batch_wise</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">top_n_genes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to check whether previous and current batches&#39; common genes are</span>
+<span class="sd">            are greater than or equal to the threshold and return top genes</span>
+<span class="sd">            batch wise.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch_id: Current batch number.</span>
+<span class="sd">            genes_class_shap_df: label/class wise genes SHAP values(mean across samples).</span>
+<span class="sd">            prev_top_genes_batch_wise: Dictionary where prev batches per labels top genes are stored.</span>
+<span class="sd">            top_n_genes: Number of top genes check.</span>
+<span class="sd">            threshold: early stop if common genes are higher than this.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Early stop value, top genes batch wise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">early_stop</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">top_genes_batch_wise</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="n">genes_class_shap_df</span><span class="o">.</span><span class="n">columns</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+            <span class="n">top_genes_batch_wise</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">genes_class_shap_df</span><span class="p">[</span>
+                <span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)[:</span><span class="n">top_n_genes</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+
+            <span class="c1"># Start checking after first batch.</span>
+            <span class="k">if</span> <span class="n">batch_id</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">num_common_genes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
+                    <span class="nb">set</span><span class="p">(</span><span class="n">top_genes_batch_wise</span><span class="p">[</span><span class="n">label</span><span class="p">])</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span>
+                        <span class="nb">set</span><span class="p">(</span><span class="n">prev_top_genes_batch_wise</span><span class="p">[</span><span class="n">label</span><span class="p">])))</span>
+                <span class="c1"># If commnon genes are less than 90 early stop will be false.</span>
+                <span class="k">if</span> <span class="n">num_common_genes</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
+                    <span class="n">early_stop</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">early_stop</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="n">early_stop</span><span class="p">,</span> <span class="n">top_genes_batch_wise</span></div>
+
+
+<div class="viewcode-block" id="ShapScorer.get_default_params">
+<a class="viewcode-back" href="../../../../scalr.feature.scoring.html#scalr.feature.scoring.shap_scorer.ShapScorer.get_default_params">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_default_params</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Class method to get default params.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;top_n_genes&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="s2">&quot;background_tensor&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+            <span class="s2">&quot;samples_abs_mean&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;early_stop&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;patience&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                <span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="mi">95</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;dataloader&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;SimpleDataLoader&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="mi">5000</span><span class="p">,</span>
+                    <span class="s2">&quot;padding&quot;</span><span class="p">:</span> <span class="mi">5000</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

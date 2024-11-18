@@ -1,0 +1,597 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analysis &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Data" href="scalr.data.html" />
+    <link rel="prev" title="scaLR Documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            scaLR
+              <img src="_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis._analyser">_analyser module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis._analyser.AnalysisBase"><code class="docutils literal notranslate"><span class="pre">AnalysisBase</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis._analyser.AnalysisBase.generate_analysis"><code class="docutils literal notranslate"><span class="pre">AnalysisBase.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis._analyser.AnalysisBase.get_default_params"><code class="docutils literal notranslate"><span class="pre">AnalysisBase.get_default_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis._analyser.build_analyser"><code class="docutils literal notranslate"><span class="pre">build_analyser()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis.dge_lmem">dge_lmem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM"><code class="docutils literal notranslate"><span class="pre">DgeLMEM</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.generate_analysis"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.get_default_params"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.get_default_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.get_genes_n_fixed_val_subset_df"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.get_genes_n_fixed_val_subset_df()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.get_multiproc_mxeffect_model_batch_res"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.get_multiproc_mxeffect_model_batch_res()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.get_result_mxmodel_per_gene"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.get_result_mxmodel_per_gene()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.plot_lmem_dge_result"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.plot_lmem_dge_result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_lmem.DgeLMEM.replace_spec_char_get_dict"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.replace_spec_char_get_dict()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis.dge_pseudobulk">dge_pseudobulk</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk._make_design_matrix"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk._make_design_matrix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk.generate_analysis"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk.get_default_params"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk.get_default_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk.get_differential_expression_results"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk.get_differential_expression_results()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk.plot_volcano"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk.plot_volcano()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis.evaluation">evaluation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.evaluation.generate_and_save_classification_report"><code class="docutils literal notranslate"><span class="pre">generate_and_save_classification_report()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.evaluation.get_accuracy"><code class="docutils literal notranslate"><span class="pre">get_accuracy()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis.gene_recall_curve">gene_recall_curve</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.gene_recall_curve.GeneRecallCurve"><code class="docutils literal notranslate"><span class="pre">GeneRecallCurve</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.gene_recall_curve.GeneRecallCurve.generate_analysis"><code class="docutils literal notranslate"><span class="pre">GeneRecallCurve.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.gene_recall_curve.GeneRecallCurve.get_default_params"><code class="docutils literal notranslate"><span class="pre">GeneRecallCurve.get_default_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.gene_recall_curve.GeneRecallCurve.plot_gene_recall"><code class="docutils literal notranslate"><span class="pre">GeneRecallCurve.plot_gene_recall()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis.heatmap">heatmap</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.heatmap.Heatmap"><code class="docutils literal notranslate"><span class="pre">Heatmap</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.heatmap.Heatmap.generate_analysis"><code class="docutils literal notranslate"><span class="pre">Heatmap.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.heatmap.Heatmap.plot_heatmap"><code class="docutils literal notranslate"><span class="pre">Heatmap.plot_heatmap()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scalr.analysis.roc_auc">roc_auc</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.analysis.roc_auc.RocAucCurve"><code class="docutils literal notranslate"><span class="pre">RocAucCurve</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.analysis.roc_auc.RocAucCurve.generate_analysis"><code class="docutils literal notranslate"><span class="pre">RocAucCurve.generate_analysis()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Analysis</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/scalr.analysis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="analysis">
+<h1>Analysis<a class="headerlink" href="#analysis" title="Link to this heading"></a></h1>
+<section id="module-scalr.analysis._analyser">
+<span id="analyser-module"></span><h2>_analyser module<a class="headerlink" href="#module-scalr.analysis._analyser" title="Link to this heading"></a></h2>
+<p>This file is a base class for the analysis module.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.analysis._analyser.AnalysisBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.analysis._analyser.</span></span><span class="sig-name descname"><span class="pre">AnalysisBase</span></span><a class="reference internal" href="_modules/scalr/analysis/_analyser.html#AnalysisBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis._analyser.AnalysisBase" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A base class for downstream analysis tasks.</p>
+<p>This class provides common attributes and methods for all the analysis tasks.
+It is intended to be subclassed to create task-specific analysis.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis._analyser.AnalysisBase.generate_analysis">
+<span class="sig-name descname"><span class="pre">generate_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_dl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataLoader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/_analyser.html#AnalysisBase.generate_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis._analyser.AnalysisBase.generate_analysis" title="Link to this definition"></a></dt>
+<dd><p>A function to generate analysis, should be overridden by all subclasses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>nn.Module</em>) – final trained model.</p></li>
+<li><p><strong>test_data</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – test data to run analysis on.</p></li>
+<li><p><strong>test_dl</strong> (<em>DataLoader</em>) – DataLoader object to prepare inputs for the model.</p></li>
+<li><p><strong>dirpath</strong> (<em>str</em>) – dirpath to store analysis.</p></li>
+<li><p><strong>**kwargs</strong> – contains all previous analysis done to be used later.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis._analyser.AnalysisBase.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/analysis/_analyser.html#AnalysisBase.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis._analyser.AnalysisBase.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for analysis_config.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scalr.analysis._analyser.build_analyser">
+<span class="sig-prename descclassname"><span class="pre">scalr.analysis._analyser.</span></span><span class="sig-name descname"><span class="pre">build_analyser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scalr.analysis._analyser.AnalysisBase" title="scalr.analysis._analyser.AnalysisBase"><span class="pre">AnalysisBase</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/scalr/analysis/_analyser.html#build_analyser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis._analyser.build_analyser" title="Link to this definition"></a></dt>
+<dd><p>Builder object to get analyser, updated analyser_config.</p>
+</dd></dl>
+
+</section>
+<section id="module-scalr.analysis.dge_lmem">
+<span id="dge-lmem"></span><h2>dge_lmem<a class="headerlink" href="#module-scalr.analysis.dge_lmem" title="Link to this heading"></a></h2>
+<p>This file generates differential gene expression analysis using Linear mixed-effects model approach and stores the results.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.analysis.dge_lmem.DgeLMEM">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.analysis.dge_lmem.</span></span><span class="sig-name descname"><span class="pre">DgeLMEM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">fixed_effect_column:</span> <span class="pre">str,</span> <span class="pre">fixed_effect_factors:</span> <span class="pre">list[str],</span> <span class="pre">group:</span> <span class="pre">str,</span> <span class="pre">celltype_column:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">cell_subsets:</span> <span class="pre">list[str]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">min_cell_threshold:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10,</span> <span class="pre">n_cpu:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">6,</span> <span class="pre">gene_batch_size:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1000,</span> <span class="pre">coef_threshold:</span> <span class="pre">[&lt;class</span> <span class="pre">'float'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'int'&gt;]</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">p_val:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0.05,</span> <span class="pre">y_lim_tuple:</span> <span class="pre">~typing.Tuple[float,</span> <span class="pre">...]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">save_plot:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True,</span> <span class="pre">stdout:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/dge_lmem.html#DgeLMEM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_lmem.DgeLMEM" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scalr.analysis._analyser.AnalysisBase" title="scalr.analysis._analyser.AnalysisBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisBase</span></code></a></p>
+<p>Class to perform differential gene expression analysis
+using Linear mixed effects model.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.dge_lmem.DgeLMEM.generate_analysis">
+<span class="sig-name descname"><span class="pre">generate_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/dge_lmem.html#DgeLMEM.generate_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_lmem.DgeLMEM.generate_analysis" title="Link to this definition"></a></dt>
+<dd><p>This method calls methods to run multiple linear mixed effects models and
+generate DGE results and plots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_data</strong> – Anndata.</p></li>
+<li><p><strong>dirpath</strong> – Path to save results.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.dge_lmem.DgeLMEM.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/analysis/dge_lmem.html#DgeLMEM.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_lmem.DgeLMEM.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for DgeLMEM_config.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.dge_lmem.DgeLMEM.get_genes_n_fixed_val_subset_df">
+<span class="sig-name descname"><span class="pre">get_genes_n_fixed_val_subset_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_adata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/dge_lmem.html#DgeLMEM.get_genes_n_fixed_val_subset_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_lmem.DgeLMEM.get_genes_n_fixed_val_subset_df" title="Link to this definition"></a></dt>
+<dd><p>This method converts Anndata into a pandas DataFrame with gene expression data,
+‘fixed_effect_column’, and ‘group’ params.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch_adata</strong> – Anndata.</p></li>
+<li><p><strong>cell_type</strong> – Cell type in the ‘celltype_column’ to subset the anndata,
+the whole anndata will be processed if ‘cell_type’ is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of gene names in the anndata, and a pandas dataframe with count matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.dge_lmem.DgeLMEM.get_multiproc_mxeffect_model_batch_res">
+<span class="sig-name descname"><span class="pre">get_multiproc_mxeffect_model_batch_res</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gene_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ad_subset_to_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/dge_lmem.html#DgeLMEM.get_multiproc_mxeffect_model_batch_res"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_lmem.DgeLMEM.get_multiproc_mxeffect_model_batch_res" title="Link to this definition"></a></dt>
+<dd><p>This method parallelizes the Linear mixed effects models for a list
+of genes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gene_names</strong> – List of gene names.</p></li>
+<li><p><strong>ad_subset_to_df</strong> – A pandas dataframe with gene expression, ‘fixed_effect_column’,</p></li>
+<li><p><strong>params.</strong> (<em>and 'group'</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of dictionaries with model stats for ‘gene_names’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.dge_lmem.DgeLMEM.get_result_mxmodel_per_gene">
+<span class="sig-name descname"><span class="pre">get_result_mxmodel_per_gene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gene</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ad_subset_to_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/dge_lmem.html#DgeLMEM.get_result_mxmodel_per_gene"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_lmem.DgeLMEM.get_result_mxmodel_per_gene" title="Link to this definition"></a></dt>
+<dd><p>This method produces the Linear mixed-effects model statistics for a single gene.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gene</strong> – Gene name.</p></li>
+<li><p><strong>ad_subset_to_df</strong> – A pandas dataframe with gene expression, ‘fixed_effect_column’,
+and ‘group’ params.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary with model statistics.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.dge_lmem.DgeLMEM.plot_lmem_dge_result">
+<span class="sig-name descname"><span class="pre">plot_lmem_dge_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmem_res_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/dge_lmem.html#DgeLMEM.plot_lmem_dge_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_lmem.DgeLMEM.plot_lmem_dge_result" title="Link to this definition"></a></dt>
+<dd><p>This method produces a volcano plot for the model results for a data subset
+with a cell type, or for the whole dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lmem_res_df</strong> – A pandas DataFrame with Model results (p-value, co-efficients, Standard error..).</p></li>
+<li><p><strong>dirpath</strong> – Path to save the plot.</p></li>
+<li><p><strong>cell_type</strong> – Cell type used to subset input anndata.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.dge_lmem.DgeLMEM.replace_spec_char_get_dict">
+<span class="sig-name descname"><span class="pre">replace_spec_char_get_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/dge_lmem.html#DgeLMEM.replace_spec_char_get_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_lmem.DgeLMEM.replace_spec_char_get_dict" title="Link to this definition"></a></dt>
+<dd><p>This method replaces any special character in gene names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>var_names</strong> – var_names in the Anndata.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>var_names with special characters replaced with ‘_’, and a dictionary mapping of old and new names.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.analysis.dge_pseudobulk">
+<span id="dge-pseudobulk"></span><h2>dge_pseudobulk<a class="headerlink" href="#module-scalr.analysis.dge_pseudobulk" title="Link to this heading"></a></h2>
+<p>This file generates differential gene expression analysis using Pseudobulk approach and stores the results.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.analysis.dge_pseudobulk.DgePseudoBulk">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.analysis.dge_pseudobulk.</span></span><span class="sig-name descname"><span class="pre">DgePseudoBulk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">celltype_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">design_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor_categories</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sum_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_subsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cell_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold_change</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lim_tuple</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/dge_pseudobulk.html#DgePseudoBulk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scalr.analysis._analyser.AnalysisBase" title="scalr.analysis._analyser.AnalysisBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisBase</span></code></a></p>
+<p>Class to perform differential gene expression analysis using Pseudobulk approach.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.dge_pseudobulk.DgePseudoBulk._make_design_matrix">
+<span class="sig-name descname"><span class="pre">_make_design_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/dge_pseudobulk.html#DgePseudoBulk._make_design_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk._make_design_matrix" title="Link to this definition"></a></dt>
+<dd><p>Method to subset an anndata as per a cell type and
+make design matrix based upon the factor levels in design_factor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> – AnnData.</p></li>
+<li><p><strong>cell_type</strong> – Cell type to subset data on, belonging to <cite>celltype_column</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>AnnData oject of design matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.dge_pseudobulk.DgePseudoBulk.generate_analysis">
+<span class="sig-name descname"><span class="pre">generate_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/dge_pseudobulk.html#DgePseudoBulk.generate_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk.generate_analysis" title="Link to this definition"></a></dt>
+<dd><p>This method calls methods to perform differential gene expression analysis on data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_data</strong> – AnnData.</p></li>
+<li><p><strong>dirpath</strong> – Path to save the result.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pandas DataFrame object containing differential gene expression stats.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.dge_pseudobulk.DgePseudoBulk.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/analysis/dge_pseudobulk.html#DgePseudoBulk.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for DgePseudoBulk_config.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.dge_pseudobulk.DgePseudoBulk.get_differential_expression_results">
+<span class="sig-name descname"><span class="pre">get_differential_expression_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/dge_pseudobulk.html#DgePseudoBulk.get_differential_expression_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk.get_differential_expression_results" title="Link to this definition"></a></dt>
+<dd><p>Method to get differential gene expression analysis results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>design_matrix</strong> – AnnData generated using ‘_make_design_matrix’.</p></li>
+<li><p><strong>cell_type</strong> – Cell type used to subset the input anndata.</p></li>
+<li><p><strong>dirpath</strong> – Path to save the result.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas DataFrame object containing differential gene expression results.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.dge_pseudobulk.DgePseudoBulk.plot_volcano">
+<span class="sig-name descname"><span class="pre">plot_volcano</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dge_results_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/dge_pseudobulk.html#DgePseudoBulk.plot_volcano"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.dge_pseudobulk.DgePseudoBulk.plot_volcano" title="Link to this definition"></a></dt>
+<dd><p>Method to generate volcano plot of differential gene expression results
+and store it on disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dge_results_df</strong> – Differential gene expression results in dataframe.</p></li>
+<li><p><strong>cell_type</strong> – Cell type used to subset the input anndata.</p></li>
+<li><p><strong>dirpath</strong> – Path to save the result.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.analysis.evaluation">
+<span id="evaluation"></span><h2>evaluation<a class="headerlink" href="#module-scalr.analysis.evaluation" title="Link to this heading"></a></h2>
+<p>This file generates accuracy, classification report and stores it.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="scalr.analysis.evaluation.generate_and_save_classification_report">
+<span class="sig-prename descclassname"><span class="pre">scalr.analysis.evaluation.</span></span><span class="sig-name descname"><span class="pre">generate_and_save_classification_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/scalr/analysis/evaluation.html#generate_and_save_classification_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.evaluation.generate_and_save_classification_report" title="Link to this definition"></a></dt>
+<dd><p>A function to generate a classificaton report from the actual and predicted data
+and store at <cite>dirpath</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_labels</strong> – True labels from the test set.</p></li>
+<li><p><strong>pred_labels</strong> – Predicted labels from the trained model.</p></li>
+<li><p><strong>dirpath</strong> – Path to store classification_report.</p></li>
+<li><p><strong>mapping</strong><strong>[</strong><strong>optional</strong><strong>]</strong> – Mapping of label_id to true label_names (id2label).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Pandas DataFrame with the classification report.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scalr.analysis.evaluation.get_accuracy">
+<span class="sig-prename descclassname"><span class="pre">scalr.analysis.evaluation.</span></span><span class="sig-name descname"><span class="pre">get_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/scalr/analysis/evaluation.html#get_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.evaluation.get_accuracy" title="Link to this definition"></a></dt>
+<dd><p>A function to get accuracy for the predicted labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_labels</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – True labels from the test set.</p></li>
+<li><p><strong>pred_labels</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – Predicted labels from the trained model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>accuracy score</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-scalr.analysis.gene_recall_curve">
+<span id="gene-recall-curve"></span><h2>gene_recall_curve<a class="headerlink" href="#module-scalr.analysis.gene_recall_curve" title="Link to this heading"></a></h2>
+<p>This file generates gene recall curves for reference genes in provided models ranked genes</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.analysis.gene_recall_curve.GeneRecallCurve">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.analysis.gene_recall_curve.</span></span><span class="sig-name descname"><span class="pre">GeneRecallCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_genes_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranked_genes_path_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_K</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">150</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_per_row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_plots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/gene_recall_curve.html#GeneRecallCurve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.gene_recall_curve.GeneRecallCurve" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scalr.analysis._analyser.AnalysisBase" title="scalr.analysis._analyser.AnalysisBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisBase</span></code></a></p>
+<p>Class to generate gene recall curve.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.gene_recall_curve.GeneRecallCurve.generate_analysis">
+<span class="sig-name descname"><span class="pre">generate_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/gene_recall_curve.html#GeneRecallCurve.generate_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.gene_recall_curve.GeneRecallCurve.generate_analysis" title="Link to this definition"></a></dt>
+<dd><p>This function calls function to generate gene recall after setting a few parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>score_matrix</strong> – Matrix that contains a score of each gene for each category.</p></li>
+<li><p><strong>dirpath</strong> – Path to store gene recall curve if applicable.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.gene_recall_curve.GeneRecallCurve.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/analysis/gene_recall_curve.html#GeneRecallCurve.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.gene_recall_curve.GeneRecallCurve.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for preprocess_config.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.gene_recall_curve.GeneRecallCurve.plot_gene_recall">
+<span class="sig-name descname"><span class="pre">plot_gene_recall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ranked_genes_df_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_genes_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/gene_recall_curve.html#GeneRecallCurve.plot_gene_recall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.gene_recall_curve.GeneRecallCurve.plot_gene_recall" title="Link to this definition"></a></dt>
+<dd><p>This function plots &amp; stores the gene recall curve for reference genes in provided ranked genes.</p>
+<p>It also stores the reference genes along with their ranks for each model in a json file for further
+analysis to the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ranked_genes_df_dict</strong> – Pipeline generated ranked genes dataframe.</p></li>
+<li><p><strong>reference_genes_df</strong> – Reference genes dataframe.</p></li>
+<li><p><strong>top_K</strong> – The top K-ranked genes in which reference genes are to be looked for.</p></li>
+<li><p><strong>dirpath</strong> – Path to store gene recall plot and json.</p></li>
+<li><p><strong>plot_type</strong> – Type of gene recall - per category or aggregated across all categories.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.analysis.heatmap">
+<span id="heatmap"></span><h2>heatmap<a class="headerlink" href="#module-scalr.analysis.heatmap" title="Link to this heading"></a></h2>
+<p>This file generates heatmaps for top genes of particular class w.r.t same top genes in other classes.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.analysis.heatmap.Heatmap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.analysis.heatmap.</span></span><span class="sig-name descname"><span class="pre">Heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_n_genes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_matrix_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/analysis/heatmap.html#Heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.heatmap.Heatmap" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scalr.analysis._analyser.AnalysisBase" title="scalr.analysis._analyser.AnalysisBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisBase</span></code></a></p>
+<p>Class to generate a heatmap of top genes classwise.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.heatmap.Heatmap.generate_analysis">
+<span class="sig-name descname"><span class="pre">generate_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/scalr/analysis/heatmap.html#Heatmap.generate_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.heatmap.Heatmap.generate_analysis" title="Link to this definition"></a></dt>
+<dd><p>A function to generate heatmap for top features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>score_matrix</strong> – Matrix(class * genes) that contains a score of each gene per class.</p></li>
+<li><p><strong>top_features</strong> – Class-wise top genes or list of top features.</p></li>
+<li><p><strong>dirpath</strong> – Path to store the heatmap image.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.heatmap.Heatmap.plot_heatmap">
+<span class="sig-name descname"><span class="pre">plot_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_genes_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/scalr/analysis/heatmap.html#Heatmap.plot_heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.heatmap.Heatmap.plot_heatmap" title="Link to this definition"></a></dt>
+<dd><p>A function to plot a heatmap for top n genes across all classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>class_genes_weights</strong> – Matrix(genes * classes) which contains
+shap_value/weights of each gene to class.</p></li>
+<li><p><strong>dirpath</strong> – Path to store the heatmap image.</p></li>
+<li><p><strong>filename</strong> – Heatmap image name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.analysis.roc_auc">
+<span id="roc-auc"></span><h2>roc_auc<a class="headerlink" href="#module-scalr.analysis.roc_auc" title="Link to this heading"></a></h2>
+<p>This file generates ROC-AUC plot and stores it.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.analysis.roc_auc.RocAucCurve">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.analysis.roc_auc.</span></span><span class="sig-name descname"><span class="pre">RocAucCurve</span></span><a class="reference internal" href="_modules/scalr/analysis/roc_auc.html#RocAucCurve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.roc_auc.RocAucCurve" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scalr.analysis._analyser.AnalysisBase" title="scalr.analysis._analyser.AnalysisBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisBase</span></code></a></p>
+<p>Class to generate ROC-AUC curve.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.analysis.roc_auc.RocAucCurve.generate_analysis">
+<span class="sig-name descname"><span class="pre">generate_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_probabilities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/scalr/analysis/roc_auc.html#RocAucCurve.generate_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.analysis.roc_auc.RocAucCurve.generate_analysis" title="Link to this definition"></a></dt>
+<dd><p>A function to calculate ROC-AUC and save the plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test_labels</strong> – True labels from the test dataset.</p></li>
+<li><p><strong>pred_probabilities</strong> – Predictions probabilities of each sample for all the classes.</p></li>
+<li><p><strong>dirpath</strong> – Path to store gene recall curve if applicable.</p></li>
+<li><p><strong>mapping</strong> – List of class names.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="scaLR Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scalr.data.html" class="btn btn-neutral float-right" title="Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

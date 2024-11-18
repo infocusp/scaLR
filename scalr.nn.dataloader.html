@@ -1,0 +1,314 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dataloader &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="loss" href="scalr.nn.loss.html" />
+    <link rel="prev" title="callbacks" href="scalr.nn.callbacks.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            scaLR
+              <img src="_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="scalr.nn.html">NN</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.callbacks.html">callbacks</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">dataloader</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.nn.dataloader._dataloader">_dataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.nn.dataloader._dataloader.DataLoaderBase"><code class="docutils literal notranslate"><span class="pre">DataLoaderBase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.nn.dataloader._dataloader.build_dataloader"><code class="docutils literal notranslate"><span class="pre">build_dataloader()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.nn.dataloader.simple_dataloader">simple_dataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.nn.dataloader.simple_dataloader.SimpleDataLoader"><code class="docutils literal notranslate"><span class="pre">SimpleDataLoader</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.nn.dataloader.simple_metadataloader">simple_metadataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.nn.dataloader.simple_metadataloader.SimpleMetaDataLoader"><code class="docutils literal notranslate"><span class="pre">SimpleMetaDataLoader</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.nn.dataloader.test_simple_dataloader">test_simple_dataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.nn.dataloader.test_simple_dataloader.test_metadataloader"><code class="docutils literal notranslate"><span class="pre">test_metadataloader()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.nn.dataloader.test_simple_metadataloader">test_simple_metadataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.nn.dataloader.test_simple_metadataloader.test_metadataloader"><code class="docutils literal notranslate"><span class="pre">test_metadataloader()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.loss.html">loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.model.html">model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.trainer.html">trainer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="scalr.nn.html">NN</a></li>
+      <li class="breadcrumb-item active">dataloader</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/scalr.nn.dataloader.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dataloader">
+<h1>dataloader<a class="headerlink" href="#dataloader" title="Link to this heading"></a></h1>
+<section id="module-scalr.nn.dataloader._dataloader">
+<span id="id1"></span><h2>_dataloader<a class="headerlink" href="#module-scalr.nn.dataloader._dataloader" title="Link to this heading"></a></h2>
+<p>This file is a base class for dataloader.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.nn.dataloader._dataloader.DataLoaderBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.nn.dataloader._dataloader.</span></span><span class="sig-name descname"><span class="pre">DataLoaderBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/nn/dataloader/_dataloader.html#DataLoaderBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader._dataloader.DataLoaderBase" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.nn.dataloader._dataloader.DataLoaderBase.collate_fn">
+<span class="sig-name descname"><span class="pre">collate_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/nn/dataloader/_dataloader.html#DataLoaderBase.collate_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader._dataloader.DataLoaderBase.collate_fn" title="Link to this definition"></a></dt>
+<dd><p>Collate function for dataloader. Should be implemented in child classes.</p>
+<p>Given an input anndata of batch_size, the collate function creates inputs and outputs.
+It can also be used to perform batch-wise operations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.nn.dataloader._dataloader.DataLoaderBase.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/nn/dataloader/_dataloader.html#DataLoaderBase.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader._dataloader.DataLoaderBase.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for model_config.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.nn.dataloader._dataloader.DataLoaderBase.get_targets_ids_from_mappings">
+<span class="sig-name descname"><span class="pre">get_targets_ids_from_mappings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/scalr/nn/dataloader/_dataloader.html#DataLoaderBase.get_targets_ids_from_mappings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader._dataloader.DataLoaderBase.get_targets_ids_from_mappings" title="Link to this definition"></a></dt>
+<dd><p>Helper function to generate target ids from label mappings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>adata</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – Anndata object containing targets in <cite>obs</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scalr.nn.dataloader._dataloader.build_dataloader">
+<span class="sig-prename descclassname"><span class="pre">scalr.nn.dataloader._dataloader.</span></span><span class="sig-name descname"><span class="pre">build_dataloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataloader_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scalr.nn.dataloader._dataloader.DataLoaderBase" title="scalr.nn.dataloader._dataloader.DataLoaderBase"><span class="pre">DataLoaderBase</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/scalr/nn/dataloader/_dataloader.html#build_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader._dataloader.build_dataloader" title="Link to this definition"></a></dt>
+<dd><p>Builder object to get DataLoader, updated dataloader_config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataloader_config</strong> (<em>dict</em>) – Config to build dataloader.</p></li>
+<li><p><strong>adata</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – Data to load.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – Target column in data.obs.</p></li>
+<li><p><strong>mappings</strong> (<em>dict</em>) – Mappings of column labels to ids.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-scalr.nn.dataloader.simple_dataloader">
+<span id="simple-dataloader"></span><h2>simple_dataloader<a class="headerlink" href="#module-scalr.nn.dataloader.simple_dataloader" title="Link to this heading"></a></h2>
+<p>This file is the implementation of simpledataloader.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.nn.dataloader.simple_dataloader.SimpleDataLoader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.nn.dataloader.simple_dataloader.</span></span><span class="sig-name descname"><span class="pre">SimpleDataLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/nn/dataloader/simple_dataloader.html#SimpleDataLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader.simple_dataloader.SimpleDataLoader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scalr.nn.dataloader._dataloader.DataLoaderBase" title="scalr.nn.dataloader._dataloader.DataLoaderBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataLoaderBase</span></code></a></p>
+<p>Class for simple dataloader.</p>
+<p>Simple DataLoader converts all adata values to inputs, and target columns in metadata
+to output labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor [batch_size, features], y: Tensor [batch_size, ]).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>PyTorch DataLoader object with (X</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.nn.dataloader.simple_dataloader.SimpleDataLoader.collate_fn">
+<span class="sig-name descname"><span class="pre">collate_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata_batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/scalr/nn/dataloader/simple_dataloader.html#SimpleDataLoader.collate_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader.simple_dataloader.SimpleDataLoader.collate_fn" title="Link to this definition"></a></dt>
+<dd><p>Given an input anndata of batch_size, the collate function creates inputs and outputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>adata_batch</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – Anndata view object with batch_size samples.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Input to model, output from data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple(x, y)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.nn.dataloader.simple_dataloader.SimpleDataLoader.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/nn/dataloader/simple_dataloader.html#SimpleDataLoader.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader.simple_dataloader.SimpleDataLoader.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for model_config.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.nn.dataloader.simple_metadataloader">
+<span id="simple-metadataloader"></span><h2>simple_metadataloader<a class="headerlink" href="#module-scalr.nn.dataloader.simple_metadataloader" title="Link to this heading"></a></h2>
+<p>This file is the implementation of simple metadataloader.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.nn.dataloader.simple_metadataloader.SimpleMetaDataLoader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.nn.dataloader.simple_metadataloader.</span></span><span class="sig-name descname"><span class="pre">SimpleMetaDataLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/nn/dataloader/simple_metadataloader.html#SimpleMetaDataLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader.simple_metadataloader.SimpleMetaDataLoader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scalr.nn.dataloader.simple_dataloader.SimpleDataLoader" title="scalr.nn.dataloader.simple_dataloader.SimpleDataLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleDataLoader</span></code></a></p>
+<p>Class for simple metadataloader.</p>
+<p>Simple MetaDataLoader converts all adata values to inputs, concat specified metadata columns as onehotencoded vector
+to feature data and map target columns in metadata to output labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor [batch_size, features], y: Tensor [batch_size, ]).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>PyTorch DataLoader object with (X</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.nn.dataloader.simple_metadataloader.SimpleMetaDataLoader.collate_fn">
+<span class="sig-name descname"><span class="pre">collate_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata_batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/nn/dataloader/simple_metadataloader.html#SimpleMetaDataLoader.collate_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader.simple_metadataloader.SimpleMetaDataLoader.collate_fn" title="Link to this definition"></a></dt>
+<dd><p>Given an input anndata of batch_size, the collate function creates inputs and outputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>adata_batch</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – Anndata view object with batch_size samples.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Input to model, output from data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple(x, y)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.nn.dataloader.simple_metadataloader.SimpleMetaDataLoader.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/nn/dataloader/simple_metadataloader.html#SimpleMetaDataLoader.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader.simple_metadataloader.SimpleMetaDataLoader.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for model_config.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.nn.dataloader.test_simple_dataloader">
+<span id="test-simple-dataloader"></span><h2>test_simple_dataloader<a class="headerlink" href="#module-scalr.nn.dataloader.test_simple_dataloader" title="Link to this heading"></a></h2>
+<p>This is a test file for simpledataloader.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="scalr.nn.dataloader.test_simple_dataloader.test_metadataloader">
+<span class="sig-prename descclassname"><span class="pre">scalr.nn.dataloader.test_simple_dataloader.</span></span><span class="sig-name descname"><span class="pre">test_metadataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/nn/dataloader/test_simple_dataloader.html#test_metadataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader.test_simple_dataloader.test_metadataloader" title="Link to this definition"></a></dt>
+<dd><p>This function tests features shape returned by simpledataloader for the below 2 cases.
+1. #features are consistent with feature_subsetsize. No padding is required.
+2. #features are less than feature_subsetsize. This case needs padding.</p>
+</dd></dl>
+
+</section>
+<section id="module-scalr.nn.dataloader.test_simple_metadataloader">
+<span id="test-simple-metadataloader"></span><h2>test_simple_metadataloader<a class="headerlink" href="#module-scalr.nn.dataloader.test_simple_metadataloader" title="Link to this heading"></a></h2>
+<p>This is a test file for simplemetadataloader.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="scalr.nn.dataloader.test_simple_metadataloader.test_metadataloader">
+<span class="sig-prename descclassname"><span class="pre">scalr.nn.dataloader.test_simple_metadataloader.</span></span><span class="sig-name descname"><span class="pre">test_metadataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/nn/dataloader/test_simple_metadataloader.html#test_metadataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.nn.dataloader.test_simple_metadataloader.test_metadataloader" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="scalr.nn.callbacks.html" class="btn btn-neutral float-left" title="callbacks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scalr.nn.loss.html" class="btn btn-neutral float-right" title="loss" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>split &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Feature" href="scalr.feature.html" />
+    <link rel="prev" title="preprocess" href="scalr.data.preprocess.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            scaLR
+              <img src="_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="scalr.data.html">Data</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="scalr.data.preprocess.html">preprocess</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">split</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.split._split">_split module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.split._split.SplitterBase"><code class="docutils literal notranslate"><span class="pre">SplitterBase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.split._split.build_splitter"><code class="docutils literal notranslate"><span class="pre">build_splitter()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.split.group_splitter">group_splitter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.split.group_splitter.GroupSplitter"><code class="docutils literal notranslate"><span class="pre">GroupSplitter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.split.stratified_group_splitter">stratified_group_splitter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter"><code class="docutils literal notranslate"><span class="pre">StratifiedGroupSplitter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.split.stratified_splitter">stratified_splitter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.split.stratified_splitter.StratifiedSplitter"><code class="docutils literal notranslate"><span class="pre">StratifiedSplitter</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="scalr.data.html">Data</a></li>
+      <li class="breadcrumb-item active">split</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/scalr.data.split.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="split">
+<h1>split<a class="headerlink" href="#split" title="Link to this heading"></a></h1>
+<section id="module-scalr.data.split._split">
+<span id="split-module"></span><h2>_split module<a class="headerlink" href="#module-scalr.data.split._split" title="Link to this heading"></a></h2>
+<p>This file is a base class for splitter.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.data.split._split.SplitterBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.data.split._split.</span></span><span class="sig-name descname"><span class="pre">SplitterBase</span></span><a class="reference internal" href="_modules/scalr/data/split/_split.html#SplitterBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split._split.SplitterBase" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for splitter, to make Train|Val|Test Splits.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.split._split.SplitterBase.check_splits">
+<span class="sig-name descname"><span class="pre">check_splits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_splits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data/split/_split.html#SplitterBase.check_splits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split._split.SplitterBase.check_splits" title="Link to this definition"></a></dt>
+<dd><p>This function performs certain checks regarding splits and logs
+the distribution of target classes in each split.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datapath</strong> (<em>str</em>) – Path to full data.</p></li>
+<li><p><strong>data_splits</strong> (<em>dict</em>) – Split of ‘train’, ‘val’ and ‘test’ indices.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – Classification target column name in <cite>obs</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.split._split.SplitterBase.generate_train_val_test_split_indices">
+<span class="sig-name descname"><span class="pre">generate_train_val_test_split_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/data/split/_split.html#SplitterBase.generate_train_val_test_split_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split._split.SplitterBase.generate_train_val_test_split_indices" title="Link to this definition"></a></dt>
+<dd><p>Generate a list of indices for train/val/test split of whole dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datapath</strong> (<em>str</em>) – Path to full data.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – Target for classification present in <cite>obs</cite>.</p></li>
+<li><p><strong>**kwargs</strong> – Any other params needed for splitting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>‘train’, ‘val’ and ‘test’ indices list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.split._split.SplitterBase.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/data/split/_split.html#SplitterBase.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split._split.SplitterBase.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for model_config.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.split._split.SplitterBase.write_splits">
+<span class="sig-name descname"><span class="pre">write_splits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_split_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_chunksize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data/split/_split.html#SplitterBase.write_splits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split._split.SplitterBase.write_splits" title="Link to this definition"></a></dt>
+<dd><p>THis function writes the train validation and test splits to the disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>full_data</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – Full data to be split.</p></li>
+<li><p><strong>data_split_indices</strong> (<em>dict</em>) – Indices of each split.</p></li>
+<li><p><strong>sample_chunksize</strong> (<em>int</em>) – Number of samples to be written in one file.</p></li>
+<li><p><strong>dirpath</strong> (<em>int</em>) – Path to write data into.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path of each split.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scalr.data.split._split.build_splitter">
+<span class="sig-prename descclassname"><span class="pre">scalr.data.split._split.</span></span><span class="sig-name descname"><span class="pre">build_splitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">splitter_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scalr.data.split._split.SplitterBase" title="scalr.data.split._split.SplitterBase"><span class="pre">SplitterBase</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/scalr/data/split/_split.html#build_splitter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split._split.build_splitter" title="Link to this definition"></a></dt>
+<dd><p>Builder object to get splitter, updated splitter_config.</p>
+</dd></dl>
+
+</section>
+<section id="module-scalr.data.split.group_splitter">
+<span id="group-splitter"></span><h2>group_splitter<a class="headerlink" href="#module-scalr.data.split.group_splitter" title="Link to this heading"></a></h2>
+<p>This file is an implementation of group splitter.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.data.split.group_splitter.GroupSplitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.data.split.group_splitter.</span></span><span class="sig-name descname"><span class="pre">GroupSplitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stratify</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data/split/group_splitter.html#GroupSplitter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split.group_splitter.GroupSplitter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scalr.data.split.stratified_splitter.StratifiedSplitter" title="scalr.data.split.stratified_splitter.StratifiedSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">StratifiedSplitter</span></code></a></p>
+<p>Class for splitting data based on the provided group.</p>
+<p>Generate a stratified split of data into train, validation, and test
+sets. Stratification ensures samples have the same value for <cite>stratify</cite>
+column, can not belong to different sets.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.split.group_splitter.GroupSplitter._split_data_with_stratification">
+<span class="sig-name descname"><span class="pre">_split_data_with_stratification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/scalr/data/split/group_splitter.html#GroupSplitter._split_data_with_stratification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split.group_splitter.GroupSplitter._split_data_with_stratification" title="Link to this definition"></a></dt>
+<dd><p>A function to split given metadata into a training and testing set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metadata</strong> (<em>DataFrame</em>) – Dataframe containing all samples to be split.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – Target for classification present in <cite>obs</cite>.</p></li>
+<li><p><strong>test_ratio</strong> (<em>float</em>) – Ratio of samples belonging to the test split.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Two lists consisting of train and test indices.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(list(int), list(int))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.split.group_splitter.GroupSplitter.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/data/split/group_splitter.html#GroupSplitter.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split.group_splitter.GroupSplitter.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for model_config.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.data.split.stratified_group_splitter">
+<span id="stratified-group-splitter"></span><h2>stratified_group_splitter<a class="headerlink" href="#module-scalr.data.split.stratified_group_splitter" title="Link to this heading"></a></h2>
+<p>This file is an implementation of stratified group splitter.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.data.split.stratified_group_splitter.</span></span><span class="sig-name descname"><span class="pre">StratifiedGroupSplitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stratify</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data/split/stratified_group_splitter.html#StratifiedGroupSplitter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scalr.data.split._split.SplitterBase" title="scalr.data.split._split.SplitterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SplitterBase</span></code></a></p>
+<p>Class for stratified group splitter.</p>
+<p>Generates split of data into train, validation, and test
+sets. Stratification ensures samples have the same value for <cite>stratify</cite>
+column, can not belong to different sets. Also, it ensures every split
+contains samples from each class available in the data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter._split_data_with_stratification">
+<span class="sig-name descname"><span class="pre">_split_data_with_stratification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/scalr/data/split/stratified_group_splitter.html#StratifiedGroupSplitter._split_data_with_stratification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter._split_data_with_stratification" title="Link to this definition"></a></dt>
+<dd><p>A function to split given metadata into a training and testing set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metadata</strong> (<em>DataFrame</em>) – Dataframe containing all samples to be split.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – Target for classification present in <cite>obs</cite>.</p></li>
+<li><p><strong>test_ratio</strong> (<em>float</em>) – Ratio of samples belonging to the test split.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Two lists consisting of train and test indices.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(list(int), list(int))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter.generate_train_val_test_split_indices">
+<span class="sig-name descname"><span class="pre">generate_train_val_test_split_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/data/split/stratified_group_splitter.html#StratifiedGroupSplitter.generate_train_val_test_split_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter.generate_train_val_test_split_indices" title="Link to this definition"></a></dt>
+<dd><p>A function to generate a list of indices for train/val/test split of the whole dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datapath</strong> (<em>str</em>) – Path to full data.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – Target for classification present in <cite>obs</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>‘train’, ‘val’ and ‘test’ indices list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/data/split/stratified_group_splitter.html#StratifiedGroupSplitter.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for model_config.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.data.split.stratified_splitter">
+<span id="stratified-splitter"></span><h2>stratified_splitter<a class="headerlink" href="#module-scalr.data.split.stratified_splitter" title="Link to this heading"></a></h2>
+<p>This file is an implementation of the stratified splitter.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.data.split.stratified_splitter.StratifiedSplitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.data.split.stratified_splitter.</span></span><span class="sig-name descname"><span class="pre">StratifiedSplitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data/split/stratified_splitter.html#StratifiedSplitter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split.stratified_splitter.StratifiedSplitter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scalr.data.split._split.SplitterBase" title="scalr.data.split._split.SplitterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SplitterBase</span></code></a></p>
+<p>Generate Stratified split of data into train, validation, and test sets.</p>
+<p>Stratification ensures the percentage of samples for each class. It ensures
+every split contains samples from each class available in the data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.split.stratified_splitter.StratifiedSplitter._split_data_with_stratification">
+<span class="sig-name descname"><span class="pre">_split_data_with_stratification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/scalr/data/split/stratified_splitter.html#StratifiedSplitter._split_data_with_stratification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split.stratified_splitter.StratifiedSplitter._split_data_with_stratification" title="Link to this definition"></a></dt>
+<dd><p>A function to split the given metadata into a training and testing set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metadata</strong> (<em>DataFrame</em>) – Dataframe containing all samples to be split.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – Target for classification present in <cite>obs</cite>.</p></li>
+<li><p><strong>test_ratio</strong> (<em>float</em>) – Ratio of samples belonging to the test split.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Two lists consisting of train and test indices.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(list(int), list(int))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.split.stratified_splitter.StratifiedSplitter.generate_train_val_test_split_indices">
+<span class="sig-name descname"><span class="pre">generate_train_val_test_split_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/data/split/stratified_splitter.html#StratifiedSplitter.generate_train_val_test_split_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split.stratified_splitter.StratifiedSplitter.generate_train_val_test_split_indices" title="Link to this definition"></a></dt>
+<dd><p>A function to generate a list of indices for train/val/test split of the whole dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datapath</strong> (<em>str</em>) – Path to full data.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – Target for classification present in <cite>obs</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>‘train’, ‘val’ and ‘test’ indices list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.split.stratified_splitter.StratifiedSplitter.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/data/split/stratified_splitter.html#StratifiedSplitter.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.split.stratified_splitter.StratifiedSplitter.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for model_config.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="scalr.data.preprocess.html" class="btn btn-neutral float-left" title="preprocess" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scalr.feature.html" class="btn btn-neutral float-right" title="Feature" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

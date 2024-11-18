@@ -1,0 +1,359 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>preprocess &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="split" href="scalr.data.split.html" />
+    <link rel="prev" title="Data" href="scalr.data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            scaLR
+              <img src="_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="scalr.data.html">Data</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">preprocess</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.preprocess._preprocess">_preprocess</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.preprocess._preprocess.PreprocessorBase"><code class="docutils literal notranslate"><span class="pre">PreprocessorBase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.preprocess._preprocess.build_preprocessor"><code class="docutils literal notranslate"><span class="pre">build_preprocessor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.preprocess.sample_norm">sample_norm</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.preprocess.sample_norm.SampleNorm"><code class="docutils literal notranslate"><span class="pre">SampleNorm</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.preprocess.standard_scale">standard_scale</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.preprocess.standard_scale.StandardScaler"><code class="docutils literal notranslate"><span class="pre">StandardScaler</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.preprocess.test_sample_norm">test_sample_norm</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.preprocess.test_sample_norm.test_transform"><code class="docutils literal notranslate"><span class="pre">test_transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-scalr.data.preprocess.test_standard_scale">test_standard_scale</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalr.data.preprocess.test_standard_scale.test_fit"><code class="docutils literal notranslate"><span class="pre">test_fit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.data.split.html">split</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="scalr.data.html">Data</a></li>
+      <li class="breadcrumb-item active">preprocess</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/scalr.data.preprocess.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="preprocess">
+<h1>preprocess<a class="headerlink" href="#preprocess" title="Link to this heading"></a></h1>
+<section id="module-scalr.data.preprocess._preprocess">
+<span id="id1"></span><h2>_preprocess<a class="headerlink" href="#module-scalr.data.preprocess._preprocess" title="Link to this heading"></a></h2>
+<p>This file is a base class for preprocessing module.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.data.preprocess._preprocess.PreprocessorBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.data.preprocess._preprocess.</span></span><span class="sig-name descname"><span class="pre">PreprocessorBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data/preprocess/_preprocess.html#PreprocessorBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess._preprocess.PreprocessorBase" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for preprocessor</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.preprocess._preprocess.PreprocessorBase.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_chunksize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/scalr/data/preprocess/_preprocess.html#PreprocessorBase.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess._preprocess.PreprocessorBase.fit" title="Link to this definition"></a></dt>
+<dd><p>A function to calculate attributes for transformation.</p>
+<p>It is required only when you need to see the entire train data and
+calculate attributes, as required in StdScaler, etc. This method
+should not return anything, it should be used to store attributes
+that will be used by the <cite>transform</cite> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – train_data in backed mode.</p></li>
+<li><p><strong>sample_chunksize</strong> (<em>int</em>) – several samples of data that can at most
+be loaded in memory.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.preprocess._preprocess.PreprocessorBase.process_data">
+<span class="sig-name descname"><span class="pre">process_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_chunksize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data/preprocess/_preprocess.html#PreprocessorBase.process_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess._preprocess.PreprocessorBase.process_data" title="Link to this definition"></a></dt>
+<dd><p>A function to process the entire data chunkwise and write the processed data
+to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>full_data</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – Full data for transformation.</p></li>
+<li><p><strong>sample_chunksize</strong> (<em>int</em>) – Number of samples in one chunk.</p></li>
+<li><p><strong>dirpath</strong> (<em>str</em>) – Path to write the data to.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.preprocess._preprocess.PreprocessorBase.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/scalr/data/preprocess/_preprocess.html#PreprocessorBase.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess._preprocess.PreprocessorBase.transform" title="Link to this definition"></a></dt>
+<dd><p>A required function to transform a numpy array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>np.ndarray</em>) – Input raw data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Processed data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scalr.data.preprocess._preprocess.build_preprocessor">
+<span class="sig-prename descclassname"><span class="pre">scalr.data.preprocess._preprocess.</span></span><span class="sig-name descname"><span class="pre">build_preprocessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preprocessing_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#scalr.data.preprocess._preprocess.PreprocessorBase" title="scalr.data.preprocess._preprocess.PreprocessorBase"><span class="pre">PreprocessorBase</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/scalr/data/preprocess/_preprocess.html#build_preprocessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess._preprocess.build_preprocessor" title="Link to this definition"></a></dt>
+<dd><p>Builder object to get a processor, updated preprocessing_config.</p>
+</dd></dl>
+
+</section>
+<section id="module-scalr.data.preprocess.sample_norm">
+<span id="sample-norm"></span><h2>sample_norm<a class="headerlink" href="#module-scalr.data.preprocess.sample_norm" title="Link to this heading"></a></h2>
+<p>This file performs Sample-wise normalization on the data.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.data.preprocess.sample_norm.SampleNorm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.data.preprocess.sample_norm.</span></span><span class="sig-name descname"><span class="pre">SampleNorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data/preprocess/sample_norm.html#SampleNorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess.sample_norm.SampleNorm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scalr.data.preprocess._preprocess.PreprocessorBase" title="scalr.data.preprocess._preprocess.PreprocessorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PreprocessorBase</span></code></a></p>
+<p>Class for Samplewise Normalization</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.preprocess.sample_norm.SampleNorm.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/data/preprocess/sample_norm.html#SampleNorm.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess.sample_norm.SampleNorm.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for preprocess_config.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.preprocess.sample_norm.SampleNorm.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/scalr/data/preprocess/sample_norm.html#SampleNorm.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess.sample_norm.SampleNorm.transform" title="Link to this definition"></a></dt>
+<dd><p>A function to transform provided input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>np.ndarray</em>) – Input raw data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Processed data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.data.preprocess.standard_scale">
+<span id="standard-scale"></span><h2>standard_scale<a class="headerlink" href="#module-scalr.data.preprocess.standard_scale" title="Link to this heading"></a></h2>
+<p>This file performs standard scaler normalization on the data.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.data.preprocess.standard_scale.StandardScaler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.data.preprocess.standard_scale.</span></span><span class="sig-name descname"><span class="pre">StandardScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">with_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data/preprocess/standard_scale.html#StandardScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess.standard_scale.StandardScaler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scalr.data.preprocess._preprocess.PreprocessorBase" title="scalr.data.preprocess._preprocess.PreprocessorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PreprocessorBase</span></code></a></p>
+<p>Class for Standard Normalization</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.preprocess.standard_scale.StandardScaler.calculate_mean">
+<span class="sig-name descname"><span class="pre">calculate_mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_chunksize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/scalr/data/preprocess/standard_scale.html#StandardScaler.calculate_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess.standard_scale.StandardScaler.calculate_mean" title="Link to this definition"></a></dt>
+<dd><p>Function to calculate mean for each feature in the train data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Data to calculate the mean of.</p></li>
+<li><p><strong>sample_chunksize</strong> – Chunks of data that can be loaded into memory at once.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Nothing, stores mean per feature of the train data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.preprocess.standard_scale.StandardScaler.calculate_std">
+<span class="sig-name descname"><span class="pre">calculate_std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_chunksize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/scalr/data/preprocess/standard_scale.html#StandardScaler.calculate_std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess.standard_scale.StandardScaler.calculate_std" title="Link to this definition"></a></dt>
+<dd><p>A function to calculate standard deviation for each feature in the train data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Data to calculate the standard deviation of</p></li>
+<li><p><strong>sample_chunksize</strong> – Chunks of data that can be loaded into memory at once.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Nothing, stores standard deviation per feature of the train data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.preprocess.standard_scale.StandardScaler.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_chunksize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/scalr/data/preprocess/standard_scale.html#StandardScaler.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess.standard_scale.StandardScaler.fit" title="Link to this definition"></a></dt>
+<dd><p>This function calculate parameters for standard scaler object from the train data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Data to calculate the required parameters of.</p></li>
+<li><p><strong>sample_chunksize</strong> – Chunks of data that can be loaded into memory at once.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.preprocess.standard_scale.StandardScaler.get_default_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/data/preprocess/standard_scale.html#StandardScaler.get_default_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess.standard_scale.StandardScaler.get_default_params" title="Link to this definition"></a></dt>
+<dd><p>Class method to get default params for preprocess_config.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data.preprocess.standard_scale.StandardScaler.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/scalr/data/preprocess/standard_scale.html#StandardScaler.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess.standard_scale.StandardScaler.transform" title="Link to this definition"></a></dt>
+<dd><p>A function to transform provided input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>np.ndarray</em>) – raw data</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>processed data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.data.preprocess.test_sample_norm">
+<span id="test-sample-norm"></span><h2>test_sample_norm<a class="headerlink" href="#module-scalr.data.preprocess.test_sample_norm" title="Link to this heading"></a></h2>
+<p>This is a test file for Sample-wise normalization.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="scalr.data.preprocess.test_sample_norm.test_transform">
+<span class="sig-prename descclassname"><span class="pre">scalr.data.preprocess.test_sample_norm.</span></span><span class="sig-name descname"><span class="pre">test_transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data/preprocess/test_sample_norm.html#test_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess.test_sample_norm.test_transform" title="Link to this definition"></a></dt>
+<dd><p>This function tests the transform function of Sample-wise normalization.</p>
+<p>There is no fit() involved in Sample-wise normalization.</p>
+</dd></dl>
+
+</section>
+<section id="module-scalr.data.preprocess.test_standard_scale">
+<span id="test-standard-scale"></span><h2>test_standard_scale<a class="headerlink" href="#module-scalr.data.preprocess.test_standard_scale" title="Link to this heading"></a></h2>
+<p>This is a test file for standard-scaler normalization.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="scalr.data.preprocess.test_standard_scale.test_fit">
+<span class="sig-prename descclassname"><span class="pre">scalr.data.preprocess.test_standard_scale.</span></span><span class="sig-name descname"><span class="pre">test_fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data/preprocess/test_standard_scale.html#test_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data.preprocess.test_standard_scale.test_fit" title="Link to this definition"></a></dt>
+<dd><p>This function tests fit() function of sample-norm normalization.</p>
+<p>fit() function is enough for testing, as we can compare mean and std with
+sklean standard-scaler object params.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="scalr.data.html" class="btn btn-neutral float-left" title="Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scalr.data.split.html" class="btn btn-neutral float-right" title="split" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

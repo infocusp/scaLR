@@ -1,0 +1,365 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scalr.eval_and_analysis_pipeline &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="../../_static/scaLR_logo.png"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            scaLR
+              <img src="../../_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scalr.eval_and_analysis_pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scalr.eval_and_analysis_pipeline</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This file contains an implementation of model evaluation and performs downstream analysis tasks.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">AnnData</span>
+<span class="kn">from</span> <span class="nn">anndata.experimental</span> <span class="kn">import</span> <span class="n">AnnCollection</span>
+
+<span class="kn">from</span> <span class="nn">scalr.analysis</span> <span class="kn">import</span> <span class="n">build_analyser</span>
+<span class="kn">from</span> <span class="nn">scalr.analysis.evaluation</span> <span class="kn">import</span> <span class="n">generate_and_save_classification_report</span>
+<span class="kn">from</span> <span class="nn">scalr.analysis.evaluation</span> <span class="kn">import</span> <span class="n">get_accuracy</span>
+<span class="kn">from</span> <span class="nn">scalr.feature_extraction_pipeline</span> <span class="kn">import</span> <span class="n">FeatureExtractionPipeline</span>
+<span class="kn">from</span> <span class="nn">scalr.nn.dataloader</span> <span class="kn">import</span> <span class="n">build_dataloader</span>
+<span class="kn">from</span> <span class="nn">scalr.nn.model</span> <span class="kn">import</span> <span class="n">build_model</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">FlowLogger</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">load_full_data_from_config</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">load_test_data_from_config</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">load_train_val_data_from_config</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">read_data</span>
+
+
+<div class="viewcode-block" id="EvalAndAnalysisPipeline">
+<a class="viewcode-back" href="../../pipeline.html#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline">[docs]</a>
+<span class="k">class</span> <span class="nc">EvalAndAnalysisPipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for evaluation and analysis of the trained model.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis_config</span><span class="p">,</span> <span class="n">dirpath</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize required parameters for analysis.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            analysis_config: Analysis config.</span>
+<span class="sd">            dirpath: Path to store analysis outputs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span> <span class="o">=</span> <span class="n">FlowLogger</span><span class="p">(</span><span class="s1">&#39;Eval&amp;Analysis&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">analysis_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span> <span class="o">=</span> <span class="n">dirpath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+
+        <span class="n">model_checkpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;model_checkpoint&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">model_checkpoint</span><span class="p">:</span>
+            <span class="n">model_config</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span>
+                <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_checkpoint</span><span class="p">,</span> <span class="s1">&#39;model_config.yaml&#39;</span><span class="p">))</span>
+            <span class="n">model_weights</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_checkpoint</span><span class="p">,</span> <span class="s1">&#39;model.pt&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">build_model</span><span class="p">(</span><span class="n">model_config</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">model_weights</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;Model path not provided. Unable to perform model-based analysis!&#39;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Dict to transfer information between analyses.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">primary_analysis</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+<div class="viewcode-block" id="EvalAndAnalysisPipeline.build_dataloaders">
+<a class="viewcode-back" href="../../pipeline.html#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.build_dataloaders">[docs]</a>
+    <span class="k">def</span> <span class="nf">build_dataloaders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to build dataloader for train, validation, and test data.&quot;&quot;&quot;</span>
+        <span class="n">dataloader_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dataloader&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dataloader_config</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;DataLoader configs not provided!&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">train_dl</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">val_dl</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test_dl</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_dl</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">build_dataloader</span><span class="p">(</span><span class="n">dataloader_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_data</span><span class="p">,</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mappings</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_dl</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">build_dataloader</span><span class="p">(</span><span class="n">dataloader_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_data</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mappings</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_dl</span><span class="p">,</span> <span class="n">dataloader_config</span> <span class="o">=</span> <span class="n">build_dataloader</span><span class="p">(</span>
+            <span class="n">dataloader_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mappings</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis_config</span><span class="p">[</span><span class="s1">&#39;dataloader&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataloader_config</span></div>
+
+
+<div class="viewcode-block" id="EvalAndAnalysisPipeline.load_data_and_targets_from_config">
+<a class="viewcode-back" href="../../pipeline.html#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.load_data_and_targets_from_config">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_data_and_targets_from_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to load data and targets from data config.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_config: Data config.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_data</span> <span class="o">=</span> <span class="n">load_train_val_data_from_config</span><span class="p">(</span>
+            <span class="n">data_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_data</span> <span class="o">=</span> <span class="n">load_test_data_from_config</span><span class="p">(</span><span class="n">data_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_data</span> <span class="o">=</span> <span class="n">load_full_data_from_config</span><span class="p">(</span><span class="n">data_config</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">data_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mappings</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;label_mappings&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_dataloaders</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="EvalAndAnalysisPipeline.set_data_and_targets">
+<a class="viewcode-back" href="../../pipeline.html#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.set_data_and_targets">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_data_and_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">AnnCollection</span><span class="p">],</span>
+                             <span class="n">val_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">AnnCollection</span><span class="p">],</span>
+                             <span class="n">test_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">AnnCollection</span><span class="p">],</span>
+                             <span class="n">target</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">mappings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to set data when you don&#39;t use data directly from config,</span>
+<span class="sd">        but rather by other sources like feature subsetting, etc.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            train_data (Union[AnnData, AnnCollection]): Training data.</span>
+<span class="sd">            val_data (Union[AnnData, AnnCollection]): Validation data.</span>
+<span class="sd">            target (Union[str, list[str]]): Target columns name(s).</span>
+<span class="sd">            mappings (dict): Mapping of a column value to ids</span>
+<span class="sd">                            eg. mappings[column_name][label2id] = {A: 1, B:2, ...}.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_data</span> <span class="o">=</span> <span class="n">train_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_data</span> <span class="o">=</span> <span class="n">val_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_data</span> <span class="o">=</span> <span class="n">test_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mappings</span> <span class="o">=</span> <span class="n">mappings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_dataloaders</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="EvalAndAnalysisPipeline.evaluation_and_classification_report">
+<a class="viewcode-back" href="../../pipeline.html#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.evaluation_and_classification_report">[docs]</a>
+    <span class="k">def</span> <span class="nf">evaluation_and_classification_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to evaluate the trained model and generate classification report on test data.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;Calculating accuracy and generating classification report on test set&#39;</span>
+        <span class="p">)</span>
+
+        <span class="n">test_labels</span><span class="p">,</span> <span class="n">pred_labels</span><span class="p">,</span> <span class="n">pred_probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_predictions</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test_dl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">primary_analysis</span><span class="p">[</span><span class="s1">&#39;test_labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">primary_analysis</span><span class="p">[</span><span class="s1">&#39;pred_labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred_labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">primary_analysis</span><span class="p">[</span><span class="s1">&#39;pred_probabilities&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred_probabilities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">primary_analysis</span><span class="p">[</span><span class="s1">&#39;mapping&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mappings</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">][</span><span class="s1">&#39;id2label&#39;</span><span class="p">]</span>
+
+        <span class="n">accuracy</span> <span class="o">=</span> <span class="n">get_accuracy</span><span class="p">(</span><span class="n">test_labels</span><span class="p">,</span> <span class="n">pred_labels</span><span class="p">)</span>
+
+        <span class="c1"># Generate classification report.</span>
+        <span class="n">generate_and_save_classification_report</span><span class="p">(</span>
+            <span class="n">test_labels</span><span class="p">,</span>
+            <span class="n">pred_labels</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">,</span>
+            <span class="n">mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mappings</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">][</span><span class="s1">&#39;id2label&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="EvalAndAnalysisPipeline.gene_analysis">
+<a class="viewcode-back" href="../../pipeline.html#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.gene_analysis">[docs]</a>
+    <span class="k">def</span> <span class="nf">gene_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to perform analysis on trained model to get top genes and biomarkers.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Performing gene analysis&#39;</span><span class="p">)</span>
+        <span class="n">gene_analysis_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">,</span> <span class="s1">&#39;gene_analysis&#39;</span><span class="p">)</span>
+        <span class="n">gene_analyser</span> <span class="o">=</span> <span class="n">FeatureExtractionPipeline</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysis_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;gene_analysis&#39;</span><span class="p">),</span> <span class="n">gene_analysis_path</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">gene_analyser</span><span class="o">.</span><span class="n">set_model</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">])</span>
+        <span class="n">gene_analyser</span><span class="o">.</span><span class="n">set_data_and_targets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_data</span><span class="p">,</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mappings</span><span class="p">)</span>
+
+        <span class="n">score_matrix</span> <span class="o">=</span> <span class="n">gene_analyser</span><span class="o">.</span><span class="n">feature_scoring</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">primary_analysis</span><span class="p">[</span><span class="s1">&#39;score_matrix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">score_matrix</span>
+
+        <span class="n">top_features</span> <span class="o">=</span> <span class="n">gene_analyser</span><span class="o">.</span><span class="n">top_feature_extraction</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">primary_analysis</span><span class="p">[</span><span class="s1">&#39;top_features&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">top_features</span></div>
+
+
+<div class="viewcode-block" id="EvalAndAnalysisPipeline._perform_downstream_analysis">
+<a class="viewcode-back" href="../../pipeline.html#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline._perform_downstream_analysis">[docs]</a>
+    <span class="k">def</span> <span class="nf">_perform_downstream_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to perform all downstream analysis tasks on model and data.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            samples [&#39;test&#39; | &#39;full&#39;]: indicates the samples to perform downstream </span>
+<span class="sd">                                       analysis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">downstream_analysis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">samples</span><span class="si">}</span><span class="s1">_samples_downstream_analysis&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">downstream_analysis</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Performing Downstream Analysis on </span><span class="si">{</span><span class="n">samples</span><span class="si">}</span><span class="s1"> samples&#39;</span><span class="p">)</span>
+            <span class="n">samples_analysis_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">,</span>
+                                              <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">samples</span><span class="si">}</span><span class="s1">_samples&#39;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">samples_analysis_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">analysis_config</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">downstream_analysis</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Performing </span><span class="si">{</span><span class="n">analysis_config</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="n">analysis_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">analysis_config</span><span class="p">)</span>
+                <span class="n">analyser</span><span class="p">,</span> <span class="n">analysis_config</span> <span class="o">=</span> <span class="n">build_analyser</span><span class="p">(</span><span class="n">analysis_config</span><span class="p">)</span>
+                <span class="n">downstream_analysis</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">analysis_config</span>
+
+                <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="k">if</span> <span class="n">samples</span> <span class="o">==</span> <span class="s1">&#39;test&#39;</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">dl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_dl</span> <span class="k">if</span> <span class="n">samples</span> <span class="o">==</span> <span class="s1">&#39;test&#39;</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data</span> <span class="k">if</span> <span class="n">samples</span> <span class="o">==</span> <span class="s1">&#39;test&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_data</span>
+
+                <span class="n">analysis</span> <span class="o">=</span> <span class="n">analyser</span><span class="o">.</span><span class="n">generate_analysis</span><span class="p">(</span>
+                    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                    <span class="n">test_data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                    <span class="n">test_dl</span><span class="o">=</span><span class="n">dl</span><span class="p">,</span>
+                    <span class="n">dirpath</span><span class="o">=</span><span class="n">samples_analysis_path</span><span class="p">,</span>
+                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">primary_analysis</span><span class="p">)</span>
+
+                <span class="c1"># To be able to use any above analyses in other downstream analysis.</span>
+                <span class="k">if</span> <span class="n">analysis</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">primary_analysis</span><span class="p">[</span><span class="n">analysis_config</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">analysis</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">downstream_analysis</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysis_config</span><span class="p">[</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">samples</span><span class="si">}</span><span class="s1">_samples_downstream_analysis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">downstream_analysis</span></div>
+
+
+<div class="viewcode-block" id="EvalAndAnalysisPipeline.full_samples_downstream_anlaysis">
+<a class="viewcode-back" href="../../pipeline.html#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.full_samples_downstream_anlaysis">[docs]</a>
+    <span class="k">def</span> <span class="nf">full_samples_downstream_anlaysis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to perform downstream analysis tasks on all samples data.</span>
+<span class="sd">        </span>
+<span class="sd">        Note: The Model &amp; DataLoader will not be passsed since it is assumed that</span>
+<span class="sd">        a model is trained on the train data, so analysis by model should not</span>
+<span class="sd">        be on full samples data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_downstream_analysis</span><span class="p">(</span><span class="s1">&#39;full&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EvalAndAnalysisPipeline.test_samples_downstream_anlaysis">
+<a class="viewcode-back" href="../../pipeline.html#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.test_samples_downstream_anlaysis">[docs]</a>
+    <span class="k">def</span> <span class="nf">test_samples_downstream_anlaysis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to perform downstream analysis tasks on model and test </span>
+<span class="sd">        samples data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_downstream_analysis</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EvalAndAnalysisPipeline.get_updated_config">
+<a class="viewcode-back" href="../../pipeline.html#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.get_updated_config">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_updated_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to return updated configs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_config</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

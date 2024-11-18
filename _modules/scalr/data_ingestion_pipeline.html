@@ -1,0 +1,327 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scalr.data_ingestion_pipeline &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="../../_static/scaLR_logo.png"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            scaLR
+              <img src="../../_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scalr.data_ingestion_pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scalr.data_ingestion_pipeline</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This file is a class for data ingestion into the pipeline.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">scalr.data.preprocess</span> <span class="kn">import</span> <span class="n">build_preprocessor</span>
+<span class="kn">from</span> <span class="nn">scalr.data.split</span> <span class="kn">import</span> <span class="n">build_splitter</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">FlowLogger</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">read_data</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">write_data</span>
+
+
+<div class="viewcode-block" id="DataIngestionPipeline">
+<a class="viewcode-back" href="../../pipeline.html#scalr.data_ingestion_pipeline.DataIngestionPipeline">[docs]</a>
+<span class="k">class</span> <span class="nc">DataIngestionPipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for Data Ingestion into the pipeline&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">dirpath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load data config and create a `data` directory.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_config (dict): Data processing configuration and paths.</span>
+<span class="sd">            dirpath (str): Experiment data directory. Defaults to &#39;.&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span> <span class="o">=</span> <span class="n">FlowLogger</span><span class="p">(</span><span class="s1">&#39;DataIngestion&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">data_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_chunksize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sample_chunksize&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Make some necessary checks and logs.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Target not given&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_chunksize</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<span class="w">                </span><span class="sd">&#39;&#39;&#39;Sample chunk size not given. Will default to not using chunking.</span>
+<span class="sd">                   Might results in excessive use of memory.&#39;&#39;&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">datadir</span> <span class="o">=</span> <span class="n">dirpath</span>
+
+<div class="viewcode-block" id="DataIngestionPipeline.generate_train_val_test_split">
+<a class="viewcode-back" href="../../pipeline.html#scalr.data_ingestion_pipeline.DataIngestionPipeline.generate_train_val_test_split">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_train_val_test_split</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to split data into train, validation and test sets.&quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO: Move to config validation</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s1">&#39;full_datapath&#39;</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s1">&#39;split_datapaths&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<span class="w">                </span><span class="sd">&#39;&#39;&#39;`full_datapath` and `split_datapaths` are both provided in</span>
+<span class="sd">                the config. Pipeline will use `full_datapath` and it will overwrite</span>
+<span class="sd">                the `split_datapaths`.</span>
+<span class="sd">                &#39;&#39;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Move to config validation</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s1">&#39;feature_subset_datapaths&#39;</span>
+        <span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;final_datapaths&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="w">                </span><span class="sd">&#39;&#39;&#39;`final_datapaths` or `feature_subset_datapaths` can not be provided</span>
+<span class="sd">                by the user in the config. These paths are generated by the pipeline!</span>
+<span class="sd">                &#39;&#39;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;full_datapath&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generating Train, Validation and Test sets&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<span class="w">                    </span><span class="sd">&#39;&#39;&#39;Target not provided. Will not be able to perform</span>
+<span class="sd">                    checks regarding splits.</span>
+<span class="sd">                    &#39;&#39;&#39;</span><span class="p">)</span>
+
+            <span class="n">full_datapath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">][</span><span class="s1">&#39;full_datapath&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">full_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">full_datapath</span><span class="p">)</span>
+            <span class="n">splitter_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">][</span><span class="s1">&#39;splitter_config&#39;</span><span class="p">])</span>
+            <span class="n">splitter</span><span class="p">,</span> <span class="n">splitter_config</span> <span class="o">=</span> <span class="n">build_splitter</span><span class="p">(</span><span class="n">splitter_config</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">][</span>
+                <span class="s1">&#39;splitter_config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">splitter_config</span>
+
+            <span class="c1"># Make data splits.</span>
+            <span class="n">train_val_test_split_indices</span> <span class="o">=</span> <span class="n">splitter</span><span class="o">.</span><span class="n">generate_train_val_test_split_indices</span><span class="p">(</span>
+                <span class="n">full_datapath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+
+            <span class="n">write_data</span><span class="p">(</span><span class="n">train_val_test_split_indices</span><span class="p">,</span>
+                       <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="s1">&#39;train_val_test_split.json&#39;</span><span class="p">))</span>
+
+            <span class="c1"># Check data splits.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">:</span>
+                <span class="n">splitter</span><span class="o">.</span><span class="n">check_splits</span><span class="p">(</span><span class="n">full_datapath</span><span class="p">,</span>
+                                      <span class="n">train_val_test_split_indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+
+            <span class="c1"># Write data splits.</span>
+            <span class="n">train_val_test_split_dirpath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+                                                     <span class="s1">&#39;train_val_test_split&#39;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">train_val_test_split_dirpath</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">splitter</span><span class="o">.</span><span class="n">write_splits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_data</span><span class="p">,</span> <span class="n">train_val_test_split_indices</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">sample_chunksize</span><span class="p">,</span>
+                                  <span class="n">train_val_test_split_dirpath</span><span class="p">)</span>
+
+            <span class="c1"># Garbage collection</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_data</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">][</span>
+                <span class="s1">&#39;split_datapaths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_val_test_split_dirpath</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;split_datapaths&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;Reading Train, Validation and Test sets from config&#39;</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Move to config validation</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;No Data Provided. Please provide `full_datapath` or `split_datapaths`!&#39;</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DataIngestionPipeline.preprocess_data">
+<a class="viewcode-back" href="../../pipeline.html#scalr.data_ingestion_pipeline.DataIngestionPipeline.preprocess_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">preprocess_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to apply preprocessing on data splits.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">][</span><span class="s1">&#39;final_datapaths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">][</span><span class="s1">&#39;split_datapaths&#39;</span><span class="p">])</span>
+
+        <span class="n">all_preprocessings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;preprocess&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">all_preprocessings</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Preprocessing data&#39;</span><span class="p">)</span>
+        <span class="n">datapath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">][</span><span class="s1">&#39;final_datapaths&#39;</span><span class="p">]</span>
+
+        <span class="n">processed_datapath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span> <span class="s1">&#39;processed_data&#39;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">processed_datapath</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">preprocess</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">all_preprocessings</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Applying </span><span class="si">{</span><span class="n">preprocess</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="n">preprocessor</span><span class="p">,</span> <span class="n">preprocessor_config</span> <span class="o">=</span> <span class="n">build_preprocessor</span><span class="p">(</span>
+                <span class="n">deepcopy</span><span class="p">(</span><span class="n">preprocess</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;preprocess&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">preprocessor_config</span>
+            <span class="c1"># Fit on train data.</span>
+            <span class="n">preprocessor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">read_data</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">datapath</span><span class="p">,</span> <span class="s1">&#39;train&#39;</span><span class="p">)),</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">sample_chunksize</span><span class="p">)</span>
+            <span class="c1"># Transform on train, val &amp; test split.</span>
+            <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="s1">&#39;val&#39;</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">]:</span>
+                <span class="n">split_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">datapath</span><span class="p">,</span> <span class="n">split</span><span class="p">))</span>
+                <span class="n">preprocessor</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">split_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_chunksize</span><span class="p">,</span>
+                                          <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">processed_datapath</span><span class="p">,</span> <span class="n">split</span><span class="p">))</span>
+
+            <span class="n">datapath</span> <span class="o">=</span> <span class="n">processed_datapath</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">][</span>
+            <span class="s1">&#39;final_datapaths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">processed_datapath</span></div>
+
+
+<div class="viewcode-block" id="DataIngestionPipeline.generate_mappings">
+<a class="viewcode-back" href="../../pipeline.html#scalr.data_ingestion_pipeline.DataIngestionPipeline.generate_mappings">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_mappings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to generate an Integer mapping to and from target columns.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flow_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;Generate label mappings for all columns in metadata&#39;</span><span class="p">)</span>
+
+        <span class="n">column_names</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">][</span><span class="s1">&#39;final_datapaths&#39;</span><span class="p">],</span>
+                      <span class="s1">&#39;val&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">columns</span>
+
+        <span class="n">data_obs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="s1">&#39;val&#39;</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">]:</span>
+            <span class="n">datapath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;train_val_test&#39;</span><span class="p">][</span><span class="s1">&#39;final_datapaths&#39;</span><span class="p">],</span> <span class="n">split</span><span class="p">)</span>
+            <span class="n">split_data_obs</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">datapath</span><span class="p">)</span><span class="o">.</span><span class="n">obs</span>
+            <span class="n">data_obs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">split_data_obs</span><span class="p">)</span>
+        <span class="n">full_data_obs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">data_obs</span><span class="p">)</span>
+
+        <span class="n">label_mappings</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">column_name</span> <span class="ow">in</span> <span class="n">column_names</span><span class="p">:</span>
+            <span class="n">label_mappings</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="n">id2label</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">full_data_obs</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                <span class="s1">&#39;category&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">categories</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+            <span class="n">label2id</span> <span class="o">=</span> <span class="p">{</span><span class="n">id2label</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">id2label</span><span class="p">))}</span>
+            <span class="n">label_mappings</span><span class="p">[</span><span class="n">column_name</span><span class="p">][</span><span class="s1">&#39;id2label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">id2label</span>
+            <span class="n">label_mappings</span><span class="p">[</span><span class="n">column_name</span><span class="p">][</span><span class="s1">&#39;label2id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">label2id</span>
+
+        <span class="c1"># Garbage collection</span>
+        <span class="k">del</span> <span class="n">data_obs</span>
+        <span class="k">del</span> <span class="n">full_data_obs</span>
+
+        <span class="n">write_data</span><span class="p">(</span><span class="n">label_mappings</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+                                             <span class="s1">&#39;label_mappings.json&#39;</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;label_mappings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+                                                       <span class="s1">&#39;label_mappings.json&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DataIngestionPipeline.get_updated_config">
+<a class="viewcode-back" href="../../pipeline.html#scalr.data_ingestion_pipeline.DataIngestionPipeline.get_updated_config">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_updated_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function returns updated configs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_config</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

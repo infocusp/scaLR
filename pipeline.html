@@ -1,0 +1,451 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data ingestion &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Utils" href="scalr.utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            scaLR
+              <img src="_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data ingestion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.generate_mappings"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline.generate_mappings()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.generate_train_val_test_split"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline.generate_train_val_test_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.get_updated_config"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline.get_updated_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.preprocess_data"><code class="docutils literal notranslate"><span class="pre">DataIngestionPipeline.preprocess_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline._perform_downstream_analysis"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline._perform_downstream_analysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.build_dataloaders"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.build_dataloaders()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.evaluation_and_classification_report"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.evaluation_and_classification_report()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.full_samples_downstream_anlaysis"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.full_samples_downstream_anlaysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.gene_analysis"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.gene_analysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.get_updated_config"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.get_updated_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.load_data_and_targets_from_config"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.load_data_and_targets_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.set_data_and_targets"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.set_data_and_targets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.test_samples_downstream_anlaysis"><code class="docutils literal notranslate"><span class="pre">EvalAndAnalysisPipeline.test_samples_downstream_anlaysis()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-scalr.feature_extraction_pipeline">Feature extraction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.feature_scoring"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.feature_scoring()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.feature_subsetted_model_training"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.feature_subsetted_model_training()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.get_updated_config"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.get_updated_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.load_data_and_targets_from_config"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.load_data_and_targets_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_data_and_targets"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.set_data_and_targets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_model"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.set_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_score_matrix"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.set_score_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.top_feature_extraction"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.top_feature_extraction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.write_top_features_subset_data"><code class="docutils literal notranslate"><span class="pre">FeatureExtractionPipeline.write_top_features_subset_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-scalr.model_training_pipeline">Model training</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.build_model_training_artifacts"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.build_model_training_artifacts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.build_optimizer"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.build_optimizer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.get_updated_config"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.get_updated_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.load_data_and_targets_from_config"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.load_data_and_targets_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.set_data_and_targets"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.set_data_and_targets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scalr.model_training_pipeline.ModelTrainingPipeline.train"><code class="docutils literal notranslate"><span class="pre">ModelTrainingPipeline.train()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Data ingestion</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pipeline.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-scalr.data_ingestion_pipeline">
+<span id="data-ingestion"></span><h1>Data ingestion<a class="headerlink" href="#module-scalr.data_ingestion_pipeline" title="Link to this heading"></a></h1>
+<p>This file is a class for data ingestion into the pipeline.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.data_ingestion_pipeline.DataIngestionPipeline">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.data_ingestion_pipeline.</span></span><span class="sig-name descname"><span class="pre">DataIngestionPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data_ingestion_pipeline.html#DataIngestionPipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for Data Ingestion into the pipeline</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data_ingestion_pipeline.DataIngestionPipeline.generate_mappings">
+<span class="sig-name descname"><span class="pre">generate_mappings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data_ingestion_pipeline.html#DataIngestionPipeline.generate_mappings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.generate_mappings" title="Link to this definition"></a></dt>
+<dd><p>A function to generate an Integer mapping to and from target columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data_ingestion_pipeline.DataIngestionPipeline.generate_train_val_test_split">
+<span class="sig-name descname"><span class="pre">generate_train_val_test_split</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data_ingestion_pipeline.html#DataIngestionPipeline.generate_train_val_test_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.generate_train_val_test_split" title="Link to this definition"></a></dt>
+<dd><p>A function to split data into train, validation and test sets.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data_ingestion_pipeline.DataIngestionPipeline.get_updated_config">
+<span class="sig-name descname"><span class="pre">get_updated_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data_ingestion_pipeline.html#DataIngestionPipeline.get_updated_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.get_updated_config" title="Link to this definition"></a></dt>
+<dd><p>This function returns updated configs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.data_ingestion_pipeline.DataIngestionPipeline.preprocess_data">
+<span class="sig-name descname"><span class="pre">preprocess_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/data_ingestion_pipeline.html#DataIngestionPipeline.preprocess_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.data_ingestion_pipeline.DataIngestionPipeline.preprocess_data" title="Link to this definition"></a></dt>
+<dd><p>A function to apply preprocessing on data splits.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.eval_and_analysis_pipeline">
+<span id="eval-and-analysis"></span><h1>Eval and analysis<a class="headerlink" href="#module-scalr.eval_and_analysis_pipeline" title="Link to this heading"></a></h1>
+<p>This file contains an implementation of model evaluation and performs downstream analysis tasks.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.eval_and_analysis_pipeline.</span></span><span class="sig-name descname"><span class="pre">EvalAndAnalysisPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/eval_and_analysis_pipeline.html#EvalAndAnalysisPipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for evaluation and analysis of the trained model.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline._perform_downstream_analysis">
+<span class="sig-name descname"><span class="pre">_perform_downstream_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/eval_and_analysis_pipeline.html#EvalAndAnalysisPipeline._perform_downstream_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline._perform_downstream_analysis" title="Link to this definition"></a></dt>
+<dd><p>A function to perform all downstream analysis tasks on model and data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>'full'</strong><strong>]</strong> (<em>samples</em><em> [</em><em>'test'</em><em> |</em>) – indicates the samples to perform downstream
+analysis.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.build_dataloaders">
+<span class="sig-name descname"><span class="pre">build_dataloaders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/eval_and_analysis_pipeline.html#EvalAndAnalysisPipeline.build_dataloaders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.build_dataloaders" title="Link to this definition"></a></dt>
+<dd><p>A function to build dataloader for train, validation, and test data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.evaluation_and_classification_report">
+<span class="sig-name descname"><span class="pre">evaluation_and_classification_report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/eval_and_analysis_pipeline.html#EvalAndAnalysisPipeline.evaluation_and_classification_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.evaluation_and_classification_report" title="Link to this definition"></a></dt>
+<dd><p>A function to evaluate the trained model and generate classification report on test data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.full_samples_downstream_anlaysis">
+<span class="sig-name descname"><span class="pre">full_samples_downstream_anlaysis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/eval_and_analysis_pipeline.html#EvalAndAnalysisPipeline.full_samples_downstream_anlaysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.full_samples_downstream_anlaysis" title="Link to this definition"></a></dt>
+<dd><p>A function to perform downstream analysis tasks on all samples data.</p>
+<p>Note: The Model &amp; DataLoader will not be passsed since it is assumed that
+a model is trained on the train data, so analysis by model should not
+be on full samples data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.gene_analysis">
+<span class="sig-name descname"><span class="pre">gene_analysis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/eval_and_analysis_pipeline.html#EvalAndAnalysisPipeline.gene_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.gene_analysis" title="Link to this definition"></a></dt>
+<dd><p>A function to perform analysis on trained model to get top genes and biomarkers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.get_updated_config">
+<span class="sig-name descname"><span class="pre">get_updated_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/eval_and_analysis_pipeline.html#EvalAndAnalysisPipeline.get_updated_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.get_updated_config" title="Link to this definition"></a></dt>
+<dd><p>A function to return updated configs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.load_data_and_targets_from_config">
+<span class="sig-name descname"><span class="pre">load_data_and_targets_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/eval_and_analysis_pipeline.html#EvalAndAnalysisPipeline.load_data_and_targets_from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.load_data_and_targets_from_config" title="Link to this definition"></a></dt>
+<dd><p>A function to load data and targets from data config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_config</strong> – Data config.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.set_data_and_targets">
+<span class="sig-name descname"><span class="pre">set_data_and_targets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/eval_and_analysis_pipeline.html#EvalAndAnalysisPipeline.set_data_and_targets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.set_data_and_targets" title="Link to this definition"></a></dt>
+<dd><p>A function to set data when you don’t use data directly from config,
+but rather by other sources like feature subsetting, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – Training data.</p></li>
+<li><p><strong>val_data</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – Validation data.</p></li>
+<li><p><strong>target</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>list</em><em>[</em><em>str</em><em>]</em><em>]</em>) – Target columns name(s).</p></li>
+<li><p><strong>mappings</strong> (<em>dict</em>) – Mapping of a column value to ids
+eg. mappings[column_name][label2id] = {A: 1, B:2, …}.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.test_samples_downstream_anlaysis">
+<span class="sig-name descname"><span class="pre">test_samples_downstream_anlaysis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/eval_and_analysis_pipeline.html#EvalAndAnalysisPipeline.test_samples_downstream_anlaysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.eval_and_analysis_pipeline.EvalAndAnalysisPipeline.test_samples_downstream_anlaysis" title="Link to this definition"></a></dt>
+<dd><p>A function to perform downstream analysis tasks on model and test
+samples data.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.feature_extraction_pipeline">
+<span id="feature-extraction"></span><h1>Feature extraction<a class="headerlink" href="#module-scalr.feature_extraction_pipeline" title="Link to this heading"></a></h1>
+<p>This file contains the implementation of feature subsetting, model training followed by top feature extraction.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.feature_extraction_pipeline.FeatureExtractionPipeline">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.feature_extraction_pipeline.</span></span><span class="sig-name descname"><span class="pre">FeatureExtractionPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_selection_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/feature_extraction_pipeline.html#FeatureExtractionPipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.feature_extraction_pipeline.FeatureExtractionPipeline.feature_scoring">
+<span class="sig-name descname"><span class="pre">feature_scoring</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/scalr/feature_extraction_pipeline.html#FeatureExtractionPipeline.feature_scoring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.feature_scoring" title="Link to this definition"></a></dt>
+<dd><p>A function to generate scores of each feature for each class using a scorer
+and chunked models.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.feature_extraction_pipeline.FeatureExtractionPipeline.feature_subsetted_model_training">
+<span class="sig-name descname"><span class="pre">feature_subsetted_model_training</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Module</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/scalr/feature_extraction_pipeline.html#FeatureExtractionPipeline.feature_subsetted_model_training"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.feature_subsetted_model_training" title="Link to this definition"></a></dt>
+<dd><p>This function train models on subsetted data containing <cite>feature_subsetsize</cite> genes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.feature_extraction_pipeline.FeatureExtractionPipeline.get_updated_config">
+<span class="sig-name descname"><span class="pre">get_updated_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/feature_extraction_pipeline.html#FeatureExtractionPipeline.get_updated_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.get_updated_config" title="Link to this definition"></a></dt>
+<dd><p>This function returns updated configs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.feature_extraction_pipeline.FeatureExtractionPipeline.load_data_and_targets_from_config">
+<span class="sig-name descname"><span class="pre">load_data_and_targets_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/feature_extraction_pipeline.html#FeatureExtractionPipeline.load_data_and_targets_from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.load_data_and_targets_from_config" title="Link to this definition"></a></dt>
+<dd><p>A function to load data and targets from data config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_config</strong> – Data config.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_data_and_targets">
+<span class="sig-name descname"><span class="pre">set_data_and_targets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/feature_extraction_pipeline.html#FeatureExtractionPipeline.set_data_and_targets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_data_and_targets" title="Link to this definition"></a></dt>
+<dd><p>A function to set data when you don’t use data directly from config,
+but rather by other sources like feature subsetting, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – Training data.</p></li>
+<li><p><strong>val_data</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – Validation data.</p></li>
+<li><p><strong>target</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>list</em><em>[</em><em>str</em><em>]</em><em>]</em>) – Target columns name(s).</p></li>
+<li><p><strong>mappings</strong> (<em>dict</em>) – Mapping of a column value to ids
+eg. mappings[column_name][label2id] = {A: 1, B:2, …}.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_model">
+<span class="sig-name descname"><span class="pre">set_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Module</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/feature_extraction_pipeline.html#FeatureExtractionPipeline.set_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_model" title="Link to this definition"></a></dt>
+<dd><p>A function to set the trained model for downstream feature tasks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_score_matrix">
+<span class="sig-name descname"><span class="pre">set_score_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/feature_extraction_pipeline.html#FeatureExtractionPipeline.set_score_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.set_score_matrix" title="Link to this definition"></a></dt>
+<dd><p>A function to set score_matrix for feature extraction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.feature_extraction_pipeline.FeatureExtractionPipeline.top_feature_extraction">
+<span class="sig-name descname"><span class="pre">top_feature_extraction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/feature_extraction_pipeline.html#FeatureExtractionPipeline.top_feature_extraction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.top_feature_extraction" title="Link to this definition"></a></dt>
+<dd><p>A function to get top features using <cite>Selector</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.feature_extraction_pipeline.FeatureExtractionPipeline.write_top_features_subset_data">
+<span class="sig-name descname"><span class="pre">write_top_features_subset_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/scalr/feature_extraction_pipeline.html#FeatureExtractionPipeline.write_top_features_subset_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.feature_extraction_pipeline.FeatureExtractionPipeline.write_top_features_subset_data" title="Link to this definition"></a></dt>
+<dd><p>A function to write top features subset data onto disk
+and return updated data_config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_config</strong> – Data config.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scalr.model_training_pipeline">
+<span id="model-training"></span><h1>Model training<a class="headerlink" href="#module-scalr.model_training_pipeline" title="Link to this heading"></a></h1>
+<p>This file contains an implementation for the model training pipeline.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scalr.model_training_pipeline.ModelTrainingPipeline">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scalr.model_training_pipeline.</span></span><span class="sig-name descname"><span class="pre">ModelTrainingPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/model_training_pipeline.html#ModelTrainingPipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.model_training_pipeline.ModelTrainingPipeline" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for Model training pipeline.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.model_training_pipeline.ModelTrainingPipeline.build_model_training_artifacts">
+<span class="sig-name descname"><span class="pre">build_model_training_artifacts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/model_training_pipeline.html#ModelTrainingPipeline.build_model_training_artifacts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.model_training_pipeline.ModelTrainingPipeline.build_model_training_artifacts" title="Link to this definition"></a></dt>
+<dd><p>This function configures the model, optimizer, and loss function required
+for model training.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.model_training_pipeline.ModelTrainingPipeline.build_optimizer">
+<span class="sig-name descname"><span class="pre">build_optimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opt_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/model_training_pipeline.html#ModelTrainingPipeline.build_optimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.model_training_pipeline.ModelTrainingPipeline.build_optimizer" title="Link to this definition"></a></dt>
+<dd><p>A function to build optimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>opt_config</strong> (<em>dict</em>) – Optimizer config.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.model_training_pipeline.ModelTrainingPipeline.get_updated_config">
+<span class="sig-name descname"><span class="pre">get_updated_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/model_training_pipeline.html#ModelTrainingPipeline.get_updated_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.model_training_pipeline.ModelTrainingPipeline.get_updated_config" title="Link to this definition"></a></dt>
+<dd><p>This function returns updated configs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.model_training_pipeline.ModelTrainingPipeline.load_data_and_targets_from_config">
+<span class="sig-name descname"><span class="pre">load_data_and_targets_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/model_training_pipeline.html#ModelTrainingPipeline.load_data_and_targets_from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.model_training_pipeline.ModelTrainingPipeline.load_data_and_targets_from_config" title="Link to this definition"></a></dt>
+<dd><p>A function to load data and targets from data config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_config</strong> – Data config.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.model_training_pipeline.ModelTrainingPipeline.set_data_and_targets">
+<span class="sig-name descname"><span class="pre">set_data_and_targets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AnnCollection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/model_training_pipeline.html#ModelTrainingPipeline.set_data_and_targets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.model_training_pipeline.ModelTrainingPipeline.set_data_and_targets" title="Link to this definition"></a></dt>
+<dd><p>A function to set data when you don’t use data directly from config,
+but rather by other sources like feature subsetting, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – Training data.</p></li>
+<li><p><strong>val_data</strong> (<em>Union</em><em>[</em><em>AnnData</em><em>, </em><em>AnnCollection</em><em>]</em>) – Validation data.</p></li>
+<li><p><strong>target</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>list</em><em>[</em><em>str</em><em>]</em><em>]</em>) – Target columns name(s).</p></li>
+<li><p><strong>mappings</strong> (<em>dict</em>) – Mapping of a column value to ids
+eg. mappings[column_name][label2id] = {A: 1, B:2, …}.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scalr.model_training_pipeline.ModelTrainingPipeline.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scalr/model_training_pipeline.html#ModelTrainingPipeline.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scalr.model_training_pipeline.ModelTrainingPipeline.train" title="Link to this definition"></a></dt>
+<dd><p>This function trains the model.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="scalr.utils.html" class="btn btn-neutral float-left" title="Utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

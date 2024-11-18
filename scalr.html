@@ -1,0 +1,550 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scalr &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="_static/scaLR_logo.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            scaLR
+              <img src="_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">scalr</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/scalr.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="scalr">
+<h1>scalr<a class="headerlink" href="#scalr" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="scalr.analysis.html">Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scalr.analysis.html#module-scalr.analysis._analyser">_analyser module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html#scalr.analysis._analyser.AnalysisBase"><code class="docutils literal notranslate"><span class="pre">AnalysisBase</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis._analyser.AnalysisBase.generate_analysis"><code class="docutils literal notranslate"><span class="pre">AnalysisBase.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis._analyser.AnalysisBase.get_default_params"><code class="docutils literal notranslate"><span class="pre">AnalysisBase.get_default_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html#scalr.analysis._analyser.build_analyser"><code class="docutils literal notranslate"><span class="pre">build_analyser()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.analysis.html#module-scalr.analysis.dge_lmem">dge_lmem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM"><code class="docutils literal notranslate"><span class="pre">DgeLMEM</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.generate_analysis"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.get_default_params"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.get_default_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.get_genes_n_fixed_val_subset_df"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.get_genes_n_fixed_val_subset_df()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.get_multiproc_mxeffect_model_batch_res"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.get_multiproc_mxeffect_model_batch_res()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.get_result_mxmodel_per_gene"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.get_result_mxmodel_per_gene()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.plot_lmem_dge_result"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.plot_lmem_dge_result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.replace_spec_char_get_dict"><code class="docutils literal notranslate"><span class="pre">DgeLMEM.replace_spec_char_get_dict()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.analysis.html#module-scalr.analysis.dge_pseudobulk">dge_pseudobulk</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_pseudobulk.DgePseudoBulk"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_pseudobulk.DgePseudoBulk._make_design_matrix"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk._make_design_matrix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_pseudobulk.DgePseudoBulk.generate_analysis"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_pseudobulk.DgePseudoBulk.get_default_params"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk.get_default_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_pseudobulk.DgePseudoBulk.get_differential_expression_results"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk.get_differential_expression_results()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.dge_pseudobulk.DgePseudoBulk.plot_volcano"><code class="docutils literal notranslate"><span class="pre">DgePseudoBulk.plot_volcano()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.analysis.html#module-scalr.analysis.evaluation">evaluation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.evaluation.generate_and_save_classification_report"><code class="docutils literal notranslate"><span class="pre">generate_and_save_classification_report()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.evaluation.get_accuracy"><code class="docutils literal notranslate"><span class="pre">get_accuracy()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.analysis.html#module-scalr.analysis.gene_recall_curve">gene_recall_curve</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.gene_recall_curve.GeneRecallCurve"><code class="docutils literal notranslate"><span class="pre">GeneRecallCurve</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.gene_recall_curve.GeneRecallCurve.generate_analysis"><code class="docutils literal notranslate"><span class="pre">GeneRecallCurve.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.gene_recall_curve.GeneRecallCurve.get_default_params"><code class="docutils literal notranslate"><span class="pre">GeneRecallCurve.get_default_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.gene_recall_curve.GeneRecallCurve.plot_gene_recall"><code class="docutils literal notranslate"><span class="pre">GeneRecallCurve.plot_gene_recall()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.analysis.html#module-scalr.analysis.heatmap">heatmap</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.heatmap.Heatmap"><code class="docutils literal notranslate"><span class="pre">Heatmap</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.heatmap.Heatmap.generate_analysis"><code class="docutils literal notranslate"><span class="pre">Heatmap.generate_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.heatmap.Heatmap.plot_heatmap"><code class="docutils literal notranslate"><span class="pre">Heatmap.plot_heatmap()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.analysis.html#module-scalr.analysis.roc_auc">roc_auc</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.roc_auc.RocAucCurve"><code class="docutils literal notranslate"><span class="pre">RocAucCurve</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.analysis.html#scalr.analysis.roc_auc.RocAucCurve.generate_analysis"><code class="docutils literal notranslate"><span class="pre">RocAucCurve.generate_analysis()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scalr.data.preprocess.html">preprocess</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.data.preprocess.html#module-scalr.data.preprocess._preprocess">_preprocess</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess._preprocess.PreprocessorBase"><code class="docutils literal notranslate"><span class="pre">PreprocessorBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess._preprocess.PreprocessorBase.fit"><code class="docutils literal notranslate"><span class="pre">PreprocessorBase.fit()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess._preprocess.PreprocessorBase.process_data"><code class="docutils literal notranslate"><span class="pre">PreprocessorBase.process_data()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess._preprocess.PreprocessorBase.transform"><code class="docutils literal notranslate"><span class="pre">PreprocessorBase.transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess._preprocess.build_preprocessor"><code class="docutils literal notranslate"><span class="pre">build_preprocessor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.data.preprocess.html#module-scalr.data.preprocess.sample_norm">sample_norm</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess.sample_norm.SampleNorm"><code class="docutils literal notranslate"><span class="pre">SampleNorm</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess.sample_norm.SampleNorm.get_default_params"><code class="docutils literal notranslate"><span class="pre">SampleNorm.get_default_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess.sample_norm.SampleNorm.transform"><code class="docutils literal notranslate"><span class="pre">SampleNorm.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.data.preprocess.html#module-scalr.data.preprocess.standard_scale">standard_scale</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess.standard_scale.StandardScaler"><code class="docutils literal notranslate"><span class="pre">StandardScaler</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess.standard_scale.StandardScaler.calculate_mean"><code class="docutils literal notranslate"><span class="pre">StandardScaler.calculate_mean()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess.standard_scale.StandardScaler.calculate_std"><code class="docutils literal notranslate"><span class="pre">StandardScaler.calculate_std()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess.standard_scale.StandardScaler.fit"><code class="docutils literal notranslate"><span class="pre">StandardScaler.fit()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess.standard_scale.StandardScaler.get_default_params"><code class="docutils literal notranslate"><span class="pre">StandardScaler.get_default_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess.standard_scale.StandardScaler.transform"><code class="docutils literal notranslate"><span class="pre">StandardScaler.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.data.preprocess.html#module-scalr.data.preprocess.test_sample_norm">test_sample_norm</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess.test_sample_norm.test_transform"><code class="docutils literal notranslate"><span class="pre">test_transform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.data.preprocess.html#module-scalr.data.preprocess.test_standard_scale">test_standard_scale</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.data.preprocess.html#scalr.data.preprocess.test_standard_scale.test_fit"><code class="docutils literal notranslate"><span class="pre">test_fit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.data.split.html">split</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.data.split.html#module-scalr.data.split._split">_split module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.data.split.html#scalr.data.split._split.SplitterBase"><code class="docutils literal notranslate"><span class="pre">SplitterBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.split.html#scalr.data.split._split.SplitterBase.check_splits"><code class="docutils literal notranslate"><span class="pre">SplitterBase.check_splits()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.split.html#scalr.data.split._split.SplitterBase.generate_train_val_test_split_indices"><code class="docutils literal notranslate"><span class="pre">SplitterBase.generate_train_val_test_split_indices()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.split.html#scalr.data.split._split.SplitterBase.get_default_params"><code class="docutils literal notranslate"><span class="pre">SplitterBase.get_default_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.split.html#scalr.data.split._split.SplitterBase.write_splits"><code class="docutils literal notranslate"><span class="pre">SplitterBase.write_splits()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.data.split.html#scalr.data.split._split.build_splitter"><code class="docutils literal notranslate"><span class="pre">build_splitter()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.data.split.html#module-scalr.data.split.group_splitter">group_splitter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.data.split.html#scalr.data.split.group_splitter.GroupSplitter"><code class="docutils literal notranslate"><span class="pre">GroupSplitter</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.split.html#scalr.data.split.group_splitter.GroupSplitter._split_data_with_stratification"><code class="docutils literal notranslate"><span class="pre">GroupSplitter._split_data_with_stratification()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.split.html#scalr.data.split.group_splitter.GroupSplitter.get_default_params"><code class="docutils literal notranslate"><span class="pre">GroupSplitter.get_default_params()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.data.split.html#module-scalr.data.split.stratified_group_splitter">stratified_group_splitter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.data.split.html#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter"><code class="docutils literal notranslate"><span class="pre">StratifiedGroupSplitter</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.split.html#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter._split_data_with_stratification"><code class="docutils literal notranslate"><span class="pre">StratifiedGroupSplitter._split_data_with_stratification()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.split.html#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter.generate_train_val_test_split_indices"><code class="docutils literal notranslate"><span class="pre">StratifiedGroupSplitter.generate_train_val_test_split_indices()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.split.html#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter.get_default_params"><code class="docutils literal notranslate"><span class="pre">StratifiedGroupSplitter.get_default_params()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.data.split.html#module-scalr.data.split.stratified_splitter">stratified_splitter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.data.split.html#scalr.data.split.stratified_splitter.StratifiedSplitter"><code class="docutils literal notranslate"><span class="pre">StratifiedSplitter</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.split.html#scalr.data.split.stratified_splitter.StratifiedSplitter._split_data_with_stratification"><code class="docutils literal notranslate"><span class="pre">StratifiedSplitter._split_data_with_stratification()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.split.html#scalr.data.split.stratified_splitter.StratifiedSplitter.generate_train_val_test_split_indices"><code class="docutils literal notranslate"><span class="pre">StratifiedSplitter.generate_train_val_test_split_indices()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.data.split.html#scalr.data.split.stratified_splitter.StratifiedSplitter.get_default_params"><code class="docutils literal notranslate"><span class="pre">StratifiedSplitter.get_default_params()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.feature.html">Feature</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scalr.feature.scoring.html">scoring</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.feature.scoring.html#module-scalr.feature.scoring._scoring">_scoring</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.feature.scoring.html#scalr.feature.scoring._scoring.ScoringBase"><code class="docutils literal notranslate"><span class="pre">ScoringBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.scoring.html#scalr.feature.scoring._scoring.ScoringBase.generate_scores"><code class="docutils literal notranslate"><span class="pre">ScoringBase.generate_scores()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.scoring.html#scalr.feature.scoring._scoring.ScoringBase.get_default_params"><code class="docutils literal notranslate"><span class="pre">ScoringBase.get_default_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.feature.scoring.html#scalr.feature.scoring._scoring.build_scorer"><code class="docutils literal notranslate"><span class="pre">build_scorer()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.feature.scoring.html#module-scalr.feature.scoring.linear_scorer">linear_scorer</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.feature.scoring.html#scalr.feature.scoring.linear_scorer.LinearScorer"><code class="docutils literal notranslate"><span class="pre">LinearScorer</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.scoring.html#scalr.feature.scoring.linear_scorer.LinearScorer.generate_scores"><code class="docutils literal notranslate"><span class="pre">LinearScorer.generate_scores()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.feature.scoring.html#module-scalr.feature.scoring.shap_scorer">shap_scorer</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.feature.scoring.html#scalr.feature.scoring.shap_scorer.ShapScorer"><code class="docutils literal notranslate"><span class="pre">ShapScorer</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.scoring.html#scalr.feature.scoring.shap_scorer.ShapScorer._is_shap_early_stop"><code class="docutils literal notranslate"><span class="pre">ShapScorer._is_shap_early_stop()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.scoring.html#scalr.feature.scoring.shap_scorer.ShapScorer.generate_scores"><code class="docutils literal notranslate"><span class="pre">ShapScorer.generate_scores()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.scoring.html#scalr.feature.scoring.shap_scorer.ShapScorer.get_default_params"><code class="docutils literal notranslate"><span class="pre">ShapScorer.get_default_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.scoring.html#scalr.feature.scoring.shap_scorer.ShapScorer.get_top_n_genes_weights"><code class="docutils literal notranslate"><span class="pre">ShapScorer.get_top_n_genes_weights()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.feature.selector.html">selector</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.feature.selector.html#module-scalr.feature.selector._selector">_selector</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector._selector.SelectorBase"><code class="docutils literal notranslate"><span class="pre">SelectorBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector._selector.SelectorBase.get_default_params"><code class="docutils literal notranslate"><span class="pre">SelectorBase.get_default_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector._selector.SelectorBase.get_feature_list"><code class="docutils literal notranslate"><span class="pre">SelectorBase.get_feature_list()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector._selector.build_selector"><code class="docutils literal notranslate"><span class="pre">build_selector()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.feature.selector.html#module-scalr.feature.selector.abs_mean">abs_mean</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector.abs_mean.AbsMean"><code class="docutils literal notranslate"><span class="pre">AbsMean</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector.abs_mean.AbsMean.get_default_params"><code class="docutils literal notranslate"><span class="pre">AbsMean.get_default_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector.abs_mean.AbsMean.get_feature_list"><code class="docutils literal notranslate"><span class="pre">AbsMean.get_feature_list()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.feature.selector.html#module-scalr.feature.selector.classwise_abs">classwise_abs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector.classwise_abs.ClasswiseAbs"><code class="docutils literal notranslate"><span class="pre">ClasswiseAbs</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector.classwise_abs.ClasswiseAbs.get_default_params"><code class="docutils literal notranslate"><span class="pre">ClasswiseAbs.get_default_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector.classwise_abs.ClasswiseAbs.get_feature_list"><code class="docutils literal notranslate"><span class="pre">ClasswiseAbs.get_feature_list()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.feature.selector.html#module-scalr.feature.selector.classwise_promoters">classwise_promoters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector.classwise_promoters.ClasswisePromoters"><code class="docutils literal notranslate"><span class="pre">ClasswisePromoters</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector.classwise_promoters.ClasswisePromoters.get_default_params"><code class="docutils literal notranslate"><span class="pre">ClasswisePromoters.get_default_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.feature.selector.html#scalr.feature.selector.classwise_promoters.ClasswisePromoters.get_feature_list"><code class="docutils literal notranslate"><span class="pre">ClasswisePromoters.get_feature_list()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.feature.html#module-scalr.feature.feature_subsetting">feature_subsetting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.feature.html#scalr.feature.feature_subsetting.FeatureSubsetting"><code class="docutils literal notranslate"><span class="pre">FeatureSubsetting</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.feature.html#scalr.feature.feature_subsetting.FeatureSubsetting.get_updated_configs"><code class="docutils literal notranslate"><span class="pre">FeatureSubsetting.get_updated_configs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.feature.html#scalr.feature.feature_subsetting.FeatureSubsetting.train_chunked_models"><code class="docutils literal notranslate"><span class="pre">FeatureSubsetting.train_chunked_models()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.nn.html">NN</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.callbacks.html">callbacks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.callbacks.html#module-scalr.nn.callbacks._callbacks">_callbacks</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks._callbacks.CallbackBase"><code class="docutils literal notranslate"><span class="pre">CallbackBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks._callbacks.CallbackBase.get_default_params"><code class="docutils literal notranslate"><span class="pre">CallbackBase.get_default_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks._callbacks.CallbackExecutor"><code class="docutils literal notranslate"><span class="pre">CallbackExecutor</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks._callbacks.CallbackExecutor.execute"><code class="docutils literal notranslate"><span class="pre">CallbackExecutor.execute()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.callbacks.html#module-scalr.nn.callbacks.early_stopping">early_stopping</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.early_stopping.EarlyStopping"><code class="docutils literal notranslate"><span class="pre">EarlyStopping</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.early_stopping.EarlyStopping.patience"><code class="docutils literal notranslate"><span class="pre">EarlyStopping.patience</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.early_stopping.EarlyStopping.min_delta"><code class="docutils literal notranslate"><span class="pre">EarlyStopping.min_delta</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.early_stopping.EarlyStopping.get_default_params"><code class="docutils literal notranslate"><span class="pre">EarlyStopping.get_default_params()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.callbacks.html#module-scalr.nn.callbacks.model_checkpoint">model_checkpoint</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.model_checkpoint.ModelCheckpoint"><code class="docutils literal notranslate"><span class="pre">ModelCheckpoint</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.model_checkpoint.ModelCheckpoint.epoch"><code class="docutils literal notranslate"><span class="pre">ModelCheckpoint.epoch</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.model_checkpoint.ModelCheckpoint.max_validation_acc"><code class="docutils literal notranslate"><span class="pre">ModelCheckpoint.max_validation_acc</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.model_checkpoint.ModelCheckpoint.interval"><code class="docutils literal notranslate"><span class="pre">ModelCheckpoint.interval</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.model_checkpoint.ModelCheckpoint.get_default_params"><code class="docutils literal notranslate"><span class="pre">ModelCheckpoint.get_default_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.model_checkpoint.ModelCheckpoint.save_checkpoint"><code class="docutils literal notranslate"><span class="pre">ModelCheckpoint.save_checkpoint()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.callbacks.html#module-scalr.nn.callbacks.tensorboard_logger">tensorboard_logger</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.tensorboard_logger.TensorboardLogger"><code class="docutils literal notranslate"><span class="pre">TensorboardLogger</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.tensorboard_logger.TensorboardLogger.epoch"><code class="docutils literal notranslate"><span class="pre">TensorboardLogger.epoch</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.tensorboard_logger.TensorboardLogger.writer"><code class="docutils literal notranslate"><span class="pre">TensorboardLogger.writer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.tensorboard_logger.TensorboardLogger.get_default_params"><code class="docutils literal notranslate"><span class="pre">TensorboardLogger.get_default_params()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.callbacks.html#module-scalr.nn.callbacks.test_early_stopping">test_early_stopping</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.callbacks.html#scalr.nn.callbacks.test_early_stopping.test_early_stopping"><code class="docutils literal notranslate"><span class="pre">test_early_stopping()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.dataloader.html">dataloader</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.dataloader.html#module-scalr.nn.dataloader._dataloader">_dataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader._dataloader.DataLoaderBase"><code class="docutils literal notranslate"><span class="pre">DataLoaderBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader._dataloader.DataLoaderBase.collate_fn"><code class="docutils literal notranslate"><span class="pre">DataLoaderBase.collate_fn()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader._dataloader.DataLoaderBase.get_default_params"><code class="docutils literal notranslate"><span class="pre">DataLoaderBase.get_default_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader._dataloader.DataLoaderBase.get_targets_ids_from_mappings"><code class="docutils literal notranslate"><span class="pre">DataLoaderBase.get_targets_ids_from_mappings()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader._dataloader.build_dataloader"><code class="docutils literal notranslate"><span class="pre">build_dataloader()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.dataloader.html#module-scalr.nn.dataloader.simple_dataloader">simple_dataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader.simple_dataloader.SimpleDataLoader"><code class="docutils literal notranslate"><span class="pre">SimpleDataLoader</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader.simple_dataloader.SimpleDataLoader.collate_fn"><code class="docutils literal notranslate"><span class="pre">SimpleDataLoader.collate_fn()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader.simple_dataloader.SimpleDataLoader.get_default_params"><code class="docutils literal notranslate"><span class="pre">SimpleDataLoader.get_default_params()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.dataloader.html#module-scalr.nn.dataloader.simple_metadataloader">simple_metadataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader.simple_metadataloader.SimpleMetaDataLoader"><code class="docutils literal notranslate"><span class="pre">SimpleMetaDataLoader</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader.simple_metadataloader.SimpleMetaDataLoader.collate_fn"><code class="docutils literal notranslate"><span class="pre">SimpleMetaDataLoader.collate_fn()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader.simple_metadataloader.SimpleMetaDataLoader.get_default_params"><code class="docutils literal notranslate"><span class="pre">SimpleMetaDataLoader.get_default_params()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.dataloader.html#module-scalr.nn.dataloader.test_simple_dataloader">test_simple_dataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader.test_simple_dataloader.test_metadataloader"><code class="docutils literal notranslate"><span class="pre">test_metadataloader()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.dataloader.html#module-scalr.nn.dataloader.test_simple_metadataloader">test_simple_metadataloader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.dataloader.html#scalr.nn.dataloader.test_simple_metadataloader.test_metadataloader"><code class="docutils literal notranslate"><span class="pre">test_metadataloader()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.loss.html">loss</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.loss.html#module-scalr.nn.loss._loss">_loss</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.loss.html#scalr.nn.loss._loss.CustomLossBase"><code class="docutils literal notranslate"><span class="pre">CustomLossBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.loss.html#scalr.nn.loss._loss.CustomLossBase.forward"><code class="docutils literal notranslate"><span class="pre">CustomLossBase.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.loss.html#scalr.nn.loss._loss.build_loss_fn"><code class="docutils literal notranslate"><span class="pre">build_loss_fn()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.model.html">model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.model.html#module-scalr.nn.model._model">_model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model._model.ModelBase"><code class="docutils literal notranslate"><span class="pre">ModelBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model._model.ModelBase.forward"><code class="docutils literal notranslate"><span class="pre">ModelBase.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model._model.ModelBase.get_default_params"><code class="docutils literal notranslate"><span class="pre">ModelBase.get_default_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model._model.ModelBase.get_predictions"><code class="docutils literal notranslate"><span class="pre">ModelBase.get_predictions()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model._model.ModelBase.load_weights"><code class="docutils literal notranslate"><span class="pre">ModelBase.load_weights()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model._model.ModelBase.save_weights"><code class="docutils literal notranslate"><span class="pre">ModelBase.save_weights()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model._model.build_model"><code class="docutils literal notranslate"><span class="pre">build_model()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.model.html#module-scalr.nn.model.sequential_model">sequential_model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model.sequential_model.SequentialModel"><code class="docutils literal notranslate"><span class="pre">SequentialModel</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model.sequential_model.SequentialModel.forward"><code class="docutils literal notranslate"><span class="pre">SequentialModel.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model.sequential_model.SequentialModel.get_default_params"><code class="docutils literal notranslate"><span class="pre">SequentialModel.get_default_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model.sequential_model.SequentialModel.get_predictions"><code class="docutils literal notranslate"><span class="pre">SequentialModel.get_predictions()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model.sequential_model.SequentialModel.make_weights_zero"><code class="docutils literal notranslate"><span class="pre">SequentialModel.make_weights_zero()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.model.html#module-scalr.nn.model.shap_model">shap_model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model.shap_model.CustomShapModel"><code class="docutils literal notranslate"><span class="pre">CustomShapModel</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.model.html#scalr.nn.model.shap_model.CustomShapModel.forward"><code class="docutils literal notranslate"><span class="pre">CustomShapModel.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.nn.trainer.html">trainer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.trainer.html#module-scalr.nn.trainer._trainer">_trainer</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.trainer.html#scalr.nn.trainer._trainer.TrainerBase"><code class="docutils literal notranslate"><span class="pre">TrainerBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.trainer.html#scalr.nn.trainer._trainer.TrainerBase.train"><code class="docutils literal notranslate"><span class="pre">TrainerBase.train()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.trainer.html#scalr.nn.trainer._trainer.TrainerBase.train_one_epoch"><code class="docutils literal notranslate"><span class="pre">TrainerBase.train_one_epoch()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="scalr.nn.trainer.html#scalr.nn.trainer._trainer.TrainerBase.validation"><code class="docutils literal notranslate"><span class="pre">TrainerBase.validation()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.nn.trainer.html#module-scalr.nn.trainer.simple_model_trainer">simple_model_trainer</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.nn.trainer.html#scalr.nn.trainer.simple_model_trainer.SimpleModelTrainer"><code class="docutils literal notranslate"><span class="pre">SimpleModelTrainer</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scalr.utils.html">Utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scalr.utils.html#module-scalr.utils.data_utils">data_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.data_utils.generate_dummy_anndata"><code class="docutils literal notranslate"><span class="pre">generate_dummy_anndata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.data_utils.generate_dummy_dge_anndata"><code class="docutils literal notranslate"><span class="pre">generate_dummy_dge_anndata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.data_utils.get_one_hot_matrix"><code class="docutils literal notranslate"><span class="pre">get_one_hot_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.data_utils.get_random_samples"><code class="docutils literal notranslate"><span class="pre">get_random_samples()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.utils.html#module-scalr.utils.file_utils">file_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils._get_datapath_from_config"><code class="docutils literal notranslate"><span class="pre">_get_datapath_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.dump_anndata"><code class="docutils literal notranslate"><span class="pre">dump_anndata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.dump_csv"><code class="docutils literal notranslate"><span class="pre">dump_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.dump_json"><code class="docutils literal notranslate"><span class="pre">dump_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.dump_yaml"><code class="docutils literal notranslate"><span class="pre">dump_yaml()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.load_full_data_from_config"><code class="docutils literal notranslate"><span class="pre">load_full_data_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.load_test_data_from_config"><code class="docutils literal notranslate"><span class="pre">load_test_data_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.load_train_val_data_from_config"><code class="docutils literal notranslate"><span class="pre">load_train_val_data_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.read_anndata"><code class="docutils literal notranslate"><span class="pre">read_anndata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.read_chunked_anndatas"><code class="docutils literal notranslate"><span class="pre">read_chunked_anndatas()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.read_csv"><code class="docutils literal notranslate"><span class="pre">read_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.read_data"><code class="docutils literal notranslate"><span class="pre">read_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.read_json"><code class="docutils literal notranslate"><span class="pre">read_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.read_yaml"><code class="docutils literal notranslate"><span class="pre">read_yaml()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.write_chunkwise_data"><code class="docutils literal notranslate"><span class="pre">write_chunkwise_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.file_utils.write_data"><code class="docutils literal notranslate"><span class="pre">write_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.utils.html#module-scalr.utils.logger">logger</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.logger.EventLogger"><code class="docutils literal notranslate"><span class="pre">EventLogger</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.utils.html#scalr.utils.logger.EventLogger.filepath"><code class="docutils literal notranslate"><span class="pre">EventLogger.filepath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.utils.html#scalr.utils.logger.EventLogger.heading"><code class="docutils literal notranslate"><span class="pre">EventLogger.heading()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.utils.html#scalr.utils.logger.EventLogger.heading1"><code class="docutils literal notranslate"><span class="pre">EventLogger.heading1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.utils.html#scalr.utils.logger.EventLogger.heading2"><code class="docutils literal notranslate"><span class="pre">EventLogger.heading2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scalr.utils.html#scalr.utils.logger.EventLogger.level"><code class="docutils literal notranslate"><span class="pre">EventLogger.level</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.logger.FlowLogger"><code class="docutils literal notranslate"><span class="pre">FlowLogger</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scalr.utils.html#scalr.utils.logger.FlowLogger.level"><code class="docutils literal notranslate"><span class="pre">FlowLogger.level</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.utils.html#module-scalr.utils.misc_utils">misc_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.misc_utils.build_object"><code class="docutils literal notranslate"><span class="pre">build_object()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.misc_utils.overwrite_default"><code class="docutils literal notranslate"><span class="pre">overwrite_default()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.misc_utils.set_seed"><code class="docutils literal notranslate"><span class="pre">set_seed()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.utils.html#module-scalr.utils.test_file_utils">test_file_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.test_file_utils.test_write_chunkwise_data"><code class="docutils literal notranslate"><span class="pre">test_write_chunkwise_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scalr.utils.html#module-scalr.utils.test_misc_utils">test_misc_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scalr.utils.html#scalr.utils.test_misc_utils.test_overwrite_default"><code class="docutils literal notranslate"><span class="pre">test_overwrite_default()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scalr.analysis.dge_pseudobulk &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/scaLR_logo.png"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            scaLR
+              <img src="../../../_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scalr.analysis.dge_pseudobulk</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scalr.analysis.dge_pseudobulk</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This file generates differential gene expression analysis using Pseudobulk approach and stores the results.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">AnnData</span>
+<span class="kn">import</span> <span class="nn">anndata</span> <span class="k">as</span> <span class="nn">ad</span>
+<span class="kn">from</span> <span class="nn">anndata.experimental</span> <span class="kn">import</span> <span class="n">AnnCollection</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pydeseq2.dds</span> <span class="kn">import</span> <span class="n">DeseqDataSet</span>
+<span class="kn">from</span> <span class="nn">pydeseq2.ds</span> <span class="kn">import</span> <span class="n">DeseqStats</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+
+<span class="kn">from</span> <span class="nn">scalr</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">scalr.analysis</span> <span class="kn">import</span> <span class="n">AnalysisBase</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">EventLogger</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">read_data</span>
+
+
+<div class="viewcode-block" id="DgePseudoBulk">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_pseudobulk.DgePseudoBulk">[docs]</a>
+<span class="k">class</span> <span class="nc">DgePseudoBulk</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Class to perform differential gene expression analysis using Pseudobulk approach.&#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">celltype_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">design_factor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">factor_categories</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                 <span class="n">sum_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">cell_subsets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">min_cell_threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">fold_change</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span>
+                 <span class="n">p_val</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+                 <span class="n">y_lim_tuple</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">save_plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">stdout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;DgePseudoBulk parameters initialization.</span>
+<span class="sd">        </span>
+<span class="sd">        Args: </span>
+<span class="sd">            celltype_column: Column name in `anndata.obs` containing all the cell types.</span>
+<span class="sd">            design_factor: Column name in `anndata.obs` containing different factor levels or categories for</span>
+<span class="sd">                           differential gene expression analysis.         </span>
+<span class="sd">            factor_categories: List of conditions in `design_factor` to make design matrix for.</span>
+<span class="sd">            sum_column: Column name to sum values across samples.</span>
+<span class="sd">            cell_subsets: Selcted list of cells in &#39;celltype_column&#39; to subset the anndata.</span>
+<span class="sd">            min_cell_threshold: Minimum number of subjects with aggregated nonzero gene expression values for a gene.</span>
+<span class="sd">                                Used for filtering noisy genes.</span>
+<span class="sd">            fold_change: Fold change to filter the differentially expressed genes for the volcano plot.</span>
+<span class="sd">            p_val: p value, to filter the differentially expressed genes for the volcano plot.</span>
+<span class="sd">            y_lim_tuple: Values to adjust the Y-axis limits of the plot.</span>
+<span class="sd">            save_plot: Boolean value to save plot.</span>
+<span class="sd">            stdout : Flag to print logs to stdout.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span> <span class="o">=</span> <span class="n">celltype_column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design_factor</span> <span class="o">=</span> <span class="n">design_factor</span>
+        <span class="c1"># Hacky fix since pydeseq2 does not support `_` in `design_factor` or factor levels.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design_factor_no_undrscr</span> <span class="o">=</span> <span class="n">design_factor</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">factor</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">factor</span> <span class="ow">in</span> <span class="n">factor_categories</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sum_column</span> <span class="o">=</span> <span class="n">sum_column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_subsets</span> <span class="o">=</span> <span class="n">cell_subsets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_cell_threshold</span> <span class="o">=</span> <span class="n">min_cell_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fold_change</span> <span class="o">=</span> <span class="n">fold_change</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_val</span> <span class="o">=</span> <span class="n">p_val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_lim_tuple</span> <span class="o">=</span> <span class="n">y_lim_tuple</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_plot</span> <span class="o">=</span> <span class="n">save_plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span>
+
+<div class="viewcode-block" id="DgePseudoBulk._make_design_matrix">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_pseudobulk.DgePseudoBulk._make_design_matrix">[docs]</a>
+    <span class="k">def</span> <span class="nf">_make_design_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Method to subset an anndata as per a cell type and </span>
+<span class="sd">        make design matrix based upon the factor levels in design_factor.</span>
+<span class="sd">    </span>
+<span class="sd">        Args:</span>
+<span class="sd">            adata: AnnData.</span>
+<span class="sd">            cell_type: Cell type to subset data on, belonging to `celltype_column`.</span>
+<span class="sd">    </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            AnnData oject of design matrix.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">AnnData</span><span class="p">):</span>
+            <span class="n">adata</span> <span class="o">=</span> <span class="n">AnnCollection</span><span class="p">([</span><span class="n">adata</span><span class="p">])</span>
+
+        <span class="n">design_matrix_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">fix_data</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span><span class="p">]</span> <span class="o">==</span> <span class="n">cell_type</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">condition</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span><span class="p">:</span>
+            <span class="n">condition_subset</span> <span class="o">=</span> <span class="n">fix_data</span><span class="p">[</span><span class="n">fix_data</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">design_factor</span><span class="p">]</span> <span class="o">==</span>
+                                        <span class="n">condition</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">sum_sample</span> <span class="ow">in</span> <span class="n">condition_subset</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sum_column</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                <span class="n">sum_subset</span> <span class="o">=</span> <span class="n">condition_subset</span><span class="p">[</span><span class="n">condition_subset</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sum_column</span><span class="p">]</span> <span class="o">==</span> <span class="n">sum_sample</span><span class="p">]</span>
+                <span class="n">subdata</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">AnnData</span><span class="p">(</span>
+                    <span class="n">X</span><span class="o">=</span><span class="n">sum_subset</span><span class="p">[:]</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                        <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sum_subset</span><span class="o">.</span><span class="n">var_names</span><span class="p">)),</span>
+                    <span class="n">var</span><span class="o">=</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">sum_subset</span><span class="o">.</span><span class="n">var_names</span><span class="p">),</span>
+                    <span class="n">obs</span><span class="o">=</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sum_sample</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">condition</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]))</span>
+                <span class="n">subdata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">design_factor_no_undrscr</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">condition</span><span class="p">]</span>
+                <span class="n">design_matrix_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subdata</span><span class="p">)</span>
+
+        <span class="n">design_matrix</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">design_matrix_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">design_matrix</span></div>
+
+
+<div class="viewcode-block" id="DgePseudoBulk.get_differential_expression_results">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_pseudobulk.DgePseudoBulk.get_differential_expression_results">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_differential_expression_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design_matrix</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span>
+                                            <span class="n">cell_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dirpath</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Method to get differential gene expression analysis results.</span>
+<span class="sd">    </span>
+<span class="sd">        Args:</span>
+<span class="sd">            design_matrix: AnnData generated using &#39;_make_design_matrix&#39;.</span>
+<span class="sd">            cell_type: Cell type used to subset the input anndata.</span>
+<span class="sd">            dirpath: Path to save the result.</span>
+<span class="sd">    </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A pandas DataFrame object containing differential gene expression results.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">count_matrix</span> <span class="o">=</span> <span class="n">design_matrix</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span>
+        <span class="n">count_matrix_int</span> <span class="o">=</span> <span class="n">count_matrix</span><span class="o">.</span><span class="n">round</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">metadata_ad</span> <span class="o">=</span> <span class="n">design_matrix</span><span class="o">.</span><span class="n">obs</span>
+
+        <span class="n">deseq_dataset</span> <span class="o">=</span> <span class="n">DeseqDataSet</span><span class="p">(</span>
+            <span class="n">counts</span><span class="o">=</span><span class="n">count_matrix_int</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="n">metadata_ad</span><span class="p">,</span>
+            <span class="n">design_factors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design_factor_no_undrscr</span><span class="p">)</span>
+
+        <span class="c1"># removing genes with zero expression across all the sample</span>
+        <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">deseq_dataset</span><span class="p">,</span> <span class="n">min_cells</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_cell_threshold</span><span class="p">)</span>
+        <span class="n">deseq_dataset</span><span class="o">.</span><span class="n">deseq2</span><span class="p">()</span>
+
+        <span class="n">result_stats</span> <span class="o">=</span> <span class="n">DeseqStats</span><span class="p">(</span><span class="n">deseq_dataset</span><span class="p">,</span>
+                                  <span class="n">contrast</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">design_factor_no_undrscr</span><span class="p">,</span>
+                                            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span><span class="p">))</span>
+        <span class="n">result_stats</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+        <span class="n">results_df</span> <span class="o">=</span> <span class="n">result_stats</span><span class="o">.</span><span class="n">results_df</span>
+        <span class="n">results_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;gene&#39;</span>
+
+        <span class="k">if</span> <span class="n">dirpath</span><span class="p">:</span>
+            <span class="n">_cell_type</span> <span class="o">=</span> <span class="n">cell_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">factor_0</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">factor_1</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">results_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+                <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span>
+                          <span class="sa">f</span><span class="s1">&#39;pbkDGE_</span><span class="si">{</span><span class="n">_cell_type</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">factor_0</span><span class="si">}</span><span class="s1">_vs_</span><span class="si">{</span><span class="n">factor_1</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">results_df</span></div>
+
+
+<div class="viewcode-block" id="DgePseudoBulk.plot_volcano">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_pseudobulk.DgePseudoBulk.plot_volcano">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_volcano</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dge_results_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                     <span class="n">dirpath</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Method to generate volcano plot of differential gene expression results </span>
+<span class="sd">        and store it on disk.</span>
+<span class="sd">    </span>
+<span class="sd">        Args:</span>
+<span class="sd">            dge_results_df: Differential gene expression results in dataframe.</span>
+<span class="sd">            cell_type: Cell type used to subset the input anndata.</span>
+<span class="sd">            dirpath: Path to save the result.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">log2_fold_chnage</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fold_change</span><span class="p">)</span>
+        <span class="n">neg_log10_pval</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p_val</span><span class="p">)</span>
+        <span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;pvalue&#39;</span><span class="p">])</span>
+
+        <span class="n">upregulated_gene</span> <span class="o">=</span> <span class="p">(</span><span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;log2FoldChange&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">log2_fold_chnage</span>
+                           <span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">]</span>
+                                <span class="o">&gt;=</span> <span class="p">(</span><span class="n">neg_log10_pval</span><span class="p">))</span>
+        <span class="n">downregulated_gene</span> <span class="o">=</span> <span class="p">(</span><span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;log2FoldChange&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="p">(</span>
+            <span class="o">-</span><span class="n">log2_fold_chnage</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">]</span>
+                                   <span class="o">&gt;=</span> <span class="p">(</span><span class="n">neg_log10_pval</span><span class="p">))</span>
+
+        <span class="n">unsignificant_gene</span> <span class="o">=</span> <span class="n">dge_results_df</span><span class="p">[</span><span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="p">(</span>
+            <span class="n">neg_log10_pval</span><span class="p">)</span>
+        <span class="n">signi_genes_between_up_n_down</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">upregulated_gene</span> <span class="o">|</span> <span class="n">downregulated_gene</span>
+                                          <span class="o">|</span> <span class="n">unsignificant_gene</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">dge_results_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">upregulated_gene</span><span class="p">,</span> <span class="s1">&#39;log2FoldChange&#39;</span><span class="p">],</span>
+                    <span class="n">dge_results_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">upregulated_gene</span><span class="p">,</span> <span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">],</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+                    <span class="n">s</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;FC&gt;=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fold_change</span><span class="si">}</span><span class="s2"> &amp; p_val&lt;=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p_val</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">dge_results_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">downregulated_gene</span><span class="p">,</span> <span class="s1">&#39;log2FoldChange&#39;</span><span class="p">],</span>
+                    <span class="n">dge_results_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">downregulated_gene</span><span class="p">,</span> <span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">],</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+                    <span class="n">s</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;FC&lt;=-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fold_change</span><span class="si">}</span><span class="s1"> &amp; p_val&lt;=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p_val</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">dge_results_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">unsignificant_gene</span><span class="p">,</span> <span class="s1">&#39;log2FoldChange&#39;</span><span class="p">],</span>
+                    <span class="n">dge_results_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">unsignificant_gene</span><span class="p">,</span> <span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">],</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;mediumorchid&#39;</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+                    <span class="n">s</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;p_val&gt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p_val</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">dge_results_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">signi_genes_between_up_n_down</span><span class="p">,</span> <span class="s1">&#39;log2FoldChange&#39;</span><span class="p">],</span>
+            <span class="n">dge_results_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">signi_genes_between_up_n_down</span><span class="p">,</span> <span class="s1">&#39;-log10(pvalue)&#39;</span><span class="p">],</span>
+            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+            <span class="n">s</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span>
+            <span class="sa">f</span><span class="s1">&#39;-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fold_change</span><span class="si">}</span><span class="s1">&lt;FC&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fold_change</span><span class="si">}</span><span class="s1"> &amp; p_val&lt;=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p_val</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Log2 Fold Change&#39;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;-Log10(p-value)&#39;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Psedobulk_DGE of &quot;</span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s1">&quot; in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> vs </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">neg_log10_pval</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+                    <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;p_val (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p_val</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">log2_fold_chnage</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+                    <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Log2 Fold Change (+</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fold_change</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="o">-</span><span class="n">log2_fold_chnage</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+                    <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Log2 Fold Change (-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fold_change</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_lim_tuple</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">bottom</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_lim_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">top</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_lim_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">_cell_type</span> <span class="o">=</span> <span class="n">cell_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">factor_0</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">factor_1</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">dirpath</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;pbkDGE_</span><span class="si">{</span><span class="n">_cell_type</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">factor_0</span><span class="si">}</span><span class="s1">_vs_</span><span class="si">{</span><span class="n">factor_1</span><span class="si">}</span><span class="s1">.svg&#39;</span><span class="p">),</span>
+                    <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DgePseudoBulk.generate_analysis">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_pseudobulk.DgePseudoBulk.generate_analysis">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">AnnCollection</span><span class="p">],</span>
+                          <span class="n">dirpath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;This method calls methods to perform differential gene expression analysis on data.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            test_data: AnnData.</span>
+<span class="sd">            dirpath: Path to save the result.</span>
+<span class="sd">    </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Pandas DataFrame object containing differential gene expression stats.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">EventLogger</span><span class="p">(</span><span class="s1">&#39;Differential Gene expression analysis&#39;</span><span class="p">,</span>
+                             <span class="n">stdout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">heading2</span><span class="p">(</span><span class="s2">&quot;DGE analysis using Pseudobulk&quot;</span><span class="p">)</span>
+        <span class="n">dirpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="s1">&#39;pseudobulk_dge_result&#39;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">design_factor</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">design_factor</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span> <span class="ow">in</span> <span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span><span class="si">}</span><span class="s2"> must be a column name in `adata.obs`&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">design_factor</span> <span class="ow">in</span> <span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">design_factor</span><span class="si">}</span><span class="s2"> must be a column name in `adata.obs`&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sum_column</span> <span class="ow">in</span> <span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sum_column</span><span class="si">}</span><span class="s2"> must be a column name in `adata.obs`&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">design_factor</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> must belong to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">design_factor</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">design_factor</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">factor_categories</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> must belong to &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">design_factor</span><span class="si">}</span><span class="s2">&#39; column&quot;</span>
+
+        <span class="n">cell_type_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">condition</span>
+            <span class="k">for</span> <span class="n">condition</span> <span class="ow">in</span> <span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_subsets</span><span class="p">:</span>
+            <span class="n">cell_type_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_subsets</span>
+
+        <span class="k">for</span> <span class="n">cell_type</span> <span class="ow">in</span> <span class="n">cell_type_list</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">cell_type</span> <span class="ow">in</span> <span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s2"> must belong to &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span><span class="si">}</span><span class="s2">&#39; column&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Processing for &quot;</span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s1">&quot; ...&#39;</span><span class="p">)</span>
+            <span class="n">design_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_design_matrix</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">)</span>
+            <span class="n">dge_results_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_differential_expression_results</span><span class="p">(</span>
+                <span class="n">design_matrix</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">,</span> <span class="n">dirpath</span><span class="p">)</span>
+
+            <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_volcano</span><span class="p">(</span><span class="n">dge_results_df</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">,</span> <span class="n">dirpath</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Pseudobulk-DGE results stored at: </span><span class="si">{</span><span class="n">dirpath</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DgePseudoBulk.get_default_params">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_pseudobulk.DgePseudoBulk.get_default_params">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_default_params</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Class method to get default params for DgePseudoBulk_config.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">celltype_column</span><span class="o">=</span><span class="s1">&#39;celltype_column&#39;</span><span class="p">,</span>
+                    <span class="n">design_factor</span><span class="o">=</span><span class="s1">&#39;design_factor&#39;</span><span class="p">,</span>
+                    <span class="n">factor_categories</span><span class="o">=</span><span class="s1">&#39;factor_categories&#39;</span><span class="p">,</span>
+                    <span class="n">sum_column</span><span class="o">=</span><span class="s1">&#39;sum_column&#39;</span><span class="p">,</span>
+                    <span class="n">cell_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">min_cell_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">fold_change</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+                    <span class="n">p_val</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                    <span class="n">y_lim_tuple</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">save_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">stdout</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
