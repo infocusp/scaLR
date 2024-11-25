@@ -43,6 +43,7 @@ feature_selection:
 
     # score_matrix: '/path/to/matrix'
     feature_subsetsize: 5000
+    num_workers: 1
 
     model:
         name: SequentialModel
