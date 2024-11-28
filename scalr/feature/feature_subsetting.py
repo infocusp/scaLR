@@ -134,8 +134,7 @@ class FeatureSubsetting:
                     path.join(self.feature_chunked_data_dirpath, 'train',
                               str(i)))
                 val_features_subset = read_data(
-                    path.join(self.feature_chunked_data_dirpath, 'train',
-                              str(i)))
+                    path.join(self.feature_chunked_data_dirpath, 'val', str(i)))
             else:
                 train_features_subset = self.train_data[:, start:start +
                                                         self.feature_subsetsize]
@@ -151,6 +150,7 @@ class FeatureSubsetting:
             model_trainer.set_data_and_targets(train_features_subset,
                                                val_features_subset, self.target,
                                                self.mappings)
+
             model_trainer.build_model_training_artifacts()
             best_model = model_trainer.train()
 

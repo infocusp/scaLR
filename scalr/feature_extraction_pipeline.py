@@ -127,9 +127,7 @@ class FeatureExtractionPipeline:
         all_scores = []
         if not getattr(self, 'feature_subsetsize', None):
             self.feature_subsetsize = self.train_data.shape[1]
-        print('ft_subset_size', self.feature_subsetsize)
 
-        print('chunked_models', self.chunked_models)
         for i, (model) in enumerate(self.chunked_models):
             subset_train_data = self.train_data[:, i *
                                                 self.feature_subsetsize:(i +
@@ -144,7 +142,6 @@ class FeatureExtractionPipeline:
 
             all_scores.append(score[:self.feature_subsetsize])
 
-        print('all_scores', all_scores)
         columns = self.train_data.var_names
         columns.name = "index"
         class_labels = self.mappings[self.target]['id2label']
