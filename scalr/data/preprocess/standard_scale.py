@@ -7,7 +7,6 @@ from anndata.experimental import AnnCollection
 import numpy as np
 
 from scalr.data.preprocess import PreprocessorBase
-from scalr.utils import EventLogger
 
 
 class StandardScaler(PreprocessorBase):
@@ -28,8 +27,6 @@ class StandardScaler(PreprocessorBase):
         self.train_mean = None
         self.train_std = None
 
-        self.event_logger = EventLogger('Standard Scaler Normalization')
-
     def transform(self, data: np.ndarray) -> np.ndarray:
         """A function to transform provided input data.
 
@@ -39,9 +36,6 @@ class StandardScaler(PreprocessorBase):
         Returns:
             np.ndarray: processed data
         """
-        self.event_logger.info(
-            '\Transforming data using standard scaler object')
-
         if not self.with_mean:
             train_mean = np.zeros((1, data.shape[1]))
         else:
@@ -58,9 +52,6 @@ class StandardScaler(PreprocessorBase):
         
         """
 
-        self.event_logger.info('\n\nStarting standardscaler normalization')
-        self.event_logger.info('\nFitting standard scaler object on train data')
-
         self.calculate_mean(data, sample_chunksize)
         self.calculate_std(data, sample_chunksize)
 
@@ -76,7 +67,6 @@ class StandardScaler(PreprocessorBase):
             Nothing, stores mean per feature of the train data.
             """
 
-        self.event_logger.info('Calculating mean of data...')
         train_sum = np.zeros(data.shape[1]).reshape(1, -1)
 
         # Iterate through batches of data to get mean statistics
@@ -84,11 +74,6 @@ class StandardScaler(PreprocessorBase):
             train_sum += data[i * sample_chunksize:i * sample_chunksize +
                               sample_chunksize].X.sum(axis=0)
         self.train_mean = train_sum / data.shape[0]
-
-        if not self.with_mean:
-            self.event_logger.info(
-                '`train_mean` will be set to zero during `transform()`, as `with_mean` is set to False!'
-            )
 
     def calculate_std(self, data: Union[AnnData, AnnCollection],
                       sample_chunksize: int) -> None:
@@ -104,7 +89,6 @@ class StandardScaler(PreprocessorBase):
 
         # Getting standard deviation of entire train data per feature.
         if self.with_std:
-            self.event_logger.info('Calculating standard deviation of data...')
             self.train_std = np.zeros(data.shape[1]).reshape(1, -1)
             # Iterate through batches of data to get std statistics
             for i in range(int(np.ceil(data.shape[0] / sample_chunksize))):
@@ -119,8 +103,6 @@ class StandardScaler(PreprocessorBase):
             self.train_std[self.train_std == 0] = 1
         else:
             # If `with_std` is False, set train_std to 1.
-            self.event_logger.info(
-                'Setting `train_std` to be 1, as `with_std` is set to False!')
             self.train_std = np.ones((1, data.shape[1]))
 
     @classmethod

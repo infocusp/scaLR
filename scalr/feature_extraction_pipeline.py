@@ -186,15 +186,18 @@ class FeatureExtractionPipeline:
             'test': test_data
         }
 
+        sample_chunksize = data_config.get('sample_chunksize')
+        num_workers = data_config.get('num_workers', 1)
+
         for split, split_data in splits.items():
 
             split_feature_subset_datapath = path.join(feature_subset_datapath,
                                                       split)
-            sample_chunksize = data_config.get('sample_chunksize')
             write_chunkwise_data(split_data,
                                  sample_chunksize,
                                  split_feature_subset_datapath,
-                                 feature_inds=self.top_features)
+                                 feature_inds=self.top_features,
+                                 num_workers=num_workers)
 
         data_config['train_val_test'][
             'feature_subset_datapaths'] = feature_subset_datapath
