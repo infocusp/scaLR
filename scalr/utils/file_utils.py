@@ -133,6 +133,10 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
             """Internal function to transform a chunk of data and write 
             it to disk."""
 
+            # Handling of empty data
+            if len(data) == 0:
+                return
+
             # Transformation
             if transform:
                 data = AnnData(data.X, obs=data.obs, var=data.var)

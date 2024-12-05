@@ -128,6 +128,7 @@ class FeatureExtractionPipeline:
         if not getattr(self, 'feature_subsetsize', None):
             self.feature_subsetsize = self.train_data.shape[1]
 
+        # TODO: Parallelize feature scoring
         for i, (model) in enumerate(self.chunked_models):
             subset_train_data = self.train_data[:, i *
                                                 self.feature_subsetsize:(i +
