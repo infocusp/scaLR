@@ -1,6 +1,7 @@
 """This file contains functions related to file read-write."""
 
 import json
+from math import ceil
 import os
 from os import path
 from typing import Union
@@ -146,8 +147,9 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
 
             write_data(data, path.join(dirpath, f'{chunk_number}.h5ad'))
 
-        worker_chunksize = (sample_chunksize //
-                            num_workers) if num_workers else sample_chunksize
+        worker_chunksize = int(
+            ceil(sample_chunksize /
+                 num_workers)) if num_workers else sample_chunksize
 
         # Execute parallel jobs for transformation and witing of data.
         # In case of `num_workers = None`, single process is used.
