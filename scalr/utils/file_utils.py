@@ -125,7 +125,7 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
 
         if not isinstance(data, AnnData):
             data = data.to_adata()
-        data = data.to_memory()
+        data = data.to_memory(copy=True)
 
         for col in data.obs.columns:
             data.obs[col] = data.obs[col].astype('category')
