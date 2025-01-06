@@ -35,7 +35,7 @@ class FeatureSubsetting:
                  mappings: dict,
                  dirpath: str = None,
                  device: str = 'cpu',
-                 num_workers: int = None,
+                 num_workers: int = 1,
                  sample_chunksize: int = None):
         """Initialize required parameters for feature subset training.
 
@@ -52,7 +52,8 @@ class FeatureSubsetting:
             num_workers (int, optional): Number of parallel processes to launch to train multiple
                                          feature subsets simultaneously. Defaults to using single
                                          process.
-            sample_chunksize (int): Chunks of samples to be loaded in memory at once.
+            sample_chunksize (int, optional): Chunks of samples to be loaded in memory at once. 
+                                              Required when `num_workers` > 1.
         """
         self.feature_subsetsize = feature_subsetsize
         self.chunk_model_config = chunk_model_config

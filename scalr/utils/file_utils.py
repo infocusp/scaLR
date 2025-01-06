@@ -83,7 +83,7 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
                          sample_inds: list[int] = None,
                          feature_inds: list[int] = None,
                          transform: callable = None,
-                         num_workers: int = None):
+                         num_workers: int = 1):
     """This function writes data subsets iteratively in a chunkwise manner, to ensure
     only at most `sample_chunksize` samples are loaded at a time.
 
@@ -152,7 +152,6 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
                  num_workers)) if num_workers else sample_chunksize
 
         # Execute parallel jobs for transformation and witing of data.
-        # In case of `num_workers = None`, single process is used.
         parallel = Parallel(n_jobs=num_workers)
         parallel(
             delayed(transform_and_write_data)(

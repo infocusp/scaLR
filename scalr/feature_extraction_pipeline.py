@@ -85,7 +85,7 @@ class FeatureExtractionPipeline:
 
         self.feature_subsetsize = self.feature_selection_config.get(
             'feature_subsetsize', len(self.val_data.var_names))
-        self.num_workers = self.feature_selection_config.get('num_workers')
+        self.num_workers = self.feature_selection_config.get('num_workers', 1)
 
         chunk_model_config = self.feature_selection_config.get('model')
         chunk_model_train_config = self.feature_selection_config.get(

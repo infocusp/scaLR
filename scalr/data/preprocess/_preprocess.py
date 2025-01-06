@@ -54,7 +54,7 @@ class PreprocessorBase:
                      full_data: Union[AnnData, AnnCollection],
                      sample_chunksize: int,
                      dirpath: str,
-                     num_workers: int = None):
+                     num_workers: int = 1):
         """A function to process the entire data chunkwise and write the processed data
         to disk.
 
