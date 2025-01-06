@@ -4,7 +4,7 @@
 
 
 [![GitHub](https://img.shields.io/github/license/InFoCusp/scaLR)](https://github.com/infocusp/scaLR?tab=GPL-3.0-1-ov-file#)
-[![Documentation](https://img.shields.io/badge/docs-v1.0.0-orange)](https://infocusp.github.io/scaLR/)
+[![Documentation](https://img.shields.io/badge/docs-v1.0.1-orange)](https://infocusp.github.io/scaLR/)
 
 [![DOI](https://zenodo.org/badge/852710658.svg)](https://doi.org/10.5281/zenodo.13767942)
 
@@ -71,10 +71,9 @@ Detailed tutorials have been made on how to use some functionalities as a scaLR 
 - **scaLR pipeline** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/pipeline/scalr_pipeline.ipynb)
 - **Differential gene expression analysis** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/analysis/differential_gene_expression/dge.ipynb)
 - **Gene recall curve** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb)
-
-- [Normalization](https://github.com/infocusp/scaLR/blob/main/tutorials/preprocessing/normalization.ipynb)
-- [Batch correction](https://github.com/infocusp/scaLR/blob/main/tutorials/preprocessing/batch_correction.ipynb)
-- [SHAP analysis](https://github.com/infocusp/scaLR/blob/main/tutorials/analysis/shap_analysis/shap_heatmap.ipynb)
+- **Normalization** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/preprocessing/normalization.ipynb)
+- **Batch correction** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/preprocessing/batch_correction.ipynb)
+- **SHAP analysis** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/analysis/shap_analysis/shap_heatmap.ipynb)
 
 ## Experiment Output Structure
 - **pipeline.py**:

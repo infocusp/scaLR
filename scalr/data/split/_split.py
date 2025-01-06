@@ -119,7 +119,8 @@ class SplitterBase:
                                      num_workers=num_workers)
             else:
                 filepath = path.join(dirpath, f'{split}.h5ad')
-                write_data(full_data[data_split_indices[split]], filepath)
+                write_data(full_data[data_split_indices[split]].to_memory(),
+                           filepath)
 
     @classmethod
     def get_default_params(cls) -> dict:
