@@ -16,6 +16,7 @@ data:
 
     train_val_test:
         full_datapath: 'data/modified_adata.h5ad'
+        num_workers: 2
 
         splitter_config:
             name: GroupSplitter
@@ -42,6 +43,7 @@ feature_selection:
 
     # score_matrix: '/path/to/matrix'
     feature_subsetsize: 5000
+    num_workers: 2
 
     model:
         name: SequentialModel
