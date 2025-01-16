@@ -1,6 +1,7 @@
 """This file contains functions related to file read-write."""
 
 import json
+from math import ceil
 import os
 from os import path
 from typing import Union
@@ -8,6 +9,8 @@ from typing import Union
 from anndata import AnnData
 import anndata as ad
 from anndata.experimental import AnnCollection
+from joblib import delayed
+from joblib import Parallel
 import numpy as np
 import pandas as pd
 import yaml
@@ -79,7 +82,8 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
                          dirpath: str,
                          sample_inds: list[int] = None,
                          feature_inds: list[int] = None,
-                         transform=None):
+                         transform: callable = None,
+                         num_workers: int = 1):
     """This function writes data subsets iteratively in a chunkwise manner, to ensure
     only at most `sample_chunksize` samples are loaded at a time.
 
@@ -96,9 +100,14 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
                                                         only a subset of features.dataframe.
                                                         Defaults to all features.
         transform (function): a function to apply a transformation on a chunked numpy array.
+        num_workers (int): Number of jobs to run in parallel for data writing. Additional
+                            workers will not use additional memory, but will be CPU-intensive.
     """
     if not path.exists(dirpath):
         os.makedirs(dirpath)
+
+    if not num_workers:
+        num_workers = 1
 
     if not sample_inds:
         sample_inds = list(range(len(full_data)))
@@ -116,18 +125,38 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
 
         if not isinstance(data, AnnData):
             data = data.to_adata()
-        data = data.to_memory()
+        data = data.to_memory(copy=True)
 
         for col in data.obs.columns:
             data.obs[col] = data.obs[col].astype('category')
 
-        # Transformation
-        if transform:
-            if not isinstance(data.X, np.ndarray):
-                data.X = data.X.A
-            data.X = transform(data.X)
+        def transform_and_write_data(data: AnnData, chunk_number: int):
+            """Internal function to transform a chunk of data and write 
+            it to disk."""
 
-        write_data(data, path.join(dirpath, f'{i}.h5ad'))
+            # Handling of empty data
+            if len(data) == 0:
+                return
+
+            # Transformation
+            if transform:
+                data = AnnData(data.X, obs=data.obs, var=data.var)
+                if not isinstance(data.X, np.ndarray):
+                    data.X = data.X.A
+                data.X = transform(data.X)
+
+            write_data(data, path.join(dirpath, f'{chunk_number}.h5ad'))
+
+        worker_chunksize = int(
+            ceil(sample_chunksize /
+                 num_workers)) if num_workers else sample_chunksize
+
+        # Execute parallel jobs for transformation and witing of data.
+        parallel = Parallel(n_jobs=num_workers)
+        parallel(
+            delayed(transform_and_write_data)(
+                data=data[j * worker_chunksize:(j + 1) * worker_chunksize],
+                chunk_number=i * num_workers + j) for j in range(num_workers))
 
 
 def _get_datapath_from_config(data_config):

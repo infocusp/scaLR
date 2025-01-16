@@ -18,6 +18,7 @@ from scalr.utils import EventLogger
 from scalr.utils import FlowLogger
 from scalr.utils import load_train_val_data_from_config
 from scalr.utils import read_data
+from scalr.utils import set_seed
 from scalr.utils import write_data
 
 
@@ -40,6 +41,7 @@ class ModelTrainingPipeline:
             device (str, optional): Device to run model on. Defaults to 'cpu'.
         """
         self.flow_logger = FlowLogger('ModelTraining')
+        set_seed(42)
 
         self.train_config = train_config
         self.model_config = model_config

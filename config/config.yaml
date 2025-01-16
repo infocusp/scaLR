@@ -13,6 +13,7 @@ experiment:
 # DATA CONFIG.
 data:
     sample_chunksize: 20000
+    num_workers: 1
 
     train_val_test:
         full_datapath: '/path/to/anndata.h5ad'
@@ -42,6 +43,7 @@ feature_selection:
 
     # score_matrix: '/path/to/matrix'
     feature_subsetsize: 5000
+    num_workers: 1
 
     model:
         name: SequentialModel

@@ -29,6 +29,7 @@ class DataIngestionPipeline:
         self.data_config = deepcopy(data_config)
         self.target = self.data_config.get('target')
         self.sample_chunksize = self.data_config.get('sample_chunksize')
+        self.num_workers = self.data_config.get('num_workers', 1)
 
         # Make some necessary checks and logs.
         if not self.target:
@@ -99,7 +100,8 @@ class DataIngestionPipeline:
 
             splitter.write_splits(self.full_data, train_val_test_split_indices,
                                   self.sample_chunksize,
-                                  train_val_test_split_dirpath)
+                                  train_val_test_split_dirpath,
+                                  self.num_workers)
 
             # Garbage collection
             del self.full_data
@@ -146,7 +148,8 @@ class DataIngestionPipeline:
             for split in ['train', 'val', 'test']:
                 split_data = read_data(path.join(datapath, split))
                 preprocessor.process_data(split_data, self.sample_chunksize,
-                                          path.join(processed_datapath, split))
+                                          path.join(processed_datapath, split),
+                                          self.num_workers)
 
             datapath = processed_datapath
 

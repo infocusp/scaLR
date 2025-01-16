@@ -1,5 +1,6 @@
 anndata==0.10.9
 isort==5.13.2
+loky==3.4.1
 memory-profiler==0.61.0
 pillow==10.4.0
 pre_commit==4.0.1

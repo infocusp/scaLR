@@ -54,10 +54,14 @@ class FeatureExtractionPipeline:
             data_config)
         self.target = data_config.get('target')
         self.mappings = read_data(data_config['label_mappings'])
+        self.sample_chunksize = data_config.get('sample_chunksize')
 
-    def set_data_and_targets(self, train_data: Union[AnnData, AnnCollection],
+    def set_data_and_targets(self,
+                             train_data: Union[AnnData, AnnCollection],
                              val_data: Union[AnnData, AnnCollection],
-                             target: Union[str, list[str]], mappings: dict):
+                             target: Union[str, list[str]],
+                             mappings: dict,
+                             sample_chunksize: int = None):
         """A function to set data when you don't use data directly from config,
         but rather by other sources like feature subsetting, etc.
 
@@ -67,6 +71,7 @@ class FeatureExtractionPipeline:
             target (Union[str, list[str]]): Target columns name(s).
             mappings (dict): Mapping of a column value to ids
                             eg. mappings[column_name][label2id] = {A: 1, B:2, ...}.
+            sample_chunksize (int): Chunks of samples to be loaded in memory at once.
         """
         self.train_data = train_data
         self.val_data = val_data
@@ -80,6 +85,7 @@ class FeatureExtractionPipeline:
 
         self.feature_subsetsize = self.feature_selection_config.get(
             'feature_subsetsize', len(self.val_data.var_names))
+        self.num_workers = self.feature_selection_config.get('num_workers', 1)
 
         chunk_model_config = self.feature_selection_config.get('model')
         chunk_model_train_config = self.feature_selection_config.get(
@@ -88,7 +94,11 @@ class FeatureExtractionPipeline:
         chunked_features_model_trainer = FeatureSubsetting(
             self.feature_subsetsize, chunk_model_config,
             chunk_model_train_config, self.train_data, self.val_data,
-            self.target, self.mappings, self.dirpath, self.device)
+            self.target, self.mappings, self.dirpath, self.device,
+            self.num_workers, self.sample_chunksize)
+
+        if self.num_workers > 1:
+            chunked_features_model_trainer.write_feature_subsetted_data()
 
         self.chunked_models = chunked_features_model_trainer.train_chunked_models(
         )
@@ -118,6 +128,7 @@ class FeatureExtractionPipeline:
         if not getattr(self, 'feature_subsetsize', None):
             self.feature_subsetsize = self.train_data.shape[1]
 
+        # TODO: Parallelize feature scoring
         for i, (model) in enumerate(self.chunked_models):
             subset_train_data = self.train_data[:, i *
                                                 self.feature_subsetsize:(i +
@@ -176,6 +187,7 @@ class FeatureExtractionPipeline:
         self.flow_logger.info('Writing feature-subset data onto disk')
 
         datapath = data_config['train_val_test'].get('final_datapaths')
+
         feature_subset_datapath = path.join(self.dirpath, 'feature_subset_data')
         os.makedirs(feature_subset_datapath, exist_ok=True)
 
@@ -186,15 +198,18 @@ class FeatureExtractionPipeline:
             'test': test_data
         }
 
+        sample_chunksize = data_config.get('sample_chunksize')
+        num_workers = data_config.get('num_workers')
+
         for split, split_data in splits.items():
 
             split_feature_subset_datapath = path.join(feature_subset_datapath,
                                                       split)
-            sample_chunksize = data_config.get('sample_chunksize')
             write_chunkwise_data(split_data,
                                  sample_chunksize,
                                  split_feature_subset_datapath,
-                                 feature_inds=self.top_features)
+                                 feature_inds=self.top_features,
+                                 num_workers=num_workers)
 
         data_config['train_val_test'][
             'feature_subset_datapaths'] = feature_subset_datapath
