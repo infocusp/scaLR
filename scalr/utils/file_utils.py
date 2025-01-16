@@ -100,7 +100,7 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
                                                         only a subset of features.dataframe.
                                                         Defaults to all features.
         transform (function): a function to apply a transformation on a chunked numpy array.
-        num_workers (int): number of jobs to run in parallel for data writing. Additional
+        num_workers (int): Number of jobs to run in parallel for data writing. Additional
                             workers will not use additional memory, but will be CPU-intensive.
     """
     if not path.exists(dirpath):
