@@ -165,6 +165,8 @@ class FeatureSubsetting:
             delayed(train_chunked_model)(i, start) for i, (start) in enumerate(
                 range(0, self.total_features, self.feature_subsetsize)))
 
+        # parallel loop returns all models with the chunk number, which is used to sort models in order
+        # model[1] returns only the model, without the chunk number
         models = sorted(models)
         models = [model[1] for model in models]
         return models
