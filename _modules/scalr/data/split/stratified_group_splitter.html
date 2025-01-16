@@ -1,0 +1,246 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scalr.data.split.stratified_group_splitter &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/scaLR_logo.png"/>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            scaLR
+              <img src="../../../../_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scalr.data.split.stratified_group_splitter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scalr.data.split.stratified_group_splitter</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This file is an implementation of stratified group splitter.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GroupShuffleSplit</span>
+
+<span class="kn">from</span> <span class="nn">scalr.data.split</span> <span class="kn">import</span> <span class="n">SplitterBase</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">read_data</span>
+
+
+<div class="viewcode-block" id="StratifiedGroupSplitter">
+<a class="viewcode-back" href="../../../../scalr.data.split.html#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter">[docs]</a>
+<span class="k">class</span> <span class="nc">StratifiedGroupSplitter</span><span class="p">(</span><span class="n">SplitterBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for stratified group splitter.</span>
+
+<span class="sd">    Generates split of data into train, validation, and test</span>
+<span class="sd">    sets. Stratification ensures samples have the same value for `stratify`</span>
+<span class="sd">    column, can not belong to different sets. Also, it ensures every split</span>
+<span class="sd">    contains samples from each class available in the data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_ratio</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">stratify</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize splitter with required parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            split_ratio (list[float]): ratio to split number of samples in</span>
+<span class="sd">            stratify (str): column name to metadata the split upon in `obs`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stratify</span> <span class="o">=</span> <span class="n">stratify</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">split_ratio</span> <span class="o">=</span> <span class="n">split_ratio</span>
+
+<div class="viewcode-block" id="StratifiedGroupSplitter._split_data_with_stratification">
+<a class="viewcode-back" href="../../../../scalr.data.split.html#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter._split_data_with_stratification">[docs]</a>
+    <span class="k">def</span> <span class="nf">_split_data_with_stratification</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">test_ratio</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to split given metadata into a training and testing set.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            metadata (DataFrame): Dataframe containing all samples to be split.</span>
+<span class="sd">            target (str): Target for classification present in `obs`.</span>
+<span class="sd">            test_ratio (float): Ratio of samples belonging to the test split.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list(int), list(int)): Two lists consisting of train and test indices.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">splitter</span> <span class="o">=</span> <span class="n">GroupShuffleSplit</span><span class="p">(</span><span class="n">test_size</span><span class="o">=</span><span class="n">test_ratio</span><span class="p">,</span>
+                                     <span class="n">n_splits</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                     <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+        <span class="n">train_inds</span><span class="p">,</span> <span class="n">test_inds</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="n">splitter</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span>
+                           <span class="n">metadata</span><span class="p">[</span><span class="n">target</span><span class="p">],</span>
+                           <span class="n">groups</span><span class="o">=</span><span class="n">metadata</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stratify</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">train_inds</span><span class="p">,</span> <span class="n">test_inds</span></div>
+
+
+<div class="viewcode-block" id="StratifiedGroupSplitter.generate_train_val_test_split_indices">
+<a class="viewcode-back" href="../../../../scalr.data.split.html#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter.generate_train_val_test_split_indices">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_train_val_test_split_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                              <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function to generate a list of indices for train/val/test split of the whole dataset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            datapath (str): Path to full data.</span>
+<span class="sd">            target (str): Target for classification present in `obs`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: &#39;train&#39;, &#39;val&#39; and &#39;test&#39; indices list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Must provide target for StratifiedGroupSplitter&#39;</span><span class="p">)</span>
+
+        <span class="n">adata</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">datapath</span><span class="p">)</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;true_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metadata</span><span class="p">))</span>
+        <span class="n">n_cls</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">n_cls</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;StratifiedGroupSplitter only works for binary classification.&#39;</span><span class="p">)</span>
+
+        <span class="n">total_ratio</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">split_ratio</span><span class="p">)</span>
+        <span class="n">train_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_ratio</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">total_ratio</span>
+        <span class="n">val_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_ratio</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">total_ratio</span>
+        <span class="n">val_ratio</span> <span class="o">=</span> <span class="n">val_ratio</span> <span class="o">/</span> <span class="p">(</span><span class="n">val_ratio</span> <span class="o">+</span> <span class="n">train_ratio</span><span class="p">)</span>
+        <span class="n">test_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_ratio</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">total_ratio</span>
+
+        <span class="n">train_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">val_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">test_indices</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="n">label_metadata</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">metadata</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">==</span> <span class="n">label</span><span class="p">]</span>
+
+            <span class="c1"># Split testing and (train+val) indices.</span>
+            <span class="n">relative_train_val_inds</span><span class="p">,</span> <span class="n">relative_test_inds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_data_with_stratification</span><span class="p">(</span>
+                <span class="n">label_metadata</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">test_ratio</span><span class="p">)</span>
+
+            <span class="n">train_val_data</span> <span class="o">=</span> <span class="n">label_metadata</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">relative_train_val_inds</span><span class="p">]</span>
+
+            <span class="c1"># Get train and val indices, relative to the `train_val_data`.</span>
+            <span class="n">relative_train_inds</span><span class="p">,</span> <span class="n">relative_val_inds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_data_with_stratification</span><span class="p">(</span>
+                <span class="n">train_val_data</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">val_ratio</span><span class="p">)</span>
+
+            <span class="c1"># Get true_indices relative to the entire data.</span>
+            <span class="n">test_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">label_metadata</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">relative_test_inds</span><span class="p">][</span><span class="s1">&#39;true_index&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">val_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">train_val_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">relative_val_inds</span><span class="p">][</span><span class="s1">&#39;true_index&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">train_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">train_val_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">relative_train_inds</span><span class="p">][</span><span class="s1">&#39;true_index&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+        <span class="n">data_split</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;train&#39;</span><span class="p">:</span> <span class="n">train_indices</span><span class="p">,</span>
+            <span class="s1">&#39;val&#39;</span><span class="p">:</span> <span class="n">val_indices</span><span class="p">,</span>
+            <span class="s1">&#39;test&#39;</span><span class="p">:</span> <span class="n">test_indices</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">data_split</span></div>
+
+
+<div class="viewcode-block" id="StratifiedGroupSplitter.get_default_params">
+<a class="viewcode-back" href="../../../../scalr.data.split.html#scalr.data.split.stratified_group_splitter.StratifiedGroupSplitter.get_default_params">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_default_params</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Class method to get default params for model_config.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">split_ratio</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">stratify</span><span class="o">=</span><span class="s1">&#39;donor_id&#39;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

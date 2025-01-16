@@ -1,0 +1,272 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scalr.utils.data_utils &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/scaLR_logo.png"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            scaLR
+              <img src="../../../_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scalr.utils.data_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scalr.utils.data_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This file contains functions related to data utility.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">AnnData</span>
+<span class="kn">from</span> <span class="nn">anndata.experimental</span> <span class="kn">import</span> <span class="n">AnnCollection</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">csr_matrix</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+
+<div class="viewcode-block" id="get_one_hot_matrix">
+<a class="viewcode-back" href="../../../scalr.utils.html#scalr.utils.data_utils.get_one_hot_matrix">[docs]</a>
+<span class="k">def</span> <span class="nf">get_one_hot_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function returns a one-hot matrix of given labels.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Categorical data of dim 1D or 2D array.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        one-hot matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">ohe</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">one_hot_matrix</span> <span class="o">=</span> <span class="n">ohe</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">one_hot_matrix</span></div>
+
+
+
+<div class="viewcode-block" id="get_random_samples">
+<a class="viewcode-back" href="../../../scalr.utils.html#scalr.utils.data_utils.get_random_samples">[docs]</a>
+<span class="k">def</span> <span class="nf">get_random_samples</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">AnnCollection</span><span class="p">],</span>
+    <span class="n">n_random_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function returns random N samples from given data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: AnnData or AnnCollection object.</span>
+<span class="sd">        n_random_samples: number of random samples to extract from the data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Chosen random samples tensor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">random_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_random_samples</span><span class="p">)</span>
+    <span class="n">random_background_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">random_indices</span><span class="p">]</span><span class="o">.</span><span class="n">X</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">random_background_data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">random_background_data</span> <span class="o">=</span> <span class="n">random_background_data</span><span class="o">.</span><span class="n">A</span>
+
+    <span class="n">random_background_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">random_background_data</span><span class="p">,</span>
+                                             <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">random_background_data</span></div>
+
+
+
+<div class="viewcode-block" id="generate_dummy_anndata">
+<a class="viewcode-back" href="../../../scalr.utils.html#scalr.utils.data_utils.generate_dummy_anndata">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_dummy_anndata</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">target_name</span><span class="o">=</span><span class="s1">&#39;celltype&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function returns anndata object of shape (n_samples, n_features).</span>
+<span class="sd">    </span>
+<span class="sd">    It generates random values for target, batch &amp; env from below mentioned choices.</span>
+<span class="sd">    If you require more columns, you can add them in the below adata.obs without editing</span>
+<span class="sd">    already existing columns.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n_samples: Number of samples in anndata.</span>
+<span class="sd">        n_features: Number of features in anndata.</span>
+<span class="sd">        target_name: Any preferred target name. Default is `celltype`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Anndata object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Setting seed for reproducibility.</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Creating anndata object.</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">AnnData</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">n_features</span><span class="p">))</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+        <span class="n">target_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;DC&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">n_samples</span><span class="p">),</span>
+        <span class="s1">&#39;batch&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;batch1&#39;</span><span class="p">,</span> <span class="s1">&#39;batch2&#39;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">n_samples</span><span class="p">),</span>
+        <span class="s1">&#39;env&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;env1&#39;</span><span class="p">,</span> <span class="s1">&#39;env2&#39;</span><span class="p">,</span> <span class="s1">&#39;env3&#39;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span>
+    <span class="p">})</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">adata</span></div>
+
+
+
+<div class="viewcode-block" id="generate_dummy_dge_anndata">
+<a class="viewcode-back" href="../../../scalr.utils.html#scalr.utils.data_utils.generate_dummy_dge_anndata">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_dummy_dge_anndata</span><span class="p">(</span><span class="n">n_donors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                               <span class="n">cell_type_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                                   <span class="s1">&#39;B_cell&#39;</span><span class="p">,</span> <span class="s1">&#39;T_cell&#39;</span><span class="p">,</span> <span class="s1">&#39;DC&#39;</span>
+                               <span class="p">],</span>
+                               <span class="n">cell_replicate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                               <span class="n">n_vars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnnData</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function returns anndata object for DGE analysis</span>
+<span class="sd">    with shape (n_donors*len(cell_type_list)*cell_replicate, n_vars).</span>
+
+<span class="sd">    It generates obs with random donors with a fixed clinical condition (disease_x or normal).</span>
+<span class="sd">    Includes all the cell types in `cell_type_list` with number of `cell_replicate` for each donor.</span>
+<span class="sd">    It generates a csr(Compressed Sparse Row) matrix with random gene expression values.</span>
+<span class="sd">    It generates var with random gene name as `var.index` of length `n_vars`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n_donors: Number of donors or subjects in `anndata.obs`.</span>
+<span class="sd">        cell_type_list: List of different cell types to include.</span>
+<span class="sd">        cell_replicate: Number of cell replicates per cell type.</span>
+<span class="sd">        n_vars: Number of genes to include in `anndata.var`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Anndata object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Setting seed for reproducibility.</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">donor_list</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;D_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_donors</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">condition_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;disease_x&#39;</span><span class="p">,</span> <span class="s1">&#39;normal&#39;</span><span class="p">],</span>
+                                       <span class="n">size</span><span class="o">=</span><span class="n">n_donors</span><span class="p">,</span>
+                                       <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Creating obs</span>
+    <span class="n">obs_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">donor</span><span class="p">,</span> <span class="n">condition</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">donor_list</span><span class="p">,</span> <span class="n">condition_array</span><span class="p">):</span>
+        <span class="n">obs_data</span><span class="o">.</span><span class="n">extend</span><span class="p">([{</span>
+            <span class="s1">&#39;donor_id&#39;</span><span class="p">:</span> <span class="n">donor</span><span class="p">,</span>
+            <span class="s1">&#39;cell_type&#39;</span><span class="p">:</span> <span class="n">cell_type</span><span class="p">,</span>
+            <span class="s1">&#39;disease&#39;</span><span class="p">:</span> <span class="n">condition</span>
+        <span class="p">}</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cell_replicate</span><span class="p">)</span> <span class="k">for</span> <span class="n">cell_type</span> <span class="ow">in</span> <span class="n">cell_type_list</span><span class="p">])</span>
+    <span class="n">obs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">obs_data</span><span class="p">)</span>
+    <span class="n">n_obs</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">obs</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="c1"># Random geneexpression matrix</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">csr_matrix</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_obs</span><span class="p">,</span> <span class="n">n_vars</span><span class="p">))</span>
+
+    <span class="c1"># Creating var</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s1">&#39;gene_id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;gid_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_vars</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)],</span>
+        <span class="s1">&#39;gene_name&#39;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;gene_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_vars</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="p">})</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;gene_name&#39;</span><span class="p">)</span>
+    <span class="n">var</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="c1"># Creating AnnData object</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">AnnData</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">obs</span><span class="o">=</span><span class="n">obs</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">adata</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,632 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scalr.analysis.dge_lmem &mdash; scaLR v1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/logo.css?v=e01f80eb" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/scaLR_logo.png"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=d29a5c0e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            scaLR
+              <img src="../../../_static/scaLR_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">scaLR</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.feature.html">Feature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scalr.utils.html">Utils</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">scaLR Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Data ingestion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.eval_and_analysis_pipeline">Eval and analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.feature_extraction_pipeline">Feature extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html#module-scalr.model_training_pipeline">Model training</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">scaLR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scalr.analysis.dge_lmem</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scalr.analysis.dge_lmem</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This file generates differential gene expression analysis using Linear mixed-effects model approach and stores the results.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">resource</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">AnnData</span>
+<span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">ImplicitModificationWarning</span>
+<span class="kn">import</span> <span class="nn">anndata</span> <span class="k">as</span> <span class="nn">ad</span>
+<span class="kn">from</span> <span class="nn">anndata.experimental</span> <span class="kn">import</span> <span class="n">AnnCollection</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">LinAlgError</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">OptimizeWarning</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+<span class="kn">import</span> <span class="nn">statsmodels.formula.api</span> <span class="k">as</span> <span class="nn">smf</span>
+<span class="kn">from</span> <span class="nn">statsmodels.stats.multitest</span> <span class="kn">import</span> <span class="n">multipletests</span>
+<span class="kn">from</span> <span class="nn">statsmodels.tools.sm_exceptions</span> <span class="kn">import</span> <span class="n">ConvergenceWarning</span>
+<span class="kn">from</span> <span class="nn">statsmodels.tools.sm_exceptions</span> <span class="kn">import</span> <span class="n">HessianInversionWarning</span>
+
+<span class="kn">from</span> <span class="nn">scalr</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">scalr.analysis</span> <span class="kn">import</span> <span class="n">AnalysisBase</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">EventLogger</span>
+<span class="kn">from</span> <span class="nn">scalr.utils</span> <span class="kn">import</span> <span class="n">read_data</span>
+
+
+<div class="viewcode-block" id="DgeLMEM">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM">[docs]</a>
+<span class="k">class</span> <span class="nc">DgeLMEM</span><span class="p">(</span><span class="n">AnalysisBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Class to perform differential gene expression analysis </span>
+<span class="sd">    using Linear mixed effects model.&#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">fixed_effect_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">fixed_effect_factors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                 <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">celltype_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">cell_subsets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">min_cell_threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                 <span class="n">n_cpu</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+                 <span class="n">gene_batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+                 <span class="n">coef_threshold</span><span class="p">:</span> <span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">p_val</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+                 <span class="n">y_lim_tuple</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">save_plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">stdout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;DgeLMEM parameters initialization.</span>
+<span class="sd">        </span>
+<span class="sd">        Args: </span>
+<span class="sd">            fixed_effect_column: Column name in `anndata.obs` containing different factor levels or categories for</span>
+<span class="sd">                           differential gene expression analysis. This acts as a fixed_effect parameter.           </span>
+<span class="sd">            fixed_effect_factors: List of conditions in `fixed_effect_column` to make design matrix for.</span>
+<span class="sd">            group: Column name to act as a random_effect parameter for mixed effect model.</span>
+<span class="sd">            celltype_column: Column name in `anndata.obs` containing all the cell types.</span>
+<span class="sd">            cell_subsets: Selcted list of cell types in &#39;celltype_column&#39; to subset the anndata.</span>
+<span class="sd">            min_cell_threshold: Minimum number of cells with nonzero values for a gene. Used for filtering noisy genes.</span>
+<span class="sd">            n_cpu: Number of CPUs for parallelization.</span>
+<span class="sd">            gene_batch_size: Number of genes in a batch of process.</span>
+<span class="sd">            coef_threshold: Threshold to filter up and down-regulated genes in volcano plot.</span>
+<span class="sd">            p_val: p value, to filter the differentially expressed genes for the volcano plot.</span>
+<span class="sd">            y_lim_tuple: Values to adjust the Y-axis limits of the plot.</span>
+<span class="sd">            save_plot: Boolean value to save plot.</span>
+<span class="sd">            stdout : Flag to print logs to stdout.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span> <span class="o">=</span> <span class="n">fixed_effect_column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_factors</span> <span class="o">=</span> <span class="n">fixed_effect_factors</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">group</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span> <span class="o">=</span> <span class="n">celltype_column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_subsets</span> <span class="o">=</span> <span class="n">cell_subsets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_cell_threshold</span> <span class="o">=</span> <span class="n">min_cell_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_cpu</span> <span class="o">=</span> <span class="n">n_cpu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gene_batch_size</span> <span class="o">=</span> <span class="n">gene_batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coef_threshold</span> <span class="o">=</span> <span class="n">coef_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_val</span> <span class="o">=</span> <span class="n">p_val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_lim_tuple</span> <span class="o">=</span> <span class="n">y_lim_tuple</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_plot</span> <span class="o">=</span> <span class="n">save_plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_cpu</span> <span class="o">&gt;</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_cpu</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DgeLMEM.replace_spec_char_get_dict">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.replace_spec_char_get_dict">[docs]</a>
+    <span class="k">def</span> <span class="nf">replace_spec_char_get_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_names</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">indexes</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">Index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39; This method replaces any special character in gene names.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            var_names: var_names in the Anndata.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            var_names with special characters replaced with &#39;_&#39;, and a dictionary mapping of old and new names.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">old_new_name_map_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">special_chars</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">punctuation</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">replace_special_chars</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s1">&#39;_&#39;</span> <span class="k">if</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">special_chars</span> <span class="k">else</span> <span class="n">char</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="n">replaced_name_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">replace_special_chars</span><span class="p">)(</span><span class="n">var_names</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">var_names</span><span class="p">)):</span>
+            <span class="n">old_new_name_map_dict</span><span class="p">[</span><span class="n">replaced_name_array</span><span class="p">[</span><span class="n">name</span><span class="p">]]</span> <span class="o">=</span> <span class="n">var_names</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">replaced_name_array</span><span class="p">,</span> <span class="n">old_new_name_map_dict</span></div>
+
+
+<div class="viewcode-block" id="DgeLMEM.get_genes_n_fixed_val_subset_df">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.get_genes_n_fixed_val_subset_df">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_genes_n_fixed_val_subset_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                        <span class="n">batch_adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span>
+                                        <span class="n">cell_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;This method converts Anndata into a pandas DataFrame with gene expression data,</span>
+<span class="sd">        &#39;fixed_effect_column&#39;, and &#39;group&#39; params.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            batch_adata: Anndata.</span>
+<span class="sd">            cell_type: Cell type in the &#39;celltype_column&#39; to subset the anndata, </span>
+<span class="sd">                       the whole anndata will be processed if &#39;cell_type&#39; is None.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of gene names in the anndata, and a pandas dataframe with count matrix.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">cell_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">batch_adata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">index</span><span class="o">=</span><span class="n">batch_adata</span><span class="o">.</span><span class="n">obs_names</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">factor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_factors</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">factor</span> <span class="ow">in</span> <span class="n">batch_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span>
+                    <span class="n">fixed_effect_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">factor</span><span class="si">}</span><span class="s2"> must be in the &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span><span class="si">}</span><span class="s2">&#39; column in &#39;adata.obs&#39;&quot;</span>
+            <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">batch_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_factors</span><span class="p">)</span>
+            <span class="n">ad_subset</span> <span class="o">=</span> <span class="n">batch_adata</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="c1">#Remove unexpressed genes</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">ad_subset</span><span class="p">,</span> <span class="n">min_cells</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_cell_threshold</span><span class="p">)</span>
+            <span class="n">ad_subset_to_df</span> <span class="o">=</span> <span class="n">ad_subset</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span>
+            <span class="n">genes</span> <span class="o">=</span> <span class="n">ad_subset_to_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">ad_subset_to_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad_subset</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">ad_subset_to_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad_subset</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">batch_adata</span><span class="p">,</span> <span class="n">min_cells</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_cell_threshold</span><span class="p">)</span>
+            <span class="n">ad_subset_to_df</span> <span class="o">=</span> <span class="n">batch_adata</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span>
+            <span class="n">genes</span> <span class="o">=</span> <span class="n">ad_subset_to_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">ad_subset_to_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">ad_subset_to_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">ad_subset_to_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Categorical</span><span class="p">(</span>
+            <span class="n">ad_subset_to_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span><span class="p">],</span>
+            <span class="n">categories</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_factors</span><span class="p">],</span>
+            <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">genes</span><span class="p">,</span> <span class="n">ad_subset_to_df</span></div>
+
+
+<div class="viewcode-block" id="DgeLMEM.get_result_mxmodel_per_gene">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.get_result_mxmodel_per_gene">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_result_mxmodel_per_gene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gene</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                    <span class="n">ad_subset_to_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;This method produces the Linear mixed-effects model statistics for a single gene.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            gene: Gene name.</span>
+<span class="sd">            ad_subset_to_df: A pandas dataframe with gene expression, &#39;fixed_effect_column&#39;, </span>
+<span class="sd">                             and &#39;group&#39; params.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A dictionary with model statistics.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">OptimizeWarning</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">ConvergenceWarning</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">HessianInversionWarning</span><span class="p">)</span>
+                <span class="n">formula</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">gene</span><span class="si">}</span><span class="s1"> ~ </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">mxmodel</span> <span class="o">=</span> <span class="n">smf</span><span class="o">.</span><span class="n">mixedlm</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span>
+                                      <span class="n">ad_subset_to_df</span><span class="p">,</span>
+                                      <span class="n">groups</span><span class="o">=</span><span class="n">ad_subset_to_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">])</span>
+                <span class="n">mixmodel_result</span> <span class="o">=</span> <span class="n">mxmodel</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+                <span class="n">result_dict_per_gene</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="n">result_dict_per_gene</span><span class="p">[</span><span class="s1">&#39;gene&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gene</span>
+                <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_factors</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="n">result_dict_per_gene</span><span class="p">[</span>
+                        <span class="sa">f</span><span class="s1">&#39;coef_</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixmodel_result</span><span class="o">.</span><span class="n">params</span><span class="p">[</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span><span class="si">}</span><span class="s1">[T.</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">]</span>
+                    <span class="n">result_dict_per_gene</span><span class="p">[</span>
+                        <span class="sa">f</span><span class="s1">&#39;SEcoef_</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixmodel_result</span><span class="o">.</span><span class="n">bse</span><span class="p">[</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span><span class="si">}</span><span class="s1">[T.</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">]</span>
+                    <span class="n">result_dict_per_gene</span><span class="p">[</span>
+                        <span class="sa">f</span><span class="s1">&#39;pval_</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixmodel_result</span><span class="o">.</span><span class="n">pvalues</span><span class="p">[</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_column</span><span class="si">}</span><span class="s1">[T.</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">]</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">result_dict_per_gene</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">result_dict_per_gene</span>
+        <span class="k">except</span> <span class="n">LinAlgError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="DgeLMEM.get_multiproc_mxeffect_model_batch_res">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.get_multiproc_mxeffect_model_batch_res">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_multiproc_mxeffect_model_batch_res</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gene_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                                               <span class="n">ad_subset_to_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;This method parallelizes the Linear mixed effects models for a list</span>
+<span class="sd">        of genes.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            gene_names: List of gene names.</span>
+<span class="sd">            ad_subset_to_df: A pandas dataframe with gene expression, &#39;fixed_effect_column&#39;, </span>
+<span class="sd">            and &#39;group&#39; params.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of dictionaries with model stats for &#39;gene_names&#39;.    </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">mxmodel_results_list</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_cpu</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;loky&quot;</span><span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_result_mxmodel_per_gene</span><span class="p">)(</span><span class="n">gene</span><span class="p">,</span> <span class="n">ad_subset_to_df</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">gene_names</span><span class="p">)</span>
+        <span class="n">mxmodel_results_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">per_gene_result</span> <span class="k">for</span> <span class="n">per_gene_result</span> <span class="ow">in</span> <span class="n">mxmodel_results_list</span>
+            <span class="k">if</span> <span class="n">per_gene_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">mxmodel_results_list</span></div>
+
+
+<div class="viewcode-block" id="DgeLMEM.plot_lmem_dge_result">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.plot_lmem_dge_result">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_lmem_dge_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                             <span class="n">lmem_res_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span>
+                             <span class="n">dirpath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                             <span class="n">cell_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;This method produces a volcano plot for the model results for a data subset </span>
+<span class="sd">        with a cell type, or for the whole dataset.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            lmem_res_df: A pandas DataFrame with Model results (p-value, co-efficients, Standard error..).</span>
+<span class="sd">            dirpath: Path to save the plot.</span>
+<span class="sd">            cell_type: Cell type used to subset input anndata.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">neg_log10_pval</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p_val</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_factors</span><span class="p">:</span>
+            <span class="n">coef_col</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">lmem_res_df</span><span class="o">.</span><span class="n">columns</span>
+                             <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;coef&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">col</span><span class="p">),</span>
+                            <span class="kc">None</span><span class="p">)</span>
+            <span class="n">pval_col</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">lmem_res_df</span><span class="o">.</span><span class="n">columns</span>
+                             <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;pval&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">col</span><span class="p">),</span>
+                            <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">coef_col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">pval_col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+
+                <span class="n">lmem_res_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;-log10_</span><span class="si">{</span><span class="n">pval_col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
+                    <span class="n">lmem_res_df</span><span class="p">[</span><span class="n">pval_col</span><span class="p">])</span>
+                <span class="n">down_reg_genes_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">lmem_res_df</span><span class="p">[</span><span class="n">coef_col</span><span class="p">]</span> <span class="o">&lt;</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">coef_threshold</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">lmem_res_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;-log10_</span><span class="si">{</span><span class="n">pval_col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+                                             <span class="o">&gt;=</span> <span class="p">(</span><span class="n">neg_log10_pval</span><span class="p">))</span>
+                <span class="n">up_reg_genes_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">lmem_res_df</span><span class="p">[</span><span class="n">coef_col</span><span class="p">]</span> <span class="o">&gt;</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">coef_threshold</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">lmem_res_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;-log10_</span><span class="si">{</span><span class="n">pval_col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+                                             <span class="o">&gt;=</span> <span class="p">(</span><span class="n">neg_log10_pval</span><span class="p">))</span>
+                <span class="n">rest_gene_idx</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">down_reg_genes_idx</span> <span class="o">|</span> <span class="n">up_reg_genes_idx</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">lmem_res_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">up_reg_genes_idx</span><span class="p">,</span> <span class="n">coef_col</span><span class="p">],</span>
+                            <span class="n">lmem_res_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">up_reg_genes_idx</span><span class="p">,</span>
+                                            <span class="sa">f</span><span class="s1">&#39;-log10_</span><span class="si">{</span><span class="n">pval_col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span>
+                            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+                            <span class="n">s</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+                            <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Upreg_genes(p&lt;=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p_val</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">lmem_res_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">down_reg_genes_idx</span><span class="p">,</span> <span class="n">coef_col</span><span class="p">],</span>
+                            <span class="n">lmem_res_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">down_reg_genes_idx</span><span class="p">,</span>
+                                            <span class="sa">f</span><span class="s1">&#39;-log10_</span><span class="si">{</span><span class="n">pval_col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span>
+                            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+                            <span class="n">s</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+                            <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Downreg_genes(p&lt;=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p_val</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+                <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">lmem_res_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">rest_gene_idx</span><span class="p">,</span> <span class="n">coef_col</span><span class="p">],</span>
+                            <span class="n">lmem_res_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">rest_gene_idx</span><span class="p">,</span>
+                                            <span class="sa">f</span><span class="s1">&#39;-log10_</span><span class="si">{</span><span class="n">pval_col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">],</span>
+                            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span>
+                            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+                            <span class="n">s</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                            <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Insignificant genes&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_threshold</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coef_threshold</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+                                <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Coefficient(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">coef_threshold</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">neg_log10_pval</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+                                <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;p_val (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p_val</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef_threshold</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coef_threshold</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+                                <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Coefficient(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">coef_threshold</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">coef_threshold</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+                                <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Coefficient(-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">coef_threshold</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">neg_log10_pval</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+                                <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;p_val (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p_val</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">))</span>
+
+                <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Coefficient&#39;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;-Log10(p-value)&#39;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+                <span class="n">_category</span> <span class="o">=</span> <span class="n">category</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">cell_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">_cell_type</span> <span class="o">=</span> <span class="n">cell_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;lmem_DGE of &quot;</span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s1">&quot; in &quot;</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s1">&quot; vs &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_factors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">,</span>
+                        <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">dirpath</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;lmem_DGE_</span><span class="si">{</span><span class="n">_cell_type</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">_category</span><span class="si">}</span><span class="s1">.svg&#39;</span><span class="p">),</span>
+                                <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;lmem_DGE in &quot;</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s1">&quot; vs &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fixed_effect_factors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">,</span>
+                        <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;lmemDGE_</span><span class="si">{</span><span class="n">_category</span><span class="si">}</span><span class="s1">.svg&#39;</span><span class="p">),</span>
+                                <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DgeLMEM.generate_analysis">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.generate_analysis">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">AnnCollection</span><span class="p">],</span>
+                          <span class="n">dirpath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;This method calls methods to run multiple linear mixed effects models and  </span>
+<span class="sd">        generate DGE results and plots.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            test_data: Anndata.</span>
+<span class="sd">            dirpath: Path to save results.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span> <span class="n">AnnData</span><span class="p">):</span>
+            <span class="n">test_data</span> <span class="o">=</span> <span class="n">AnnCollection</span><span class="p">([</span><span class="n">test_data</span><span class="p">])</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">EventLogger</span><span class="p">(</span><span class="s1">&#39;Differential Gene expression analysis&#39;</span><span class="p">,</span>
+                             <span class="n">stdout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">heading2</span><span class="p">(</span><span class="s2">&quot;DGE analysis using LMEM&quot;</span><span class="p">)</span>
+        <span class="n">dirpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="s1">&#39;lmem_dge_result&#39;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">new_var_names</span><span class="p">,</span> <span class="n">varname_map_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_spec_char_get_dict</span><span class="p">(</span>
+            <span class="n">test_data</span><span class="o">.</span><span class="n">var_names</span><span class="p">)</span>
+        <span class="n">test_data</span><span class="o">.</span><span class="n">var_names</span> <span class="o">=</span> <span class="n">new_var_names</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Performing DGE analysis with subset anndata&quot;</span><span class="p">)</span>
+            <span class="n">fixed_val_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_subsets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fixed_val_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_subsets</span>
+            <span class="k">for</span> <span class="n">cell_type</span> <span class="ow">in</span> <span class="n">fixed_val_list</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">cell_type</span> <span class="ow">in</span> <span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span>
+                    <span class="n">celltype_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s2"> must be in the &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span><span class="si">}</span><span class="s2">&#39; column in &#39;adata.obs&#39;&quot;</span>
+                <span class="n">cell_type_test_data</span> <span class="o">=</span> <span class="n">test_data</span><span class="p">[</span><span class="n">test_data</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">celltype_column</span><span class="p">]</span> <span class="o">==</span> <span class="n">cell_type</span><span class="p">]</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Processing for &quot;</span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s1">&quot; ...&#39;</span><span class="p">)</span>
+                <span class="n">fixed_val_lmem_result_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell_type_test_data</span><span class="o">.</span><span class="n">var_names</span><span class="p">),</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">gene_batch_size</span><span class="p">):</span>
+                    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+                        <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span>
+                            <span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">ImplicitModificationWarning</span><span class="p">)</span>
+                        <span class="n">gene_list</span><span class="p">,</span> <span class="n">batch_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_genes_n_fixed_val_subset_df</span><span class="p">(</span>
+                            <span class="n">cell_type_test_data</span><span class="p">[:,</span> <span class="n">batch</span><span class="p">:</span><span class="n">batch</span> <span class="o">+</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">gene_batch_size</span><span class="p">]</span><span class="o">.</span><span class="n">to_adata</span><span class="p">(</span>
+                                                <span class="p">),</span> <span class="n">cell_type</span><span class="p">)</span>
+                    <span class="n">result_lmem_batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_multiproc_mxeffect_model_batch_res</span><span class="p">(</span>
+                        <span class="n">gene_list</span><span class="p">,</span> <span class="n">batch_df</span><span class="p">)</span>
+                    <span class="n">fixed_val_lmem_result_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result_lmem_batch</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">fixed_val_lmem_result_list</span><span class="p">:</span>
+                    <span class="n">fixed_val_lmem_result_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                        <span class="n">fixed_val_lmem_result_list</span><span class="p">)</span>
+                    <span class="n">standard_error_cols</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">fixed_val_lmem_result_df</span><span class="o">.</span><span class="n">columns</span>
+                        <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;SEcoef&#39;</span><span class="p">)</span>
+                    <span class="p">]</span>
+                    <span class="n">pval_columns</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">fixed_val_lmem_result_df</span><span class="o">.</span><span class="n">columns</span>
+                        <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;pval&#39;</span><span class="p">)</span>
+                    <span class="p">]</span>
+                    <span class="n">fixed_val_lmem_result_df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">pval_columns</span><span class="p">,</span>
+                                                    <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">standard_error_cols</span><span class="p">:</span>
+                        <span class="n">condition_category</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">column</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
+                        <span class="n">fixed_val_lmem_result_df</span><span class="p">[</span>
+                            <span class="sa">f</span><span class="s1">&#39;stat_</span><span class="si">{</span><span class="n">condition_category</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="n">fixed_val_lmem_result_df</span><span class="p">[</span>
+                                    <span class="sa">f</span><span class="s1">&#39;coef_</span><span class="si">{</span><span class="n">condition_category</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">/</span>
+                                <span class="p">(</span><span class="n">fixed_val_lmem_result_df</span><span class="p">[</span>
+                                    <span class="sa">f</span><span class="s1">&#39;SEcoef_</span><span class="si">{</span><span class="n">condition_category</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                                        <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)))</span>
+                    <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">pval_columns</span><span class="p">:</span>
+                        <span class="n">multitest_result_bh</span> <span class="o">=</span> <span class="n">multipletests</span><span class="p">(</span>
+                            <span class="n">fixed_val_lmem_result_df</span><span class="p">[</span><span class="n">column</span><span class="p">],</span>
+                            <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">,</span>
+                            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+                        <span class="n">fixed_val_lmem_result_df</span><span class="p">[</span>
+                            <span class="sa">f</span><span class="s1">&#39;adj_</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">multitest_result_bh</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="k">for</span> <span class="n">gene_name</span> <span class="ow">in</span> <span class="n">fixed_val_lmem_result_df</span><span class="p">[</span><span class="s1">&#39;gene&#39;</span><span class="p">]:</span>
+                        <span class="n">fixed_val_lmem_result_df</span><span class="p">[</span>
+                            <span class="s1">&#39;gene&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed_val_lmem_result_df</span><span class="p">[</span><span class="s1">&#39;gene&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                                <span class="p">{</span><span class="n">gene_name</span><span class="p">:</span> <span class="n">varname_map_dict</span><span class="p">[</span><span class="n">gene_name</span><span class="p">]})</span>
+                    <span class="n">file_name</span> <span class="o">=</span> <span class="s1">&#39;lmemDGE_&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="n">cell_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span>
+                                                                <span class="s1">&#39;&#39;</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
+                    <span class="n">full_file_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+                    <span class="n">fixed_val_lmem_result_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">full_file_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_plot</span><span class="p">:</span>
+                        <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_lmem_dge_result</span><span class="p">(</span>
+                            <span class="n">fixed_val_lmem_result_df</span><span class="p">,</span> <span class="n">dirpath</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">)</span>
+                        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error in producing result for &quot;</span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Performing DGE analysis with whole anndata ...&quot;</span><span class="p">)</span>
+            <span class="n">whole_data_lmem_result_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_data</span><span class="o">.</span><span class="n">var_names</span><span class="p">),</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">gene_batch_size</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span>
+                        <span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">ImplicitModificationWarning</span><span class="p">)</span>
+                    <span class="n">gene_list</span><span class="p">,</span> <span class="n">batch_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_genes_n_fixed_val_subset_df</span><span class="p">(</span>
+                        <span class="n">test_data</span><span class="p">[:,</span> <span class="n">batch</span><span class="p">:</span><span class="n">batch</span> <span class="o">+</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">gene_batch_size</span><span class="p">]</span><span class="o">.</span><span class="n">to_adata</span><span class="p">())</span>
+                <span class="n">result_lmem_batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_multiproc_mxeffect_model_batch_res</span><span class="p">(</span>
+                    <span class="n">gene_list</span><span class="p">,</span> <span class="n">batch_df</span><span class="p">)</span>
+                <span class="n">whole_data_lmem_result_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result_lmem_batch</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">whole_data_lmem_result_list</span><span class="p">:</span>
+                <span class="n">whole_data_lmem_result_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                    <span class="n">whole_data_lmem_result_list</span><span class="p">)</span>
+                <span class="n">standard_error_cols</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">whole_data_lmem_result_df</span><span class="o">.</span><span class="n">columns</span>
+                    <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;SEcoef&#39;</span><span class="p">)</span>
+                <span class="p">]</span>
+                <span class="n">pval_columns</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">whole_data_lmem_result_df</span><span class="o">.</span><span class="n">columns</span>
+                    <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;pval&#39;</span><span class="p">)</span>
+                <span class="p">]</span>
+                <span class="n">whole_data_lmem_result_df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">pval_columns</span><span class="p">,</span>
+                                                 <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">standard_error_cols</span><span class="p">:</span>
+                    <span class="n">condition_category</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">column</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
+                    <span class="n">whole_data_lmem_result_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;stat_</span><span class="si">{</span><span class="n">condition_category</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">whole_data_lmem_result_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;coef_</span><span class="si">{</span><span class="n">condition_category</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+                        <span class="o">/</span> <span class="p">(</span><span class="n">whole_data_lmem_result_df</span><span class="p">[</span>
+                            <span class="sa">f</span><span class="s1">&#39;SEcoef_</span><span class="si">{</span><span class="n">condition_category</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)))</span>
+                <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">pval_columns</span><span class="p">:</span>
+                    <span class="n">multitest_result_bh</span> <span class="o">=</span> <span class="n">multipletests</span><span class="p">(</span>
+                        <span class="n">whole_data_lmem_result_df</span><span class="p">[</span><span class="n">column</span><span class="p">],</span>
+                        <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">,</span>
+                        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+                    <span class="n">whole_data_lmem_result_df</span><span class="p">[</span>
+                        <span class="sa">f</span><span class="s1">&#39;adj_</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">multitest_result_bh</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="k">for</span> <span class="n">gene_name</span> <span class="ow">in</span> <span class="n">whole_data_lmem_result_df</span><span class="p">[</span><span class="s1">&#39;gene&#39;</span><span class="p">]:</span>
+                    <span class="n">whole_data_lmem_result_df</span><span class="p">[</span>
+                        <span class="s1">&#39;gene&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">whole_data_lmem_result_df</span><span class="p">[</span><span class="s1">&#39;gene&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                            <span class="p">{</span><span class="n">gene_name</span><span class="p">:</span> <span class="n">varname_map_dict</span><span class="p">[</span><span class="n">gene_name</span><span class="p">]})</span>
+                <span class="n">file_name</span> <span class="o">=</span> <span class="s1">&#39;lmemDGE_whole&#39;</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
+                <span class="n">full_file_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+                <span class="n">whole_data_lmem_result_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">full_file_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_plot</span><span class="p">:</span>
+                    <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_lmem_dge_result</span><span class="p">(</span><span class="n">whole_data_lmem_result_df</span><span class="p">,</span>
+                                                     <span class="n">dirpath</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">LMEM-DGE results stored at: </span><span class="si">{</span><span class="n">dirpath</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DgeLMEM.get_default_params">
+<a class="viewcode-back" href="../../../scalr.analysis.html#scalr.analysis.dge_lmem.DgeLMEM.get_default_params">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_default_params</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Class method to get default params for DgeLMEM_config.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">fixed_effect_column</span><span class="o">=</span><span class="s1">&#39;fixed_effect_column&#39;</span><span class="p">,</span>
+                    <span class="n">fixed_effect_factors</span><span class="o">=</span><span class="s1">&#39;fixed_effect_factors&#39;</span><span class="p">,</span>
+                    <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span>
+                    <span class="n">celltype_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">cell_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">min_cell_threshold</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                    <span class="n">n_cpu</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                    <span class="n">gene_batch_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                    <span class="n">coef_threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">p_val</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                    <span class="n">y_lim_tuple</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">save_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">stdout</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Infocusp Innovations.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
