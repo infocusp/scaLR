@@ -4,7 +4,7 @@
 
 
 [![GitHub](https://img.shields.io/github/license/InFoCusp/scaLR)](https://github.com/infocusp/scaLR?tab=GPL-3.0-1-ov-file#)
-[![Documentation](https://img.shields.io/badge/docs-v1.0.1-orange)](https://infocusp.github.io/scaLR/)
+[![Documentation](https://img.shields.io/badge/docs-v1.1.0-orange)](https://infocusp.github.io/scaLR/)
 
 [![DOI](https://zenodo.org/badge/852710658.svg)](https://doi.org/10.5281/zenodo.13767942)
 
