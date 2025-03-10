@@ -29,7 +29,6 @@ The following flowchart explains the major steps of the scaLR platform.
 
 - ScaLR can be installed using git or pip. It is tested in Python 3.10 and it is recommended to use that environment.
 
-
 ```
 conda create -n scaLR_env python=3.10
 
@@ -60,15 +59,192 @@ pip install pyscaLR
 ## How to run
 
 1. It is necessary that the user modify the configuration file, and each stage of the pipeline is available inside the config folder [config.yml] as per your requirements. Simply omit/comment out stages of the pipeline you do not wish to run.
-2. Refer config.yml & it's detailed config [README](https://github.com/infocusp/scaLR/blob/main/config/README.md) file on how to use different parameters and files.
+2. Refer **config.yml** & **it's detailed config** [README](https://github.com/infocusp/scaLR/blob/main/config/README.md) file on how to use different parameters and files.
 3. Then use the `pipeline.py` file to run the entire pipeline according to your configurations. This file takes as argument the path to config (`-c | --config`), along with optional flags to log all parts of the pipelines (`-l | --log`) and to analyze memory usage (`-m | --memoryprofiler`).
 5. `python pipeline.py --config /path/to/config.yaml -l -m` to run the scaLR.
 
-## Examples configs
+## Example configs
 
-### Config edits (For clinical condition-specific biomarker identification and DGE analysis)
+### Config For Cell Type Classification and Biomarker Identification
 
-An example configuration file for the current dataset, incorporating the edits below, can be found at: scaLR/tutorials/pipeline/config_clinical.yaml.Please update the device as CUDA or CPU as per runtype
+NOTE: Below are just suggestions for the model parameters. Feel free to play around with them for tuning the model & improving the results.
+
+An example configuration file for the current dataset, incorporating the edits below, can be found at '`scaLR/tutorials/pipeline/config_celltype.yaml`. Please update the device as cuda or cpu as per runtype.
+
+- **Device setup*** 
+    - Update device: 'cuda' for GPU enabled runtype, else device: 'cpu' for CPU enabled runtype.
+- **Experiment Config**
+    - The default exp_run number is 0.If not changed, the celltype classification experiment would be exp_run_0 with all the pipeline results.
+- **Data Config**
+    - Update the full_datapath to data/modified_adata.h5ad (as we will include GeneRecallCurve in the downstream).
+    - Specify the num_workers value for effective parallelization.
+    - Set target to cell_type.
+- **Feature Selection**
+    - Specify the num_workers value for effective parallelization.
+    - Update the model layers to [5000, 10], as there are only 10 cell types in the dataset.
+    - Change epoch to 10.
+- **Final Model Training**
+    - Update the model layers to the same as for feature selection: [5000, 10].
+    - Change epoch to 100.
+- **Analysis**
+    - Downstream Analysis
+        - Uncomment the test_samples_downstream_analysis section.
+        -   Update the reference_genes_path to scaLR/tutorials/pipeline/grc_reference_gene.csv.
+        - refer to the section below:
+    ```
+    # Config file for pipeline run for cell type classification.
+
+    # DEVICE SETUP.
+    device: 'cuda'
+
+    # EXPERIMENT.
+    experiment:
+        dirpath: 'scalr_experiments'
+        exp_name: 'exp_name'
+        exp_run: 0
+
+    # DATA CONFIG.
+    data:
+        sample_chunksize: 20000
+
+        train_val_test:
+            full_datapath: 'data/modified_adata.h5ad'
+            num_workers: 2
+
+            splitter_config:
+                name: GroupSplitter
+                params:
+                    split_ratio: [7, 1, 2.5]
+                    stratify: 'donor_id'
+
+            # split_datapaths: ''
+
+        # preprocess:
+        #     - name: SampleNorm
+        #       params:
+        #             **args
+
+        #     - name: StandardScaler
+        #       params: 
+        #             **args
+
+        target: cell_type    
+
+    # FEATURE SELECTION.
+    feature_selection:
+
+        # score_matrix: '/path/to/matrix'
+        feature_subsetsize: 5000
+        num_workers: 2
+
+        model:
+            name: SequentialModel
+            params:
+                layers: [5000, 10]
+                weights_init_zero: True
+
+        model_train_config:
+            trainer: SimpleModelTrainer
+
+            dataloader: 
+                name: SimpleDataLoader
+                params:
+                    batch_size: 25000
+                    padding: 5000
+            
+            optimizer:
+                name: SGD
+                params:
+                    lr: 1.0e-3
+                    weight_decay: 0.1
+
+            loss:
+                name: CrossEntropyLoss
+            
+            epochs: 10
+
+        scoring_config: 
+            name: LinearScorer
+            
+        features_selector:
+            name: AbsMean
+            params:
+                k: 5000
+
+    # FINAL MODEL TRAINING.
+    final_training:
+
+        model:
+            name: SequentialModel
+            params:
+                layers: [5000, 10]
+                dropout: 0
+                weights_init_zero: False
+
+        model_train_config:
+            resume_from_checkpoint: null
+
+            trainer: SimpleModelTrainer
+
+            dataloader: 
+                name: SimpleDataLoader
+                params:
+                    batch_size: 15000
+            
+            optimizer:
+                name: Adam
+                params:
+                    lr: 1.0e-3
+                    weight_decay: 0
+
+            loss:
+                name: CrossEntropyLoss
+            
+            epochs: 100
+
+            callbacks:
+                - name: TensorboardLogger
+                - name: EarlyStopping
+                params:
+                    patience: 3
+                    min_delta: 1.0e-4
+                - name: ModelCheckpoint
+                params:
+                    interval: 5
+    analysis:
+
+        model_checkpoint: ''
+
+        dataloader:
+            name: SimpleDataLoader
+            params:
+                batch_size: 15000
+
+        gene_analysis:
+            scoring_config:
+                name: LinearScorer
+
+            features_selector:
+                name: ClasswisePromoters
+                params:
+                    k: 100
+        test_samples_downstream_analysis:
+            - name: GeneRecallCurve
+              params:
+                reference_genes_path: 'scaLR/tutorials/pipeline/grc_reference_gene.csv'
+                top_K: 300
+                plots_per_row: 3
+                features_selector:
+                    name: ClasswiseAbs
+                    params: {}
+            - name: Heatmap
+              params: {}
+            - name: RocAucCurve
+              params: {}
+    ```
+### Config For clinical condition-specific biomarker identification and DGE analysis
+
+An example configuration file (`scaLR/tutorials/pipeline/config_clinical.yaml`). Update the device as CUDA or CPU as per runtype
 
 - Experiment Config
   - Make sure to change the exp_run number if you have an experiment with the same number earlier related to cell classification. As we have done one experiment earlier, we'll change the number now to '1'.
@@ -85,70 +261,9 @@ An example configuration file for the current dataset, incorporating the edits b
   - Downstream Analysis
      - Uncomment the full_samples_downstream_analysis section.
      - We are not performing the 'gene_recall_curve' analysis in this case. It can be performed if the COVID-19/normal specific genes are available, but there are many possibilities of genes in the case of normal conditions.
-     - There are two options to perform differential gene expression (DGE) analysis: DgePseudoBulk and DgeLMEM. The parameters are updated as follows. Note that DgeLMEM may take a bit more time, as the multiprocessing is not very       efficient with only 2 CPUs in the current Colab runtime.
-     - Please refer to the section below:
+     - There are two options to perform differential gene expression (DGE) analysis: **DgePseudoBulk and DgeLMEM**. The parameters are updated as follows. Note that DgeLMEM may take a bit more time, as the multiprocessing is not very efficient with only 2 CPUs in the current Colab runtime.
+     - Refer to the section below:
 
-    ```
-    analysis:
-    
-      model_checkpoint: ''
-    
-      dataloader:
-          name: SimpleDataLoader
-          params:
-              batch_size: 15000
-    
-      gene_analysis:
-          scoring_config:
-              name: LinearScorer
-    
-          features_selector:
-              name: ClasswisePromoters
-              params:
-                  k: 100
-      full_samples_downstream_analysis:
-          - name: Heatmap
-            params:
-              top_n_genes: 100
-          - name: RocAucCurve
-            params: {}
-          - name: DgePseudoBulk
-            params:
-                celltype_column: 'cell_type'
-                design_factor: 'disease'
-                factor_categories: ['COVID-19', 'normal']
-                sum_column: 'donor_id'
-                cell_subsets: ['conventional dendritic cell', 'natural killer cell']
-          - name: DgeLMEM
-            params:
-              fixed_effect_column: 'disease'
-              fixed_effect_factors: ['COVID-19', 'normal']
-              group: 'donor_id'
-              celltype_column: 'cell_type'
-              cell_subsets: ['conventional dendritic cell']
-              gene_batch_size: 1000
-              coef_threshold: 0.1
-    ```
-### Config edits (For clinical condition-specific biomarker identification and DGE analysis)
-  An example configuration file for the current dataset, incorporating the edits below, can be found at: scaLR/tutorials/pipeline/config_clinical.yaml.Please update the device as cuda or cpu as per runtype
-
-- Experiment Config
-    - Make sure to change the exp_run number if you have an experiment with the same number earlier related to cell classification.As we have done one experiment earlier, we'll change the number now to '1'.
-- Data Config
-    - The full_datapath remains the same as above.
-    - Change the target to disease (this column contains data for clinical conditions, COVID-19/normal).
-- Feature Selection
-    - Update the model layers to [5000, 2], as there are only two types of clinical conditions.
-    - epoch as 10.
-- Final Model Training
-    - Update the model layers to the same as for feature selection: [5000, 2].
-    - epoch as 100.
-- Analysis
-    - Downstream Analysis
-      - Uncomment the full_samples_downstream_analysis section.
-      - We are not performing the 'gene_recall_curve' analysis in this case. It can be performed if the COVID-19/normal specific genes are available, but there are many possibilities of genes in the case of normal conditions.
-      - There are two options to perform differential gene expression (DGE) analysis: DgePseudoBulk and DgeLMEM. The parameters are updated as follows. Note that DgeLMEM may take a bit more time, as the multiprocessing is not very efficient with only 2 CPUs in the current Colab runtime.
-      - Please refer to the section below:
     ```
     analysis:
     
@@ -192,14 +307,15 @@ An example configuration file for the current dataset, incorporating the edits b
     ```
 
 ## Interactive tutorials
-Detailed tutorials have been made on how to use some functionalities as a scaLR library. Find the links below.
+Detailed tutorials have been made on how to use somepipline functionalities as a scaLR library. Find the links below.
 
 - **scaLR pipeline** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/pipeline/scalr_pipeline.ipynb)
 - **Differential gene expression analysis** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/analysis/differential_gene_expression/dge.ipynb)
 - **Gene recall curve** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb)
 - **Normalization** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/preprocessing/normalization.ipynb)
 - **Batch correction** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/preprocessing/batch_correction.ipynb)
-- **SHAP analysis** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/analysis/shap_analysis/shap_heatmap.ipynb)
+
+- **An example of jupyter notebook to [run scaLR in local machine](https://github.com/infocusp/scaLR/blob/main/tutorials/pipeline/scalr_pipeline_local_run.ipynb)**
 
 ## Experiment Output Structure
 - **pipeline.py**:
@@ -256,8 +372,6 @@ Performs evaluation of best model trained on user-defined metrics on the test se
                     - `lmemDGE_celltype.csv`: contains LMEM DGE results between selected factor categories for a celltype.
                     - `lmemDGE_fixed_effect_factor_X.svg`: volcano plot of coefficient vs -log10(p-value) of genes.
   
-
-
 ## Citation
 
 Jogani Saiyam, Anand Santosh Pol, Mayur Prajapati, Amit Samal, Kriti Bhatia, Jayendra Parmar, Urvik Patel, Falak Shah, Nisarg Vyas, and Saurabh Gupta. "scaLR: a low-resource deep neural network-based platform for single cell analysis and biomarker discovery." bioRxiv (2024): 2024-09.
