@@ -20,7 +20,7 @@
 
 4. <b>Evaluation & Downstream Analysis</b>: The trained model is evaluated using the test dataset by calculating metrics such as precision, recall, f1-score, and accuracy. Various visualizations, such as ROC curve of class annotation, feature rank plots, heatmap of top genes per class, [DGE analysis](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/analysis/differential_gene_expression/dge.ipynb), and [gene recall curves](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/analysis/gene_recall_curve/gene_recall_curve.ipynb), are generated.
 
-The following flowchart explains the major steps of the scaLR platform.
+**The below flowchart also explains the major steps of the scaLR platform.**
 
 ![image.jpg](img/Schematic-of-scPipeline.jpg)
 
@@ -46,9 +46,9 @@ pip install -r requirements.txt
 ```
 pip install pyscaLR
 ```
-*Note* If the user wants to run the entire pipeline via installing pip pyscalr, they should clone/download these files(`pipeline.py` and `config.yaml`) from the git repository.
+**Note:** If the user wants to run the entire pipeline via installing pip pyscalr, they should clone/download these files(`pipeline.py` and `config.yaml`) from the git repository.
 
-## Input Data
+## Input data type
 - Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only).
 - The anndata object should contain cell samples as `obs` and genes as `var. '
 - `adata.X`: contains normalized gene counts/expression values (`log1p` normalization with range `0-10` expected).
@@ -65,18 +65,18 @@ pip install pyscaLR
 
 ## Example configs
 
-### Config For Cell Type Classification and Biomarker Identification
+### Config for cell type classification and biomarker identification
 
 NOTE: Below are just suggestions for the model parameters. Feel free to play around with them for tuning the model & improving the results.
 
-An example configuration file for the current dataset, incorporating the edits below, can be found at '`scaLR/tutorials/pipeline/config_celltype.yaml`. Please update the device as cuda or cpu as per runtype.
+An example configuration file for the current dataset, incorporating the edits below, can be found at '`scaLR/tutorials/pipeline/config_celltype.yaml`. Update the device as cuda or cpu as per the requirement.
 
 - **Device setup*** 
     - Update device: 'cuda' for GPU enabled runtype, else device: 'cpu' for CPU enabled runtype.
 - **Experiment Config**
     - The default exp_run number is 0.If not changed, the celltype classification experiment would be exp_run_0 with all the pipeline results.
 - **Data Config**
-    - Update the full_datapath to data/modified_adata.h5ad (as we will include GeneRecallCurve in the downstream).
+    - Update the full_datapath to `data/modified_adata.h5ad` (as we will include GeneRecallCurve in the downstream).
     - Specify the num_workers value for effective parallelization.
     - Set target to cell_type.
 - **Feature Selection**
@@ -89,8 +89,8 @@ An example configuration file for the current dataset, incorporating the edits b
 - **Analysis**
     - Downstream Analysis
         - Uncomment the test_samples_downstream_analysis section.
-        -   Update the reference_genes_path to scaLR/tutorials/pipeline/grc_reference_gene.csv.
-        - refer to the section below:
+        -   Update the reference_genes_path to `scaLR/tutorials/pipeline/grc_reference_gene.csv`.
+        - Refer to the section below:
     ```
     # Config file for pipeline run for cell type classification.
 
@@ -242,9 +242,9 @@ An example configuration file for the current dataset, incorporating the edits b
             - name: RocAucCurve
               params: {}
     ```
-### Config For clinical condition-specific biomarker identification and DGE analysis
+### Config for clinical condition-specific biomarker identification and DGE analysis
 
-An example configuration file (`scaLR/tutorials/pipeline/config_clinical.yaml`). Update the device as CUDA or CPU as per runtype
+An example configuration file (`scaLR/tutorials/pipeline/config_clinical.yaml`). Update the device as CUDA or CPU as per the requirement.
 
 - Experiment Config
   - Make sure to change the exp_run number if you have an experiment with the same number earlier related to cell classification. As we have done one experiment earlier, we'll change the number now to '1'.
@@ -259,7 +259,7 @@ An example configuration file (`scaLR/tutorials/pipeline/config_clinical.yaml`).
   - epoch as 100.
 - Analysis
   - Downstream Analysis
-     - Uncomment the full_samples_downstream_analysis section.
+     - Uncomment the full_samples_downstream_analysis section for example config file.
      - We are not performing the 'gene_recall_curve' analysis in this case. It can be performed if the COVID-19/normal specific genes are available, but there are many possibilities of genes in the case of normal conditions.
      - There are two options to perform differential gene expression (DGE) analysis: **DgePseudoBulk and DgeLMEM**. The parameters are updated as follows. Note that DgeLMEM may take a bit more time, as the multiprocessing is not very efficient with only 2 CPUs in the current Colab runtime.
      - Refer to the section below:
@@ -307,7 +307,7 @@ An example configuration file (`scaLR/tutorials/pipeline/config_clinical.yaml`).
     ```
 
 ## Interactive tutorials
-Detailed tutorials have been made on how to use somepipline functionalities as a scaLR library. Find the links below.
+Detailed tutorials have been made on how to use some pipeline functionalities as a scaLR library. Find the links below.
 
 - **scaLR pipeline** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/pipeline/scalr_pipeline.ipynb)
 - **Differential gene expression analysis** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/analysis/differential_gene_expression/dge.ipynb)
@@ -315,9 +315,9 @@ Detailed tutorials have been made on how to use somepipline functionalities as a
 - **Normalization** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/preprocessing/normalization.ipynb)
 - **Batch correction** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infocusp/scaLR/blob/main/tutorials/preprocessing/batch_correction.ipynb)
 
-- **An example of jupyter notebook to [run scaLR in local machine](https://github.com/infocusp/scaLR/blob/main/tutorials/pipeline/scalr_pipeline_local_run.ipynb)**
+- **An example of jupyter notebook to [run scaLR in local machine](https://github.com/infocusp/scaLR/blob/main/tutorials/pipeline/scalr_pipeline_local_run.ipynb)**.
 
-## Experiment Output Structure
+## Experiment output structure
 - **pipeline.py**:
 The main script that performs an end-to-end run.
     - `exp_dir`: root experiment directory for the storage of all step outputs of the platform specified in the config.
