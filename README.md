@@ -48,7 +48,7 @@ pip install pyscaLR
 ```
 **Note:** If the user wants to run the entire pipeline via installing pip pyscalr, they should clone/download these files(`pipeline.py` and `config.yaml`) from the git repository.
 
-## Input data type
+## Input data format
 - Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only).
 - The anndata object should contain cell samples as `obs` and genes as `var. '
 - `adata.X`: contains normalized gene counts/expression values (`log1p` normalization with range `0-10` expected).
