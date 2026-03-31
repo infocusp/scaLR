@@ -27,10 +27,10 @@
 ## Pre-requisites and installation scaLR
 
 
-- ScaLR can be installed using git or pip. It is tested in Python 3.10 and it is recommended to use that environment.
+- ScaLR can be installed using git or pip. It is tested in Python 3.10.20 and it is recommended to use that environment.
 
 ```
-conda create -n scaLR_env python=3.10
+conda create -n scaLR_env python=3.10.20
 
 conda activate scaLR_env
 ```

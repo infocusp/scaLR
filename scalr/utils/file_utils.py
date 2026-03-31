@@ -7,8 +7,8 @@ from os import path
 from typing import Union
 
 from anndata import AnnData
-import anndata as ad
 from anndata.experimental import AnnCollection
+from anndata.io import read_h5ad
 from joblib import delayed
 from joblib import Parallel
 import numpy as np
@@ -142,7 +142,7 @@ def write_chunkwise_data(full_data: Union[AnnData, AnnCollection],
             if transform:
                 data = AnnData(data.X, obs=data.obs, var=data.var)
                 if not isinstance(data.X, np.ndarray):
-                    data.X = data.X.A
+                    data.X = data.X.toarray()
                 data.X = transform(data.X)
 
             write_data(data, path.join(dirpath, f'{chunk_number}.h5ad'))
@@ -262,7 +262,7 @@ def read_csv(filepath: str, index_col: int = 0) -> pd.DataFrame:
 
 def read_anndata(filepath: str, backed: str = 'r') -> AnnData:
     """This file returns the Anndata object from filepath."""
-    data = ad.read_h5ad(filepath, backed=backed)
+    data = read_h5ad(filepath, backed=backed)
     return data
 
 

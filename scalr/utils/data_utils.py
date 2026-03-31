@@ -46,7 +46,7 @@ def get_random_samples(
     random_background_data = data[random_indices].X
 
     if not isinstance(random_background_data, np.ndarray):
-        random_background_data = random_background_data.A
+        random_background_data = random_background_data.toarray()
 
     random_background_data = torch.as_tensor(random_background_data,
                                              dtype=torch.float32)

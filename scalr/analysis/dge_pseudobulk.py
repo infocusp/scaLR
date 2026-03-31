@@ -4,8 +4,7 @@ import os
 from os import path
 from typing import Optional, Tuple, Union
 
-from anndata import AnnData
-import anndata as ad
+from anndata import AnnData, concat
 from anndata.experimental import AnnCollection
 import matplotlib.pyplot as plt
 import numpy as np
@@ -94,7 +93,7 @@ class DgePseudoBulk(AnalysisBase):
             for sum_sample in condition_subset.obs[self.sum_column].unique():
                 sum_subset = condition_subset[condition_subset.obs[
                     self.sum_column] == sum_sample]
-                subdata = ad.AnnData(
+                subdata = AnnData(
                     X=sum_subset[:].X.sum(axis=0).reshape(
                         1, len(sum_subset.var_names)),
                     var=DataFrame(index=sum_subset.var_names),
@@ -102,7 +101,7 @@ class DgePseudoBulk(AnalysisBase):
                 subdata.obs[self.design_factor_no_undrscr] = [condition]
                 design_matrix_list.append(subdata)
 
-        design_matrix = ad.concat(design_matrix_list)
+        design_matrix = concat(design_matrix_list)
         return design_matrix
 
     def get_differential_expression_results(self, design_matrix: AnnData,

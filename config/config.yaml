@@ -16,7 +16,7 @@ data:
     num_workers: 1
 
     train_val_test:
-        full_datapath: 'data/modified_adata.h5ad'
+        full_datapath: 'path/to/adata.h5ad'
         splitter_config:
             name: GroupSplitter
             params:
