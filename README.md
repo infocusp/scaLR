@@ -374,5 +374,4 @@ Performs evaluation of best model trained on user-defined metrics on the test se
   
 ## Citation
 
-Jogani Saiyam, Anand Santosh Pol, Mayur Prajapati, Amit Samal, Kriti Bhatia, Jayendra Parmar, Urvik Patel, Falak Shah, Nisarg Vyas, and Saurabh Gupta. "scaLR: a low-resource deep neural network-based platform for single cell analysis and biomarker discovery." bioRxiv (2024): 2024-09.
-
+Jogani, S., Pol, A. S., Prajapati, M., Samal, A., Bhatia, K., Parmar, J., ... & Gupta, S. (2025). scaLR: a low-resource deep neural network-based platform for single cell analysis and biomarker discovery. Briefings in Bioinformatics, 26(3), bbaf243.

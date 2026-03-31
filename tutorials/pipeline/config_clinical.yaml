@@ -1,7 +1,7 @@
 # Config file for pipeline run for clinical condition specific biomarker identification.
 
 # DEVICE SETUP.
-device: 'cuda'
+device: 'cpu'
 
 # EXPERIMENT.
 experiment:
@@ -15,7 +15,7 @@ data:
     sample_chunksize: 20000
 
     train_val_test:
-        full_datapath: 'data/modified_adata.h5ad'
+        full_datapath: 'data/21ef2ea2-cbed-4b6c-a572-0ddd1d9020bc.h5ad'
         num_workers: 2
 
         splitter_config:

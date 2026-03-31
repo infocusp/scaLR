@@ -1,7 +1,7 @@
 # Config file for pipeline run.
 
 # DEVICE SETUP.
-device: 'cuda'
+device: 'cpu'
 
 # EXPERIMENT.
 experiment:
@@ -16,8 +16,7 @@ data:
     num_workers: 1
 
     train_val_test:
-        full_datapath: '/path/to/anndata.h5ad'
-
+        full_datapath: 'data/modified_adata.h5ad'
         splitter_config:
             name: GroupSplitter
             params:
@@ -35,7 +34,7 @@ data:
     #       params: 
     #             **args
 
-    target: Cell_Type    
+    target: cell_type    
 
 
 # FEATURE SELECTION.

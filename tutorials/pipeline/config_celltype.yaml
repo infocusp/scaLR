@@ -1,7 +1,7 @@
 # Config file for pipeline run for cell type classification.
 
 # DEVICE SETUP.
-device: 'cuda'
+device: 'cpu'
 
 # EXPERIMENT.
 experiment:
