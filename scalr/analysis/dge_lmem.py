@@ -11,7 +11,6 @@ import warnings
 
 from anndata import AnnData
 from anndata import ImplicitModificationWarning
-import anndata as ad
 from anndata.experimental import AnnCollection
 from joblib import delayed
 from joblib import Parallel

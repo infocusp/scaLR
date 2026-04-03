@@ -13,14 +13,13 @@ import yaml
 
 from anndata import AnnData
 from anndata import ImplicitModificationWarning
-import anndata as ad
 from anndata.experimental import AnnCollection
+from anndata.io import read_h5ad
 from joblib import Parallel, delayed
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
-import scanpy as sc
 from scipy.optimize import OptimizeWarning
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
@@ -31,7 +30,7 @@ from scalr.analysis import DgeLMEM
 
 
 def main(config):
-    test_data = sc.read_h5ad(config['full_datapath'], backed='r')
+    test_data = read_h5ad(config['full_datapath'], backed='r')
     dirpath = config['dirpath']
     dge_type = config['dge_type']
     assert (dge_type == 'DgeLMEM') and ('lmem_params' in config), (

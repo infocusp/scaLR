@@ -1,7 +1,7 @@
 # Config file for pipeline run for cell type classification.
 
 # DEVICE SETUP.
-device: 'cuda'
+device: 'cpu'
 
 # EXPERIMENT.
 experiment:
@@ -15,8 +15,8 @@ data:
     sample_chunksize: 20000
 
     train_val_test:
-        full_datapath: 'data/modified_adata.h5ad'
-        num_workers: 2
+        full_datapath: 'path/to/adata.h5ad'
+        num_workers: 4
 
         splitter_config:
             name: GroupSplitter

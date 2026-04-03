@@ -71,7 +71,7 @@ class SimpleMetaDataLoader(SimpleDataLoader):
             x = torch.cat(
                 (x,
                  torch.as_tensor(self.metadata_onehotencoder[col].transform(
-                     adata_batch.obs[col].values.reshape(-1, 1)).A,
+                     adata_batch.obs[col].values.reshape(-1, 1)).toarray(),
                                  dtype=torch.float32)),
                 dim=1)
         return x, y
