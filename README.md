@@ -48,6 +48,42 @@ pip install pyscaLR
 ```
 **Note:** If the user wants to run the entire pipeline via installing pip pyscalr, they should clone/download these files(`pipeline.py` and `config.yaml`) from the git repository.
 
+### CPU vs GPU installation
+
+The base install (`pip install pyscaLR` or `pip install -r requirements.txt`) pulls the CPU build of PyTorch from PyPI and works out of the box on any machine, including ones without a GPU or CUDA toolkit.
+
+If you have an NVIDIA GPU and want CUDA acceleration, install a CUDA-enabled `torch` build for your CUDA version **before or after** installing scaLR, following the [official PyTorch instructions](https://pytorch.org/get-started/locally/), e.g.:
+
+```
+pip install torch --index-url https://download.pytorch.org/whl/cu121
+```
+
+scaLR auto-selects the device (`device="auto"`) at train/inference time, using CUDA when available and otherwise falling back to CPU.
+
+## Quickstart: annotate cells in 3 lines
+
+```python
+import scanpy as sc
+import scalr
+
+adata = sc.read_h5ad("pbmc.h5ad")
+
+result = scalr.annotate(adata, model="models/pbmc_v1", device="auto")
+
+adata.obs["cell_type"] = result.labels
+adata.obs["cell_type_confidence"] = result.confidence
+adata.obs["cell_type_unknown"] = result.is_unknown
+```
+
+To train your own model:
+
+```python
+model = scalr.train(adata, labels_key="cell_type", group_key="donor_id")
+model.save("models/pbmc_v1")
+```
+
+`scalr.train` performs leakage-safe (donor-grouped) splitting, class-imbalance-aware training, confidence calibration, and reports macro-F1/balanced accuracy on held-out data. `scalr.annotate`/`model.predict` validate the input, align its genes to the model's expected feature set, and return a `PredictionResult` with calibrated `confidence`, `entropy`, `margin` and an `is_unknown` abstention flag — see [scalr/api.py](scalr/api.py) and [scalr/result.py](scalr/result.py). This sits alongside, and does not replace, the configuration-driven pipeline described below, which remains available for advanced/research workflows.
+
 ## Input data format
 - Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only).
 - The anndata object should contain cell samples as `obs` and genes as `var. '
