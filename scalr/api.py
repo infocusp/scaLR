@@ -11,6 +11,7 @@
     result = scalr.annotate(adata, model="models/pbmc_v1")
 """
 
+import os
 from typing import Optional, Union
 
 from anndata import AnnData
@@ -19,10 +20,12 @@ import torch
 from torch import nn
 
 import scalr
+from scalr import models
 from scalr.artifact import AnnotationModel
 from scalr.artifact import load_model as _load_model
 from scalr.calibration import OpenSetThresholds
 from scalr.calibration import TemperatureScaler
+from scalr.hierarchy import validate_taxonomy
 from scalr.leakage import check_group_leakage
 from scalr.leakage import detect_likely_grouping_column
 from scalr.leakage import group_safe_split
@@ -78,6 +81,7 @@ def train(
     split_ratio: tuple = (0.7, 0.1, 0.2),
     class_balanced_loss: bool = True,
     open_set: bool = True,
+    taxonomy: Optional[dict[str, str]] = None,
     seed: int = 42,
     verbose: bool = True,
 ) -> AnnotationModel:
@@ -107,6 +111,10 @@ def train(
             the training loss, improving rare-cell performance.
         open_set: When True, fit open-set (unknown-cell) abstention thresholds
             from the validation split's confidence/entropy/margin distribution.
+        taxonomy: Optional mapping from every fine-grained class name (i.e.
+            every value in `adata.obs[labels_key]`) to a broad class name,
+            enabling `model.predict(adata, level="broad")` for hierarchical
+            (coarse-to-fine) annotation.
         seed: Random seed for reproducibility.
         verbose: Log progress via scaLR's FlowLogger.
 
@@ -138,6 +146,9 @@ def train(
     class_names = sorted(adata.obs[labels_key].astype(str).unique().tolist())
     label2id = {c: i for i, c in enumerate(class_names)}
     label_ids = adata.obs[labels_key].astype(str).map(label2id).values
+
+    if taxonomy is not None:
+        validate_taxonomy(class_names, taxonomy)
 
     split = group_safe_split(adata.obs, labels_key, group_key, split_ratio,
                              seed)
@@ -271,6 +282,7 @@ def train(
         calibrator=calibrator,
         open_set_thresholds=open_set_thresholds,
         metrics=metrics,
+        taxonomy=taxonomy,
         metadata={
             'scalr_version': getattr(scalr, '__version__', 'unknown'),
             'model_version': '1.0.0',
@@ -284,9 +296,18 @@ def train(
     return annotation_model
 
 
-def load_model(dirpath: str) -> AnnotationModel:
-    """Load a self-contained scaLR model artifact from `dirpath`."""
-    return _load_model(dirpath)
+def load_model(dirpath_or_name: str) -> AnnotationModel:
+    """Load a self-contained scaLR model artifact.
+
+    Args:
+        dirpath_or_name: Either a path to a saved model artifact directory, or
+            the name of a model registered locally via
+            `scalr.models.register` (resolved via the local model registry,
+            see `scalr/models.py`).
+    """
+    if os.path.exists(os.path.join(dirpath_or_name, 'manifest.json')):
+        return _load_model(dirpath_or_name)
+    return _load_model(models.resolve_path(dirpath_or_name))
 
 
 def annotate(
@@ -297,12 +318,16 @@ def annotate(
     open_set: bool = True,
     top_k: int = 5,
     min_feature_overlap: float = 0.1,
+    level: str = 'fine',
+    cluster_refinement: Optional[str] = None,
+    flag_doublets: bool = False,
 ) -> PredictionResult:
     """Annotate cells in `adata` using a trained scaLR model.
 
     Args:
         adata: Query AnnData object.
-        model: Either a path to a saved model artifact directory, or an
+        model: Either a path to a saved model artifact directory, the name of
+            a model registered locally via `scalr.models.register`, or an
             already-loaded `AnnotationModel`.
         device: 'auto', 'cpu' or 'cuda'.
         preprocess: 'auto' detects and reports the query's normalization state
@@ -312,6 +337,13 @@ def annotate(
             flagged `is_unknown=True` instead of forced into a class.
         top_k: Number of top classes to report per cell.
         min_feature_overlap: Minimum required gene-overlap fraction.
+        level: 'fine' (default) or 'broad' for hierarchical annotation, when
+            the model was trained with a `taxonomy`.
+        cluster_refinement: When given, relabel cells to their cluster's
+            confidence-weighted majority class (an `adata.obs` column name,
+            or 'auto' to detect one). `None` (default) disables this.
+        flag_doublets: When True, screen for possible mixed/doublet cells and
+            set `result.is_possible_doublet`.
 
     Returns:
         A `PredictionResult` aligned to `adata.obs_names`.
@@ -336,4 +368,7 @@ def annotate(
                          device=device,
                          open_set=open_set,
                          top_k=top_k,
-                         min_feature_overlap=min_feature_overlap)
+                         min_feature_overlap=min_feature_overlap,
+                         level=level,
+                         cluster_refinement=cluster_refinement,
+                         flag_doublets=flag_doublets)

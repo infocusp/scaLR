@@ -29,8 +29,13 @@ from scalr.calibration import OpenSetThresholds
 from scalr.calibration import predictive_entropy
 from scalr.calibration import TemperatureScaler
 from scalr.calibration import top1_top2_margin
+from scalr.doublet import flag_possible_doublets
 from scalr.genes import align_genes
+from scalr.hierarchy import aggregate_to_broad
+from scalr.hierarchy import validate_taxonomy
+from scalr.model_card import render_model_card
 from scalr.nn.model import build_model
+from scalr.refinement import refine_with_clusters
 from scalr.result import PredictionResult
 from scalr.utils import read_data
 from scalr.utils import write_data
@@ -64,6 +69,7 @@ class AnnotationModel:
         open_set_thresholds: Optional[OpenSetThresholds] = None,
         metrics: Optional[dict] = None,
         metadata: Optional[dict] = None,
+        taxonomy: Optional[dict[str, str]] = None,
     ):
         self.model = model
         self.model_config = model_config
@@ -74,6 +80,9 @@ class AnnotationModel:
         self.open_set_thresholds = open_set_thresholds or OpenSetThresholds()
         self.metrics = metrics or {}
         self.metadata = metadata or {}
+        if taxonomy is not None:
+            validate_taxonomy(class_names, taxonomy)
+        self.taxonomy = taxonomy
 
     # ------------------------------------------------------------------ #
     # Inference
@@ -86,6 +95,9 @@ class AnnotationModel:
         open_set: bool = True,
         top_k: int = 5,
         min_feature_overlap: float = 0.1,
+        level: str = 'fine',
+        cluster_refinement: Optional[str] = None,
+        flag_doublets: bool = False,
     ) -> PredictionResult:
         """Run gene-aligned, calibrated inference on an AnnData object.
 
@@ -99,10 +111,27 @@ class AnnotationModel:
             top_k: Number of top classes to report per cell.
             min_feature_overlap: Minimum required gene-overlap fraction;
                 raises if coverage falls below this.
+            level: 'fine' (default, the model's native classes) or 'broad' to
+                aggregate predictions to broad classes using `self.taxonomy`
+                (raises if the model has no taxonomy).
+            cluster_refinement: When given, relabel cells to their cluster's
+                confidence-weighted majority class. Either an `adata.obs`
+                column name, or 'auto' to detect a 'leiden'/'louvain'/
+                'cluster'/'clusters' column. `None` (default) disables this;
+                the raw, unrefined labels are always kept in
+                `result.metadata['raw_labels']` when refinement is applied.
+            flag_doublets: When True, screen for cells whose top-two class
+                probabilities are both substantial and close together, and
+                set `result.is_possible_doublet` — a heuristic screening
+                signal, not a validated doublet call.
 
         Returns:
             A `PredictionResult` aligned to `adata.obs_names`.
         """
+        if level == 'broad' and not self.taxonomy:
+            raise ValueError(
+                'level="broad" requires a taxonomy; this model has none. '
+                'Pass `taxonomy` when training/constructing the model.')
         report = validate(adata,
                           model_features=self.features,
                           min_feature_overlap=min_feature_overlap)
@@ -153,7 +182,12 @@ class AnnotationModel:
             top_k_out.append([(self.class_names[c],
                                float(probabilities[row_idx, c])) for c in row])
 
-        return PredictionResult(
+        is_possible_doublet = None
+        if flag_doublets:
+            is_possible_doublet = flag_possible_doublets(
+                probabilities, entropy, margin)
+
+        result = PredictionResult(
             obs_names=list(adata.obs_names),
             labels=labels,
             probabilities=probabilities,
@@ -163,6 +197,7 @@ class AnnotationModel:
             margin=margin,
             is_unknown=is_unknown,
             top_k=top_k_out,
+            is_possible_doublet=is_possible_doublet,
             metadata={
                 'model_version': self.metadata.get('model_version'),
                 'scalr_version': self.metadata.get('scalr_version'),
@@ -173,6 +208,16 @@ class AnnotationModel:
                 'device': resolved_device,
             },
         )
+
+        if level == 'broad':
+            result = aggregate_to_broad(result, self.taxonomy)
+
+        if cluster_refinement is not None:
+            result = refine_with_clusters(result,
+                                          adata,
+                                          cluster_key=cluster_refinement)
+
+        return result
 
     # ------------------------------------------------------------------ #
     # Persistence
@@ -202,6 +247,10 @@ class AnnotationModel:
             }, path.join(dirpath, 'calibration.json'))
         write_data(self.metrics, path.join(dirpath, 'metrics.json'))
 
+        if self.taxonomy is not None:
+            write_data({'taxonomy': self.taxonomy},
+                       path.join(dirpath, 'taxonomy.json'))
+
         manifest = {
             'format_version': FORMAT_VERSION,
             'scalr_version': getattr(scalr, '__version__', 'unknown'),
@@ -211,8 +260,14 @@ class AnnotationModel:
             **{
                 k: v for k, v in self.metadata.items() if k not in ('scalr_version',)
             },
+            'temperature': self.calibrator.temperature,
+            'open_set_thresholds': self.open_set_thresholds.to_dict(),
+            'has_taxonomy': self.taxonomy is not None,
         }
         write_data(manifest, path.join(dirpath, 'manifest.json'))
+
+        with open(path.join(dirpath, 'README.md'), 'w') as fh:
+            fh.write(render_model_card(manifest, self.metrics))
 
     @classmethod
     def load(cls, dirpath: str) -> 'AnnotationModel':
@@ -254,9 +309,15 @@ class AnnotationModel:
         if path.exists(metrics_path):
             metrics = read_data(metrics_path)
 
+        taxonomy = None
+        taxonomy_path = path.join(dirpath, 'taxonomy.json')
+        if path.exists(taxonomy_path):
+            taxonomy = read_data(taxonomy_path)['taxonomy']
+
         return cls(
             model=model,
             model_config=model_config,
+            taxonomy=taxonomy,
             class_names=class_names,
             features=features,
             preprocessing=preprocessing,

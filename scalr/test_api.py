@@ -220,3 +220,135 @@ def test_load_model_rejects_newer_format_version(tmp_path):
 
     with pytest.raises(ValueError):
         scalr.load_model(str(artifact_dir))
+
+
+def test_train_with_taxonomy_supports_broad_level_prediction():
+    """A model trained with a taxonomy should support level='broad' prediction."""
+    adata = _toy_adata()
+    taxonomy = {'B_cell': 'B_lineage', 'T_cell': 'T_lineage', 'DC': 'Myeloid'}
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False,
+                        taxonomy=taxonomy)
+
+    fine_result = model.predict(adata, device='cpu')
+    broad_result = model.predict(adata, device='cpu', level='broad')
+
+    assert sorted(broad_result.class_names) == sorted(set(taxonomy.values()))
+    assert len(broad_result.labels) == len(fine_result.labels)
+
+
+def test_predict_broad_level_without_taxonomy_raises():
+    """Requesting level='broad' on a model with no taxonomy should raise clearly."""
+    adata = _toy_adata()
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+
+    with pytest.raises(ValueError):
+        model.predict(adata, device='cpu', level='broad')
+
+
+def test_predict_flag_doublets_populates_result_field():
+    """flag_doublets=True should populate is_possible_doublet as a boolean array."""
+    adata = _toy_adata()
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+
+    result = model.predict(adata, device='cpu', flag_doublets=True)
+    assert result.is_possible_doublet is not None
+    assert result.is_possible_doublet.dtype == bool
+    assert len(result.is_possible_doublet) == len(adata)
+
+
+def test_predict_without_flag_doublets_leaves_field_none():
+    """By default (flag_doublets=False), is_possible_doublet should remain None."""
+    adata = _toy_adata()
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+
+    result = model.predict(adata, device='cpu')
+    assert result.is_possible_doublet is None
+
+
+def test_predict_cluster_refinement_via_annotate():
+    """scalr.annotate should support cluster_refinement end-to-end."""
+    adata = _toy_adata()
+    adata.obs['leiden'] = (adata.obs['donor_id'].astype('category').cat.codes %
+                           3).astype(str)
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+
+    result = scalr.annotate(adata,
+                            model=model,
+                            device='cpu',
+                            cluster_refinement='auto')
+    assert 'raw_labels' in result.metadata
+    assert result.metadata['cluster_key'] == 'leiden'
+
+
+def test_model_save_writes_model_card(tmp_path):
+    """Saving a model should write a human-readable README.md model card."""
+    adata = _toy_adata()
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+    artifact_dir = tmp_path / 'pbmc_v1'
+    model.save(str(artifact_dir))
+
+    card = (artifact_dir / 'README.md').read_text()
+    assert 'Model Card' in card
+    assert 'donor_id' in card
+
+
+def test_load_model_from_local_registry(tmp_path, monkeypatch):
+    """scalr.load_model should resolve a bare name via the local model registry."""
+    monkeypatch.setenv('SCALR_MODEL_REGISTRY', str(tmp_path / 'registry'))
+    adata = _toy_adata()
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+    artifact_dir = tmp_path / 'pbmc_v1'
+    model.save(str(artifact_dir))
+    scalr.models.register(str(artifact_dir), 'my_registered_model')
+
+    loaded = scalr.load_model('my_registered_model')
+    assert loaded.class_names == model.class_names
