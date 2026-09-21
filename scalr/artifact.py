@@ -126,14 +126,13 @@ class AnnotationModel:
                 chunk = aligned[start:start + batch_size].X
                 if not isinstance(chunk, np.ndarray):
                     chunk = chunk.toarray()
-                x = torch.as_tensor(chunk, dtype=torch.float32).to(
-                    resolved_device)
+                x = torch.as_tensor(chunk,
+                                    dtype=torch.float32).to(resolved_device)
                 out = self.model(x)['cls_output']
                 all_logits.append(out.cpu())
 
         logits = torch.cat(all_logits, dim=0)
-        probabilities = self.calibrator.calibrate_probabilities(
-            logits.numpy())
+        probabilities = self.calibrator.calibrate_probabilities(logits.numpy())
 
         top1_ids = probabilities.argmax(axis=1)
         labels = [self.class_names[i] for i in top1_ids]
@@ -152,7 +151,7 @@ class AnnotationModel:
         top_k_idx = np.argsort(-probabilities, axis=1)[:, :k]
         for row_idx, row in enumerate(top_k_idx):
             top_k_out.append([(self.class_names[c],
-                              float(probabilities[row_idx, c])) for c in row])
+                               float(probabilities[row_idx, c])) for c in row])
 
         return PredictionResult(
             obs_names=list(adata.obs_names),
@@ -186,13 +185,16 @@ class AnnotationModel:
         write_data(self.model_config, path.join(dirpath, 'model_config.json'))
         write_data(
             {
-                'label2id': {c: i for i, c in enumerate(self.class_names)},
-                'id2label': {i: c for i, c in enumerate(self.class_names)},
+                'label2id': {
+                    c: i for i, c in enumerate(self.class_names)
+                },
+                'id2label': {
+                    i: c for i, c in enumerate(self.class_names)
+                },
             }, path.join(dirpath, 'label_mapping.json'))
         write_data({'features': self.features},
                    path.join(dirpath, 'features.json'))
-        write_data(self.preprocessing, path.join(dirpath,
-                                                  'preprocessing.json'))
+        write_data(self.preprocessing, path.join(dirpath, 'preprocessing.json'))
         write_data(
             {
                 'calibration': self.calibrator.to_dict(),
@@ -207,9 +209,7 @@ class AnnotationModel:
             'feature_count': len(self.features),
             'labels': self.class_names,
             **{
-                k: v
-                for k, v in self.metadata.items()
-                if k not in ('scalr_version',)
+                k: v for k, v in self.metadata.items() if k not in ('scalr_version',)
             },
         }
         write_data(manifest, path.join(dirpath, 'manifest.json'))

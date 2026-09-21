@@ -40,8 +40,8 @@ class ValidationReport:
 
     def raise_if_unusable(self) -> None:
         if not self.is_usable:
-            raise ValueError('scaLR validation failed:\n' + '\n'.join(
-                f'  - {e}' for e in self.errors))
+            raise ValueError('scaLR validation failed:\n' +
+                             '\n'.join(f'  - {e}' for e in self.errors))
 
     def __str__(self) -> str:
         lines = ['scaLR validation', '-' * 17]
@@ -49,8 +49,8 @@ class ValidationReport:
         lines += [f'  {e}' for e in self.errors] if self.errors else ['  None']
         lines.append('')
         lines.append('WARNING')
-        lines += [f'  {w}'
-                  for w in self.warnings] if self.warnings else ['  None']
+        lines += [f'  {w}' for w in self.warnings
+                 ] if self.warnings else ['  None']
         lines.append('')
         lines.append('INFO')
         lines += [f'  {i}' for i in self.info] if self.info else ['  None']
@@ -62,7 +62,8 @@ class ValidationReport:
         return '\n'.join(lines)
 
 
-def detect_normalization_state(adata: AnnData, layer: Optional[str] = None,
+def detect_normalization_state(adata: AnnData,
+                               layer: Optional[str] = None,
                                sample_size: int = 500) -> str:
     """Heuristically detect whether expression values look like raw counts,
     log1p-normalized values, or standardized/scaled values.
@@ -209,10 +210,9 @@ def validate(
         model_genes = set(model_features)
         matched = model_genes & query_genes
         coverage = len(matched) / len(model_genes) if model_genes else 0.0
-        report.add_info(
-            f'Input: {n_obs:,} cells x {n_vars:,} genes; '
-            f'model expects {len(model_genes):,} genes; '
-            f'gene coverage: {coverage * 100:.1f}%.')
+        report.add_info(f'Input: {n_obs:,} cells x {n_vars:,} genes; '
+                        f'model expects {len(model_genes):,} genes; '
+                        f'gene coverage: {coverage * 100:.1f}%.')
         if len(model_genes) - len(matched) > 0:
             report.add_warning(
                 f'{len(model_genes) - len(matched)}/{len(model_genes)} model '

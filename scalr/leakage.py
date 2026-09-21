@@ -71,10 +71,10 @@ def check_group_leakage(splits: dict[str, pd.DataFrame],
 
 
 def detect_likely_grouping_column(
-        obs: pd.DataFrame,
-        candidates: tuple[str, ...] = ('donor_id', 'donor', 'patient_id',
-                                       'patient', 'sample_id', 'sample',
-                                       'subject_id', 'batch')) -> list[str]:
+    obs: pd.DataFrame,
+    candidates: tuple[str, ...] = ('donor_id', 'donor', 'patient_id', 'patient',
+                                   'sample_id', 'sample', 'subject_id', 'batch')
+) -> list[str]:
     """Detect columns in `obs` that look like a donor/patient/sample identifier.
 
     This is a name-based heuristic used to warn users who did not specify a

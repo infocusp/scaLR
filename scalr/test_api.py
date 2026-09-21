@@ -122,7 +122,9 @@ def test_annotate_with_gene_subset_query():
     subset_genes = list(adata.var_names[:15])[::-1]
     query = adata[:, subset_genes].copy()
 
-    result = scalr.annotate(query, model=model, device='cpu',
+    result = scalr.annotate(query,
+                            model=model,
+                            device='cpu',
                             min_feature_overlap=0.1)
     assert len(result.labels) == len(query)
     assert result.metadata['gene_coverage'] < 1.0

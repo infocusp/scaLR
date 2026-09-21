@@ -50,8 +50,11 @@ def _dense_batch(adata: AnnData, indices: np.ndarray, start: int, end: int):
     return np.asarray(chunk, dtype=np.float32)
 
 
-def _iterate_batches(adata: AnnData, indices: np.ndarray, label_ids: np.ndarray,
-                     batch_size: int, shuffle: bool = False):
+def _iterate_batches(adata: AnnData,
+                     indices: np.ndarray,
+                     label_ids: np.ndarray,
+                     batch_size: int,
+                     shuffle: bool = False):
     order = indices.copy()
     if shuffle:
         np.random.shuffle(order)
@@ -131,8 +134,7 @@ def train(
     if imbalance.small_classes and verbose:
         logger.warning(str(imbalance))
 
-    features = list(features) if features is not None else list(
-        adata.var_names)
+    features = list(features) if features is not None else list(adata.var_names)
     class_names = sorted(adata.obs[labels_key].astype(str).unique().tolist())
     label2id = {c: i for i, c in enumerate(class_names)}
     label_ids = adata.obs[labels_key].astype(str).map(label2id).values
@@ -141,8 +143,9 @@ def train(
                              seed)
     if group_key is not None:
         leakage = check_group_leakage(
-            {name: adata.obs.iloc[idx] for name, idx in split.items()},
-            group_key)
+            {
+                name: adata.obs.iloc[idx] for name, idx in split.items()
+            }, group_key)
         if leakage.has_leakage:
             logger.warning(str(leakage))
 
@@ -151,7 +154,7 @@ def train(
         'name': 'SequentialModel',
         'params': {
             'layers': [len(features), *hidden_layers,
-                      len(class_names)],
+                       len(class_names)],
         },
     }
     model, model_config = build_model(model_config)
@@ -161,8 +164,8 @@ def train(
     if class_balanced_loss:
         class_weights = compute_class_weights(label_ids[split['train']],
                                               len(class_names))
-        weights = torch.as_tensor(class_weights, dtype=torch.float32).to(
-            resolved_device)
+        weights = torch.as_tensor(class_weights,
+                                  dtype=torch.float32).to(resolved_device)
     loss_fn = nn.CrossEntropyLoss(weight=weights)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
@@ -171,10 +174,10 @@ def train(
         epoch_loss = 0.0
         n_batches = 0
         for x, y in _iterate_batches(adata,
-                                    split['train'],
-                                    label_ids,
-                                    batch_size,
-                                    shuffle=True):
+                                     split['train'],
+                                     label_ids,
+                                     batch_size,
+                                     shuffle=True):
             x, y = x.to(resolved_device), y.to(resolved_device)
             optimizer.zero_grad()
             out = model(x)['cls_output']
@@ -194,7 +197,7 @@ def train(
     val_logits, val_labels = [], []
     with torch.no_grad():
         for x, y in _iterate_batches(adata, split['val'], label_ids,
-                                    batch_size):
+                                     batch_size):
             x = x.to(resolved_device)
             out = model(x)['cls_output']
             val_logits.append(out.cpu())
@@ -224,7 +227,7 @@ def train(
     test_logits, test_labels = [], []
     with torch.no_grad():
         for x, y in _iterate_batches(adata, split['test'], label_ids,
-                                    batch_size):
+                                     batch_size):
             x = x.to(resolved_device)
             out = model(x)['cls_output']
             test_logits.append(out.cpu())
@@ -236,15 +239,19 @@ def train(
             torch.cat(test_logits, dim=0).numpy())
         test_preds = test_probs.argmax(axis=1)
         test_labels_np = torch.cat(test_labels, dim=0).numpy()
-        class_metrics = compute_classification_metrics(
-            test_labels_np, test_preds, class_names)
+        class_metrics = compute_classification_metrics(test_labels_np,
+                                                       test_preds, class_names)
         metrics = {
-            'macro_f1': class_metrics.macro_f1,
-            'weighted_f1': class_metrics.weighted_f1,
-            'balanced_accuracy': class_metrics.balanced_accuracy,
-            'per_class': class_metrics.per_class.reset_index().to_dict(
-                orient='records'),
-            'n_test_cells': int(len(test_labels_np)),
+            'macro_f1':
+                class_metrics.macro_f1,
+            'weighted_f1':
+                class_metrics.weighted_f1,
+            'balanced_accuracy':
+                class_metrics.balanced_accuracy,
+            'per_class':
+                class_metrics.per_class.reset_index().to_dict(orient='records'),
+            'n_test_cells':
+                int(len(test_labels_np)),
         }
         if verbose:
             logger.info(str(class_metrics))

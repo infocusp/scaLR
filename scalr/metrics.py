@@ -62,14 +62,13 @@ def compute_classification_metrics(
     precision, recall, f1, support = precision_recall_fscore_support(
         labels, predictions, labels=all_ids, zero_division=0)
 
-    per_class = pd.DataFrame(
-        {
-            'class': class_names,
-            'precision': precision,
-            'recall': recall,
-            'f1': f1,
-            'support': support,
-        }).set_index('class')
+    per_class = pd.DataFrame({
+        'class': class_names,
+        'precision': precision,
+        'recall': recall,
+        'f1': f1,
+        'support': support,
+    }).set_index('class')
 
     macro_f1 = f1_score(labels,
                         predictions,
@@ -103,8 +102,10 @@ class ClassImbalanceReport:
     small_classes: list[str] = field(default_factory=list)
 
     def __str__(self) -> str:
-        lines = ['Class imbalance detected' if self.small_classes else
-                 'Class distribution']
+        lines = [
+            'Class imbalance detected'
+            if self.small_classes else 'Class distribution'
+        ]
         lines.append('')
         for cls, count in self.class_counts.items():
             lines.append(f'{cls}: {count:,}')
@@ -116,10 +117,10 @@ class ClassImbalanceReport:
         return '\n'.join(lines)
 
 
-def check_class_imbalance(labels: pd.Series,
-                          min_class_size: int = 50,
-                          imbalance_ratio_threshold: float = 20.0
-                         ) -> ClassImbalanceReport:
+def check_class_imbalance(
+        labels: pd.Series,
+        min_class_size: int = 50,
+        imbalance_ratio_threshold: float = 20.0) -> ClassImbalanceReport:
     """Report class sizes and flag rare classes / severe imbalance.
 
     Args:

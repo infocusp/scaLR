@@ -50,7 +50,8 @@ def test_align_genes_no_overlap_at_all():
     adata = generate_dummy_anndata(n_samples=4, n_features=3)
     reference_features = ['unrelated_1', 'unrelated_2']
 
-    aligned, report = align_genes(adata, reference_features,
+    aligned, report = align_genes(adata,
+                                  reference_features,
                                   min_feature_overlap=0.1)
 
     assert report.matched_features == 0

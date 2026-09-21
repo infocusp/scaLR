@@ -86,7 +86,8 @@ def test_open_set_thresholds_flags_low_confidence():
 
 def test_open_set_thresholds_roundtrip():
     """An OpenSetThresholds' dict form should reconstruct an equivalent object."""
-    thresholds = OpenSetThresholds(min_confidence=0.6, max_entropy=0.5,
+    thresholds = OpenSetThresholds(min_confidence=0.6,
+                                   max_entropy=0.5,
                                    min_margin=0.1)
     restored = OpenSetThresholds.from_dict(thresholds.to_dict())
     assert restored == thresholds

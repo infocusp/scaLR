@@ -23,8 +23,11 @@ class TemperatureScaler:
     def __init__(self, temperature: float = 1.0):
         self.temperature = float(temperature)
 
-    def fit(self, logits: Tensor, labels: Tensor, lr: float = 0.01,
-           max_iter: int = 100) -> 'TemperatureScaler':
+    def fit(self,
+            logits: Tensor,
+            labels: Tensor,
+            lr: float = 0.01,
+            max_iter: int = 100) -> 'TemperatureScaler':
         """Fit the scalar temperature on held-out (logits, labels) via NLL minimization."""
         logits = logits.detach().float()
         labels = labels.detach().long()
@@ -53,7 +56,10 @@ class TemperatureScaler:
         return probs.numpy()
 
     def to_dict(self) -> dict:
-        return {'method': 'temperature_scaling', 'temperature': self.temperature}
+        return {
+            'method': 'temperature_scaling',
+            'temperature': self.temperature
+        }
 
     @classmethod
     def from_dict(cls, d: dict) -> 'TemperatureScaler':

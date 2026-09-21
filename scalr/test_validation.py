@@ -30,8 +30,9 @@ def test_validate_duplicate_obs_names():
     adata.obs_names = ['cell_0'] * len(adata)
     report = validate(adata)
     assert not report.is_usable
-    assert any('duplicate cell IDs' in e.lower() or 'duplicate cell' in e.lower()
-              for e in report.errors)
+    assert any(
+        'duplicate cell IDs' in e.lower() or 'duplicate cell' in e.lower()
+        for e in report.errors)
 
 
 def test_validate_nan_values():
@@ -46,9 +47,10 @@ def test_validate_nan_values():
 def test_validate_gene_overlap_report():
     """Gene coverage against model_features should be reported."""
     adata = generate_dummy_anndata(n_samples=10, n_features=10)
-    model_features = list(adata.var_names[:5]) + ['missing_gene_1',
-                                                   'missing_gene_2']
-    report = validate(adata, model_features=model_features,
+    model_features = list(
+        adata.var_names[:5]) + ['missing_gene_1', 'missing_gene_2']
+    report = validate(adata,
+                      model_features=model_features,
                       min_feature_overlap=0.1)
     assert report.is_usable
     assert any('missing' in w.lower() for w in report.warnings)
@@ -58,7 +60,8 @@ def test_validate_low_gene_overlap_is_error():
     """Gene coverage below `min_feature_overlap` should make data unusable."""
     adata = generate_dummy_anndata(n_samples=10, n_features=10)
     model_features = ['missing_gene_1', 'missing_gene_2', 'missing_gene_3']
-    report = validate(adata, model_features=model_features,
+    report = validate(adata,
+                      model_features=model_features,
                       min_feature_overlap=0.5)
     assert not report.is_usable
 
