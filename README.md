@@ -27,25 +27,37 @@
 ## Pre-requisites and installation scaLR
 
 
-- ScaLR can be installed using git or pip. It is tested in Python 3.10.20 and it is recommended to use that environment.
+- ScaLR supports Python 3.10-3.14. Dependencies use compatible version ranges instead of requiring one exact Python environment. New Python releases still need to be added to CI before they can be considered supported.
 
 ```
-conda create -n scaLR_env python=3.10.20
+conda create -n scaLR_env python=3.12
 
 conda activate scaLR_env
+```
+
+You can use `venv` instead of Conda:
+
+```
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 ```
 
 - Using git
 
 ```
 git clone https://github.com/infocusp/scaLR.git
+cd scaLR
 
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install -e .
 ```
 - Installation using pip
 ```
-pip install pyscaLR
+python -m pip install pyscaLR
 ```
+If pip reports that no compatible dependency version is available, check `python --version` and upgrade pip. The package supports Python 3.10-3.14, but individual dependency releases may lag behind a newly released Python version.
 **Note:** If the user wants to run the entire pipeline via installing pip pyscalr, they should clone/download these files(`pipeline.py` and `config.yaml`) from the git repository.
 
 ### CPU vs GPU installation
@@ -239,6 +251,28 @@ scalr models info human_pbmc
 ```
 
 Registering a model into the registry (`scalr.models.register(...)`) is currently Python-API-only, not yet a CLI subcommand.
+
+### 7. Run downstream analyses
+
+Configure the desired analyses under `analysis` in a YAML file. Supported analyses include `Heatmap`, `RocAucCurve`, `GeneRecallCurve`, `DgePseudoBulk`, and `DgeLMEM`.
+
+Run them through the CLI:
+
+```bash
+scalr analyze \
+    --config config/config.yaml \
+    --log
+```
+
+Optional flags:
+
+```bash
+--level INFO
+--logpath scalr_experiments/analysis.log
+--memoryprofiler
+```
+
+The command uses the existing configuration-driven pipeline and writes results under the `experiment.dirpath` configured in the YAML file.
 
 ## Input data format
 - Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only).

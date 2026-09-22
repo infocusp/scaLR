@@ -18,7 +18,7 @@ Install (editable, for development):
 pip install -r requirements.txt
 pip install -e .
 ```
-CPU is the default `torch` install; for CUDA, install a CUDA-specific `torch` build per the [PyTorch instructions](https://pytorch.org/get-started/locally/) before or after. `requirements.txt` pins `pandas<3` and `numpy<2` deliberately — unpinned, a fresh resolve can pull `pandas` 3.x / `numpy` 2.x, which break h5ad writing (`anndata`) and `shap` respectively; don't remove those pins without re-verifying the full test suite from a clean install.
+CPU is the default `torch` install; for CUDA, install a CUDA-specific `torch` build per the [PyTorch instructions](https://pytorch.org/get-started/locally/) before or after. `requirements.txt` uses bounded version ranges so pip can select wheels for the active Python version while avoiding major-version compatibility breaks.
 
 `pip install -e .` also registers the `scalr` console script (`scalr validate|train|annotate|evaluate|models ...`, see `scalr/cli.py`), a thin wrapper around the simple API below.
 

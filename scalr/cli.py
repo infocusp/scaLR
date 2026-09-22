@@ -14,6 +14,8 @@ the configuration-driven, chunked/streaming pipeline remains available via
 
 import argparse
 import json
+from pathlib import Path
+import subprocess
 import sys
 
 import scalr
@@ -34,11 +36,28 @@ def _cmd_validate(args) -> int:
 
 def _cmd_train(args) -> int:
     adata = read_data(args.input, backed=None)
+    features = None
+    if args.features_file:
+        with open(args.features_file, encoding='utf-8') as handle:
+            features = json.load(handle)
+    taxonomy = None
+    if args.taxonomy_file:
+        with open(args.taxonomy_file, encoding='utf-8') as handle:
+            taxonomy = json.load(handle)
     model = scalr.train(adata,
                         labels_key=args.labels_key,
                         group_key=args.group_key,
+                        features=features,
+                        hidden_layers=tuple(args.hidden_layers),
                         epochs=args.epochs,
+                        batch_size=args.batch_size,
+                        lr=args.lr,
                         device=args.device,
+                        split_ratio=tuple(args.split_ratio),
+                        class_balanced_loss=not args.no_class_balanced_loss,
+                        open_set=not args.no_open_set,
+                        taxonomy=taxonomy,
+                        seed=args.seed,
                         verbose=not args.quiet)
     model.save(args.output)
     print(f'Model saved to {args.output}')
@@ -111,6 +130,21 @@ def _cmd_models_info(args) -> int:
     return 0
 
 
+def _cmd_analyze(args) -> int:
+    """Run configured downstream analyses through the pipeline runner."""
+    pipeline_path = Path(__file__).resolve().parent.parent / 'pipeline.py'
+    command = [sys.executable, str(pipeline_path), '--config', args.config]
+    if args.log:
+        command.append('--log')
+    if args.level:
+        command.extend(['--level', args.level])
+    if args.logpath:
+        command.extend(['--logpath', args.logpath])
+    if args.memoryprofiler:
+        command.append('--memoryprofiler')
+    return subprocess.run(command, check=False).returncode
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the `scalr` CLI argument parser."""
     parser = argparse.ArgumentParser(
@@ -131,11 +165,27 @@ def build_parser() -> argparse.ArgumentParser:
                    help='Path to a training .h5ad file.')
     p.add_argument('--labels-key', required=True)
     p.add_argument('--group-key', default=None)
+    p.add_argument('--features-file', default=None,
+                   help='JSON file containing the ordered input gene list.')
+    p.add_argument('--hidden-layers', nargs='+', type=int, default=[256, 64],
+                   help='Hidden layer sizes. Default: 256 64.')
     p.add_argument('--output',
                    required=True,
                    help='Directory to save the model artifact to.')
     p.add_argument('--epochs', type=int, default=15)
+    p.add_argument('--batch-size', type=int, default=256)
+    p.add_argument('--lr', type=float, default=1e-3,
+                   help='Adam learning rate. Default: 0.001.')
     p.add_argument('--device', default='auto')
+    p.add_argument('--split-ratio', nargs=3, type=float, default=[0.7, 0.1, 0.2],
+                   metavar=('TRAIN', 'VAL', 'TEST'))
+    p.add_argument('--no-class-balanced-loss', action='store_true',
+                   help='Disable inverse-frequency class weighting.')
+    p.add_argument('--no-open-set', action='store_true',
+                   help='Disable unknown-cell abstention thresholds.')
+    p.add_argument('--taxonomy-file', default=None,
+                   help='JSON file mapping fine labels to broad labels.')
+    p.add_argument('--seed', type=int, default=42)
     p.add_argument('--quiet', action='store_true')
     p.set_defaults(func=_cmd_train)
 
@@ -179,6 +229,17 @@ def build_parser() -> argparse.ArgumentParser:
                                    help="Show a registered model's manifest.")
     p_info.add_argument('name')
     p_info.set_defaults(func=_cmd_models_info)
+
+    p = subparsers.add_parser(
+        'analyze',
+        help='Run downstream analyses configured in a YAML pipeline config.')
+    p.add_argument('--config', required=True, help='Path to config.yaml.')
+    p.add_argument('--log', action='store_true', help='Save experiment logs.')
+    p.add_argument('--level', default=None, help='Logging level, e.g. INFO.')
+    p.add_argument('--logpath', default=None, help='Path to the log file.')
+    p.add_argument('--memoryprofiler', action='store_true',
+                   help='Record peak memory usage.')
+    p.set_defaults(func=_cmd_analyze)
 
     return parser
 
