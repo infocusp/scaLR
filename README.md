@@ -27,26 +27,282 @@
 ## Pre-requisites and installation scaLR
 
 
-- ScaLR can be installed using git or pip. It is tested in Python 3.10.20 and it is recommended to use that environment.
+- ScaLR supports Python 3.10-3.14. Dependencies use compatible version ranges instead of requiring one exact Python environment. New Python releases still need to be added to CI before they can be considered supported.
 
 ```
-conda create -n scaLR_env python=3.10.20
+conda create -n scaLR_env python=3.12
 
 conda activate scaLR_env
+```
+
+You can use `venv` instead of Conda:
+
+```
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 ```
 
 - Using git
 
 ```
 git clone https://github.com/infocusp/scaLR.git
+cd scaLR
 
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install -e .
 ```
 - Installation using pip
 ```
-pip install pyscaLR
+python -m pip install pyscaLR
 ```
+If pip reports that no compatible dependency version is available, check `python --version` and upgrade pip. The package supports Python 3.10-3.14, but individual dependency releases may lag behind a newly released Python version.
 **Note:** If the user wants to run the entire pipeline via installing pip pyscalr, they should clone/download these files(`pipeline.py` and `config.yaml`) from the git repository.
+
+### CPU vs GPU installation
+
+The base install (`pip install pyscaLR` or `pip install -r requirements.txt`) pulls the CPU build of PyTorch from PyPI and works out of the box on any machine, including ones without a GPU or CUDA toolkit.
+
+If you have an NVIDIA GPU and want CUDA acceleration, install a CUDA-enabled `torch` build for your CUDA version **before or after** installing scaLR, following the [official PyTorch instructions](https://pytorch.org/get-started/locally/), e.g.:
+
+```
+pip install torch --index-url https://download.pytorch.org/whl/cu121
+```
+
+scaLR auto-selects the device (`device="auto"`) at train/inference time, using CUDA when available and otherwise falling back to CPU.
+
+## Quickstart: annotate cells in 3 lines
+
+```python
+import scanpy as sc
+import scalr
+
+adata = sc.read_h5ad("pbmc.h5ad")
+
+result = scalr.annotate(adata, model="models/pbmc_v1", device="auto")
+
+adata.obs["cell_type"] = result.labels
+adata.obs["cell_type_confidence"] = result.confidence
+adata.obs["cell_type_unknown"] = result.is_unknown
+```
+
+To train your own model:
+
+```python
+model = scalr.train(adata, labels_key="cell_type", group_key="donor_id")
+model.save("models/pbmc_v1")
+```
+
+`scalr.train` performs leakage-safe (donor-grouped) splitting, class-imbalance-aware training, confidence calibration, and reports macro-F1/balanced accuracy on held-out data. `scalr.annotate`/`model.predict` validate the input, align its genes to the model's expected feature set, and return a `PredictionResult` with calibrated `confidence`, `entropy`, `margin` and an `is_unknown` abstention flag — see [scalr/api.py](scalr/api.py) and [scalr/result.py](scalr/result.py). This sits alongside, and does not replace, the configuration-driven pipeline described below, which remains available for advanced/research workflows.
+
+### Validate your data before training or annotating
+
+```python
+report = scalr.validate(adata, labels_key="cell_type", group_key="donor_id")
+print(report)
+```
+
+`scalr.validate` (see [scalr/validation.py](scalr/validation.py)) checks AnnData structure (empty/duplicate cells or genes), numerical issues (NaN/Inf, zero-count or unusually large-library-size cells), label/group columns, and reports the detected normalization state (raw counts, log1p-normalized, or scaled) — surfacing problems as an explicit report instead of a downstream stack trace.
+
+### Gene alignment
+
+Query data does not need to share the model's gene set or gene order. `model.predict`/`scalr.annotate` call [scalr/genes.py](scalr/genes.py) internally to reorder/subset the query to the model's expected feature list, zero-filling any missing genes and reporting coverage (`result.metadata["gene_coverage"]`, `result.metadata["missing_features"]`). You can also run this alignment directly:
+
+```python
+aligned_adata, report = scalr.align_genes(adata, reference_features, min_feature_overlap=0.1)
+print(report)
+```
+
+### Streaming / bounded-memory prediction
+
+```python
+result = model.predict("large_query.h5ad", streaming=True, chunk_size=20000)
+# or, via scalr.annotate:
+result = scalr.annotate(adata, model="models/pbmc_v1", streaming=True, chunk_size=20000)
+```
+
+Passing a file path to `model.predict`/`scalr.annotate` streams automatically; `streaming=True` on an in-memory `AnnData` also works. Gene alignment and scoring happen `chunk_size` cells at a time instead of materializing one aligned matrix for the whole dataset, bounding peak alignment/scoring memory regardless of total cell count. For out-of-core reads too (never loading the full raw dataset into memory), point it at a directory of chunked `.h5ad` files rather than a single large `.h5ad` file — see [scalr/artifact.py](scalr/artifact.py).
+
+### Self-contained model artifacts
+
+`model.save("models/pbmc_v1")` writes a versioned, portable directory containing everything needed to reload and run the model — no external config required: `manifest.json`, `model.pt`, `model_config.json`, `label_mapping.json`, `features.json`, `preprocessing.json`, `calibration.json`, and `metrics.json`. `scalr.load_model("models/pbmc_v1")` reads it back into an `AnnotationModel` — see [scalr/artifact.py](scalr/artifact.py).
+
+### Leakage-safe evaluation & class imbalance
+
+When `group_key` (e.g. `donor_id`) is passed to `scalr.train`, splitting keeps every group confined to a single split and checks for leakage across splits, warning if any group value still appears in more than one ([scalr/leakage.py](scalr/leakage.py)). Training also reports class-size imbalance and uses inverse-frequency class weighting by default, and evaluates on the held-out test split with macro-F1, weighted-F1, balanced accuracy and a per-class report rather than relying on overall accuracy alone ([scalr/metrics.py](scalr/metrics.py)).
+
+### Hierarchical (coarse-to-fine) annotation
+
+Pass a `taxonomy` mapping every fine-grained label to a broad label at training time, then request either level at inference time — without retraining:
+
+```python
+taxonomy = {"CD4_T": "T_cell", "CD8_T": "T_cell", "B_cell": "B_cell", "DC": "Myeloid"}
+model = scalr.train(adata, labels_key="cell_type", group_key="donor_id", taxonomy=taxonomy)
+
+fine_result = model.predict(adata, level="fine")     # default
+broad_result = model.predict(adata, level="broad")   # aggregated via the taxonomy
+```
+
+See [scalr/hierarchy.py](scalr/hierarchy.py); broad-class probabilities are the sum of the underlying fine-class probabilities.
+
+### Cluster-aware refinement & doublet/mixed-cell screening
+
+```python
+result = scalr.annotate(
+    adata,
+    model="models/pbmc_v1",
+    cluster_refinement="auto",  # or an adata.obs column name
+    flag_doublets=True,
+)
+```
+
+`cluster_refinement` relabels cells to their cluster's confidence-weighted majority class ([scalr/refinement.py](scalr/refinement.py)) — the raw, unrefined labels are always kept in `result.metadata["raw_labels"]`, never silently discarded. `flag_doublets` sets `result.is_possible_doublet` for cells whose top-two class probabilities are both substantial and close together ([scalr/doublet.py](scalr/doublet.py)) — a heuristic screening signal, not a validated doublet call.
+
+### Explainability
+
+```python
+explanations = model.explain(adata, indices=[10, 20, 30], top_k=20)
+print(explanations[0])
+
+supporting, contradictory = model.explain_class("T_cell", top_k=50)
+```
+
+`model.explain` reports, per requested cell, the genes whose expression most supported or contradicted the model's prediction, via a Grad x Input gene-attribution score. `model.explain_class` does the same for a class in general, independent of any specific cell. This is a first-order sensitivity explanation, not a validated biological one — treat it as a screening/interpretation aid, like the doublet/refinement heuristics above, not ground truth ([scalr/explain.py](scalr/explain.py)).
+
+### Feature-selection stability
+
+```python
+report = scalr.compute_feature_stability(adata, labels_key="cell_type", top_k=50, n_runs=20)
+print(report)
+print(report.top_stable_features(min_runs=15))
+```
+
+Repeats feature selection over random subsamples and reports each gene's selection frequency plus the mean pairwise Jaccard similarity of the selected sets, to help distinguish a stable biomarker signal from a split-specific artifact ([scalr/feature_stability.py](scalr/feature_stability.py)).
+
+### Model cards, provenance & a local model registry
+
+Every `model.save(...)` call also writes a `README.md` model card (training data, held-out metrics, calibration, known limitations, license) into the artifact directory ([scalr/model_card.py](scalr/model_card.py)). Models can be registered and resolved by name via a local registry ([scalr/models.py](scalr/models.py)), the starting point for a future hosted model hub:
+
+```python
+scalr.models.register("models/pbmc_v1", "human_pbmc")
+scalr.models.list()          # -> ['human_pbmc']
+scalr.models.info("human_pbmc")
+
+model = scalr.load_model("human_pbmc")   # resolves the registered name
+```
+
+### Benchmark suite
+
+```python
+df = scalr.run_benchmark(
+    {"small": small_adata, "medium": medium_adata},
+    labels_key="cell_type",
+    group_key="donor_id",
+)
+```
+
+Reports scientific quality (macro-F1, balanced accuracy) alongside computational cost (wall time, cells/sec, peak RSS) per dataset in one table, so quality and resource cost are always reported together rather than a one-off number ([scalr/benchmark.py](scalr/benchmark.py)).
+
+## Command-line interface
+
+The simple API is also available from the shell as the `scalr` command. This is separate from, and does not replace, `python pipeline.py --config ...` (see "How to run" below for the configuration-driven pipeline); `scalr` wraps the in-memory simple API — see [scalr/cli.py](scalr/cli.py).
+
+### 1. Install (registers the `scalr` command)
+
+```bash
+pip install -r requirements.txt
+pip install -e .          # or: pip install pyscaLR
+```
+
+`pip install -e .` (or the packaged `pyscaLR`) registers the `scalr` console script via `[project.scripts]` in `pyproject.toml`. Verify it's on your `PATH`:
+
+```bash
+scalr --help
+```
+
+### 2. Validate your data first
+
+```bash
+scalr validate --input data.h5ad --labels-key cell_type --group-key donor_id
+```
+
+Prints the validation report (structure/numerical/label checks) and exits non-zero if the data is unusable — useful as a pre-flight check or CI gate.
+
+### 3. Train a model
+
+```bash
+scalr train \
+  --input train.h5ad \
+  --labels-key cell_type \
+  --group-key donor_id \
+  --output models/pbmc_v1 \
+  --epochs 15 \
+  --device auto
+```
+
+Writes a self-contained model artifact directory to `models/pbmc_v1` (weights, manifest, calibration, a `README.md` model card, etc.) and prints macro-F1/balanced accuracy on the held-out split.
+
+### 4. Annotate new data with it
+
+```bash
+scalr annotate \
+  --input query.h5ad \
+  --model models/pbmc_v1 \
+  --output annotated.h5ad \
+  --device auto \
+  --flag-doublets
+```
+
+Writes predictions (`scalr_pred`, `scalr_confidence`, `scalr_unknown`, etc.) into `annotated.h5ad`'s `.obs`/`.obsm`/`.uns`. `--model` also accepts a name registered in the local model registry, not just a path. Add `--streaming --chunk-size 20000` for large inputs to gene-align and score in bounded-memory chunks instead of all at once.
+
+### 5. Explain predictions
+
+```bash
+scalr explain --input query.h5ad --model models/pbmc_v1 --indices 10 20 30 --top-k 20
+scalr explain --model models/pbmc_v1 --class-name T_cell --top-k 50
+```
+
+Prints, per requested cell, the genes whose expression most supported or contradicted the prediction; `--class-name` explains a class in general instead of specific cells.
+
+### 6. Evaluate against labeled test data
+
+```bash
+scalr evaluate --input test.h5ad --model models/pbmc_v1 --labels-key cell_type
+```
+
+Prints macro-F1/weighted-F1/balanced-accuracy plus a per-class precision/recall/F1 table.
+
+### 7. Manage the local model registry
+
+```bash
+scalr models list
+scalr models info human_pbmc
+```
+
+Registering a model into the registry (`scalr.models.register(...)`) is currently Python-API-only, not yet a CLI subcommand.
+
+### 8. Run downstream analyses
+
+Configure the desired analyses under `analysis` in a YAML file. Supported analyses include `Heatmap`, `RocAucCurve`, `GeneRecallCurve`, `DgePseudoBulk`, and `DgeLMEM`.
+
+Run them through the CLI:
+
+```bash
+scalr analyze \
+    --config config/config.yaml \
+    --log
+```
+
+Optional flags:
+
+```bash
+--level INFO
+--logpath scalr_experiments/analysis.log
+--memoryprofiler
+```
+
+The command uses the existing configuration-driven pipeline and writes results under the `experiment.dirpath` configured in the YAML file.
 
 ## Input data format
 - Currently the pipeline expects all datasets in [anndata](https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html) formats (`.h5ad` files only).
