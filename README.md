@@ -114,6 +114,16 @@ aligned_adata, report = scalr.align_genes(adata, reference_features, min_feature
 print(report)
 ```
 
+### Streaming / bounded-memory prediction
+
+```python
+result = model.predict("large_query.h5ad", streaming=True, chunk_size=20000)
+# or, via scalr.annotate:
+result = scalr.annotate(adata, model="models/pbmc_v1", streaming=True, chunk_size=20000)
+```
+
+Passing a file path to `model.predict`/`scalr.annotate` streams automatically; `streaming=True` on an in-memory `AnnData` also works. Gene alignment and scoring happen `chunk_size` cells at a time instead of materializing one aligned matrix for the whole dataset, bounding peak alignment/scoring memory regardless of total cell count. For out-of-core reads too (never loading the full raw dataset into memory), point it at a directory of chunked `.h5ad` files rather than a single large `.h5ad` file — see [scalr/artifact.py](scalr/artifact.py).
+
 ### Self-contained model artifacts
 
 `model.save("models/pbmc_v1")` writes a versioned, portable directory containing everything needed to reload and run the model — no external config required: `manifest.json`, `model.pt`, `model_config.json`, `label_mapping.json`, `features.json`, `preprocessing.json`, `calibration.json`, and `metrics.json`. `scalr.load_model("models/pbmc_v1")` reads it back into an `AnnotationModel` — see [scalr/artifact.py](scalr/artifact.py).
@@ -148,6 +158,17 @@ result = scalr.annotate(
 ```
 
 `cluster_refinement` relabels cells to their cluster's confidence-weighted majority class ([scalr/refinement.py](scalr/refinement.py)) — the raw, unrefined labels are always kept in `result.metadata["raw_labels"]`, never silently discarded. `flag_doublets` sets `result.is_possible_doublet` for cells whose top-two class probabilities are both substantial and close together ([scalr/doublet.py](scalr/doublet.py)) — a heuristic screening signal, not a validated doublet call.
+
+### Explainability
+
+```python
+explanations = model.explain(adata, indices=[10, 20, 30], top_k=20)
+print(explanations[0])
+
+supporting, contradictory = model.explain_class("T_cell", top_k=50)
+```
+
+`model.explain` reports, per requested cell, the genes whose expression most supported or contradicted the model's prediction, via a Grad x Input gene-attribution score. `model.explain_class` does the same for a class in general, independent of any specific cell. This is a first-order sensitivity explanation, not a validated biological one — treat it as a screening/interpretation aid, like the doublet/refinement heuristics above, not ground truth ([scalr/explain.py](scalr/explain.py)).
 
 ### Feature-selection stability
 
@@ -233,9 +254,18 @@ scalr annotate \
   --flag-doublets
 ```
 
-Writes predictions (`scalr_pred`, `scalr_confidence`, `scalr_unknown`, etc.) into `annotated.h5ad`'s `.obs`/`.obsm`/`.uns`. `--model` also accepts a name registered in the local model registry, not just a path.
+Writes predictions (`scalr_pred`, `scalr_confidence`, `scalr_unknown`, etc.) into `annotated.h5ad`'s `.obs`/`.obsm`/`.uns`. `--model` also accepts a name registered in the local model registry, not just a path. Add `--streaming --chunk-size 20000` for large inputs to gene-align and score in bounded-memory chunks instead of all at once.
 
-### 5. Evaluate against labeled test data
+### 5. Explain predictions
+
+```bash
+scalr explain --input query.h5ad --model models/pbmc_v1 --indices 10 20 30 --top-k 20
+scalr explain --model models/pbmc_v1 --class-name T_cell --top-k 50
+```
+
+Prints, per requested cell, the genes whose expression most supported or contradicted the prediction; `--class-name` explains a class in general instead of specific cells.
+
+### 6. Evaluate against labeled test data
 
 ```bash
 scalr evaluate --input test.h5ad --model models/pbmc_v1 --labels-key cell_type
@@ -243,7 +273,7 @@ scalr evaluate --input test.h5ad --model models/pbmc_v1 --labels-key cell_type
 
 Prints macro-F1/weighted-F1/balanced-accuracy plus a per-class precision/recall/F1 table.
 
-### 6. Manage the local model registry
+### 7. Manage the local model registry
 
 ```bash
 scalr models list
@@ -252,7 +282,7 @@ scalr models info human_pbmc
 
 Registering a model into the registry (`scalr.models.register(...)`) is currently Python-API-only, not yet a CLI subcommand.
 
-### 7. Run downstream analyses
+### 8. Run downstream analyses
 
 Configure the desired analyses under `analysis` in a YAML file. Supported analyses include `Heatmap`, `RocAucCurve`, `GeneRecallCurve`, `DgePseudoBulk`, and `DgeLMEM`.
 
