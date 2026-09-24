@@ -311,7 +311,7 @@ def load_model(dirpath_or_name: str) -> AnnotationModel:
 
 
 def annotate(
-    adata: AnnData,
+    adata: Union[AnnData, str],
     model: Union[str, AnnotationModel],
     device: str = 'auto',
     preprocess: str = 'auto',
@@ -321,6 +321,8 @@ def annotate(
     level: str = 'fine',
     cluster_refinement: Optional[str] = None,
     flag_doublets: bool = False,
+    streaming: bool = False,
+    chunk_size: int = 20000,
 ) -> PredictionResult:
     """Annotate cells in `adata` using a trained scaLR model.
 
@@ -344,6 +346,10 @@ def annotate(
             or 'auto' to detect one). `None` (default) disables this.
         flag_doublets: When True, screen for possible mixed/doublet cells and
             set `result.is_possible_doublet`.
+        streaming: When True, or implicitly when `adata` is a file/directory
+            path, gene-align and score the data `chunk_size` cells at a time
+            instead of materializing the whole aligned matrix at once.
+        chunk_size: Cells scored per chunk when streaming.
 
     Returns:
         A `PredictionResult` aligned to `adata.obs_names`.
@@ -351,7 +357,7 @@ def annotate(
     if isinstance(model, str):
         model = load_model(model)
 
-    if preprocess == 'auto':
+    if preprocess == 'auto' and isinstance(adata, AnnData):
         query_state = detect_normalization_state(adata)
         expected_state = model.preprocessing.get('normalization')
         if expected_state and query_state not in (expected_state, 'unknown'):
@@ -359,7 +365,7 @@ def annotate(
                 f'Query data looks like "{query_state}" but the model was '
                 f'trained on "{expected_state}" data. Predictions may be unreliable.'
             )
-    elif preprocess != 'skip':
+    elif preprocess not in ('auto', 'skip'):
         raise NotImplementedError(
             f'preprocess="{preprocess}" is not supported yet; use "auto" or "skip".'
         )
@@ -371,4 +377,6 @@ def annotate(
                          min_feature_overlap=min_feature_overlap,
                          level=level,
                          cluster_refinement=cluster_refinement,
-                         flag_doublets=flag_doublets)
+                         flag_doublets=flag_doublets,
+                         streaming=streaming,
+                         chunk_size=chunk_size)

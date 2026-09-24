@@ -12,6 +12,7 @@ from .benchmark import run_benchmark
 from .data_ingestion_pipeline import DataIngestionPipeline
 from .doublet import flag_possible_doublets
 from .eval_and_analysis_pipeline import EvalAndAnalysisPipeline
+from .explain import CellExplanation
 from .feature_extraction_pipeline import FeatureExtractionPipeline
 from .feature_stability import compute_feature_stability
 from .genes import align_genes

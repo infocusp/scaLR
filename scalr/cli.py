@@ -3,6 +3,8 @@
     scalr validate --input data.h5ad [--labels-key cell_type] [--group-key donor_id]
     scalr train --input train.h5ad --labels-key cell_type [--group-key donor_id] --output models/pbmc_v1
     scalr annotate --input data.h5ad --model models/pbmc_v1 --output annotated.h5ad
+    scalr explain --input data.h5ad --model models/pbmc_v1 --indices 10 20 30
+    scalr explain --model models/pbmc_v1 --class-name T_cell
     scalr evaluate --input test.h5ad --model models/pbmc_v1 --labels-key cell_type
     scalr models list
     scalr models info <name>
@@ -75,13 +77,53 @@ def _cmd_annotate(args) -> int:
                             device=args.device,
                             open_set=not args.no_open_set,
                             min_feature_overlap=args.min_feature_overlap,
-                            flag_doublets=args.flag_doublets)
+                            flag_doublets=args.flag_doublets,
+                            streaming=args.streaming,
+                            chunk_size=args.chunk_size)
     result.write_to_adata(adata)
     write_data(adata, args.output)
 
     n_unknown = int(result.is_unknown.sum())
     print(f'Annotated {len(result)} cells ({n_unknown} flagged unknown). '
           f'Written to {args.output}')
+    return 0
+
+
+def _cmd_explain(args) -> int:
+    model = scalr.load_model(args.model)
+
+    if not args.class_name and not args.indices:
+        print('ERROR: pass --indices or --class-name.', file=sys.stderr)
+        return 1
+
+    if args.class_name:
+        supporting, contradictory = model.explain_class(args.class_name,
+                                                        top_k=args.top_k,
+                                                        device=args.device)
+        print(f'Class: {args.class_name}')
+        print()
+        print('Supporting genes')
+        for gene, score in supporting:
+            print(f'{gene}  {score:+.4f}')
+        print()
+        print('Contradictory signals')
+        for gene, score in contradictory:
+            print(f'{gene}  {score:+.4f}')
+        return 0
+
+    if not args.input:
+        print('ERROR: --input is required when using --indices.',
+              file=sys.stderr)
+        return 1
+
+    adata = read_data(args.input, backed=None)
+    explanations = model.explain(adata,
+                                 indices=args.indices,
+                                 top_k=args.top_k,
+                                 device=args.device)
+    for explanation in explanations:
+        print(explanation)
+        print()
     return 0
 
 
@@ -219,7 +261,42 @@ def build_parser() -> argparse.ArgumentParser:
                    action='store_true',
                    help='Screen for possible mixed/doublet cells.')
     p.add_argument('--min-feature-overlap', type=float, default=0.1)
+    p.add_argument(
+        '--streaming',
+        action='store_true',
+        help='Gene-align and score in chunks instead of all at once, '
+        'bounding peak memory for large inputs.')
+    p.add_argument('--chunk-size',
+                   type=int,
+                   default=20000,
+                   help='Cells scored per chunk when --streaming is set.')
     p.set_defaults(func=_cmd_annotate)
+
+    p = subparsers.add_parser(
+        'explain',
+        help="Explain a trained model's predictions via gene attribution.")
+    p.add_argument(
+        '--input',
+        default=None,
+        help='Path to a query .h5ad file (required unless --class-name is used).'
+    )
+    p.add_argument(
+        '--model',
+        required=True,
+        help='Model artifact directory, or a locally registered model name.')
+    p.add_argument('--indices',
+                   nargs='+',
+                   type=int,
+                   default=None,
+                   help='Positional row indices of cells to explain.')
+    p.add_argument(
+        '--class-name',
+        default=None,
+        help='Explain this class in general instead of specific cells '
+        '(ignores --input/--indices).')
+    p.add_argument('--top-k', type=int, default=20)
+    p.add_argument('--device', default='auto')
+    p.set_defaults(func=_cmd_explain)
 
     p = subparsers.add_parser(
         'evaluate', help='Evaluate a trained model against labeled test data.')

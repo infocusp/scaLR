@@ -334,6 +334,51 @@ def test_model_save_writes_model_card(tmp_path):
     assert 'donor_id' in card
 
 
+def test_predict_streaming_matches_non_streaming():
+    """streaming=True with a small chunk_size should reproduce the same predictions."""
+    adata = _toy_adata()
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+
+    non_streaming = model.predict(adata, device='cpu')
+    # chunk_size smaller than len(adata) forces multiple chunks.
+    streaming = model.predict(adata, device='cpu', streaming=True, chunk_size=7)
+
+    assert streaming.obs_names == non_streaming.obs_names
+    assert streaming.labels == non_streaming.labels
+    assert np.allclose(streaming.probabilities,
+                       non_streaming.probabilities,
+                       atol=1e-5)
+
+
+def test_predict_from_h5ad_path_streams_automatically(tmp_path):
+    """Passing a file path should stream chunk-by-chunk without needing streaming=True."""
+    adata = _toy_adata()
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+
+    from scalr.utils import write_data
+    h5ad_path = tmp_path / 'query.h5ad'
+    write_data(adata, str(h5ad_path))
+
+    result = model.predict(str(h5ad_path), device='cpu', chunk_size=9)
+
+    assert result.obs_names == list(adata.obs_names)
+    assert len(result.labels) == len(adata)
+
+
 def test_load_model_from_local_registry(tmp_path, monkeypatch):
     """scalr.load_model should resolve a bare name via the local model registry."""
     monkeypatch.setenv('SCALR_MODEL_REGISTRY', str(tmp_path / 'registry'))

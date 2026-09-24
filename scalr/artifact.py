@@ -21,6 +21,7 @@ from os import path
 from typing import Optional, Union
 
 from anndata import AnnData
+from anndata.experimental import AnnCollection
 import numpy as np
 import torch
 
@@ -30,7 +31,11 @@ from scalr.calibration import predictive_entropy
 from scalr.calibration import TemperatureScaler
 from scalr.calibration import top1_top2_margin
 from scalr.doublet import flag_possible_doublets
+from scalr.explain import attribute_cells
+from scalr.explain import attribute_class
+from scalr.explain import CellExplanation
 from scalr.genes import align_genes
+from scalr.genes import GeneAlignmentReport
 from scalr.hierarchy import aggregate_to_broad
 from scalr.hierarchy import validate_taxonomy
 from scalr.model_card import render_model_card
@@ -87,9 +92,82 @@ class AnnotationModel:
     # ------------------------------------------------------------------ #
     # Inference
     # ------------------------------------------------------------------ #
+    def _score_aligned(self, aligned: AnnData, batch_size: int,
+                       device: str) -> np.ndarray:
+        """Run the network over an already gene-aligned AnnData in batches
+        and return calibrated probabilities. Never densifies more than one
+        `batch_size` chunk of `aligned.X` at a time."""
+        n = aligned.shape[0]
+        all_logits = []
+        with torch.no_grad():
+            for start in range(0, n, batch_size):
+                chunk = aligned[start:start + batch_size].X
+                if not isinstance(chunk, np.ndarray):
+                    chunk = chunk.toarray()
+                x = torch.as_tensor(chunk, dtype=torch.float32).to(device)
+                out = self.model(x)['cls_output']
+                all_logits.append(out.cpu())
+        logits = torch.cat(all_logits, dim=0)
+        return self.calibrator.calibrate_probabilities(logits.numpy())
+
+    def _predict_streaming(
+        self,
+        source: Union[AnnData, AnnCollection],
+        chunk_size: int,
+        min_feature_overlap: float,
+        batch_size: int,
+        device: str,
+    ) -> tuple[list[str], np.ndarray, GeneAlignmentReport]:
+        """Score `source` `chunk_size` cells at a time, only ever
+        gene-aligning one chunk in memory at once, so peak alignment/scoring
+        memory does not grow with total cell count.
+
+        For a single backed `.h5ad` file, `source` is first fully loaded
+        (backed row-slicing of a single file cannot be done lazily here); to
+        avoid ever holding the whole dataset in memory, pass a directory of
+        chunked `.h5ad` files (read as an `AnnCollection`), which is sliced
+        and loaded one chunk at a time.
+        """
+        if isinstance(source, AnnData) and source.isbacked:
+            source = source.to_memory(copy=True)
+
+        n_total = source.shape[0]
+        obs_names: list[str] = []
+        probability_chunks = []
+        gene_report = None
+
+        for start in range(0, n_total, chunk_size):
+            end = min(start + chunk_size, n_total)
+            chunk = source[start:end]
+            if not isinstance(chunk, AnnData):
+                chunk = chunk.to_adata()
+            if hasattr(chunk, 'to_memory'):
+                chunk = chunk.to_memory(copy=True)
+
+            if gene_report is None:
+                report = validate(chunk,
+                                  model_features=self.features,
+                                  min_feature_overlap=min_feature_overlap)
+                report.raise_if_unusable()
+
+            aligned_chunk, chunk_gene_report = align_genes(
+                chunk, self.features, min_feature_overlap)
+            if not chunk_gene_report.is_usable:
+                raise ValueError('Gene coverage too low for reliable '
+                                 f'prediction:\n{chunk_gene_report}')
+            if gene_report is None:
+                gene_report = chunk_gene_report
+
+            obs_names.extend(list(chunk.obs_names))
+            probability_chunks.append(
+                self._score_aligned(aligned_chunk, batch_size, device))
+
+        return obs_names, np.concatenate(probability_chunks,
+                                         axis=0), gene_report
+
     def predict(
         self,
-        adata: AnnData,
+        adata: Union[AnnData, AnnCollection, str],
         device: str = 'auto',
         batch_size: int = 4096,
         open_set: bool = True,
@@ -98,11 +176,15 @@ class AnnotationModel:
         level: str = 'fine',
         cluster_refinement: Optional[str] = None,
         flag_doublets: bool = False,
+        streaming: bool = False,
+        chunk_size: int = 20000,
     ) -> PredictionResult:
         """Run gene-aligned, calibrated inference on an AnnData object.
 
         Args:
-            adata: Query AnnData object. Does not need to share the model's
+            adata: Query AnnData/AnnCollection object, or a path to an
+                `.h5ad` file or directory of chunked `.h5ad` files (read via
+                `scalr.utils.read_data`). Does not need to share the model's
                 gene set or gene order; alignment is performed automatically.
             device: 'auto', 'cpu' or 'cuda'.
             batch_size: Number of cells scored per forward pass.
@@ -124,6 +206,16 @@ class AnnotationModel:
                 probabilities are both substantial and close together, and
                 set `result.is_possible_doublet` — a heuristic screening
                 signal, not a validated doublet call.
+            streaming: When True, or implicitly when `adata` is a path, gene-
+                align and score the data `chunk_size` cells at a time instead
+                of materializing the whole aligned matrix at once, bounding
+                peak alignment/scoring memory to roughly
+                `chunk_size x n_features` regardless of total dataset size.
+                For out-of-core reads too (never loading the full raw dataset
+                into memory), pass a directory of chunked `.h5ad` files
+                rather than a single large `.h5ad` file.
+            chunk_size: Cells scored per chunk when `streaming`/path input is
+                used.
 
         Returns:
             A `PredictionResult` aligned to `adata.obs_names`.
@@ -132,37 +224,35 @@ class AnnotationModel:
             raise ValueError(
                 'level="broad" requires a taxonomy; this model has none. '
                 'Pass `taxonomy` when training/constructing the model.')
-        report = validate(adata,
-                          model_features=self.features,
-                          min_feature_overlap=min_feature_overlap)
-        report.raise_if_unusable()
 
-        aligned, gene_report = align_genes(adata, self.features,
-                                           min_feature_overlap)
-        if not gene_report.is_usable:
-            raise ValueError(
-                f'Gene coverage too low for reliable prediction:\n{gene_report}'
-            )
+        if isinstance(adata, str):
+            adata = read_data(adata, backed='r')
+            streaming = True
 
         resolved_device = _select_device(device)
         self.model.to(resolved_device)
         self.model.eval()
 
-        n = aligned.shape[0]
-        all_logits = []
-        with torch.no_grad():
-            for start in range(0, n, batch_size):
-                chunk = aligned[start:start + batch_size].X
-                if not isinstance(chunk, np.ndarray):
-                    chunk = chunk.toarray()
-                x = torch.as_tensor(chunk,
-                                    dtype=torch.float32).to(resolved_device)
-                out = self.model(x)['cls_output']
-                all_logits.append(out.cpu())
+        if streaming or not isinstance(adata, AnnData):
+            obs_names, probabilities, gene_report = self._predict_streaming(
+                adata, chunk_size, min_feature_overlap, batch_size,
+                resolved_device)
+        else:
+            report = validate(adata,
+                              model_features=self.features,
+                              min_feature_overlap=min_feature_overlap)
+            report.raise_if_unusable()
 
-        logits = torch.cat(all_logits, dim=0)
-        probabilities = self.calibrator.calibrate_probabilities(logits.numpy())
+            aligned, gene_report = align_genes(adata, self.features,
+                                               min_feature_overlap)
+            if not gene_report.is_usable:
+                raise ValueError('Gene coverage too low for reliable '
+                                 f'prediction:\n{gene_report}')
+            obs_names = list(adata.obs_names)
+            probabilities = self._score_aligned(aligned, batch_size,
+                                                resolved_device)
 
+        n = len(obs_names)
         top1_ids = probabilities.argmax(axis=1)
         labels = [self.class_names[i] for i in top1_ids]
         confidence = probabilities.max(axis=1)
@@ -188,7 +278,7 @@ class AnnotationModel:
                 probabilities, entropy, margin)
 
         result = PredictionResult(
-            obs_names=list(adata.obs_names),
+            obs_names=obs_names,
             labels=labels,
             probabilities=probabilities,
             class_names=self.class_names,
@@ -218,6 +308,90 @@ class AnnotationModel:
                                           cluster_key=cluster_refinement)
 
         return result
+
+    # ------------------------------------------------------------------ #
+    # Explainability
+    # ------------------------------------------------------------------ #
+    def explain(
+        self,
+        adata: AnnData,
+        indices: list[int],
+        top_k: int = 20,
+        device: str = 'auto',
+        min_feature_overlap: float = 0.1,
+    ) -> list[CellExplanation]:
+        """Explain individual cell predictions via Grad x Input gene attribution.
+
+        For each requested cell, reports the model's prediction and the genes
+        whose expression most supported (positive attribution) or contradicted
+        (negative attribution) that prediction. This is a first-order
+        sensitivity explanation, not a validated biological one — see
+        `scalr.explain` for the method.
+
+        Args:
+            adata: Query AnnData object; gene-aligned automatically.
+            indices: Positional row indices into `adata` to explain.
+            top_k: Number of supporting and contradictory genes to report per cell.
+            device: 'auto', 'cpu' or 'cuda'.
+            min_feature_overlap: Minimum required gene-overlap fraction.
+
+        Returns:
+            One `CellExplanation` per entry in `indices`, in the same order.
+        """
+        resolved_device = _select_device(device)
+        self.model.to(resolved_device)
+        self.model.eval()
+
+        aligned, gene_report = align_genes(adata, self.features,
+                                           min_feature_overlap)
+        if not gene_report.is_usable:
+            raise ValueError('Gene coverage too low for reliable '
+                             f'explanation:\n{gene_report}')
+
+        subset = aligned[indices]
+        chunk = subset.X
+        if not isinstance(chunk, np.ndarray):
+            chunk = chunk.toarray()
+        x = torch.as_tensor(chunk, dtype=torch.float32).to(resolved_device)
+
+        with torch.no_grad():
+            logits = self.model(x)['cls_output']
+        probabilities = self.calibrator.calibrate_probabilities(
+            logits.cpu().numpy())
+        predicted_ids = probabilities.argmax(axis=1)
+        confidence = probabilities.max(axis=1)
+        obs_names = [str(adata.obs_names[i]) for i in indices]
+
+        return attribute_cells(self.model,
+                               x,
+                               self.features,
+                               self.class_names,
+                               predicted_ids,
+                               confidence,
+                               obs_names,
+                               top_k=top_k)
+
+    def explain_class(
+        self,
+        class_name: str,
+        top_k: int = 50,
+        device: str = 'auto',
+    ) -> tuple[list[tuple[str, float]], list[tuple[str, float]]]:
+        """Explain a class in general, via gradient at a zero-expression baseline.
+
+        Returns:
+            `(supporting_genes, contradictory_genes)`, each a list of
+            `(gene, score)` pairs. See `scalr.explain.attribute_class`.
+        """
+        resolved_device = _select_device(device)
+        self.model.to(resolved_device)
+        self.model.eval()
+        return attribute_class(self.model,
+                               self.features,
+                               self.class_names,
+                               class_name,
+                               top_k=top_k,
+                               device=resolved_device)
 
     # ------------------------------------------------------------------ #
     # Persistence
