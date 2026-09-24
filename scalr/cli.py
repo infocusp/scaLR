@@ -165,25 +165,37 @@ def build_parser() -> argparse.ArgumentParser:
                    help='Path to a training .h5ad file.')
     p.add_argument('--labels-key', required=True)
     p.add_argument('--group-key', default=None)
-    p.add_argument('--features-file', default=None,
+    p.add_argument('--features-file',
+                   default=None,
                    help='JSON file containing the ordered input gene list.')
-    p.add_argument('--hidden-layers', nargs='+', type=int, default=[256, 64],
+    p.add_argument('--hidden-layers',
+                   nargs='+',
+                   type=int,
+                   default=[256, 64],
                    help='Hidden layer sizes. Default: 256 64.')
     p.add_argument('--output',
                    required=True,
                    help='Directory to save the model artifact to.')
     p.add_argument('--epochs', type=int, default=15)
     p.add_argument('--batch-size', type=int, default=256)
-    p.add_argument('--lr', type=float, default=1e-3,
+    p.add_argument('--lr',
+                   type=float,
+                   default=1e-3,
                    help='Adam learning rate. Default: 0.001.')
     p.add_argument('--device', default='auto')
-    p.add_argument('--split-ratio', nargs=3, type=float, default=[0.7, 0.1, 0.2],
+    p.add_argument('--split-ratio',
+                   nargs=3,
+                   type=float,
+                   default=[0.7, 0.1, 0.2],
                    metavar=('TRAIN', 'VAL', 'TEST'))
-    p.add_argument('--no-class-balanced-loss', action='store_true',
+    p.add_argument('--no-class-balanced-loss',
+                   action='store_true',
                    help='Disable inverse-frequency class weighting.')
-    p.add_argument('--no-open-set', action='store_true',
+    p.add_argument('--no-open-set',
+                   action='store_true',
                    help='Disable unknown-cell abstention thresholds.')
-    p.add_argument('--taxonomy-file', default=None,
+    p.add_argument('--taxonomy-file',
+                   default=None,
                    help='JSON file mapping fine labels to broad labels.')
     p.add_argument('--seed', type=int, default=42)
     p.add_argument('--quiet', action='store_true')
@@ -237,7 +249,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument('--log', action='store_true', help='Save experiment logs.')
     p.add_argument('--level', default=None, help='Logging level, e.g. INFO.')
     p.add_argument('--logpath', default=None, help='Path to the log file.')
-    p.add_argument('--memoryprofiler', action='store_true',
+    p.add_argument('--memoryprofiler',
+                   action='store_true',
                    help='Record peak memory usage.')
     p.set_defaults(func=_cmd_analyze)
 
