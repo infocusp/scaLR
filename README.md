@@ -170,6 +170,19 @@ supporting, contradictory = model.explain_class("T_cell", top_k=50)
 
 `model.explain` reports, per requested cell, the genes whose expression most supported or contradicted the model's prediction, via a Grad x Input gene-attribution score. `model.explain_class` does the same for a class in general, independent of any specific cell. This is a first-order sensitivity explanation, not a validated biological one — treat it as a screening/interpretation aid, like the doublet/refinement heuristics above, not ground truth ([scalr/explain.py](scalr/explain.py)).
 
+### Dataset drift detection
+
+`is_unknown`/`is_possible_doublet` flag individual out-of-distribution cells, but can miss a whole cohort that has drifted (a different tissue, protocol, or batch) if most cells still score confidently. `scalr.train` records per-gene and per-cell (library size, detected-gene-count) statistics from the training split as a `drift_reference`; `scalr.detect_drift` compares a new dataset against it before you trust its predictions:
+
+```python
+report = scalr.detect_drift(query_adata, model="models/pbmc_v1")
+print(report)
+if report.is_drifted:
+    ...  # treat predictions on this dataset with caution
+```
+
+A gene counts as drifted when its mean-expression shift exceeds `z_threshold` reference standard deviations (default 2); the dataset is flagged `is_drifted` when either too large a fraction of genes drift (`drift_fraction_threshold`, default 10%) or the library-size/detected-gene-count shift is extreme on its own (`severity_z_threshold`, default 5) — the latter catches e.g. a sequencing-depth change a per-gene test can miss. This is a univariate summary-statistics check, not a full distributional test — see [scalr/drift.py](scalr/drift.py). Also available as `scalr drift --input query.h5ad --model models/pbmc_v1 [--fail-on-drift]` from the CLI, for use as a pre-flight/CI gate.
+
 ### Feature-selection stability
 
 ```python
@@ -180,9 +193,9 @@ print(report.top_stable_features(min_runs=15))
 
 Repeats feature selection over random subsamples and reports each gene's selection frequency plus the mean pairwise Jaccard similarity of the selected sets, to help distinguish a stable biomarker signal from a split-specific artifact ([scalr/feature_stability.py](scalr/feature_stability.py)).
 
-### Model cards, provenance & a local model registry
+### Model cards, provenance & a model registry/hub
 
-Every `model.save(...)` call also writes a `README.md` model card (training data, held-out metrics, calibration, known limitations, license) into the artifact directory ([scalr/model_card.py](scalr/model_card.py)). Models can be registered and resolved by name via a local registry ([scalr/models.py](scalr/models.py)), the starting point for a future hosted model hub:
+Every `model.save(...)` call also writes a `README.md` model card (training data, held-out metrics, calibration, known limitations, license) into the artifact directory ([scalr/model_card.py](scalr/model_card.py)). Models can be registered and resolved by name via a local registry ([scalr/models.py](scalr/models.py)):
 
 ```python
 scalr.models.register("models/pbmc_v1", "human_pbmc")
@@ -191,6 +204,16 @@ scalr.models.info("human_pbmc")
 
 model = scalr.load_model("human_pbmc")   # resolves the registered name
 ```
+
+Models can also be published to, and pulled from, the [Hugging Face Hub](https://huggingface.co/models) — requires the optional `hub` extra (`pip install "pyscaLR[hub]"`):
+
+```python
+scalr.models.push("models/pbmc_v1", "your-org/human-pbmc")   # publish
+
+model = scalr.load_model("your-org/human-pbmc")   # auto-downloads on first use, then cached locally
+```
+
+`scalr.load_model` tries an on-disk path, then the local registry, and only falls back to a Hub download for `"<namespace>/<name>"`-shaped names it can't resolve locally; once downloaded, a model is registered under that same name so later loads are local and offline. Use `scalr.models.download(repo_id, revision=..., token=...)` directly for a specific revision or a private repo.
 
 ### Benchmark suite
 
@@ -273,16 +296,26 @@ scalr evaluate --input test.h5ad --model models/pbmc_v1 --labels-key cell_type
 
 Prints macro-F1/weighted-F1/balanced-accuracy plus a per-class precision/recall/F1 table.
 
-### 7. Manage the local model registry
+### 7. Check for dataset drift
+
+```bash
+scalr drift --input query.h5ad --model models/pbmc_v1 --fail-on-drift
+```
+
+Compares `query.h5ad` against the model's training-time gene-expression and library-size statistics and prints a drift report; `--fail-on-drift` exits non-zero if drift is detected, for use as a pre-flight/CI gate before trusting predictions on a new cohort.
+
+### 8. Manage the local model registry & Hugging Face Hub
 
 ```bash
 scalr models list
 scalr models info human_pbmc
+scalr models push models/pbmc_v1 your-org/human-pbmc   # requires: pip install "pyscaLR[hub]"
+scalr models pull your-org/human-pbmc                    # downloads and registers locally
 ```
 
 Registering a model into the registry (`scalr.models.register(...)`) is currently Python-API-only, not yet a CLI subcommand.
 
-### 8. Run downstream analyses
+### 9. Run downstream analyses
 
 Configure the desired analyses under `analysis` in a YAML file. Supported analyses include `Heatmap`, `RocAucCurve`, `GeneRecallCurve`, `DgePseudoBulk`, and `DgeLMEM`.
 

@@ -397,3 +397,106 @@ def test_load_model_from_local_registry(tmp_path, monkeypatch):
 
     loaded = scalr.load_model('my_registered_model')
     assert loaded.class_names == model.class_names
+
+
+def test_load_model_auto_downloads_from_hub_for_repo_id_names(
+        tmp_path, monkeypatch):
+    """A '<namespace>/<name>'-shaped name not found locally should be pulled from the hub."""
+    registry_dir = str(tmp_path / 'registry')
+    monkeypatch.setenv('SCALR_MODEL_REGISTRY', registry_dir)
+    adata = _toy_adata()
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+    artifact_dir = tmp_path / 'pbmc_v1'
+    model.save(str(artifact_dir))
+
+    def fake_download(repo_id, registry_dir=None, **kwargs):
+        return scalr.models.register(str(artifact_dir), repo_id, registry_dir)
+
+    monkeypatch.setattr(scalr.models, 'download', fake_download)
+
+    loaded = scalr.load_model('org/pbmc-v1')
+
+    assert loaded.class_names == model.class_names
+    assert scalr.models.list(registry_dir=registry_dir) == ['org/pbmc-v1']
+
+
+def test_train_records_a_drift_reference():
+    """scalr.train should record training-set stats so drift detection works out of the box."""
+    adata = _toy_adata()
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+
+    assert model.drift_reference is not None
+    assert len(model.drift_reference['gene_mean']) == len(model.features)
+
+
+def test_detect_drift_top_level_matches_same_distribution_query():
+    """scalr.detect_drift(adata, model) should not flag drift when querying with in-distribution data."""
+    adata = _toy_adata()
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+
+    report = scalr.detect_drift(adata, model)
+
+    assert report.is_drifted is False
+    assert report.n_query_cells == adata.shape[0]
+
+
+def test_detect_drift_flags_a_shifted_query_dataset():
+    """scalr.detect_drift should flag a query dataset whose expression is shifted far from training."""
+    adata = _toy_adata()
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+
+    drifted = adata.copy()
+    X = drifted.X
+    X = X.toarray() if not isinstance(X, np.ndarray) else X
+    drifted.X = X + 10.0
+
+    report = scalr.detect_drift(drifted, model)
+
+    assert report.is_drifted is True
+
+
+def test_detect_drift_accepts_a_model_path(tmp_path):
+    """scalr.detect_drift(adata, model_path) should resolve the model like scalr.annotate does."""
+    adata = _toy_adata()
+    model = scalr.train(adata,
+                        labels_key='cell_type',
+                        group_key='donor_id',
+                        hidden_layers=(16,),
+                        epochs=2,
+                        batch_size=32,
+                        device='cpu',
+                        verbose=False)
+    model_dir = tmp_path / 'model'
+    model.save(str(model_dir))
+
+    report = scalr.detect_drift(adata, str(model_dir))
+
+    assert report.n_query_cells == adata.shape[0]

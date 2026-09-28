@@ -11,7 +11,8 @@ reproduce inference without the original training config:
     ├── features.json       # ordered gene/feature list the model expects
     ├── preprocessing.json  # fit-time preprocessing contract
     ├── calibration.json    # temperature scaling + open-set thresholds
-    └── metrics.json        # evaluation metrics recorded at training time
+    ├── metrics.json        # evaluation metrics recorded at training time
+    └── drift_reference.json  # training-set gene/library-size stats for drift detection
 """
 
 from dataclasses import asdict
@@ -31,6 +32,8 @@ from scalr.calibration import predictive_entropy
 from scalr.calibration import TemperatureScaler
 from scalr.calibration import top1_top2_margin
 from scalr.doublet import flag_possible_doublets
+from scalr.drift import detect_drift as _detect_drift
+from scalr.drift import DriftReport
 from scalr.explain import attribute_cells
 from scalr.explain import attribute_class
 from scalr.explain import CellExplanation
@@ -75,6 +78,7 @@ class AnnotationModel:
         metrics: Optional[dict] = None,
         metadata: Optional[dict] = None,
         taxonomy: Optional[dict[str, str]] = None,
+        drift_reference: Optional[dict] = None,
     ):
         self.model = model
         self.model_config = model_config
@@ -85,6 +89,7 @@ class AnnotationModel:
         self.open_set_thresholds = open_set_thresholds or OpenSetThresholds()
         self.metrics = metrics or {}
         self.metadata = metadata or {}
+        self.drift_reference = drift_reference
         if taxonomy is not None:
             validate_taxonomy(class_names, taxonomy)
         self.taxonomy = taxonomy
@@ -394,6 +399,66 @@ class AnnotationModel:
                                device=resolved_device)
 
     # ------------------------------------------------------------------ #
+    # Drift detection
+    # ------------------------------------------------------------------ #
+    def detect_drift(
+        self,
+        adata: AnnData,
+        min_feature_overlap: float = 0.1,
+        z_threshold: float = 2.0,
+        drift_fraction_threshold: float = 0.1,
+        severity_z_threshold: float = 5.0,
+        top_k: int = 20,
+    ) -> DriftReport:
+        """Check whether `adata` looks like it comes from a different
+        distribution than this model's training data.
+
+        A per-cell `is_unknown`/`is_possible_doublet` flag can miss a whole
+        cohort that has drifted (e.g. a different tissue, protocol, or batch)
+        if most individual cells still score confidently; this instead
+        compares the query dataset's gene-expression and library-size/
+        detected-gene-count distributions against the training reference
+        recorded at `train()` time.
+
+        Args:
+            adata: Query AnnData object; gene-aligned automatically.
+            min_feature_overlap: Minimum required gene-overlap fraction.
+            z_threshold: Per-gene standardized mean shift above which a gene
+                counts as "drifted".
+            drift_fraction_threshold: Fraction of drifted genes above which
+                the dataset as a whole is flagged `is_drifted`.
+            severity_z_threshold: A library-size or detected-gene-count shift
+                this extreme (in reference std deviations) flags
+                `is_drifted` on its own.
+            top_k: Number of top drifted genes to report.
+
+        Returns:
+            A `DriftReport`.
+        """
+        if self.drift_reference is None:
+            raise ValueError(
+                'This model has no drift reference (it was trained with an '
+                'older scaLR version, or `preprocessing`/`drift_reference` '
+                'was not recorded). Drift detection is unavailable; retrain '
+                'to enable it.')
+
+        aligned, gene_report = align_genes(adata, self.features,
+                                           min_feature_overlap)
+        if not gene_report.is_usable:
+            raise ValueError('Gene coverage too low for reliable drift '
+                             f'detection:\n{gene_report}')
+
+        return _detect_drift(
+            aligned,
+            self.drift_reference,
+            self.features,
+            z_threshold=z_threshold,
+            drift_fraction_threshold=drift_fraction_threshold,
+            severity_z_threshold=severity_z_threshold,
+            top_k=top_k,
+        )
+
+    # ------------------------------------------------------------------ #
     # Persistence
     # ------------------------------------------------------------------ #
     def save(self, dirpath: str) -> None:
@@ -425,6 +490,10 @@ class AnnotationModel:
             write_data({'taxonomy': self.taxonomy},
                        path.join(dirpath, 'taxonomy.json'))
 
+        if self.drift_reference is not None:
+            write_data(self.drift_reference,
+                       path.join(dirpath, 'drift_reference.json'))
+
         manifest = {
             'format_version': FORMAT_VERSION,
             'scalr_version': getattr(scalr, '__version__', 'unknown'),
@@ -437,6 +506,7 @@ class AnnotationModel:
             'temperature': self.calibrator.temperature,
             'open_set_thresholds': self.open_set_thresholds.to_dict(),
             'has_taxonomy': self.taxonomy is not None,
+            'has_drift_reference': self.drift_reference is not None,
         }
         write_data(manifest, path.join(dirpath, 'manifest.json'))
 
@@ -488,6 +558,11 @@ class AnnotationModel:
         if path.exists(taxonomy_path):
             taxonomy = read_data(taxonomy_path)['taxonomy']
 
+        drift_reference = None
+        drift_reference_path = path.join(dirpath, 'drift_reference.json')
+        if path.exists(drift_reference_path):
+            drift_reference = read_data(drift_reference_path)
+
         return cls(
             model=model,
             model_config=model_config,
@@ -499,6 +574,7 @@ class AnnotationModel:
             open_set_thresholds=open_set_thresholds,
             metrics=metrics,
             metadata=manifest,
+            drift_reference=drift_reference,
         )
 
 

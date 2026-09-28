@@ -1,5 +1,8 @@
 """This is a test file for models.py (local model registry)"""
 
+import sys
+from unittest.mock import MagicMock
+
 import pytest
 
 from scalr import models
@@ -65,7 +68,76 @@ def test_register_rejects_non_artifact_directory(tmp_path):
                         registry_dir=str(tmp_path / 'registry'))
 
 
-def test_download_raises_not_implemented():
-    """download() should clearly refuse rather than silently no-op, until a hub exists."""
-    with pytest.raises(NotImplementedError):
-        models.download('anything')
+def test_require_hub_missing_dependency_raises_helpful_error(monkeypatch):
+    """Without the "hub" extra installed, hub access should fail with an actionable message."""
+    monkeypatch.setitem(sys.modules, 'huggingface_hub', None)
+    with pytest.raises(ImportError, match=r'pyscaLR\[hub\]'):
+        models._require_hub()
+
+
+def test_download_pulls_from_hub_and_registers_locally(monkeypatch, tmp_path):
+    """download() should snapshot the hub repo and register it under repo_id by default."""
+    snapshot_dir = _fake_artifact(tmp_path, name='snapshot')
+    fake_hub = MagicMock()
+    fake_hub.snapshot_download.return_value = snapshot_dir
+    monkeypatch.setattr(models, '_require_hub', lambda: fake_hub)
+
+    registry_dir = str(tmp_path / 'registry')
+    target = models.download('org/some-model', registry_dir=registry_dir)
+
+    fake_hub.snapshot_download.assert_called_once_with(
+        repo_id='org/some-model',
+        revision=None,
+        token=None,
+        repo_type='model',
+    )
+    assert models.list(registry_dir=registry_dir) == ['org/some-model']
+    assert models.info('org/some-model', registry_dir=registry_dir) == {
+        'labels': ['A', 'B']
+    }
+    assert target != snapshot_dir    # copied, not pointed at the cache dir.
+
+
+def test_download_rejects_non_artifact_repo(monkeypatch, tmp_path):
+    """A hub repo without a manifest.json should not be silently registered."""
+    not_an_artifact = tmp_path / 'snapshot'
+    not_an_artifact.mkdir()
+    fake_hub = MagicMock()
+    fake_hub.snapshot_download.return_value = str(not_an_artifact)
+    monkeypatch.setattr(models, '_require_hub', lambda: fake_hub)
+
+    with pytest.raises(ValueError):
+        models.download('org/bad-model',
+                        registry_dir=str(tmp_path / 'registry'))
+
+
+def test_push_uploads_artifact_and_returns_url(monkeypatch, tmp_path):
+    """push() should create the repo (if needed) and upload the artifact folder."""
+    artifact_dir = _fake_artifact(tmp_path)
+    fake_api = MagicMock()
+    fake_hub = MagicMock()
+    fake_hub.HfApi.return_value = fake_api
+    monkeypatch.setattr(models, '_require_hub', lambda: fake_hub)
+
+    url = models.push(artifact_dir, 'org/my-model', private=True)
+
+    fake_hub.HfApi.assert_called_once_with(token=None)
+    fake_api.create_repo.assert_called_once_with('org/my-model',
+                                                 repo_type='model',
+                                                 private=True,
+                                                 exist_ok=True)
+    fake_api.upload_folder.assert_called_once_with(
+        repo_id='org/my-model',
+        folder_path=artifact_dir,
+        token=None,
+        commit_message='Upload scaLR model artifact',
+    )
+    assert url == 'https://huggingface.co/org/my-model'
+
+
+def test_push_rejects_non_artifact_directory(tmp_path):
+    """Pushing a directory without manifest.json should raise before touching the hub."""
+    not_an_artifact = tmp_path / 'random_dir'
+    not_an_artifact.mkdir()
+    with pytest.raises(ValueError):
+        models.push(str(not_an_artifact), 'org/bad-model')

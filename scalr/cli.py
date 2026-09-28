@@ -6,8 +6,11 @@
     scalr explain --input data.h5ad --model models/pbmc_v1 --indices 10 20 30
     scalr explain --model models/pbmc_v1 --class-name T_cell
     scalr evaluate --input test.h5ad --model models/pbmc_v1 --labels-key cell_type
+    scalr drift --input query.h5ad --model models/pbmc_v1
     scalr models list
     scalr models info <name>
+    scalr models push models/pbmc_v1 your-org/human-pbmc
+    scalr models pull your-org/human-pbmc
 
 This CLI wraps the in-memory simple API (`scalr.train`/`annotate`/`validate`);
 the configuration-driven, chunked/streaming pipeline remains available via
@@ -156,6 +159,21 @@ def _cmd_evaluate(args) -> int:
     return 0
 
 
+def _cmd_drift(args) -> int:
+    adata = read_data(args.input, backed=None)
+    model = scalr.load_model(args.model)
+    report = model.detect_drift(
+        adata,
+        min_feature_overlap=args.min_feature_overlap,
+        z_threshold=args.z_threshold,
+        drift_fraction_threshold=args.drift_fraction_threshold,
+    )
+    print(report)
+    if args.fail_on_drift and report.is_drifted:
+        return 1
+    return 0
+
+
 def _cmd_models_list(args) -> int:
     names = scalr.models.list()
     if not names:
@@ -169,6 +187,25 @@ def _cmd_models_list(args) -> int:
 def _cmd_models_info(args) -> int:
     manifest = scalr.models.info(args.name)
     print(json.dumps(manifest, indent=2))
+    return 0
+
+
+def _cmd_models_push(args) -> int:
+    url = scalr.models.push(args.artifact_dir,
+                            args.repo_id,
+                            token=args.token,
+                            private=args.private)
+    print(f'Pushed "{args.artifact_dir}" to {url}')
+    return 0
+
+
+def _cmd_models_pull(args) -> int:
+    local_path = scalr.models.download(args.repo_id,
+                                       revision=args.revision,
+                                       token=args.token,
+                                       name=args.name)
+    print(f'Pulled "{args.repo_id}" and registered locally as '
+          f'"{args.name or args.repo_id}" at {local_path}')
     return 0
 
 
@@ -308,6 +345,35 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument('--device', default='auto')
     p.set_defaults(func=_cmd_evaluate)
 
+    p = subparsers.add_parser(
+        'drift',
+        help="Check whether a dataset's distribution has drifted from a "
+        'model\'s training data.')
+    p.add_argument('--input', required=True, help='Path to a query .h5ad file.')
+    p.add_argument(
+        '--model',
+        required=True,
+        help='Model artifact directory, or a locally registered model name.')
+    p.add_argument('--min-feature-overlap', type=float, default=0.1)
+    p.add_argument(
+        '--z-threshold',
+        type=float,
+        default=2.0,
+        help='Per-gene standardized mean shift above which a gene counts as '
+        'drifted. Default: 2.0.')
+    p.add_argument(
+        '--drift-fraction-threshold',
+        type=float,
+        default=0.1,
+        help='Fraction of drifted genes above which the dataset is flagged '
+        'as drifted. Default: 0.1.')
+    p.add_argument(
+        '--fail-on-drift',
+        action='store_true',
+        help='Exit with a non-zero status if drift is detected, for use as '
+        'a CI/pipeline gate.')
+    p.set_defaults(func=_cmd_drift)
+
     p_models = subparsers.add_parser('models',
                                      help='Manage locally registered models.')
     models_sub = p_models.add_subparsers(dest='models_command', required=True)
@@ -318,6 +384,42 @@ def build_parser() -> argparse.ArgumentParser:
                                    help="Show a registered model's manifest.")
     p_info.add_argument('name')
     p_info.set_defaults(func=_cmd_models_info)
+    p_push = models_sub.add_parser(
+        'push',
+        help='Publish a saved model artifact to the Hugging Face Hub. '
+        'Requires: pip install "pyscaLR[hub]".')
+    p_push.add_argument('artifact_dir',
+                        help='Path to a saved model artifact directory.')
+    p_push.add_argument(
+        'repo_id',
+        help='Hugging Face repo id to publish to, e.g. org/model-name.')
+    p_push.add_argument(
+        '--private',
+        action='store_true',
+        help='Create the repo as private if it does not already exist.')
+    p_push.add_argument(
+        '--token',
+        default=None,
+        help='Hugging Face auth token (defaults to HF_TOKEN/huggingface-cli '
+        'login).')
+    p_push.set_defaults(func=_cmd_models_push)
+    p_pull = models_sub.add_parser(
+        'pull',
+        help='Download a model artifact from the Hugging Face Hub and '
+        'register it locally. Requires: pip install "pyscaLR[hub]".')
+    p_pull.add_argument(
+        'repo_id', help='Hugging Face repo id to pull, e.g. org/model-name.')
+    p_pull.add_argument('--revision',
+                        default=None,
+                        help='Hub revision (branch/tag/commit) to pull.')
+    p_pull.add_argument('--token',
+                        default=None,
+                        help='Hugging Face auth token, for private repos.')
+    p_pull.add_argument(
+        '--name',
+        default=None,
+        help='Local registry name to register under (default: repo_id).')
+    p_pull.set_defaults(func=_cmd_models_pull)
 
     p = subparsers.add_parser(
         'analyze',

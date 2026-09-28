@@ -5,12 +5,14 @@ from . import models
 from . import nn
 from . import utils
 from .api import annotate
+from .api import detect_drift
 from .api import load_model
 from .api import train
 from .artifact import AnnotationModel
 from .benchmark import run_benchmark
 from .data_ingestion_pipeline import DataIngestionPipeline
 from .doublet import flag_possible_doublets
+from .drift import DriftReport
 from .eval_and_analysis_pipeline import EvalAndAnalysisPipeline
 from .explain import CellExplanation
 from .feature_extraction_pipeline import FeatureExtractionPipeline

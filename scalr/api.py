@@ -25,6 +25,8 @@ from scalr.artifact import AnnotationModel
 from scalr.artifact import load_model as _load_model
 from scalr.calibration import OpenSetThresholds
 from scalr.calibration import TemperatureScaler
+from scalr.drift import compute_reference_stats
+from scalr.drift import DriftReport
 from scalr.hierarchy import validate_taxonomy
 from scalr.leakage import check_group_leakage
 from scalr.leakage import detect_likely_grouping_column
@@ -272,6 +274,7 @@ def train(
         'normalization': norm_state,
         'feature_count': len(features),
     }
+    drift_reference = compute_reference_stats(adata[split['train']])
 
     annotation_model = AnnotationModel(
         model=model,
@@ -283,6 +286,7 @@ def train(
         open_set_thresholds=open_set_thresholds,
         metrics=metrics,
         taxonomy=taxonomy,
+        drift_reference=drift_reference,
         metadata={
             'scalr_version': getattr(scalr, '__version__', 'unknown'),
             'model_version': '1.0.0',
@@ -300,14 +304,22 @@ def load_model(dirpath_or_name: str) -> AnnotationModel:
     """Load a self-contained scaLR model artifact.
 
     Args:
-        dirpath_or_name: Either a path to a saved model artifact directory, or
-            the name of a model registered locally via
-            `scalr.models.register` (resolved via the local model registry,
-            see `scalr/models.py`).
+        dirpath_or_name: A path to a saved model artifact directory, the name
+            of a model registered locally via `scalr.models.register`
+            (resolved via the local model registry, see `scalr/models.py`),
+            or a Hugging Face Hub repo id (`"<namespace>/<name>"`) — pulled
+            via `scalr.models.download` and cached in the local registry on
+            first use. Hub access requires `pip install "pyscaLR[hub]"`.
     """
     if os.path.exists(os.path.join(dirpath_or_name, 'manifest.json')):
         return _load_model(dirpath_or_name)
-    return _load_model(models.resolve_path(dirpath_or_name))
+    try:
+        return _load_model(models.resolve_path(dirpath_or_name))
+    except FileNotFoundError:
+        if '/' in dirpath_or_name and not os.path.exists(dirpath_or_name):
+            models.download(dirpath_or_name)
+            return _load_model(models.resolve_path(dirpath_or_name))
+        raise
 
 
 def annotate(
@@ -380,3 +392,53 @@ def annotate(
                          flag_doublets=flag_doublets,
                          streaming=streaming,
                          chunk_size=chunk_size)
+
+
+def detect_drift(
+    adata: AnnData,
+    model: Union[str, AnnotationModel],
+    min_feature_overlap: float = 0.1,
+    z_threshold: float = 2.0,
+    drift_fraction_threshold: float = 0.1,
+    severity_z_threshold: float = 5.0,
+    top_k: int = 20,
+) -> DriftReport:
+    """Check whether `adata` looks like it comes from a different
+    distribution than `model`'s training data.
+
+    A per-cell `is_unknown`/`is_possible_doublet` flag (see `annotate`) can
+    miss a whole cohort that has drifted if most individual cells still score
+    confidently. This instead compares `adata`'s gene-expression and library-
+    size/detected-gene-count distributions against the training reference
+    recorded at `train()` time — useful as a pre-flight check before trusting
+    predictions on a new cohort/batch/tissue.
+
+    Args:
+        adata: Query AnnData object.
+        model: Either a path to a saved model artifact directory, the name of
+            a model registered locally via `scalr.models.register`, or an
+            already-loaded `AnnotationModel`.
+        min_feature_overlap: Minimum required gene-overlap fraction.
+        z_threshold: Per-gene standardized mean shift above which a gene
+            counts as "drifted".
+        drift_fraction_threshold: Fraction of drifted genes above which the
+            dataset as a whole is flagged `is_drifted`.
+        severity_z_threshold: A library-size or detected-gene-count shift
+            this extreme (in reference std deviations) flags `is_drifted` on
+            its own, even if per-gene drift looks mild.
+        top_k: Number of top drifted genes to report.
+
+    Returns:
+        A `DriftReport`.
+    """
+    if isinstance(model, str):
+        model = load_model(model)
+
+    return model.detect_drift(
+        adata,
+        min_feature_overlap=min_feature_overlap,
+        z_threshold=z_threshold,
+        drift_fraction_threshold=drift_fraction_threshold,
+        severity_z_threshold=severity_z_threshold,
+        top_k=top_k,
+    )
