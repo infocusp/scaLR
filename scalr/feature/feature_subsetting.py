@@ -155,20 +155,29 @@ class FeatureSubsetting:
             model_trainer.build_model_training_artifacts()
             best_model = model_trainer.train()
 
-            self.chunk_model_config, self.chunk_model_train_config = model_trainer.get_updated_config(
+            updated_model_config, updated_model_train_config = model_trainer.get_updated_config(
             )
 
-            return i, best_model
+            return i, best_model, updated_model_config, updated_model_train_config
 
         parallel = Parallel(n_jobs=self.num_workers)
-        models = parallel(
+        results = parallel(
             delayed(train_chunked_model)(i, start) for i, (start) in enumerate(
                 range(0, self.total_features, self.feature_subsetsize)))
 
         # parallel loop returns all models with the chunk number, which is used to sort models in order
-        # model[1] returns only the model, without the chunk number
-        models = sorted(models)
-        models = [model[1] for model in models]
+        results = sorted(results, key=lambda result: result[0])
+
+        # With a process-based backend (num_workers > 1), mutating `self`
+        # inside `train_chunked_model` above does not propagate back to this
+        # process, so the resolved configs must come from each worker's
+        # return value instead; every chunk resolves the same model/train
+        # config class, so the first result is representative.
+        if results:
+            self.chunk_model_config = results[0][2]
+            self.chunk_model_train_config = results[0][3]
+
+        models = [result[1] for result in results]
         return models
 
     def get_updated_configs(self):

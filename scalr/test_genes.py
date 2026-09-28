@@ -1,5 +1,6 @@
 """This is a test file for genes.py"""
 
+from anndata import AnnData
 import numpy as np
 
 from scalr.genes import align_genes
@@ -84,3 +85,14 @@ def test_align_genes_report_str_contains_counts():
 
     assert 'Reference features: 5' in text
     assert 'Missing features:      1' in text
+
+
+def test_align_genes_duplicate_var_names_uses_first_occurrence():
+    """A duplicated gene name should resolve to its first column, matching the
+    "only the first occurrence will be used" contract from scalr.validation."""
+    adata = AnnData(X=np.array([[1.0, 999.0, 3.0]]))
+    adata.var_names = ['A', 'B', 'A']
+
+    aligned, _ = align_genes(adata, ['A', 'B'])
+
+    np.testing.assert_allclose(aligned.X.toarray(), [[1.0, 999.0]])

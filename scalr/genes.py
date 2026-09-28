@@ -67,7 +67,12 @@ def align_genes(
         order), and a `GeneAlignmentReport` describing the alignment.
     """
     query_genes = list(query.var_names)
-    query_index = {g: i for i, g in enumerate(query_genes)}
+    # Keep the first occurrence of a duplicated gene name (a plain dict
+    # comprehension would keep the last), matching the "only the first
+    # occurrence will be used" contract from scalr.validation.
+    query_index = {}
+    for i, g in enumerate(query_genes):
+        query_index.setdefault(g, i)
 
     matched = [g for g in reference_features if g in query_index]
     missing = [g for g in reference_features if g not in query_index]

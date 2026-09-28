@@ -34,8 +34,11 @@ def aggregate_to_broad(result: PredictionResult,
 
     Returns:
         A new `PredictionResult` at the broad level. Broad-class probabilities
-        are the sum of the fine-class probabilities within each broad group;
-        confidence/entropy/margin/is_unknown are recomputed at the broad level.
+        are the sum of the fine-class probabilities within each broad group,
+        and confidence/entropy/margin are recomputed from them. `is_unknown`
+        is carried over unchanged from the fine-level result (not
+        recomputed): a fine-level abstention is still a lack of broad-level
+        evidence, so it stays flagged unknown at the broad level too.
     """
     validate_taxonomy(result.class_names, taxonomy)
 
