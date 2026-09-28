@@ -94,7 +94,7 @@ class DgePseudoBulk(AnalysisBase):
                 sum_subset = condition_subset[condition_subset.obs[
                     self.sum_column] == sum_sample]
                 subdata = AnnData(
-                    X=sum_subset[:].X.sum(axis=0).reshape(
+                    X=np.asarray(sum_subset[:].X.sum(axis=0)).reshape(
                         1, len(sum_subset.var_names)),
                     var=DataFrame(index=sum_subset.var_names),
                     obs=DataFrame(index=[f'{sum_sample}_{condition}']))

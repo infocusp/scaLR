@@ -7,6 +7,8 @@ from typing import Union
 
 from anndata import AnnData
 from anndata.experimental import AnnCollection
+from joblib import delayed
+from joblib import Parallel
 import numpy as np
 import pandas as pd
 from torch import nn
@@ -77,6 +79,7 @@ class FeatureExtractionPipeline:
         self.val_data = val_data
         self.target = target
         self.mappings = mappings
+        self.sample_chunksize = sample_chunksize
 
     def feature_subsetted_model_training(self) -> list[nn.Module]:
         """This function train models on subsetted data containing `feature_subsetsize` genes."""
@@ -124,12 +127,11 @@ class FeatureExtractionPipeline:
             deepcopy(self.feature_selection_config.get('scoring_config')))
         self.feature_selection_config['scoring_config'] = scorer_config
 
-        all_scores = []
         if not getattr(self, 'feature_subsetsize', None):
             self.feature_subsetsize = self.train_data.shape[1]
+        num_workers = getattr(self, 'num_workers', None) or 1
 
-        # TODO: Parallelize feature scoring
-        for i, (model) in enumerate(self.chunked_models):
+        def score_chunk(i: int, model: nn.Module) -> tuple[int, np.ndarray]:
             subset_train_data = self.train_data[:, i *
                                                 self.feature_subsetsize:(i +
                                                                          1) *
@@ -140,8 +142,17 @@ class FeatureExtractionPipeline:
             score = scorer.generate_scores(model, subset_train_data,
                                            subset_val_data, self.target,
                                            self.mappings)
+            return i, score[:self.feature_subsetsize]
 
-            all_scores.append(score[:self.feature_subsetsize])
+        # Uses the threading backend (not process-based) so per-chunk scoring
+        # shares memory with the parent process: no pickling of the (often
+        # GPU-resident) models/data/loggers across processes, and numpy/torch
+        # release the GIL during their heavy lifting, so this still
+        # parallelizes real work rather than just adding process overhead.
+        results = Parallel(n_jobs=num_workers, backend='threading')(
+            delayed(score_chunk)(i, model)
+            for i, model in enumerate(self.chunked_models))
+        all_scores = [score for _, score in sorted(results)]
 
         columns = self.train_data.var_names
         columns.name = "index"
