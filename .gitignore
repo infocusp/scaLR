@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local run artifacts (quickstart/README commands write here by default)
+nohup.out
+example_data/
+models/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Docs build output
+_build/

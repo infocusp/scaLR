@@ -236,7 +236,13 @@ def load_full_data_from_config(data_config):
     full_datas += read_data(path.join(train_val_test_paths[datapath], 'test'),
                             return_anncollection=False)
 
-    full_data = AnnCollection(full_datas)
+    # harmonize_dtypes=False: skip AnnCollection's per-chunk dtype probing,
+    # which crashes on backed sparse chunks under some anndata versions
+    # (AttributeError: 'backed_csr_matrix' object has no attribute
+    # '_validate_indices'). Chunks are written by scalr's own
+    # write_chunkwise_data from a single source, so dtypes are already
+    # consistent by construction.
+    full_data = AnnCollection(full_datas, harmonize_dtypes=False)
     return full_data
 
 
@@ -279,7 +285,10 @@ def read_chunked_anndatas(dirpath: str,
                 read_anndata(path.join(dirpath, f'{i}.h5ad'), backed=backed))
         else:
             break
-    data = AnnCollection(datas)
+    # harmonize_dtypes=False: see the comment in load_full_data_from_config;
+    # avoids a crash probing dtypes on backed sparse chunks, and these
+    # chunks are already dtype-consistent by construction.
+    data = AnnCollection(datas, harmonize_dtypes=False)
 
     if return_anncollection:
         return data

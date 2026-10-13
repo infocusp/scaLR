@@ -93,6 +93,10 @@ If mentioned, the feature subsetting process will be skipped and this matrix wil
 default: `5000`  
 - Chunks of features to subset data for training the model iteratively.
 
+**num_workers** {int}: `int | null`  
+default: `1`  
+- Number of workers used to parallelize both feature-subset model training and, per chunked model, feature scoring afterwards.
+
 **model** {dict}:  
 Mention the name of the model class in `name` & its required parameters under `params` dict. Example below:
 
@@ -132,7 +136,7 @@ Mention the model of training parameters like `trainer`, `dataloader`, `optimize
 - Current support/s in the platform for the following model configurations is/are:
     - trainer: `SimpleModelTrainer`
     - dataloader: `SimpleDataLoader|SimpleMetaDataLoader`
-    - loss: pytorch supported all inbuilt loss functions. The class name should match exactly with a torch.nn class names.
+    - loss: any built-in `torch.nn` loss class (name must match exactly), or a custom loss class subclassing `scalr.nn.loss.CustomLossBase` and registered under `scalr.nn.loss` (see [scalr/nn/loss/_loss.py](../scalr/nn/loss/_loss.py)).
 
 
 **scoring_config** {dict}:  

@@ -16,6 +16,13 @@ scaLR Documentation
 
 .. toctree::
    :maxdepth: 10
+   :caption: scaLR Simple API
+   :hidden:
+
+   scalr.simple_api
+
+.. toctree::
+   :maxdepth: 10
    :caption: scaLR
    :hidden:
 
@@ -27,11 +34,17 @@ scaLR Documentation
 
 .. toctree::
    :maxdepth: 10
+   :caption: Guides
+   :hidden:
+
+   guide_simple_api
+   guide_cli
+   guide_pipeline
+   tutorials
+
+.. toctree::
+   :maxdepth: 10
    :caption: scaLR Pipelines
    :hidden:
-   
+
    pipeline
-   scalr.data_ingestion_pipeline
-   scalr.feature_extraction_pipeline
-   scalr.model_training_pipeline
-   scalr.eval_and_analysis_pipeline
