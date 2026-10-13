@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-13
+
 ### Added
 - Hugging Face Hub integration: `scalr.models.push`/`pull` and `scalr models push`/`pull` to publish and download model artifacts (`scalr/models.py`).
 - Dataset drift detection: `scalr.detect_drift` / `scalr drift` to check whether a query dataset's distribution has shifted from a model's training data (`scalr/drift.py`).
@@ -30,6 +32,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Performance
 - Lazy-import scanpy/SHAP-backed submodules (`scalr/analysis`, `scalr/feature/scoring`) to reduce base import time.
+
+### Documentation
+- `README.md` restructured into a concise entry point, with detailed content split out into linked guides: [docs/guide_simple_api.md](docs/guide_simple_api.md), [docs/guide_cli.md](docs/guide_cli.md), [docs/guide_pipeline.md](docs/guide_pipeline.md), and [docs/tutorials.md](docs/tutorials.md).
+- Added [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, tests, and formatting instructions.
+- Added Sphinx autodoc coverage for the entire simple-API layer (`docs/scalr.simple_api.rst`: `api`, `artifact`, `benchmark`, `calibration`, `cli`, `doublet`, `drift`, `explain`, `feature_stability`, `genes`, `hierarchy`, `leakage`, `metrics`, `model_card`, `models`, `refinement`, `result`, `validation`), which previously had no published documentation at all.
+- Fixed broken/orphaned Sphinx toctree entries (`docs/modules.rst`, `docs/scalr.rst`) and resolved a duplicate-object-description warning on `scalr.result.PredictionResult`.
+- Added the previously-missing SHAP analysis tutorial to the tutorials list ([docs/tutorials.md](docs/tutorials.md)).
+- Fixed stale `anndata==0.10.9` pins in `dge.ipynb`, `gene_recall_curve.ipynb`, `normalization.ipynb`, and `batch_correction.ipynb` (incompatible with the `anndata>=0.12` floor above), and a stale feature-branch image URL in `scalr_pipeline.ipynb`/`scalr_pipeline_local_run.ipynb`.
 
 ## [1.1.0]
 

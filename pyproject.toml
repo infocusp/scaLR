@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 
 name = "pyscaLR"
-version = "1.1.0"
+version = "1.2.0"
 requires-python = ">=3.11,<3.15"
 authors = [
   { name="Infocusp", email="saurabh@infocusp.com" },
@@ -18,7 +18,8 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
-    "Intended Audience :: Science/Research"
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
 ]
 
 dynamic = ["dependencies"]
@@ -41,6 +42,8 @@ exclude = [
   "docs/*",
   "tutorials/*",
   "tests/*",
+  "scalr/**/test_*.py",
+  "scaLR_v2_implementation_blueprint.md",
 ]
 
 license = {file = "LICENSE"}
@@ -49,3 +52,5 @@ license = {file = "LICENSE"}
 Repository = "https://github.com/infocusp/scaLR.git"
 Homepage = "https://github.com/infocusp/scaLR"
 Issues = "https://github.com/infocusp/scaLR/issues"
+Documentation = "https://infocusp.github.io/scaLR/"
+Changelog = "https://github.com/infocusp/scaLR/blob/main/CHANGELOG.md"

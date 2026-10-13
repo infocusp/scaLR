@@ -34,6 +34,16 @@ scaLR Documentation
 
 .. toctree::
    :maxdepth: 10
+   :caption: Guides
+   :hidden:
+
+   guide_simple_api
+   guide_cli
+   guide_pipeline
+   tutorials
+
+.. toctree::
+   :maxdepth: 10
    :caption: scaLR Pipelines
    :hidden:
 
