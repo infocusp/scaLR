@@ -27,7 +27,7 @@
 ## Pre-requisites and installation scaLR
 
 
-- ScaLR supports Python 3.10-3.14. Dependencies use compatible version ranges instead of requiring one exact Python environment. New Python releases still need to be added to CI before they can be considered supported.
+- ScaLR supports Python 3.11-3.14. Dependencies use compatible version ranges instead of requiring one exact Python environment. New Python releases still need to be added to CI before they can be considered supported.
 
 ```
 conda create -n scaLR_env python=3.12
@@ -57,7 +57,7 @@ python -m pip install -e .
 ```
 python -m pip install pyscaLR
 ```
-If pip reports that no compatible dependency version is available, check `python --version` and upgrade pip. The package supports Python 3.10-3.14, but individual dependency releases may lag behind a newly released Python version.
+If pip reports that no compatible dependency version is available, check `python --version` and upgrade pip. The package supports Python 3.11-3.14, but individual dependency releases may lag behind a newly released Python version.
 **Note:** If the user wants to run the entire pipeline via installing pip pyscalr, they should clone/download these files(`pipeline.py` and `config.yaml`) from the git repository.
 
 ### CPU vs GPU installation
@@ -71,6 +71,28 @@ pip install torch --index-url https://download.pytorch.org/whl/cu121
 ```
 
 scaLR auto-selects the device (`device="auto"`) at train/inference time, using CUDA when available and otherwise falling back to CPU.
+
+### Development setup
+
+For contributing to scaLR itself (running tests, formatting, pre-commit hooks):
+
+```
+python -m pip install -r requirements.txt
+python -m pip install -e ".[dev]"
+pre-commit install
+```
+
+- Tests (pytest, test files live next to the code as `test_*.py`, no separate test directory):
+  ```
+  pytest                    # run everything
+  pytest -v -s              # verbose, as CI does
+  pytest scalr/test_api.py  # a single test file
+  ```
+- Formatting / import order (both enforced in CI, run automatically by `pre-commit`):
+  ```
+  yapf -ir --style .style.yapf .
+  isort . --settings-path .isort.cfg
+  ```
 
 ## Quickstart: annotate cells in 3 lines
 
@@ -94,7 +116,7 @@ model = scalr.train(adata, labels_key="cell_type", group_key="donor_id")
 model.save("models/pbmc_v1")
 ```
 
-`scalr.train` performs leakage-safe (donor-grouped) splitting, class-imbalance-aware training, confidence calibration, and reports macro-F1/balanced accuracy on held-out data. `scalr.annotate`/`model.predict` validate the input, align its genes to the model's expected feature set, and return a `PredictionResult` with calibrated `confidence`, `entropy`, `margin` and an `is_unknown` abstention flag — see [scalr/api.py](scalr/api.py) and [scalr/result.py](scalr/result.py). This sits alongside, and does not replace, the configuration-driven pipeline described below, which remains available for advanced/research workflows.
+`scalr.train` performs leakage-safe (donor-grouped) splitting, class-imbalance-aware training, confidence calibration, and reports macro-F1/balanced accuracy on held-out data. `scalr.annotate`/`model.predict` validate the input, align its genes to the model's expected feature set, and return a `PredictionResult` with calibrated `confidence`, `entropy`, `margin` and an `is_unknown` abstention flag — see [scalr/api.py](https://github.com/infocusp/scaLR/blob/main/scalr/api.py) and [scalr/result.py](https://github.com/infocusp/scaLR/blob/main/scalr/result.py). This sits alongside, and does not replace, the configuration-driven pipeline described below, which remains available for advanced/research workflows.
 
 ### Validate your data before training or annotating
 
@@ -103,11 +125,11 @@ report = scalr.validate(adata, labels_key="cell_type", group_key="donor_id")
 print(report)
 ```
 
-`scalr.validate` (see [scalr/validation.py](scalr/validation.py)) checks AnnData structure (empty/duplicate cells or genes), numerical issues (NaN/Inf, zero-count or unusually large-library-size cells), label/group columns, and reports the detected normalization state (raw counts, log1p-normalized, or scaled) — surfacing problems as an explicit report instead of a downstream stack trace.
+`scalr.validate` (see [scalr/validation.py](https://github.com/infocusp/scaLR/blob/main/scalr/validation.py)) checks AnnData structure (empty/duplicate cells or genes), numerical issues (NaN/Inf, zero-count or unusually large-library-size cells), label/group columns, and reports the detected normalization state (raw counts, log1p-normalized, or scaled) — surfacing problems as an explicit report instead of a downstream stack trace.
 
 ### Gene alignment
 
-Query data does not need to share the model's gene set or gene order. `model.predict`/`scalr.annotate` call [scalr/genes.py](scalr/genes.py) internally to reorder/subset the query to the model's expected feature list, zero-filling any missing genes and reporting coverage (`result.metadata["gene_coverage"]`, `result.metadata["missing_features"]`). You can also run this alignment directly:
+Query data does not need to share the model's gene set or gene order. `model.predict`/`scalr.annotate` call [scalr/genes.py](https://github.com/infocusp/scaLR/blob/main/scalr/genes.py) internally to reorder/subset the query to the model's expected feature list, zero-filling any missing genes and reporting coverage (`result.metadata["gene_coverage"]`, `result.metadata["missing_features"]`). You can also run this alignment directly:
 
 ```python
 aligned_adata, report = scalr.align_genes(adata, reference_features, min_feature_overlap=0.1)
@@ -122,15 +144,15 @@ result = model.predict("large_query.h5ad", streaming=True, chunk_size=20000)
 result = scalr.annotate(adata, model="models/pbmc_v1", streaming=True, chunk_size=20000)
 ```
 
-Passing a file path to `model.predict`/`scalr.annotate` streams automatically; `streaming=True` on an in-memory `AnnData` also works. Gene alignment and scoring happen `chunk_size` cells at a time instead of materializing one aligned matrix for the whole dataset, bounding peak alignment/scoring memory regardless of total cell count. For out-of-core reads too (never loading the full raw dataset into memory), point it at a directory of chunked `.h5ad` files rather than a single large `.h5ad` file — see [scalr/artifact.py](scalr/artifact.py).
+Passing a file path to `model.predict`/`scalr.annotate` streams automatically; `streaming=True` on an in-memory `AnnData` also works. Gene alignment and scoring happen `chunk_size` cells at a time instead of materializing one aligned matrix for the whole dataset, bounding peak alignment/scoring memory regardless of total cell count. For out-of-core reads too (never loading the full raw dataset into memory), point it at a directory of chunked `.h5ad` files rather than a single large `.h5ad` file — see [scalr/artifact.py](https://github.com/infocusp/scaLR/blob/main/scalr/artifact.py).
 
 ### Self-contained model artifacts
 
-`model.save("models/pbmc_v1")` writes a versioned, portable directory containing everything needed to reload and run the model — no external config required: `manifest.json`, `model.pt`, `model_config.json`, `label_mapping.json`, `features.json`, `preprocessing.json`, `calibration.json`, and `metrics.json`. `scalr.load_model("models/pbmc_v1")` reads it back into an `AnnotationModel` — see [scalr/artifact.py](scalr/artifact.py).
+`model.save("models/pbmc_v1")` writes a versioned, portable directory containing everything needed to reload and run the model — no external config required: `manifest.json`, `model.pt`, `model_config.json`, `label_mapping.json`, `features.json`, `preprocessing.json`, `calibration.json`, and `metrics.json`. `scalr.load_model("models/pbmc_v1")` reads it back into an `AnnotationModel` — see [scalr/artifact.py](https://github.com/infocusp/scaLR/blob/main/scalr/artifact.py).
 
 ### Leakage-safe evaluation & class imbalance
 
-When `group_key` (e.g. `donor_id`) is passed to `scalr.train`, splitting keeps every group confined to a single split and checks for leakage across splits, warning if any group value still appears in more than one ([scalr/leakage.py](scalr/leakage.py)). Training also reports class-size imbalance and uses inverse-frequency class weighting by default, and evaluates on the held-out test split with macro-F1, weighted-F1, balanced accuracy and a per-class report rather than relying on overall accuracy alone ([scalr/metrics.py](scalr/metrics.py)).
+When `group_key` (e.g. `donor_id`) is passed to `scalr.train`, splitting keeps every group confined to a single split and checks for leakage across splits, warning if any group value still appears in more than one ([scalr/leakage.py](https://github.com/infocusp/scaLR/blob/main/scalr/leakage.py)). Training also reports class-size imbalance and uses inverse-frequency class weighting by default, and evaluates on the held-out test split with macro-F1, weighted-F1, balanced accuracy and a per-class report rather than relying on overall accuracy alone ([scalr/metrics.py](https://github.com/infocusp/scaLR/blob/main/scalr/metrics.py)).
 
 ### Hierarchical (coarse-to-fine) annotation
 
@@ -144,7 +166,7 @@ fine_result = model.predict(adata, level="fine")     # default
 broad_result = model.predict(adata, level="broad")   # aggregated via the taxonomy
 ```
 
-See [scalr/hierarchy.py](scalr/hierarchy.py); broad-class probabilities are the sum of the underlying fine-class probabilities.
+See [scalr/hierarchy.py](https://github.com/infocusp/scaLR/blob/main/scalr/hierarchy.py); broad-class probabilities are the sum of the underlying fine-class probabilities.
 
 ### Cluster-aware refinement & doublet/mixed-cell screening
 
@@ -157,7 +179,7 @@ result = scalr.annotate(
 )
 ```
 
-`cluster_refinement` relabels cells to their cluster's confidence-weighted majority class ([scalr/refinement.py](scalr/refinement.py)) — the raw, unrefined labels are always kept in `result.metadata["raw_labels"]`, never silently discarded. `flag_doublets` sets `result.is_possible_doublet` for cells whose top-two class probabilities are both substantial and close together ([scalr/doublet.py](scalr/doublet.py)) — a heuristic screening signal, not a validated doublet call.
+`cluster_refinement` relabels cells to their cluster's confidence-weighted majority class ([scalr/refinement.py](https://github.com/infocusp/scaLR/blob/main/scalr/refinement.py)) — the raw, unrefined labels are always kept in `result.metadata["raw_labels"]`, never silently discarded. `flag_doublets` sets `result.is_possible_doublet` for cells whose top-two class probabilities are both substantial and close together ([scalr/doublet.py](https://github.com/infocusp/scaLR/blob/main/scalr/doublet.py)) — a heuristic screening signal, not a validated doublet call.
 
 ### Explainability
 
@@ -168,7 +190,7 @@ print(explanations[0])
 supporting, contradictory = model.explain_class("T_cell", top_k=50)
 ```
 
-`model.explain` reports, per requested cell, the genes whose expression most supported or contradicted the model's prediction, via a Grad x Input gene-attribution score. `model.explain_class` does the same for a class in general, independent of any specific cell. This is a first-order sensitivity explanation, not a validated biological one — treat it as a screening/interpretation aid, like the doublet/refinement heuristics above, not ground truth ([scalr/explain.py](scalr/explain.py)).
+`model.explain` reports, per requested cell, the genes whose expression most supported or contradicted the model's prediction, via a Grad x Input gene-attribution score. `model.explain_class` does the same for a class in general, independent of any specific cell. This is a first-order sensitivity explanation, not a validated biological one — treat it as a screening/interpretation aid, like the doublet/refinement heuristics above, not ground truth ([scalr/explain.py](https://github.com/infocusp/scaLR/blob/main/scalr/explain.py)).
 
 ### Dataset drift detection
 
@@ -181,7 +203,7 @@ if report.is_drifted:
     ...  # treat predictions on this dataset with caution
 ```
 
-A gene counts as drifted when its mean-expression shift exceeds `z_threshold` reference standard deviations (default 2); the dataset is flagged `is_drifted` when either too large a fraction of genes drift (`drift_fraction_threshold`, default 10%) or the library-size/detected-gene-count shift is extreme on its own (`severity_z_threshold`, default 5) — the latter catches e.g. a sequencing-depth change a per-gene test can miss. This is a univariate summary-statistics check, not a full distributional test — see [scalr/drift.py](scalr/drift.py). Also available as `scalr drift --input query.h5ad --model models/pbmc_v1 [--fail-on-drift]` from the CLI, for use as a pre-flight/CI gate.
+A gene counts as drifted when its mean-expression shift exceeds `z_threshold` reference standard deviations (default 2); the dataset is flagged `is_drifted` when either too large a fraction of genes drift (`drift_fraction_threshold`, default 10%) or the library-size/detected-gene-count shift is extreme on its own (`severity_z_threshold`, default 5) — the latter catches e.g. a sequencing-depth change a per-gene test can miss. This is a univariate summary-statistics check, not a full distributional test — see [scalr/drift.py](https://github.com/infocusp/scaLR/blob/main/scalr/drift.py). Also available as `scalr drift --input query.h5ad --model models/pbmc_v1 [--fail-on-drift]` from the CLI, for use as a pre-flight/CI gate.
 
 ### Feature-selection stability
 
@@ -191,11 +213,11 @@ print(report)
 print(report.top_stable_features(min_runs=15))
 ```
 
-Repeats feature selection over random subsamples and reports each gene's selection frequency plus the mean pairwise Jaccard similarity of the selected sets, to help distinguish a stable biomarker signal from a split-specific artifact ([scalr/feature_stability.py](scalr/feature_stability.py)).
+Repeats feature selection over random subsamples and reports each gene's selection frequency plus the mean pairwise Jaccard similarity of the selected sets, to help distinguish a stable biomarker signal from a split-specific artifact ([scalr/feature_stability.py](https://github.com/infocusp/scaLR/blob/main/scalr/feature_stability.py)).
 
 ### Model cards, provenance & a model registry/hub
 
-Every `model.save(...)` call also writes a `README.md` model card (training data, held-out metrics, calibration, known limitations, license) into the artifact directory ([scalr/model_card.py](scalr/model_card.py)). Models can be registered and resolved by name via a local registry ([scalr/models.py](scalr/models.py)):
+Every `model.save(...)` call also writes a `README.md` model card (training data, held-out metrics, calibration, known limitations, license) into the artifact directory ([scalr/model_card.py](https://github.com/infocusp/scaLR/blob/main/scalr/model_card.py)). Models can be registered and resolved by name via a local registry ([scalr/models.py](https://github.com/infocusp/scaLR/blob/main/scalr/models.py)):
 
 ```python
 scalr.models.register("models/pbmc_v1", "human_pbmc")
@@ -225,11 +247,11 @@ df = scalr.run_benchmark(
 )
 ```
 
-Reports scientific quality (macro-F1, balanced accuracy) alongside computational cost (wall time, cells/sec, peak RSS) per dataset in one table, so quality and resource cost are always reported together rather than a one-off number ([scalr/benchmark.py](scalr/benchmark.py)).
+Reports scientific quality (macro-F1, balanced accuracy) alongside computational cost (wall time, cells/sec, peak RSS) per dataset in one table, so quality and resource cost are always reported together rather than a one-off number ([scalr/benchmark.py](https://github.com/infocusp/scaLR/blob/main/scalr/benchmark.py)).
 
 ## Command-line interface
 
-The simple API is also available from the shell as the `scalr` command. This is separate from, and does not replace, `python pipeline.py --config ...` (see "How to run" below for the configuration-driven pipeline); `scalr` wraps the in-memory simple API — see [scalr/cli.py](scalr/cli.py).
+The simple API is also available from the shell as the `scalr` command. This is separate from, and does not replace, `python pipeline.py --config ...` (see "How to run" below for the configuration-driven pipeline); `scalr` wraps the in-memory simple API — see [scalr/cli.py](https://github.com/infocusp/scaLR/blob/main/scalr/cli.py).
 
 ### 1. Install (registers the `scalr` command)
 
